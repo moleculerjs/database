@@ -6,4 +6,6 @@
 
 "use strict";
 
-module.exports = require("./src");
+module.exports = function (opts) {
+	return {};
+};

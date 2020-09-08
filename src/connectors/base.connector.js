@@ -6,4 +6,6 @@
 
 "use strict";
 
-module.exports = require("./src");
+class BaseConnector {}
+
+module.exports = BaseConnector;

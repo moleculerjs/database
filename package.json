@@ -33,12 +33,18 @@
     "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-security": "^1.4.0",
+    "fakerator": "0.3.1",
     "jest": "^26.4.2",
     "jest-cli": "^26.4.2",
+    "kleur": "4.1.1",
     "moleculer": "^0.14.10",
+    "mongo": "0.1.0",
+    "mongoose": "5.10.3",
+    "nedb": "1.8.0",
     "nodemon": "^2.0.4",
     "npm-check": "^5.9.2",
-    "prettier": "^2.1.1"
+    "prettier": "^2.1.1",
+    "sequelize": "6.3.5"
   },
   "jest": {
     "testEnvironment": "node",
@@ -52,6 +58,9 @@
     ]
   },
   "engines": {
-    "node": ">= 8.x.x"
+    "node": ">= 10.x.x"
+  },
+  "dependencies": {
+    "lodash": "4.17.20"
   }
 }
