@@ -4,7 +4,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/moleculerjs/database/badge.svg?branch=master)](https://coveralls.io/github/moleculerjs/database?branch=master)
 [![Known Vulnerabilities](https://snyk.io/test/github/moleculerjs/database/badge.svg)](https://snyk.io/test/github/moleculerjs/database)
 
-# database [![NPM version](https://img.shields.io/npm/v/database.svg)](https://www.npmjs.com/package/database)
+# @moleculer/database [![NPM version](https://badgen.net/npm/v/@moleculer/database)](https://www.npmjs.com/package/@moleculer/database)
 
 Advanced Database Access Service for Moleculer microservices framework
 
