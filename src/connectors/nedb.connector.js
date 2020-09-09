@@ -5,3 +5,9 @@
  */
 
 "use strict";
+
+const BaseConnector = require("./base.connector");
+
+class NeDBConnector extends BaseConnector {}
+
+module.exports = NeDBConnector;

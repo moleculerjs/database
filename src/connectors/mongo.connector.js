@@ -5,3 +5,9 @@
  */
 
 "use strict";
+
+const BaseConnector = require("./base.connector");
+
+class MongoConnector extends BaseConnector {}
+
+module.exports = MongoConnector;

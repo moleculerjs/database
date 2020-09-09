@@ -5,3 +5,9 @@
  */
 
 "use strict";
+
+const BaseConnector = require("./base.connector");
+
+class CouchDBConnector extends BaseConnector {}
+
+module.exports = CouchDBConnector;

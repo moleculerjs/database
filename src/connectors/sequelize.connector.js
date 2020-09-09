@@ -5,3 +5,9 @@
  */
 
 "use strict";
+
+const BaseConnector = require("./base.connector");
+
+class SequelizeConnector extends BaseConnector {}
+
+module.exports = SequelizeConnector;
