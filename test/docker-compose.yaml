@@ -8,6 +8,6 @@ services:
       - "27017:27017"
 
   postgres:
-	image: postgres:12
-	ports:
-		- "5432:5432"
+  image: postgres:12
+  ports:
+    - "5432:5432"
