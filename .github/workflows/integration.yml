@@ -26,18 +26,22 @@ jobs:
 
     - name: Start containers
       run: docker-compose up -d
+      working-directory: ./test
 
     - name: Sleeping 30 secs
       run: sleep 30
 
     - name: Check containers
       run: docker-compose ps
+      working-directory: ./test
 
     - name: Check logs
       run: docker-compose logs
+      working-directory: ./test
 
     - name: Run integration tests
       run: npm run test:integration
 
     - name: Stop containers
       run: docker-compose down -v
+      working-directory: ./test
