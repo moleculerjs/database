@@ -7,7 +7,7 @@
     "dev": "nodemon examples/index.js",
     "ci": "jest --testMatch \"**/unit/**/*.spec.js\" --watch",
     "test:unit": "jest --testMatch \"**/unit/**/*.spec.js\" --coverage",
-    "test:integration": "jest --testMatch \"**/integration/**/*.spec.js\" --coverage",
+    "test:integration": "jest --testMatch \"**/integration/**/*.spec.js\"",
     "test": "npm run test:unit",
     "lint": "eslint --ext=.js src examples test",
     "deps": "npm-check -u",
