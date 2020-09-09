@@ -1,0 +1,43 @@
+name: Integration Test
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x, 14.x]
+      fail-fast: false
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install dependencies
+      run: npm ci --silent
+
+    - name: Run unit tests
+      run: npm test:unit
+
+    - name: Start containers
+      run: npm run dc:up
+
+    - name: Sleeping 30 secs
+      run: sleep 30
+
+    - name: Check containers
+      run: docker-compose ps
+
+    - name: Check logs
+      run: docker-compose logs
+
+    - name: Run integration tests
+      run: npm test:integration
+
+    - name: Stop containers
+      run: npm run dc:down

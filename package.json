@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon examples/index.js",
-    "ci": "jest --watch",
-    "test": "jest --coverage",
+    "ci": "jest --testMatch \"**/unit/**/*.spec.js\" --watch",
+    "test:unit": "jest --testMatch \"**/unit/**/*.spec.js\" --coverage",
+    "test:integration": "jest --testMatch \"**/integration/**/*.spec.js\" --coverage",
+    "test": "npm run test:unit",
     "lint": "eslint --ext=.js src examples test",
     "deps": "npm-check -u",
     "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"

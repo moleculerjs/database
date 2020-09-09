@@ -1,28 +1,19 @@
 "use strict";
 
 const { ServiceBroker } = require("moleculer");
-const MyService = require("../../src");
+const DbService = require("../../");
 
-describe("Test MyService", () => {
-	const broker = new ServiceBroker();
-	const service = broker.createService(MyService);
+describe("Test DbService", () => {
+	const broker = new ServiceBroker({ logger: false });
+	const service = broker.createService({
+		name: "posts",
+		mixins: [DbService({ createActions: false })]
+	});
 
 	beforeAll(() => broker.start());
 	afterAll(() => broker.stop());
 
 	it("should be created", () => {
 		expect(service).toBeDefined();
-	});
-
-	it("should return with 'Hello Anonymous'", () => {
-		return broker.call("database.test").then(res => {
-			expect(res).toBe("Hello Anonymous");
-		});
-	});
-
-	it("should return with 'Hello John'", () => {
-		return broker.call("database.test", { name: "John" }).then(res => {
-			expect(res).toBe("Hello John");
-		});
 	});
 });
