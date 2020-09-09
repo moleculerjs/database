@@ -25,7 +25,7 @@ jobs:
       run: npm run test:unit
 
     - name: Start containers
-      run: npm run dc:up
+      run: docker-compose up -d
 
     - name: Sleeping 30 secs
       run: sleep 30
@@ -40,4 +40,4 @@ jobs:
       run: npm run test:integration
 
     - name: Stop containers
-      run: npm run dc:down
+      run: docker-compose down -v
