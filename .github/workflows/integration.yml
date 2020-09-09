@@ -22,7 +22,7 @@ jobs:
       run: npm ci --silent
 
     - name: Run unit tests
-      run: npm test:unit
+      run: npm run test:unit
 
     - name: Start containers
       run: npm run dc:up
@@ -37,7 +37,7 @@ jobs:
       run: docker-compose logs
 
     - name: Run integration tests
-      run: npm test:integration
+      run: npm run test:integration
 
     - name: Stop containers
       run: npm run dc:down
