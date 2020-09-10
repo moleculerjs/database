@@ -15,6 +15,7 @@ const DbMethods = require("./db-methods");
 /*
 
   TODO:
+	- [ ]
 	- [ ] Actions
 		- [ ] `find`
 		- [ ] `list`
@@ -44,9 +45,9 @@ const DbMethods = require("./db-methods");
 		- [ ] setOnUpdate: updatedAt: { type: "number", readonly: true, setOnUpdate: () => Date.now() }, // Set value when entity is updated
 		- [ ] setOnDelete: deletedAt: { type: "number", readonly: true, setOnDelete: () => Date.now() }, // Set value when entity is deleted
 
-	- [ ] Methods
+	- [ ] Methods (internal with _ prefix)
 		- [ ] create indexes (execute the adapter)
-		- [ ] methods for actions
+		- [ ] methods for actions (findEntities, getEntity, countEntities, createEntity, updateEntity, removeEntity)
 		- [ ] sanitizator
 		- [ ] transformer
 		- [ ] populate
@@ -66,8 +67,20 @@ module.exports = function DatabaseMixin(opts) {
 	opts = _.defaultsDeep(opts, {
 		createActions: true,
 		actionVisibility: "published",
+		cache: {
+			enable: true,
+			eventName: null
+		},
+		/** @type {Boolean} Set auto-aliasing fields */
+		rest: true,
+
 		//autoReconnect: true,
-		cacheCleanEventName: null
+
+		/** @type {Number} Maximum value of limit in `find` action. Default: `-1` (no limit) */
+		maxLimit: -1,
+
+		/** @type {Number} Default page size in `list` action. */
+		defaultPageSize: 10
 	});
 
 	const schema = {
@@ -78,17 +91,9 @@ module.exports = function DatabaseMixin(opts) {
 		 * Default settings
 		 */
 		settings: {
+			// TODO: model: { fields: { ... } } ???
 			/** @type {Object?} Field filtering list. It must be an `Object`. If the value is `null` it won't filter the fields of entities. */
 			fields: null,
-
-			/** @type {Number} Default page size in `list` action. */
-			pageSize: 10,
-
-			/** @type {Number} Maximum page size in `list` action. */
-			maxPageSize: 100,
-
-			/** @type {Number} Maximum value of limit in `find` action. Default: `-1` (no limit) */
-			maxLimit: -1,
 
 			/** @type {Object?} Predefined scopes */
 			scopes: {},
@@ -115,7 +120,8 @@ module.exports = function DatabaseMixin(opts) {
 		}
 	};
 
-	if (opts.cacheCleanEventName) {
+	if (opts.cache && opts.cache.enabled) {
+		const eventName = opts.cache.eventName || `cache.clean.${this.name}`;
 		schema.events = {
 			/**
 			 * Subscribe to the cache clean event. If it's triggered
@@ -123,7 +129,7 @@ module.exports = function DatabaseMixin(opts) {
 			 *
 			 * @param {Context} ctx
 			 */
-			async [opts.cacheCleanEventName]() {
+			async [eventName]() {
 				if (this.broker.cacher) {
 					await this.broker.cacher.clean(`${this.fullName}.*`);
 				}

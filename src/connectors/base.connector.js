@@ -43,14 +43,6 @@ class BaseConnector {
 	/**
 	 * Find all entities by filters.
 	 *
-	 * Available filter props:
-	 * 	- limit
-	 *  - offset
-	 *  - sort
-	 *  - search
-	 *  - searchFields
-	 *  - query
-	 *
 	 * @param {Object} filters
 	 * @returns {Promise<Array>}
 	 */

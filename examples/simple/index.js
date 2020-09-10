@@ -1,23 +1,38 @@
 "use strict";
 
-let { ServiceBroker } 	= require("moleculer");
-let MyService 			= require("../../index");
+const { ServiceBroker } = require("moleculer");
+const { inspect } = require("util");
+const DbService = require("../../index");
 
 // Create broker
-let broker = new ServiceBroker({
-	logger: console
+const broker = new ServiceBroker({
+	logger: {
+		type: "Console",
+		options: {
+			objectPrinter: obj =>
+				inspect(obj, {
+					breakLength: 50,
+					colors: true,
+					depth: 3
+				})
+		}
+	}
 });
 
 // Load my service
-broker.createService(MyService);
+const svc = broker.createService({
+	name: "posts",
+	mixins: [DbService()]
+});
 
 // Start server
 broker.start().then(() => {
+	broker.logger.info(svc.schema);
 
-	// Call action
+	/* Call action
 	broker
 		.call("database.test", { name: "John Doe" })
 		.then(broker.logger.info)
 		.catch(broker.logger.error);
-
+	*/
 });
