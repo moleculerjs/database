@@ -184,13 +184,21 @@ module.exports = function (opts) {
 				query: { type: "object", optional: true }
 			},
 			async handler(ctx) {
-				// TODO:
-				const rows = await this.findEntities(ctx);
-				const totalRows = await this.countEntities(ctx);
+				const params = this.sanitizeParams(ctx, ctx.params);
+				const rows = await this.findEntities(ctx, params);
+				const total = await this.countEntities(ctx, params);
 
 				return {
+					// Rows
 					rows,
-					totalRows
+					// Total rows
+					total,
+					// Page
+					page: params.page,
+					// Page size
+					pageSize: params.pageSize,
+					// Total pages
+					totalPages: Math.floor((total + params.pageSize - 1) / params.pageSize)
 				};
 			}
 		};
