@@ -286,6 +286,28 @@ module.exports = function (opts) {
 		 */
 		createIndex(def) {
 			// TODO:
+		},
+
+		/**
+		 * Encode ID of entity.
+		 *
+		 * @methods
+		 * @param {any} id
+		 * @returns {any}
+		 */
+		encodeID(id) {
+			return id;
+		},
+
+		/**
+		 * Decode ID of entity.
+		 *
+		 * @methods
+		 * @param {any} id
+		 * @returns {any}
+		 */
+		decodeID(id) {
+			return id;
 		}
 	};
 };

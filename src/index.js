@@ -127,13 +127,13 @@ module.exports = function DatabaseMixin(opts) {
 			this.connector.init(this);
 		},
 
-		started() {
-			await this._processFields();
+		async started() {
+			this._processFields();
 
 			return this.connect();
 		},
 
-		stopped() {
+		async stopped() {
 			return this.disconnect();
 		}
 	};
