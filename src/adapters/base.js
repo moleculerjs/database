@@ -23,6 +23,7 @@ class BaseAdapter {
 	init(service) {
 		this.service = service;
 		this.broker = service.broker;
+		this.Promise = this.broker.Promise;
 	}
 
 	/**
@@ -138,17 +139,6 @@ class BaseAdapter {
 	}
 
 	/**
-	 * Remove entities which are matched by `query`
-	 *
-	 * @param {Object} query
-	 * @returns {Promise<Number>} Return with the count of deleted documents.
-	 *
-	 */
-	removeMany(/*query*/) {
-		return Promise.resolve();
-	}
-
-	/**
 	 * Remove an entity by ID
 	 *
 	 * @param {String} id
@@ -156,6 +146,17 @@ class BaseAdapter {
 	 *
 	 */
 	removeById(/*id*/) {
+		return Promise.resolve();
+	}
+
+	/**
+	 * Remove entities which are matched by `query`
+	 *
+	 * @param {Object} query
+	 * @returns {Promise<Number>} Return with the count of deleted documents.
+	 *
+	 */
+	removeMany(/*query*/) {
 		return Promise.resolve();
 	}
 

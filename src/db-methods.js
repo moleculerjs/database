@@ -159,7 +159,7 @@ module.exports = function (mixinOpts) {
 			params = this.sanitizeParams(params);
 			params = this._applyScopes(params, ctx);
 
-			let result = await this.adapter.find(ctx, params);
+			let result = await this.adapter.find(params);
 			if (opts.transform !== false) {
 				result = await this.transformResult(result, params, ctx);
 			}
@@ -175,7 +175,7 @@ module.exports = function (mixinOpts) {
 			params = this.sanitizeParams(params);
 			params = this._applyScopes(params, ctx);
 
-			const result = await this.adapter.count(ctx, params);
+			const result = await this.adapter.count(params);
 			return result;
 		},
 
@@ -309,7 +309,7 @@ module.exports = function (mixinOpts) {
 		async createEntity(ctx, params = ctx.params, opts = {}) {
 			params = this.validateParams(ctx, params, { type: "create" });
 
-			let result = await this.adapter.insert(ctx, params);
+			let result = await this.adapter.insert(params);
 			if (opts.transform !== false) {
 				result = await this.transformResult(result, params, ctx);
 			}
@@ -329,7 +329,7 @@ module.exports = function (mixinOpts) {
 			const entities = await Promise.all(
 				params.entities.map(entity => this.validateParams(ctx, entity, { type: "create" }))
 			);
-			let result = await this.adapter.insertMany(ctx, entities);
+			let result = await this.adapter.insertMany(entities);
 			if (opts.transform !== false) {
 				result = await this.transformResult(result, params, ctx);
 			}
@@ -468,6 +468,30 @@ module.exports = function (mixinOpts) {
 		},
 
 		/**
+		 * Validate incoming parameters.
+		 *
+		 * @param {Context} ctx
+		 * @param {Object} params
+		 * @param {Object?} opts
+		 */
+		validateParams(ctx, params, opts) {
+			// TODO:
+			return params;
+		},
+
+		/**
+		 * Transform the result rows.
+		 *
+		 * @param {any} result
+		 * @param {Object?} params
+		 * @param {Context} ctx
+		 */
+		transformResult(result, params, ctx) {
+			// TODO:
+			return result;
+		},
+
+		/**
 		 * Create an index.
 		 *
 		 * @param {Object} def
@@ -483,7 +507,7 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} opts
 		 */
 		async entityChanged(data, ctx /*, opts = {}*/) {
-			if (cacheOpts.eventName) {
+			if (cacheOpts && cacheOpts.eventName) {
 				// Cache cleaning event
 				(ctx || this.broker).broadcast(cacheOpts.eventName);
 			}
