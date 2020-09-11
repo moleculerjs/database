@@ -6,7 +6,7 @@
 
 "use strict";
 
-const BaseAdapter = require("./base.adapter");
+const BaseAdapter = require("./base");
 
 class CouchDBAdapter extends BaseAdapter {}
 
