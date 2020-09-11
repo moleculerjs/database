@@ -8,7 +8,9 @@
 "use strict";
 
 const _ = require("lodash");
+const { ServiceSchemaError } = require("moleculer").Errors;
 
+const Connectors = require("./connectors");
 const DbActions = require("./db-actions");
 const DbMethods = require("./db-methods");
 
@@ -74,7 +76,8 @@ module.exports = function DatabaseMixin(opts) {
 		/** @type {Boolean} Set auto-aliasing fields */
 		rest: true,
 
-		//autoReconnect: true,
+		/** @type {Number} Auto reconnect if the DB server is not available at first connecting */
+		autoReconnect: true,
 
 		/** @type {Number} Maximum value of limit in `find` action. Default: `-1` (no limit) */
 		maxLimit: -1,
@@ -117,6 +120,21 @@ module.exports = function DatabaseMixin(opts) {
 		 */
 		methods: {
 			...DbMethods(opts)
+		},
+
+		created() {
+			this.connector = Connectors.resolve(opts.connector);
+			this.connector.init(this);
+		},
+
+		started() {
+			await this._processFields();
+
+			return this.connect();
+		},
+
+		stopped() {
+			return this.disconnect();
 		}
 	};
 

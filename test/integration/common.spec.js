@@ -1,24 +1,43 @@
 "use strict";
 
 const { ServiceBroker } = require("moleculer");
-const DbService = require("../../");
+const DbService = require("../../").Service;
 
-const Adapters = ["?"];
+const Adapters = Object.keys(require("../../").Adapters).filter(
+	s => ["resolve", "register", "Base"].indexOf(s) == -1
+);
 
 describe("Integration tests", () => {
-	for (const Adapter in Adapters) {
-		describe(`Adapter: ${Adapter.constructor.name}`, () => {
-			const broker = new ServiceBroker({ logger: false });
-			const service = broker.createService({
-				name: "posts",
-				mixins: [DbService({ createActions: false })]
+	for (const adapterName of Adapters) {
+		describe(`Adapter: ${adapterName}`, () => {
+			describe("Test connector via methods", () => {
+				const broker = new ServiceBroker({ logger: false });
+				const service = broker.createService({
+					name: "posts",
+					mixins: [DbService({ createActions: false })]
+				});
+
+				beforeAll(() => broker.start());
+				afterAll(() => broker.stop());
+
+				it("should be started", () => {
+					expect(service).toBeDefined();
+				});
 			});
 
-			beforeAll(() => broker.start());
-			afterAll(() => broker.stop());
+			describe("Test connector via actions", () => {
+				const broker = new ServiceBroker({ logger: false });
+				const service = broker.createService({
+					name: "posts",
+					mixins: [DbService({ createActions: false })]
+				});
 
-			it("should be started", () => {
-				expect(service).toBeDefined();
+				beforeAll(() => broker.start());
+				afterAll(() => broker.stop());
+
+				it("should be started", () => {
+					expect(service).toBeDefined();
+				});
 			});
 		});
 	}

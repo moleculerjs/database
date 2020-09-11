@@ -2,7 +2,7 @@
 
 const { ServiceBroker } = require("moleculer");
 const { inspect } = require("util");
-const DbService = require("../../index");
+const DbService = require("../../index").Service;
 
 // Create broker
 const broker = new ServiceBroker({

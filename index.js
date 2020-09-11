@@ -6,4 +6,7 @@
 
 "use strict";
 
-module.exports = require("./src");
+module.exports = {
+	Service: require("./src"),
+	Adapters: require("./src/connectors")
+};

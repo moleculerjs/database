@@ -7,17 +7,89 @@
 "use strict";
 
 const { Context } = require("moleculer");
+const { MoleculerClientError, ValidationError } = require("moleculer").Errors;
 const _ = require("lodash");
 
 module.exports = function (opts) {
 	return {
 		/**
+		 * Connect to the DB
+		 */
+		connect() {
+			return new this.Promise((resolve, reject) => {
+				const connecting = async () => {
+					try {
+						await this.connector.connect();
+						resolve();
+					} catch (err) {
+						this.logger.error("Connection error!", err);
+						if (opts.autoReconnect) {
+							setTimeout(() => {
+								this.logger.warn("Reconnecting...");
+								connecting();
+							}, 1000);
+						} else {
+							reject(err);
+						}
+					}
+				};
+				connecting();
+			});
+		},
+
+		/**
+		 * Disconnect from DB
+		 */
+		disconnect() {
+			if (this.connector) return this.connector.disconnect();
+		},
+
+		/**
+		 * Processing the `fields` definition.
+		 *
+		 * @private
+		 */
+		_processFields() {
+			this.$fields = null;
+
+			if (_.isObject(this.settings.fields)) {
+				this.$fields = _.compact(
+					_.map(this.settings.fields, (value, name) => {
+						// Disabled field
+						if (value === false) return;
+
+						// Shorthand format { title: true } => { title: {} }
+						if (value === true) value = { type: "any" };
+
+						// Shorthand format: { title: "string" } => { title: { type: "string" } }
+						// TODO: | handling like if FastestValidator
+						if (_.isString(value)) value = { type: value };
+
+						// Copy the properties
+						const field = Object.assign({}, value);
+
+						// Set name of field
+						field.name = name;
+
+						if (field.primaryKey === true) this.$primaryField = field;
+						if (field.onDelete) this.$softDelete = true;
+
+						return field;
+					})
+				);
+			}
+
+			if (!this.$primaryField) this.$primaryField = { name: "_id" };
+			if (this.$softDelete) this.logger.debug("Soft delete mode: ENABLED");
+		},
+
+		/**
 		 * Apply scopes for the params query.
 		 *
-		 * @param {Context} ctx
 		 * @param {Object} params
+		 * @param {Context?} ctx
 		 */
-		applyScopes(ctx, params) {
+		applyScopes(params, ctx) {
 			let scopes = null;
 			if (params.scope) {
 				scopes = Array.isArray(params.scope) ? params.scope : [params.scope];
@@ -40,10 +112,11 @@ module.exports = function (opts) {
 
 		/**
 		 * Sanitize incoming parameters for `find`, `list`, `count` actions.
-		 * @param {Context} ctx
+		 *
 		 * @param {Object} p
+		 * @param {Object?} opts
 		 */
-		sanitizeParams(ctx, p) {
+		sanitizeParams(p, opts) {
 			if (typeof p.sort === "string") p.sort = p.sort.replace(/,/g, " ").split(" ");
 			if (typeof p.fields === "string") p.fields = p.fields.replace(/,/g, " ").split(" ");
 			if (typeof p.populate === "string")
@@ -51,7 +124,7 @@ module.exports = function (opts) {
 			if (typeof p.searchFields === "string")
 				p.searchFields = p.searchFields.replace(/,/g, " ").split(" ");
 
-			if (ctx.action.name.endsWith(".list")) {
+			if (opts && opts.list) {
 				// Default `pageSize`
 				if (!p.pageSize) p.pageSize = opts.defaultPageSize;
 
@@ -75,9 +148,17 @@ module.exports = function (opts) {
 		 * Find all entities by query & limit
 		 * @param {Context} ctx
 		 * @param {Object?} params
+		 * @param {Object?} opts
 		 */
-		findEntities(ctx, params = ctx.params) {
-			// TODO:
+		async findEntities(ctx, params = ctx.params, opts = {}) {
+			params = this.sanitizeParams(params);
+			params = this.applyScopes(params, ctx);
+
+			let result = await this.connector.find(ctx, params);
+			if (opts.transform !== false) {
+				result = await this.transformResult(result, params, ctx);
+			}
+			return result;
 		},
 
 		/**
@@ -85,26 +166,73 @@ module.exports = function (opts) {
 		 * @param {Context} ctx
 		 * @param {Object?} params
 		 */
-		countEntities(ctx, params = ctx.params) {
-			// TODO:
+		async countEntities(ctx, params = ctx.params) {
+			params = this.sanitizeParams(params);
+			params = this.applyScopes(params, ctx);
+
+			const result = await this.connector.count(ctx, params);
+			return result;
 		},
 
 		/**
 		 * Get an entity by ID
 		 * @param {Context} ctx
 		 * @param {Object?} params
+		 * @param {Object?} opts
 		 */
-		getEntity(ctx, params = ctx.params) {
-			// TODO:
+		async getEntity(ctx, params = ctx.params, opts = {}) {
+			let id = ctx.params[this.$primaryField.name];
+			if (id == null) id = ctx.params.id;
+
+			if (id == null) {
+				return this.Promise.reject(
+					new MoleculerClientError("Missing id field.", 400, "MISSING_ID", { params })
+				);
+			}
+
+			if (opts.secure != null) {
+				id = opts.secure ? this.decodeID(id) : id;
+			} else if (this.$primaryField.secure) {
+				id = this.decodeID(id);
+			}
+
+			params = this.applyScopes(params, ctx); // TODO: applying to the `query` which is not used later.
+			let result = await this.adapter.findById(id);
+			if (result != null && opts.transform !== false) {
+				result = await this.transformResult(result, params, ctx);
+			}
+			return result;
 		},
 
 		/**
 		 * Get multiple entities by IDs with mapping
 		 * @param {Context} ctx
 		 * @param {Object?} params
+		 * @param {Object?} opts
 		 */
-		getEntities(ctx, params = ctx.params) {
-			// TODO:
+		async getEntities(ctx, params = ctx.params, opts = {}) {
+			let id = ctx.params[this.$primaryField.name];
+			if (id == null) id = ctx.params.id;
+
+			if (id == null) {
+				return this.Promise.reject(
+					new MoleculerClientError("Missing id field.", 400, "MISSING_ID", { params })
+				);
+			}
+			if (!Array.isArray(id)) id = [id];
+
+			if (opts.secure != null) {
+				id = opts.secure ? id.map(id => this.decodeID(id)) : id;
+			} else if (this.$primaryField.secure) {
+				id = id.map(id => this.decodeID(id));
+			}
+
+			params = this.applyScopes(params, ctx); // TODO: applying to the `query` which is not used later.
+			let result = await this.adapter.findByIds(id);
+			if (result != null && opts.transform !== false) {
+				result = await this.transformResult(result, params, ctx);
+			}
+			return result;
 		},
 
 		/**

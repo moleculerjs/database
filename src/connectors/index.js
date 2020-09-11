@@ -6,16 +6,16 @@
 
 "use strict";
 
-const { isObject, isString } = require("../utils");
-const { MoleculerError } = require("moleculer").Errors;
+const { isObject, isString } = require("lodash");
+const { ServiceSchemaError } = require("moleculer").Errors;
 
 const Connectors = {
-	Base: require("./base"),
-	CouchDB: require("./couchdb"),
-	Mongo: require("./mongo"),
-	Mongoose: require("./mongoose"),
-	NeDB: require("./nedb"),
-	Sequelize: require("./sequelize")
+	Base: require("./base.connector"),
+	CouchDB: require("./couchdb.connector"),
+	Mongo: require("./mongo.connector"),
+	Mongoose: require("./mongoose.connector"),
+	NeDB: require("./nedb.connector"),
+	Sequelize: require("./sequelize.connector")
 };
 
 function getByName(name) {
@@ -39,14 +39,14 @@ function resolve(opt) {
 		if (ConnectorClass) {
 			return new ConnectorClass();
 		} else {
-			throw new MoleculerError(`Invalid Connector type '${opt}'.`, { type: opt });
+			throw new ServiceSchemaError(`Invalid Connector type '${opt}'.`, { type: opt });
 		}
 	} else if (isObject(opt)) {
 		const ConnectorClass = getByName(opt.type || "NeDB");
 		if (ConnectorClass) {
 			return new ConnectorClass(opt.options);
 		} else {
-			throw new MoleculerError(`Invalid Connector type '${opt.type}'.`, {
+			throw new ServiceSchemaError(`Invalid Connector type '${opt.type}'.`, {
 				type: opt.type
 			});
 		}

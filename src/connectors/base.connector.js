@@ -18,12 +18,11 @@ class BaseConnector {
 	/**
 	 * Initialize the connector.
 	 *
-	 * @param {ServiceBroker} broker
 	 * @param {Service} service
 	 */
-	init(broker, service) {
-		this.broker = broker;
+	init(service) {
 		this.service = service;
+		this.broker = service.broker;
 	}
 
 	/**

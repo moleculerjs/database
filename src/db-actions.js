@@ -184,7 +184,7 @@ module.exports = function (opts) {
 				query: { type: "object", optional: true }
 			},
 			async handler(ctx) {
-				const params = this.sanitizeParams(ctx, ctx.params);
+				const params = this.sanitizeParams(ctx.params, { list: true });
 				const rows = await this.findEntities(ctx, params);
 				const total = await this.countEntities(ctx, params);
 
