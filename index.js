@@ -8,5 +8,5 @@
 
 module.exports = {
 	Service: require("./src"),
-	Adapters: require("./src/connectors")
+	Adapters: require("./src/adapters")
 };

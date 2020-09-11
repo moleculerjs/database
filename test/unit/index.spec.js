@@ -1,7 +1,7 @@
 "use strict";
 
 const { ServiceBroker } = require("moleculer");
-const DbService = require("../../");
+const DbService = require("../../").Service;
 
 describe("Test DbService", () => {
 	const broker = new ServiceBroker({ logger: false });

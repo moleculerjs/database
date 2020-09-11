@@ -6,8 +6,8 @@
 
 "use strict";
 
-const BaseConnector = require("./base.connector");
+const BaseAdapter = require("./base.adapter");
 
-class SequelizeConnector extends BaseConnector {}
+class CouchDBAdapter extends BaseAdapter {}
 
-module.exports = SequelizeConnector;
+module.exports = CouchDBAdapter;

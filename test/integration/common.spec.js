@@ -10,7 +10,7 @@ const Adapters = Object.keys(require("../../").Adapters).filter(
 describe("Integration tests", () => {
 	for (const adapterName of Adapters) {
 		describe(`Adapter: ${adapterName}`, () => {
-			describe("Test connector via methods", () => {
+			describe("Test adapter via methods", () => {
 				const broker = new ServiceBroker({ logger: false });
 				const service = broker.createService({
 					name: "posts",
@@ -25,7 +25,7 @@ describe("Integration tests", () => {
 				});
 			});
 
-			describe("Test connector via actions", () => {
+			describe("Test adapter via actions", () => {
 				const broker = new ServiceBroker({ logger: false });
 				const service = broker.createService({
 					name: "posts",

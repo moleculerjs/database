@@ -6,8 +6,8 @@
 
 "use strict";
 
-const BaseConnector = require("./base.connector");
+const BaseAdapter = require("./base.adapter");
 
-class MongooseConnector extends BaseConnector {}
+class MongoAdapter extends BaseAdapter {}
 
-module.exports = MongooseConnector;
+module.exports = MongoAdapter;

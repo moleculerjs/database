@@ -6,9 +6,9 @@
 
 "use strict";
 
-class BaseConnector {
+class BaseAdapter {
 	/**
-	 * Constructor of connector
+	 * Constructor of adapter
 	 * @param  {...any} args
 	 */
 	constructor(...args) {
@@ -16,7 +16,7 @@ class BaseConnector {
 	}
 
 	/**
-	 * Initialize the connector.
+	 * Initialize the adapter.
 	 *
 	 * @param {Service} service
 	 */
@@ -26,14 +26,14 @@ class BaseConnector {
 	}
 
 	/**
-	 * Connect connector to database
+	 * Connect adapter to database
 	 */
 	connect() {
 		return Promise.resolve();
 	}
 
 	/**
-	 * Disconnect connector from database
+	 * Disconnect adapter from database
 	 */
 	disconnect() {
 		return Promise.resolve();
@@ -180,4 +180,4 @@ class BaseConnector {
 	}
 }
 
-module.exports = BaseConnector;
+module.exports = BaseAdapter;

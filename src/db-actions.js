@@ -279,7 +279,8 @@ module.exports = function (opts) {
 				mapping: { type: "boolean", optional: true }
 			},
 			async handler(ctx) {
-				return this.getEntities(ctx);
+				if (Array.isArray(ctx.params.id)) return this.getEntities(ctx);
+				else return this.getEntity(ctx);
 			}
 		};
 	}
@@ -309,23 +310,21 @@ module.exports = function (opts) {
 	 *
 	 * @actions
 	 *
-	 * @param {Object|Array.<Object>} entity - Entity(ies) to save.
+	 * @param {Array<Object>} entities - Entities to save.
 	 *
-	 * @returns {Object|Array.<Object>} Saved entity(ies).
+	 * @returns {Array<Object>} Saved entity(ies).
 	 */
-	if (opts.createActions === true || opts.createActions.insert === true) {
-		res.insert = {
+	if (opts.createActions === true || opts.createActions.batchCreate === true) {
+		res.batchCreate = {
 			visibility: opts.actionVisibility,
-			rest: "POST /insert",
 			params: {
-				entity: [
+				entities: [
 					// TODO: generate from `fields`
-					{ type: "object", optional: true },
-					{ type: "array", optional: true }
+					{ type: "array", items: "object" }
 				]
 			},
 			async handler(ctx) {
-				return this.insertEntity(ctx);
+				return this.createEntities(ctx);
 			}
 		};
 	}

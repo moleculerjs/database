@@ -10,7 +10,7 @@
 const _ = require("lodash");
 const { ServiceSchemaError } = require("moleculer").Errors;
 
-const Connectors = require("./connectors");
+const Adapters = require("./adapters");
 const DbActions = require("./db-actions");
 const DbMethods = require("./db-methods");
 
@@ -65,8 +65,8 @@ const DbMethods = require("./db-methods");
 
 */
 
-module.exports = function DatabaseMixin(opts) {
-	opts = _.defaultsDeep(opts, {
+module.exports = function DatabaseMixin(mixinOpts) {
+	mixinOpts = _.defaultsDeep(mixinOpts, {
 		createActions: true,
 		actionVisibility: "published",
 		cache: {
@@ -112,19 +112,19 @@ module.exports = function DatabaseMixin(opts) {
 		 * Actions
 		 */
 		actions: {
-			...DbActions(opts)
+			...DbActions(mixinOpts)
 		},
 
 		/**
 		 * Methods
 		 */
 		methods: {
-			...DbMethods(opts)
+			...DbMethods(mixinOpts)
 		},
 
 		created() {
-			this.connector = Connectors.resolve(opts.connector);
-			this.connector.init(this);
+			this.adapter = Adapters.resolve(mixinOpts.adapter);
+			this.adapter.init(this);
 		},
 
 		async started() {
@@ -138,8 +138,8 @@ module.exports = function DatabaseMixin(opts) {
 		}
 	};
 
-	if (opts.cache && opts.cache.enabled) {
-		const eventName = opts.cache.eventName || `cache.clean.${this.name}`;
+	if (mixinOpts.cache && mixinOpts.cache.enabled) {
+		const eventName = mixinOpts.cache.eventName || `cache.clean.${this.name}`;
 		schema.events = {
 			/**
 			 * Subscribe to the cache clean event. If it's triggered
@@ -149,7 +149,7 @@ module.exports = function DatabaseMixin(opts) {
 			 */
 			async [eventName]() {
 				if (this.broker.cacher) {
-					await this.broker.cacher.clean(`${this.fullName}.*`);
+					await this.broker.cacher.clean(`${this.fullName}.**`);
 				}
 			}
 		};

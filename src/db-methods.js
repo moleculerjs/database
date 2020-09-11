@@ -7,10 +7,13 @@
 "use strict";
 
 const { Context } = require("moleculer");
+const { EntityNotFoundError } = require("./errors");
 const { MoleculerClientError, ValidationError } = require("moleculer").Errors;
 const _ = require("lodash");
 
-module.exports = function (opts) {
+module.exports = function (mixinOpts) {
+	const cacheOpts = mixinOpts.cache && mixinOpts.cache.enabled ? mixinOpts.cache : null;
+
 	return {
 		/**
 		 * Connect to the DB
@@ -19,11 +22,11 @@ module.exports = function (opts) {
 			return new this.Promise((resolve, reject) => {
 				const connecting = async () => {
 					try {
-						await this.connector.connect();
+						await this.adapter.connect();
 						resolve();
 					} catch (err) {
 						this.logger.error("Connection error!", err);
-						if (opts.autoReconnect) {
+						if (mixinOpts.autoReconnect) {
 							setTimeout(() => {
 								this.logger.warn("Reconnecting...");
 								connecting();
@@ -41,7 +44,7 @@ module.exports = function (opts) {
 		 * Disconnect from DB
 		 */
 		disconnect() {
-			if (this.connector) return this.connector.disconnect();
+			if (this.adapter) return this.adapter.disconnect();
 		},
 
 		/**
@@ -79,7 +82,7 @@ module.exports = function (opts) {
 				);
 			}
 
-			if (!this.$primaryField) this.$primaryField = { name: "_id" };
+			if (!this.$primaryField) this.$primaryField = { name: "id" };
 			if (this.$softDelete) this.logger.debug("Soft delete mode: ENABLED");
 		},
 
@@ -89,7 +92,7 @@ module.exports = function (opts) {
 		 * @param {Object} params
 		 * @param {Context?} ctx
 		 */
-		applyScopes(params, ctx) {
+		_applyScopes(params, ctx) {
 			let scopes = null;
 			if (params.scope) {
 				scopes = Array.isArray(params.scope) ? params.scope : [params.scope];
@@ -126,20 +129,22 @@ module.exports = function (opts) {
 
 			if (opts && opts.list) {
 				// Default `pageSize`
-				if (!p.pageSize) p.pageSize = opts.defaultPageSize;
+				if (!p.pageSize) p.pageSize = mixinOpts.defaultPageSize;
 
 				// Default `page`
 				if (!p.page) p.page = 1;
 
 				// Limit the `pageSize`
-				if (opts.maxLimit > 0 && p.pageSize > opts.maxLimit) p.pageSize = opts.maxLimit;
+				if (mixinOpts.maxLimit > 0 && p.pageSize > mixinOpts.maxLimit)
+					p.pageSize = mixinOpts.maxLimit;
 
 				// Calculate the limit & offset from page & pageSize
 				p.limit = p.pageSize;
 				p.offset = (p.page - 1) * p.pageSize;
 			}
 			// Limit the `limit`
-			if (opts.maxLimit > 0 && p.limit > opts.maxLimit) p.limit = opts.maxLimit;
+			if (mixinOpts.maxLimit > 0 && p.limit > mixinOpts.maxLimit)
+				p.limit = mixinOpts.maxLimit;
 
 			return p;
 		},
@@ -152,9 +157,9 @@ module.exports = function (opts) {
 		 */
 		async findEntities(ctx, params = ctx.params, opts = {}) {
 			params = this.sanitizeParams(params);
-			params = this.applyScopes(params, ctx);
+			params = this._applyScopes(params, ctx);
 
-			let result = await this.connector.find(ctx, params);
+			let result = await this.adapter.find(ctx, params);
 			if (opts.transform !== false) {
 				result = await this.transformResult(result, params, ctx);
 			}
@@ -168,10 +173,23 @@ module.exports = function (opts) {
 		 */
 		async countEntities(ctx, params = ctx.params) {
 			params = this.sanitizeParams(params);
-			params = this.applyScopes(params, ctx);
+			params = this._applyScopes(params, ctx);
 
-			const result = await this.connector.count(ctx, params);
+			const result = await this.adapter.count(ctx, params);
 			return result;
+		},
+
+		/**
+		 * Get ID value from `params`.
+		 *
+		 * @param {Object} params
+		 */
+		_getIDFromParams(params) {
+			const primaryFieldName =
+				this.$primaryField && this.$primaryField.name ? this.$primaryField.name : "id";
+			let id = params[primaryFieldName];
+			if (id == null) id = params.id;
+			return id;
 		},
 
 		/**
@@ -181,111 +199,294 @@ module.exports = function (opts) {
 		 * @param {Object?} opts
 		 */
 		async getEntity(ctx, params = ctx.params, opts = {}) {
-			let id = ctx.params[this.$primaryField.name];
-			if (id == null) id = ctx.params.id;
-
+			let id = this._getIDFromParams(params);
 			if (id == null) {
 				return this.Promise.reject(
 					new MoleculerClientError("Missing id field.", 400, "MISSING_ID", { params })
 				);
 			}
+			const origID = id;
 
-			if (opts.secure != null) {
-				id = opts.secure ? this.decodeID(id) : id;
-			} else if (this.$primaryField.secure) {
+			if (opts.secureID != null) {
+				id = opts.secureID ? this.decodeID(id) : id;
+			} else if (this.$primaryField && this.$primaryField.secure) {
 				id = this.decodeID(id);
 			}
 
-			params = this.applyScopes(params, ctx); // TODO: applying to the `query` which is not used later.
+			params = this._applyScopes(params, ctx); // TODO: applying to the `query` which is not used later.
 			let result = await this.adapter.findById(id);
-			if (result != null && opts.transform !== false) {
+			if (!result || result.length == 0)
+				return Promise.reject(new EntityNotFoundError(origID));
+
+			if (opts.transform !== false) {
 				result = await this.transformResult(result, params, ctx);
 			}
 			return result;
 		},
 
 		/**
-		 * Get multiple entities by IDs with mapping
+		 * Get multiple entities by IDs
 		 * @param {Context} ctx
 		 * @param {Object?} params
 		 * @param {Object?} opts
 		 */
 		async getEntities(ctx, params = ctx.params, opts = {}) {
-			let id = ctx.params[this.$primaryField.name];
-			if (id == null) id = ctx.params.id;
-
+			let id = this._getIDFromParams(params);
 			if (id == null) {
 				return this.Promise.reject(
 					new MoleculerClientError("Missing id field.", 400, "MISSING_ID", { params })
 				);
 			}
 			if (!Array.isArray(id)) id = [id];
+			const origID = id;
 
-			if (opts.secure != null) {
-				id = opts.secure ? id.map(id => this.decodeID(id)) : id;
-			} else if (this.$primaryField.secure) {
+			if (opts.secureID != null) {
+				id = opts.secureID ? id.map(id => this.decodeID(id)) : id;
+			} else if (this.$primaryField && this.$primaryField.secure) {
 				id = id.map(id => this.decodeID(id));
 			}
 
-			params = this.applyScopes(params, ctx); // TODO: applying to the `query` which is not used later.
+			params = this._applyScopes(params, ctx); // TODO: applying to the `query` which is not used later.
 			let result = await this.adapter.findByIds(id);
-			if (result != null && opts.transform !== false) {
+			if (!result || result.length == 0)
+				return Promise.reject(new EntityNotFoundError(origID));
+
+			if (opts.transform !== false) {
 				result = await this.transformResult(result, params, ctx);
 			}
 			return result;
 		},
 
 		/**
-		 * Create an entity
+		 * Resolve entities IDs with mapping
 		 * @param {Context} ctx
 		 * @param {Object?} params
+		 * @param {Object?} opts
 		 */
-		createEntity(ctx, params = ctx.params) {
-			// TODO:
+		async resolveEntities(ctx, params = ctx.params, opts = {}) {
+			let id = this._getIDFromParams(params);
+			if (id == null) {
+				return this.Promise.reject(
+					new MoleculerClientError("Missing id field.", 400, "MISSING_ID", { params })
+				);
+			}
+
+			let result;
+			if (Array.isArray(id)) {
+				result = await this.getEntities(ctx, params, opts);
+			} else {
+				result = await this.getEntity(ctx, params, opts);
+			}
+
+			if (ctx.params.mapping === true) {
+				const primaryFieldName =
+					this.$primaryField && this.$primaryField.name ? this.$primaryField.name : "id";
+
+				if (Array.isArray(result)) {
+					result = result.reduce((map, doc) => {
+						const id = doc[primaryFieldName];
+						map[id] = doc;
+						return map;
+					}, {});
+				} else {
+					const id = result[primaryFieldName];
+					result = {
+						[id]: result
+					};
+				}
+			}
+
+			return result;
 		},
 
 		/**
-		 * Insert entity(ies)
-		 * @param {Context} ctx
-		 * @param {Object|Array<Object>?} params
-		 */
-		insertEntity(ctx, params = ctx.params) {
-			// TODO:
-		},
-
-		/**
-		 * Replace an entity
+		 * Create an entity.
+		 *
 		 * @param {Context} ctx
 		 * @param {Object?} params
+		 * @param {Object?} opts
 		 */
-		replaceEntity(ctx, params = ctx.params) {
-			// TODO:
+		async createEntity(ctx, params = ctx.params, opts = {}) {
+			params = this.validateParams(ctx, params, { type: "create" });
+
+			let result = await this.adapter.insert(ctx, params);
+			if (opts.transform !== false) {
+				result = await this.transformResult(result, params, ctx);
+			}
+
+			await this.entityChanged(result, ctx, { ...opts, type: "create" });
+			return result;
 		},
 
 		/**
-		 * Update an entity (patch)
+		 * Insert entities.
+		 *
+		 * @param {Context} ctx
+		 * @param {Array<Object>?} params
+		 * @param {Object?} opts
+		 */
+		async createEntities(ctx, params = ctx.params, opts = {}) {
+			const entities = await Promise.all(
+				params.entities.map(entity => this.validateParams(ctx, entity, { type: "create" }))
+			);
+			let result = await this.adapter.insertMany(ctx, entities);
+			if (opts.transform !== false) {
+				result = await this.transformResult(result, params, ctx);
+			}
+
+			await this.entityChanged(result, ctx, { ...opts, type: "batchCreate" });
+			return result;
+		},
+
+		/**
+		 * Update an entity (patch).
+		 *
 		 * @param {Context} ctx
 		 * @param {Object?} params
+		 * @param {Object?} opts
 		 */
-		updateEntity(ctx, params = ctx.params) {
-			// TODO:
+		async updateEntity(ctx, params = ctx.params, opts = {}) {
+			let id = this._getIDFromParams(params);
+			if (id == null) {
+				return this.Promise.reject(
+					new MoleculerClientError("Missing id field.", 400, "MISSING_ID", { params })
+				);
+			}
+
+			/*const oldEntity = */ await this.getEntity(ctx, params);
+
+			params = this.validateParams(ctx, params, { type: "update" });
+
+			if (opts.secureID != null) {
+				id = opts.secureID ? this.decodeID(id) : id;
+			} else if (this.$primaryField && this.$primaryField.secure) {
+				id = this.decodeID(id);
+			}
+
+			let result = await this.adapter.updateById(id, params);
+
+			if (opts.transform !== false) {
+				result = await this.transformResult(result, params, ctx);
+			}
+
+			await this.entityChanged(result, ctx, { ...opts, type: "update" });
+			return result;
 		},
 
 		/**
-		 * Delete an entity
+		 * Replace an entity.
+		 *
 		 * @param {Context} ctx
 		 * @param {Object?} params
+		 * @param {Object?} opts
 		 */
-		removeEntity(ctx, params = ctx.params) {
-			// TODO:
+		async replaceEntity(ctx, params = ctx.params, opts = {}) {
+			let id = this._getIDFromParams(params);
+			if (id == null) {
+				return this.Promise.reject(
+					new MoleculerClientError("Missing id field.", 400, "MISSING_ID", { params })
+				);
+			}
+
+			/*const oldEntity = */ await this.getEntity(ctx, params);
+
+			params = this.validateParams(ctx, params, { type: "replace" });
+
+			if (opts.secureID != null) {
+				id = opts.secureID ? this.decodeID(id) : id;
+			} else if (this.$primaryField && this.$primaryField.secure) {
+				id = this.decodeID(id);
+			}
+
+			let result = await this.adapter.replaceById(id, params);
+
+			if (opts.transform !== false) {
+				result = await this.transformResult(result, params, ctx);
+			}
+
+			await this.entityChanged(result, ctx, { ...opts, type: "replace" });
+			return result;
 		},
 
 		/**
-		 * Create an index
+		 * Delete an entity.
+		 *
+		 * @param {Context} ctx
+		 * @param {Object?} params
+		 * @param {Object?} opts
+		 */
+		async removeEntity(ctx, params = ctx.params, opts = {}) {
+			let id = this._getIDFromParams(params);
+			if (id == null) {
+				return this.Promise.reject(
+					new MoleculerClientError("Missing id field.", 400, "MISSING_ID", { params })
+				);
+			}
+			const origID = id;
+
+			const entity = await this.getEntity(ctx, params, { transform: false });
+
+			if (opts.secureID != null) {
+				id = opts.secureID ? this.decodeID(id) : id;
+			} else if (this.$primaryField && this.$primaryField.secure) {
+				id = this.decodeID(id);
+			}
+
+			if (this.$softDelete) {
+				// Soft delete
+				const changes = {};
+				await Promise.all(
+					this.$fields.map(async field => {
+						if (field.onDelete) {
+							if (_.isFunction(field.onDelete)) {
+								_.set(
+									changes,
+									field.name,
+									await field.onDelete.call(
+										this,
+										_.get(entity, field.name),
+										entity,
+										ctx
+									)
+								);
+							} else {
+								_.set(changes, field.name, field.onDelete);
+							}
+						}
+					})
+				);
+
+				await this.adapter.updateById(id, changes);
+			} else {
+				// Real delete
+				await this.adapter.removeById(id);
+			}
+
+			await this.entityChanged(entity, ctx, { ...opts, type: "remove" });
+
+			return origID;
+		},
+
+		/**
+		 * Create an index.
+		 *
 		 * @param {Object} def
 		 */
 		createIndex(def) {
-			// TODO:
+			this.adapter.createIndex(def);
+		},
+
+		/**
+		 * Called when an entity changed.
+		 * @param {any} data
+		 * @param {Context?} ctx
+		 * @param {Object?} opts
+		 */
+		async entityChanged(data, ctx /*, opts = {}*/) {
+			if (cacheOpts.eventName) {
+				// Cache cleaning event
+				(ctx || this.broker).broadcast(cacheOpts.eventName);
+			}
 		},
 
 		/**

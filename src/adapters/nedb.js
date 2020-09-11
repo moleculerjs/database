@@ -6,8 +6,8 @@
 
 "use strict";
 
-const BaseConnector = require("./base.connector");
+const BaseAdapter = require("./base.adapter");
 
-class CouchDBConnector extends BaseConnector {}
+class NeDBAdapter extends BaseAdapter {}
 
-module.exports = CouchDBConnector;
+module.exports = NeDBAdapter;
