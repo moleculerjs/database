@@ -157,16 +157,17 @@ class NeDBAdapter extends BaseAdapter {
 	 *
 	 * @param {String} id
 	 * @param {Object} changes
+	 * @param {Object} opts
 	 * @returns {Promise<Object>} Return with the updated document.
 	 *
 	 */
-	updateById(id, changes) {
+	updateById(id, changes, opts) {
 		return new this.Promise((resolve, reject) => {
 			this.db.update(
 				{ _id: id },
-				changes,
+				opts && opts.raw ? changes : { $set: changes },
 				{ returnUpdatedDocs: true },
-				(err, numAffected, affectedDocuments, upsert) => {
+				(err, numAffected, affectedDocuments) => {
 					if (err) return reject(err);
 					resolve(affectedDocuments);
 				}
@@ -179,20 +180,19 @@ class NeDBAdapter extends BaseAdapter {
 	 *
 	 * @param {Object} query
 	 * @param {Object} changes
+	 * @param {Object} opts
 	 * @returns {Promise<Number>} Return with the count of modified documents.
 	 *
 	 */
-	updateMany(query, changes) {
+	updateMany(query, changes, opts) {
 		return new this.Promise((resolve, reject) => {
-			this.db.update(
-				query,
-				{ $set: changes },
-				{ multi: true },
-				(err, numAffected, affectedDocuments, upsert) => {
-					if (err) return reject(err);
-					resolve(numAffected);
-				}
-			);
+			this.db.update(query, opts && opts.raw ? changes : { $set: changes }, { multi: true }, (
+				err,
+				numAffected /*, affectedDocuments*/
+			) => {
+				if (err) return reject(err);
+				resolve(numAffected);
+			});
 		});
 	}
 
@@ -210,7 +210,7 @@ class NeDBAdapter extends BaseAdapter {
 				{ _id: id },
 				entity,
 				{ returnUpdatedDocs: true },
-				(err, numAffected, affectedDocuments, upsert) => {
+				(err, numAffected, affectedDocuments) => {
 					if (err) return reject(err);
 					resolve(affectedDocuments);
 				}
@@ -274,13 +274,11 @@ class NeDBAdapter extends BaseAdapter {
 
 			if (_.isString(params.search) && params.search !== "") {
 				query.$where = function () {
-					let item = this;
-					if (params.searchFields) item = _.pick(this, params.searchFields);
+					let doc = this;
+					const s = params.search.toLowerCase();
+					if (params.searchFields) doc = _.pick(this, params.searchFields);
 
-					const res = _.values(item).find(
-						v => String(v).toLowerCase().indexOf(params.search.toLowerCase()) !== -1
-					);
-
+					const res = _.values(doc).find(v => String(v).toLowerCase().indexOf(s) !== -1);
 					return res != null;
 				};
 			}

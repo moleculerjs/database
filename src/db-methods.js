@@ -82,7 +82,7 @@ module.exports = function (mixinOpts) {
 				);
 			}
 
-			if (!this.$primaryField) this.$primaryField = { name: "id" };
+			if (!this.$primaryField) this.$primaryField = { name: "id", columnName: "_id" };
 			if (this.$softDelete) this.logger.debug("Soft delete mode: ENABLED");
 		},
 
@@ -287,9 +287,13 @@ module.exports = function (mixinOpts) {
 				result = await this.getEntity(ctx, params, opts);
 			}
 
-			if (ctx.params.mapping === true) {
+			if (params.mapping === true) {
 				const primaryFieldName =
-					this.$primaryField && this.$primaryField.name ? this.$primaryField.name : "id";
+					this.$primaryField && this.$primaryField.columnName
+						? this.$primaryField.columnName
+						: this.$primaryField && this.$primaryField.name
+						? this.$primaryField.name
+						: "_id";
 
 				if (Array.isArray(result)) {
 					result = result.reduce((map, doc) => {
@@ -372,7 +376,13 @@ module.exports = function (mixinOpts) {
 				id = this.decodeID(id);
 			}
 
-			let result = await this.adapter.updateById(id, params);
+			// TODO: more accurate
+			delete params.id;
+
+			const rawUpdate = params.$raw === true;
+			if (rawUpdate) delete params.$raw;
+
+			let result = await this.adapter.updateById(id, params, { raw: rawUpdate });
 
 			if (opts.transform !== false) {
 				result = await this.transformResult(result, params, ctx);
@@ -406,6 +416,9 @@ module.exports = function (mixinOpts) {
 			} else if (this.$primaryField && this.$primaryField.secure) {
 				id = this.decodeID(id);
 			}
+
+			// TODO: more accurate
+			delete params.id;
 
 			let result = await this.adapter.replaceById(id, params);
 
@@ -471,7 +484,11 @@ module.exports = function (mixinOpts) {
 				await this.adapter.removeById(id);
 			}
 
-			await this.entityChanged(entity, ctx, { ...opts, type: "remove" });
+			await this.entityChanged(entity, ctx, {
+				...opts,
+				type: "remove",
+				softDelete: this.$softDelete
+			});
 
 			return origID;
 		},
