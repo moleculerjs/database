@@ -3,6 +3,7 @@
 const { ServiceBroker, Context } = require("moleculer");
 const { MoleculerClientError } = require("moleculer").Errors;
 const { EntityNotFoundError } = require("../../src/errors");
+const { addExpectAnyFields } = require("./utils");
 const DbService = require("../..").Service;
 
 const TEST_DOCS = {
@@ -39,7 +40,7 @@ const TEST_DOCS = {
 	}
 };
 
-module.exports = adapter => {
+module.exports = (adapter, adapterType) => {
 	describe("Test findEntity, findEntities & countEntities method", () => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
@@ -55,6 +56,8 @@ module.exports = adapter => {
 
 		describe("Set up", () => {
 			it("should return empty array", async () => {
+				await svc.clearEntities();
+
 				const rows = await svc.findEntities(ctx);
 				expect(rows).toEqual([]);
 
@@ -62,9 +65,19 @@ module.exports = adapter => {
 				expect(count).toEqual(0);
 			});
 
+			it("Adapter specific setups", async () => {
+				if (adapterType == "MongoDB") {
+					svc.adapter.collection.createIndex({
+						name: "text",
+						age: "text",
+						roles: "text"
+					});
+				}
+			});
+
 			it("create test entities", async () => {
 				for (const [key, value] of Object.entries(TEST_DOCS)) {
-					docs[key] = await svc.createEntity(ctx, value);
+					docs[key] = await svc.createEntity(ctx, Object.assign({}, value));
 				}
 				expect(docs.johnDoe).toEqual({ ...TEST_DOCS.johnDoe, _id: expect.any(String) });
 				expect(docs.janeDoe).toEqual({ ...TEST_DOCS.janeDoe, _id: expect.any(String) });
@@ -123,7 +136,14 @@ module.exports = adapter => {
 			it("should filter by searchText", async () => {
 				const params = { search: "Doe" };
 				const rows = await svc.findEntities(ctx, params);
-				expect(rows).toEqual(expect.arrayContaining([docs.janeDoe, docs.johnDoe]));
+				if (adapterType == "MongoDB") {
+					expect(rows).toEqual(
+						expect.arrayContaining([
+							addExpectAnyFields(docs.janeDoe, { _score: Number }),
+							addExpectAnyFields(docs.johnDoe, { _score: Number })
+						])
+					);
+				} else expect(rows).toEqual(expect.arrayContaining([docs.janeDoe, docs.johnDoe]));
 
 				const count = await svc.countEntities(ctx, params);
 				expect(count).toEqual(2);
@@ -132,23 +152,32 @@ module.exports = adapter => {
 			it("should filter by searchText", async () => {
 				const params = { search: "user" };
 				const rows = await svc.findEntities(ctx, params);
-				expect(rows).toEqual(expect.arrayContaining([docs.johnDoe, docs.bobSmith]));
+				if (adapterType == "MongoDB") {
+					expect(rows).toEqual(
+						expect.arrayContaining([
+							addExpectAnyFields(docs.bobSmith, { _score: Number }),
+							addExpectAnyFields(docs.johnDoe, { _score: Number })
+						])
+					);
+				} else expect(rows).toEqual(expect.arrayContaining([docs.johnDoe, docs.bobSmith]));
 
 				const count = await svc.countEntities(ctx, params);
 				expect(count).toEqual(2);
 			});
 
-			it("should filter by searchText && searchFields", async () => {
-				const params = {
-					search: "user",
-					searchFields: ["name", "age"]
-				};
-				const rows = await svc.findEntities(ctx, params);
-				expect(rows).toEqual([]);
+			if (["NeDB"].indexOf(adapterType) !== -1) {
+				it("should filter by searchText && searchFields", async () => {
+					const params = {
+						search: "user",
+						searchFields: ["name", "age"]
+					};
+					const rows = await svc.findEntities(ctx, params);
+					expect(rows).toEqual([]);
 
-				const count = await svc.countEntities(ctx, params);
-				expect(count).toEqual(0);
-			});
+					const count = await svc.countEntities(ctx, params);
+					expect(count).toEqual(0);
+				});
+			}
 
 			it("should filter by searchText & sort", async () => {
 				const params = {
@@ -157,7 +186,14 @@ module.exports = adapter => {
 					sort: "-age"
 				};
 				const rows = await svc.findEntities(ctx, params);
-				expect(rows).toEqual([docs.bobSmith, docs.johnDoe]);
+				if (adapterType == "MongoDB") {
+					expect(rows).toEqual(
+						expect.arrayContaining([
+							addExpectAnyFields(docs.bobSmith, { _score: Number }),
+							addExpectAnyFields(docs.johnDoe, { _score: Number })
+						])
+					);
+				} else expect(rows).toEqual([docs.bobSmith, docs.johnDoe]);
 
 				const count = await svc.countEntities(ctx, params);
 				expect(count).toEqual(2);
@@ -202,7 +238,9 @@ module.exports = adapter => {
 					search: "Doe"
 				};
 				const rows = await svc.findEntities(ctx, params);
-				expect(rows).toEqual([docs.janeDoe]);
+				if (adapterType == "MongoDB") {
+					expect(rows).toEqual([addExpectAnyFields(docs.janeDoe, { _score: Number })]);
+				} else expect(rows).toEqual([docs.janeDoe]);
 
 				const count = await svc.countEntities(ctx, params);
 				expect(count).toEqual(1);
@@ -223,7 +261,9 @@ module.exports = adapter => {
 					limit: 1
 				};
 				const rows = await svc.findEntities(ctx, params);
-				expect(rows).toEqual([docs.joeDoe]);
+				if (adapterType == "MongoDB") {
+					expect(rows).toEqual([addExpectAnyFields(docs.joeDoe, { _score: Number })]);
+				} else expect(rows).toEqual([docs.joeDoe]);
 
 				const count = await svc.countEntities(ctx, params);
 				expect(count).toEqual(2);
@@ -266,6 +306,8 @@ module.exports = adapter => {
 		let docs = {};
 
 		it("should return empty array", async () => {
+			await svc.clearEntities();
+
 			const rows = await svc.findEntities(ctx);
 			expect(rows).toEqual([]);
 
@@ -352,20 +394,24 @@ module.exports = adapter => {
 			it("throw EntityNotFound", async () => {
 				expect.assertions(2);
 				try {
-					await svc.resolveEntities(ctx, { id: "123456" });
+					await svc.resolveEntities(ctx, { id: "1234567890abcdef12345678" });
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
-					expect(err.data).toEqual({ id: "123456" });
+					expect(err.data).toEqual({ id: "1234567890abcdef12345678" });
 				}
 			});
 
 			it("throw EntityNotFound", async () => {
 				expect.assertions(2);
 				try {
-					await svc.resolveEntities(ctx, { id: ["123456", "234567"] });
+					await svc.resolveEntities(ctx, {
+						id: ["1234567890abcdef12345678", "234567890abcdef123456789"]
+					});
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
-					expect(err.data).toEqual({ id: ["123456", "234567"] });
+					expect(err.data).toEqual({
+						id: ["1234567890abcdef12345678", "234567890abcdef123456789"]
+					});
 				}
 			});
 		});
@@ -387,6 +433,8 @@ module.exports = adapter => {
 
 		describe("Set up", () => {
 			it("should return empty array", async () => {
+				await svc.clearEntities();
+
 				const rows = await svc.findEntities(ctx);
 				expect(rows).toEqual([]);
 
@@ -473,10 +521,10 @@ module.exports = adapter => {
 			it("throw EntityNotFound", async () => {
 				expect.assertions(2);
 				try {
-					await svc.updateEntity(ctx, { id: "123456" });
+					await svc.updateEntity(ctx, { id: "1234567890abcdef12345678" });
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
-					expect(err.data).toEqual({ id: "123456" });
+					expect(err.data).toEqual({ id: "1234567890abcdef12345678" });
 				}
 			});
 		});
@@ -518,10 +566,10 @@ module.exports = adapter => {
 			it("throw EntityNotFound", async () => {
 				expect.assertions(2);
 				try {
-					await svc.replaceEntity(ctx, { id: "123456" });
+					await svc.replaceEntity(ctx, { id: "1234567890abcdef12345678" });
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
-					expect(err.data).toEqual({ id: "123456" });
+					expect(err.data).toEqual({ id: "1234567890abcdef12345678" });
 				}
 			});
 		});
@@ -544,6 +592,8 @@ module.exports = adapter => {
 
 		describe("Set up", () => {
 			it("should return empty array", async () => {
+				await svc.clearEntities();
+
 				const rows = await svc.findEntities(ctx);
 				expect(rows).toEqual([]);
 
@@ -603,10 +653,10 @@ module.exports = adapter => {
 			it("throw EntityNotFound", async () => {
 				expect.assertions(2);
 				try {
-					await svc.removeEntity(ctx, { id: "123456" });
+					await svc.removeEntity(ctx, { id: "1234567890abcdef12345678" });
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
-					expect(err.data).toEqual({ id: "123456" });
+					expect(err.data).toEqual({ id: "1234567890abcdef12345678" });
 				}
 			});
 		});

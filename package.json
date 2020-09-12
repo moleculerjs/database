@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "nodemon examples/index.js",
     "ci:unit": "jest --testMatch \"**/unit/**/*.spec.js\" --watch",
-    "ci:integration": "jest --testMatch \"**/integration/**/*.spec.js\" --watch",
+    "ci:integration": "jest --testMatch \"**/integration/**/*.spec.js\" --runInBand --watch",
     "test:unit": "jest --testMatch \"**/unit/**/*.spec.js\"",
-    "test:integration": "jest --testMatch \"**/integration/**/*.spec.js\" --coverage",
+    "test:integration": "jest --testMatch \"**/integration/**/*.spec.js\" --runInBand --coverage",
     "test": "npm run test:unit && test:integration",
     "lint": "eslint --ext=.js src examples test",
     "deps": "npm-check -u",

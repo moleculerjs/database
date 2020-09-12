@@ -9,10 +9,10 @@
 class BaseAdapter {
 	/**
 	 * Constructor of adapter
-	 * @param  {...any} args
+	 * @param  {Object?} opts
 	 */
-	constructor(...args) {
-		this.constructorArgs = args;
+	constructor(opts) {
+		this.opts = opts || {};
 	}
 
 	/**
@@ -22,6 +22,7 @@ class BaseAdapter {
 	 */
 	init(service) {
 		this.service = service;
+		this.logger = service.logger;
 		this.broker = service.broker;
 		this.Promise = this.broker.Promise;
 	}

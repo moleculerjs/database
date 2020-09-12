@@ -10,6 +10,7 @@ const { Context } = require("moleculer");
 const { EntityNotFoundError } = require("./errors");
 const { MoleculerClientError, ValidationError } = require("moleculer").Errors;
 const _ = require("lodash");
+const { doc } = require("prettier");
 
 module.exports = function (mixinOpts) {
 	const cacheOpts = mixinOpts.cache && mixinOpts.cache.enabled ? mixinOpts.cache : null;
@@ -235,7 +236,8 @@ module.exports = function (mixinOpts) {
 		},
 
 		/**
-		 * Resolve entities IDs with mapping
+		 * Resolve entities IDs with mapping.
+		 *
 		 * @param {Context} ctx
 		 * @param {Object?} params
 		 * @param {Object?} opts
@@ -357,8 +359,8 @@ module.exports = function (mixinOpts) {
 				id = this.decodeID(id);
 			}
 
-			// TODO: more accurate
-			delete params.id;
+			delete params[[this.$primaryField.columnName]];
+			delete params.id; // TODO: find better solution
 
 			const rawUpdate = params.$raw === true;
 			if (rawUpdate) delete params.$raw;
@@ -393,8 +395,8 @@ module.exports = function (mixinOpts) {
 				id = this.decodeID(id);
 			}
 
-			// TODO: more accurate
-			delete params.id;
+			delete params[[this.$primaryField.columnName]];
+			delete params.id; // TODO: find better solution
 
 			let result = await this.adapter.replaceById(id, params);
 
@@ -417,7 +419,7 @@ module.exports = function (mixinOpts) {
 			let id = this._getIDFromParams(params);
 			const origID = id;
 
-			const entity = await this.resolveEntities(ctx, params, { transform: false });
+			let entity = await this.resolveEntities(ctx, params, { transform: false });
 
 			if (opts.secureID != null) {
 				id = opts.secureID ? this.decodeID(id) : id;
@@ -455,6 +457,10 @@ module.exports = function (mixinOpts) {
 				await this.adapter.removeById(id);
 			}
 
+			if (opts.transform !== false) {
+				entity = await this.transformResult(entity, params, ctx);
+			}
+
 			await this.entityChanged(entity, ctx, {
 				...opts,
 				type: "remove",
@@ -462,6 +468,17 @@ module.exports = function (mixinOpts) {
 			});
 
 			return origID;
+		},
+
+		/**
+		 * Clear all entities.
+		 *
+		 * @param {Context} ctx
+		 * @param {Object?} params
+		 */
+		async clearEntities(ctx, params) {
+			const result = await this.adapter.clear(params);
+			return result;
 		},
 
 		/**
@@ -479,13 +496,31 @@ module.exports = function (mixinOpts) {
 		/**
 		 * Transform the result rows.
 		 *
-		 * @param {any} result
+		 * @param {Object|Array<Object>} docs
 		 * @param {Object?} params
 		 * @param {Context} ctx
 		 */
-		transformResult(result, params, ctx) {
+		transformResult(docs, params, ctx) {
+			let isDoc = false;
+			if (!Array.isArray(docs)) {
+				if (_.isObject(docs)) {
+					isDoc = true;
+					docs = [docs];
+				} else {
+					// Any other primitive value
+					return Promise.resolve(docs);
+				}
+			}
+
+			docs = docs.map(doc => {
+				doc = this.adapter.entityToJSON(doc);
+				//doc[this.$primaryField.columnName] = this.encodeID(doc[this.$primaryField.columnName]);
+				return doc;
+			});
+
 			// TODO:
-			return result;
+
+			return isDoc ? docs[0] : docs;
 		},
 
 		/**

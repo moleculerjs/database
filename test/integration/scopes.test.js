@@ -79,6 +79,8 @@ module.exports = adapter => {
 
 		describe("Set up", () => {
 			it("should return empty array", async () => {
+				await svc.clearEntities();
+
 				const rows = await svc.findEntities(ctx);
 				expect(rows).toEqual([]);
 
@@ -195,16 +197,44 @@ module.exports = adapter => {
 			});
 		});
 
-		/*describe("Test getEntity & getEntities & resolveEntities", () => {
-			it("should filtered by default scope", async () => {
-				const rows = await svc.findEntities(ctx);
-				expect(rows).toEqual(
-					expect.arrayContaining([docs.johnDoe, docs.bobSmith, docs.kevinJames])
-				);
-
-				const count = await svc.countEntities(ctx);
-				expect(count).toEqual(3);
+		describe("Test updateEntity & removeEntity", () => {
+			it("should throw error because entity is not in the scope", async () => {
+				expect.assertions(2);
+				try {
+					await svc.updateEntity(ctx, {
+						id: docs.janeDoe._id,
+						age: 99
+					});
+				} catch (err) {
+					expect(err).toBeInstanceOf(EntityNotFoundError);
+					expect(err.data).toEqual({ id: docs.janeDoe._id });
+				}
 			});
-		});*/
+
+			it("should throw error because entity is not in the scope", async () => {
+				expect.assertions(2);
+				try {
+					await svc.replaceEntity(ctx, {
+						id: docs.janeDoe._id,
+						age: 99
+					});
+				} catch (err) {
+					expect(err).toBeInstanceOf(EntityNotFoundError);
+					expect(err.data).toEqual({ id: docs.janeDoe._id });
+				}
+			});
+
+			it("should throw error because entity is not in the scope", async () => {
+				expect.assertions(2);
+				try {
+					await svc.removeEntity(ctx, {
+						id: docs.janeDoe._id
+					});
+				} catch (err) {
+					expect(err).toBeInstanceOf(EntityNotFoundError);
+					expect(err.data).toEqual({ id: docs.janeDoe._id });
+				}
+			});
+		});
 	});
 };

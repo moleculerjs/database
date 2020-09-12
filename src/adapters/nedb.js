@@ -13,12 +13,10 @@ const BaseAdapter = require("./base");
 class NeDBAdapter extends BaseAdapter {
 	/**
 	 * Constructor of adapter
-	 * @param  {...any} args
+	 * @param  {Object?} opts
 	 */
-	constructor(...args) {
-		super(...args);
-
-		this.opts = args[0];
+	constructor(opts) {
+		super(opts);
 
 		this.db = null;
 	}
@@ -326,7 +324,7 @@ class NeDBAdapter extends BaseAdapter {
 	/**
 	 * Create an index. The `def` is adapter specific.
 	 *
-	 * @param {any} def
+	 * @param {Object} def
 	 */
 	createIndex(def) {
 		return new this.Promise((resolve, reject) => {

@@ -7,16 +7,21 @@ const ScopeTests = require("./scopes.test");
 	s => ["resolve", "register", "Base"].indexOf(s) == -1
 );
 */
-const Adapters = ["NeDB"];
+const Adapters = [
+	"NeDB",
+	{ type: "MongoDB", options: { dbName: "db-int-test", collection: "users" } }
+];
 
 describe("Integration tests", () => {
-	for (const adapterName of Adapters) {
-		describe(`Adapter: ${adapterName}`, () => {
+	for (const adapter of Adapters) {
+		const adapterType = typeof adapter == "string" ? adapter : adapter.type;
+
+		describe(`Adapter: ${adapterType}`, () => {
 			describe("Test common methods", () => {
-				MethodTests(adapterName);
+				MethodTests(adapter, adapterType);
 			});
 			describe("Test scopes", () => {
-				ScopeTests(adapterName);
+				ScopeTests(adapter, adapterType);
 			});
 		});
 	}

@@ -12,7 +12,7 @@ const { ServiceSchemaError } = require("moleculer").Errors;
 const Adapters = {
 	Base: require("./base"),
 	CouchDB: require("./couchdb"),
-	Mongo: require("./mongo"),
+	MongoDB: require("./mongodb"),
 	Mongoose: require("./mongoose"),
 	NeDB: require("./nedb"),
 	Sequelize: require("./sequelize")
