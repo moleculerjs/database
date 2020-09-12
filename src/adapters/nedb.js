@@ -7,7 +7,6 @@
 "use strict";
 
 const _ = require("lodash");
-const { promisify } = require("util");
 const Datastore = require("nedb");
 const BaseAdapter = require("./base");
 
@@ -30,19 +29,12 @@ class NeDBAdapter extends BaseAdapter {
 	async connect() {
 		this.db = new Datastore(this.opts); // in-memory
 
-		[
-			"loadDatabase",
-			//"insert",
-			"findOne",
-			"count",
-			"remove",
-			"ensureIndex",
-			"removeIndex"
-		].forEach(method => {
-			this.db[method] = promisify(this.db[method]);
+		return new this.Promise((resolve, reject) => {
+			this.db.loadDatabase(err => {
+				if (err) return reject(err);
+				resolve();
+			});
 		});
-
-		await this.db.loadDatabase();
 	}
 
 	/**
@@ -74,7 +66,12 @@ class NeDBAdapter extends BaseAdapter {
 	 * @returns {Promise<Object>}
 	 */
 	findOne(query) {
-		return this.db.findOne(query);
+		return new this.Promise((resolve, reject) => {
+			this.db.findOne(query, (err, docs) => {
+				if (err) return reject(err);
+				resolve(docs);
+			});
+		});
 	}
 
 	/**
@@ -85,7 +82,12 @@ class NeDBAdapter extends BaseAdapter {
 	 *
 	 */
 	findById(id) {
-		return this.db.findOne({ _id: id });
+		return new this.Promise((resolve, reject) => {
+			this.db.findOne({ _id: id }, (err, docs) => {
+				if (err) return reject(err);
+				resolve(docs);
+			});
+		});
 	}
 
 	/**
@@ -222,22 +224,32 @@ class NeDBAdapter extends BaseAdapter {
 	 * Remove an entity by ID
 	 *
 	 * @param {String} id
-	 * @returns {Promise<Object>} Return with the removed document.
+	 * @returns {Promise<any>} Return with ID of the deleted document.
 	 *
 	 */
 	removeById(id) {
-		return this.db.remove({ _id: id });
+		return new this.Promise((resolve, reject) => {
+			this.db.remove({ _id: id }, err => {
+				if (err) return reject(err);
+				resolve(id);
+			});
+		});
 	}
 
 	/**
 	 * Remove entities which are matched by `query`
 	 *
 	 * @param {Object} query
-	 * @returns {Promise<Number>} Return with the count of deleted documents.
+	 * @returns {Promise<Number>} Return with the number of deleted documents.
 	 *
 	 */
 	removeMany(query) {
-		return this.db.remove(query, { multi: true });
+		return new this.Promise((resolve, reject) => {
+			this.db.remove(query, { multi: true }, (err, numRemoved) => {
+				if (err) return reject(err);
+				resolve(numRemoved);
+			});
+		});
 	}
 
 	/**
@@ -247,7 +259,12 @@ class NeDBAdapter extends BaseAdapter {
 	 *
 	 */
 	clear() {
-		return this.db.remove({}, { multi: true });
+		return new this.Promise((resolve, reject) => {
+			this.db.remove({}, { multi: true }, (err, numRemoved) => {
+				if (err) return reject(err);
+				resolve(numRemoved);
+			});
+		});
 	}
 
 	/**
@@ -304,6 +321,20 @@ class NeDBAdapter extends BaseAdapter {
 		}
 
 		return this.db.find({});
+	}
+
+	/**
+	 * Create an index. The `def` is adapter specific.
+	 *
+	 * @param {any} def
+	 */
+	createIndex(def) {
+		return new this.Promise((resolve, reject) => {
+			this.db.ensureIndex(def, err => {
+				if (err) return reject(err);
+				resolve();
+			});
+		});
 	}
 }
 

@@ -235,7 +235,7 @@ module.exports = function (opts) {
 				populate: PARAMS_POPULATE
 			},
 			async handler(ctx) {
-				return this.getEntity(ctx);
+				return this.resolveEntities(ctx);
 			}
 		};
 	}
@@ -279,8 +279,7 @@ module.exports = function (opts) {
 				mapping: { type: "boolean", optional: true }
 			},
 			async handler(ctx) {
-				if (Array.isArray(ctx.params.id)) return this.getEntities(ctx);
-				else return this.getEntity(ctx);
+				return this.resolveEntities(ctx);
 			}
 		};
 	}

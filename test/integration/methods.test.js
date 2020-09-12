@@ -40,7 +40,7 @@ const TEST_DOCS = {
 };
 
 module.exports = adapter => {
-	describe("Test findEntities & countEntities method", () => {
+	describe("Test findEntity, findEntities & countEntities method", () => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
@@ -54,7 +54,7 @@ module.exports = adapter => {
 		let docs = {};
 
 		describe("Set up", () => {
-			it("should return empty rows", async () => {
+			it("should return empty array", async () => {
 				const rows = await svc.findEntities(ctx);
 				expect(rows).toEqual([]);
 
@@ -230,113 +230,34 @@ module.exports = adapter => {
 			});
 		});
 
-		/*
-		it("should return the new row", async () => {
-			const rows = await svc.findEntities(ctx, {});
-			expect(rows).toEqual([docs[0]]);
-		});
-
-		it("should return zero count", async () => {
-			const count = await svc.countEntities(ctx, {});
-			expect(count).toEqual(1);
-		});
-
-		it("should create multi entity", async () => {
-			const res = await svc.createEntities(ctx, {
-				entities: [
-					{
-						name: "Jane Doe",
-						age: 35,
-						status: false,
-						dob
-					},
-					{
-						name: "Bob Smith",
-						age: 51,
-						status: true,
-						dob
-					}
-				]
+		describe("Test findEntity", () => {
+			it("should return the first row by query", async () => {
+				const params = { query: { name: "Jane Doe" } };
+				const row = await svc.findEntity(ctx, params);
+				expect(row).toEqual(docs.janeDoe);
 			});
-			expect(res.length).toBe(2);
-			docs.push(...res);
 
-			expect(res).toEqual([
-				{
-					_id: expect.any(String),
-					name: "Jane Doe",
-					age: 35,
-					status: false,
-					dob
-				},
-				{
-					_id: expect.any(String),
-					name: "Bob Smith",
-					age: 51,
-					status: true,
-					dob
-				}
-			]);
+			it("should return the first row by query", async () => {
+				const params = { query: { status: true, age: 58 } };
+				const row = await svc.findEntity(ctx, params);
+				expect(row).toEqual(docs.bobSmith);
+			});
+
+			it("should return null if no match", async () => {
+				const params = { query: { age: 88 } };
+				const row = await svc.findEntity(ctx, params);
+				expect(row).toBe(null);
+			});
 		});
-
-		it("should return all rows", async () => {
-			const rows = await svc.findEntities(ctx, {});
-			expect(rows).toEqual(expect.arrayContaining(docs));
-		});
-
-		it("should return zero count", async () => {
-			const count = await svc.countEntities(ctx, {});
-			expect(count).toEqual(3);
-		});
-
-		it("should filter rows", async () => {
-			const rows = await svc.findEntities(ctx, { query: { status: true } });
-			expect(rows).toEqual(expect.arrayContaining([docs[0], docs[2]]));
-		});
-
-		it("should return count of filtered rows", async () => {
-			const count = await svc.countEntities(ctx, { query: { status: true } });
-			expect(count).toEqual(2);
-		});
-
-		it("should update row", async () => {
-					const doc = await svc.updateEntity(ctx, {
-						id: docs[2]._id,
-						name: "Adam Smith",
-						age: 49
-					});
-					expect(doc).toEqual({
-						_id: docs[2]._id,
-						name: "Adam Smith",
-						age: 49,
-						status: true,
-						dob
-					});
-				});
-
-		it("should remove first row", async () => {
-			const res = await svc.removeEntity(ctx, { id: docs[0]._id });
-			expect(res).toBe(docs[0]._id);
-		});
-
-		it("should return only 2 rows", async () => {
-			const rows = await svc.findEntities(ctx, {});
-			expect(rows).toEqual(expect.arrayContaining([docs[1], docs[2]]));
-		});
-
-		it("should return count of filtered rows", async () => {
-			const count = await svc.countEntities(ctx, {});
-			expect(count).toEqual(2);
-		});
-		*/
 	});
 
-	describe("Test createEntity & createEntities & getEntity & getEntities & resolveEntities method", () => {
+	describe("Test createEntity & createEntities & resolveEntities method", () => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
 			mixins: [DbService({ adapter, createActions: false })]
 		});
+		svc.entityChanged = jest.fn();
 
 		beforeAll(() => broker.start());
 		afterAll(() => broker.stop());
@@ -344,7 +265,7 @@ module.exports = adapter => {
 		const ctx = Context.create(broker, null, {});
 		let docs = {};
 
-		it("should return empty rows", async () => {
+		it("should return empty array", async () => {
 			const rows = await svc.findEntities(ctx);
 			expect(rows).toEqual([]);
 
@@ -353,16 +274,29 @@ module.exports = adapter => {
 		});
 
 		it("create an entity", async () => {
+			svc.entityChanged.mockClear();
 			docs.johnDoe = await svc.createEntity(ctx, TEST_DOCS.johnDoe);
 
 			expect(docs.johnDoe).toEqual({ ...TEST_DOCS.johnDoe, _id: expect.any(String) });
+
+			expect(svc.entityChanged).toBeCalledTimes(1);
+			expect(svc.entityChanged).toBeCalledWith(docs.johnDoe, ctx, {
+				type: "create"
+			});
 		});
 
 		it("create multiple entities", async () => {
-			for (const [key, value] of Object.entries(TEST_DOCS)) {
-				if (key == "johnDoe") continue;
-				docs[key] = await svc.createEntity(ctx, value);
-			}
+			svc.entityChanged.mockClear();
+			const res = await svc.createEntities(ctx, [
+				TEST_DOCS.janeDoe,
+				TEST_DOCS.bobSmith,
+				TEST_DOCS.kevinJames
+			]);
+
+			expect(res.length).toBe(3);
+			docs.janeDoe = res[0];
+			docs.bobSmith = res[1];
+			docs.kevinJames = res[2];
 
 			expect(docs.janeDoe).toEqual({ ...TEST_DOCS.janeDoe, _id: expect.any(String) });
 			expect(docs.bobSmith).toEqual({ ...TEST_DOCS.bobSmith, _id: expect.any(String) });
@@ -370,81 +304,11 @@ module.exports = adapter => {
 				...TEST_DOCS.kevinJames,
 				_id: expect.any(String)
 			});
-		});
 
-		describe("Test getEntity method", () => {
-			it("get entity by ID", async () => {
-				const res = await svc.getEntity(ctx, { id: docs.janeDoe._id });
-				expect(res).toEqual(docs.janeDoe);
-
-				const res2 = await svc.getEntity(ctx, { id: docs.bobSmith._id });
-				expect(res2).toEqual(docs.bobSmith);
-			});
-
-			it("throw Missing ID", async () => {
-				expect.assertions(4);
-				try {
-					await svc.getEntity(ctx, { a: 5 });
-				} catch (err) {
-					expect(err).toBeInstanceOf(MoleculerClientError);
-					expect(err.type).toEqual("MISSING_ID");
-					expect(err.code).toEqual(400);
-					expect(err.data).toEqual({ params: { a: 5 } });
-				}
-			});
-
-			it("throw EntityNotFound", async () => {
-				expect.assertions(2);
-				try {
-					await svc.getEntity(ctx, { id: "123456" });
-				} catch (err) {
-					expect(err).toBeInstanceOf(EntityNotFoundError);
-					expect(err.data).toEqual({ id: "123456" });
-				}
-			});
-		});
-
-		describe("Test getEntities method", () => {
-			it("get entity by IDs", async () => {
-				const res = await svc.getEntities(ctx, { id: docs.janeDoe._id });
-				expect(res).toEqual([docs.janeDoe]);
-
-				const res2 = await svc.getEntities(ctx, {
-					id: [docs.johnDoe._id, docs.bobSmith._id]
-				});
-				expect(res2).toEqual([docs.johnDoe, docs.bobSmith]);
-			});
-
-			it("throw Missing ID", async () => {
-				expect.assertions(4);
-				try {
-					await svc.getEntities(ctx, { a: 5 });
-				} catch (err) {
-					expect(err).toBeInstanceOf(MoleculerClientError);
-					expect(err.type).toEqual("MISSING_ID");
-					expect(err.code).toEqual(400);
-					expect(err.data).toEqual({ params: { a: 5 } });
-				}
-			});
-
-			it("throw EntityNotFound", async () => {
-				expect.assertions(2);
-				try {
-					await svc.getEntities(ctx, { id: "123456" });
-				} catch (err) {
-					expect(err).toBeInstanceOf(EntityNotFoundError);
-					expect(err.data).toEqual({ id: ["123456"] });
-				}
-			});
-
-			it("throw EntityNotFound", async () => {
-				expect.assertions(2);
-				try {
-					await svc.getEntities(ctx, { id: ["123456", "234567"] });
-				} catch (err) {
-					expect(err).toBeInstanceOf(EntityNotFoundError);
-					expect(err.data).toEqual({ id: ["123456", "234567"] });
-				}
+			expect(svc.entityChanged).toBeCalledTimes(1);
+			expect(svc.entityChanged).toBeCalledWith(res, ctx, {
+				type: "create",
+				batch: true
 			});
 		});
 
@@ -513,6 +377,7 @@ module.exports = adapter => {
 			name: "users",
 			mixins: [DbService({ adapter, createActions: false })]
 		});
+		svc.entityChanged = jest.fn();
 
 		beforeAll(() => broker.start());
 		afterAll(() => broker.stop());
@@ -521,7 +386,7 @@ module.exports = adapter => {
 		let docs = {};
 
 		describe("Set up", () => {
-			it("should return empty rows", async () => {
+			it("should return empty array", async () => {
 				const rows = await svc.findEntities(ctx);
 				expect(rows).toEqual([]);
 
@@ -538,6 +403,7 @@ module.exports = adapter => {
 
 		describe("Test updateEntity method", () => {
 			it("should update an entity", async () => {
+				svc.entityChanged.mockClear();
 				const row = await svc.updateEntity(ctx, {
 					id: docs.janeDoe._id,
 					status: true,
@@ -553,9 +419,15 @@ module.exports = adapter => {
 					roles: ["moderator"],
 					status: true
 				});
+
+				expect(svc.entityChanged).toBeCalledTimes(1);
+				expect(svc.entityChanged).toBeCalledWith(row, ctx, {
+					type: "update"
+				});
 			});
 
 			it("should raw update an entity", async () => {
+				svc.entityChanged.mockClear();
 				const row = await svc.updateEntity(ctx, {
 					id: docs.johnDoe._id,
 					$raw: true,
@@ -578,6 +450,11 @@ module.exports = adapter => {
 					height: 192,
 					roles: ["admin", "user"],
 					status: false
+				});
+
+				expect(svc.entityChanged).toBeCalledTimes(1);
+				expect(svc.entityChanged).toBeCalledWith(row, ctx, {
+					type: "update"
 				});
 			});
 
@@ -606,6 +483,7 @@ module.exports = adapter => {
 
 		describe("Test replaceEntity method", () => {
 			it("should replace an entity", async () => {
+				svc.entityChanged.mockClear();
 				const row = await svc.replaceEntity(ctx, {
 					id: docs.kevinJames._id,
 					name: "Kevin",
@@ -617,6 +495,11 @@ module.exports = adapter => {
 					name: "Kevin",
 					age: 72,
 					height: 185
+				});
+
+				expect(svc.entityChanged).toBeCalledTimes(1);
+				expect(svc.entityChanged).toBeCalledWith(row, ctx, {
+					type: "replace"
 				});
 			});
 
@@ -651,6 +534,8 @@ module.exports = adapter => {
 			mixins: [DbService({ adapter, createActions: false })]
 		});
 
+		svc.entityChanged = jest.fn();
+
 		beforeAll(() => broker.start());
 		afterAll(() => broker.stop());
 
@@ -658,7 +543,7 @@ module.exports = adapter => {
 		let docs = {};
 
 		describe("Set up", () => {
-			it("should return empty rows", async () => {
+			it("should return empty array", async () => {
 				const rows = await svc.findEntities(ctx);
 				expect(rows).toEqual([]);
 
@@ -683,6 +568,8 @@ module.exports = adapter => {
 			});
 
 			it("should return the remaining rows", async () => {
+				svc.entityChanged.mockClear();
+
 				const res = await svc.removeEntity(ctx, { id: docs.janeDoe._id });
 				expect(res).toBe(docs.janeDoe._id);
 
@@ -693,6 +580,12 @@ module.exports = adapter => {
 
 				const count = await svc.countEntities(ctx, {});
 				expect(count).toEqual(3);
+
+				expect(svc.entityChanged).toBeCalledTimes(1);
+				expect(svc.entityChanged).toBeCalledWith(docs.janeDoe, ctx, {
+					type: "remove",
+					softDelete: false
+				});
 			});
 
 			it("throw Missing ID", async () => {

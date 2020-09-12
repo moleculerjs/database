@@ -164,7 +164,6 @@ class BaseAdapter {
 	 * Clear all entities from collection
 	 *
 	 * @returns {Promise<Number>}
-	 *
 	 */
 	clear() {
 		return Promise.resolve();
@@ -178,6 +177,16 @@ class BaseAdapter {
 	 */
 	entityToJSON(entity) {
 		return entity;
+	}
+
+	/**
+	 * Create an index. The `def` is adapter specific.
+	 *
+	 * @param {any} def
+	 * @returns {Promise<void>}
+	 */
+	createIndex(/*def*/) {
+		return Promise.resolve();
 	}
 }
 

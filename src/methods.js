@@ -74,6 +74,8 @@ module.exports = function (mixinOpts) {
 						// Set name of field
 						field.name = name;
 
+						if (!field.columnName) field.columnName = field.name;
+
 						if (field.primaryKey === true) this.$primaryField = field;
 						if (field.onDelete) this.$softDelete = true;
 
@@ -120,6 +122,13 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} opts
 		 */
 		sanitizeParams(p, opts) {
+			if (typeof p.limit === "string") p.limit = Number(p.limit);
+			if (typeof p.offset === "string") p.offset = Number(p.offset);
+			if (typeof p.page === "string") p.page = Number(p.page);
+			if (typeof p.pageSize === "string") p.pageSize = Number(p.pageSize);
+
+			if (typeof p.query === "string") p.query = JSON.parse(p.query);
+
 			if (typeof p.sort === "string") p.sort = p.sort.replace(/,/g, " ").split(" ");
 			if (typeof p.fields === "string") p.fields = p.fields.replace(/,/g, " ").split(" ");
 			if (typeof p.populate === "string")
@@ -159,7 +168,8 @@ module.exports = function (mixinOpts) {
 		},
 
 		/**
-		 * Find all entities by query & limit
+		 * Find all entities by query & limit.
+		 *
 		 * @param {Context} ctx
 		 * @param {Object?} params
 		 * @param {Object?} opts
@@ -176,7 +186,8 @@ module.exports = function (mixinOpts) {
 		},
 
 		/**
-		 * Count entities by query & limit
+		 * Count entities by query & limit.
+		 *
 		 * @param {Context} ctx
 		 * @param {Object?} params
 		 */
@@ -189,81 +200,38 @@ module.exports = function (mixinOpts) {
 		},
 
 		/**
+		 * Find only one entity by query.
+		 *
+		 * @param {Context} ctx
+		 * @param {Object?} params
+		 * @param {Object?} opts
+		 */
+		async findEntity(ctx, params = ctx.params, opts = {}) {
+			params = this.sanitizeParams(params, { removeLimit: true });
+			params = this._applyScopes(params, ctx);
+			params.limit = 1;
+
+			let result = await this.adapter.findOne(params.query);
+			if (opts.transform !== false) {
+				result = await this.transformResult(result, params, ctx);
+			}
+			return result;
+		},
+
+		/**
 		 * Get ID value from `params`.
 		 *
 		 * @param {Object} params
 		 */
-		_getIDFromParams(params) {
-			const primaryFieldName =
-				this.$primaryField && this.$primaryField.name ? this.$primaryField.name : "id";
-			let id = params[primaryFieldName];
+		_getIDFromParams(params, throwIfNotExist = true) {
+			let id = params[this.$primaryField.columnName];
 			if (id == null) id = params.id;
+
+			if (throwIfNotExist && id == null) {
+				throw new MoleculerClientError("Missing id field.", 400, "MISSING_ID", { params });
+			}
+
 			return id;
-		},
-
-		/**
-		 * Get an entity by ID
-		 * @param {Context} ctx
-		 * @param {Object?} params
-		 * @param {Object?} opts
-		 */
-		async getEntity(ctx, params = ctx.params, opts = {}) {
-			let id = this._getIDFromParams(params);
-			if (id == null) {
-				return this.Promise.reject(
-					new MoleculerClientError("Missing id field.", 400, "MISSING_ID", { params })
-				);
-			}
-			const origID = id;
-
-			if (opts.secureID != null) {
-				id = opts.secureID ? this.decodeID(id) : id;
-			} else if (this.$primaryField && this.$primaryField.secure) {
-				id = this.decodeID(id);
-			}
-
-			params = this._applyScopes(params, ctx); // TODO: applying to the `query` which is not used later.
-			let result = await this.adapter.findById(id);
-			if (!result || result.length == 0)
-				return Promise.reject(new EntityNotFoundError(origID));
-
-			if (opts.transform !== false) {
-				result = await this.transformResult(result, params, ctx);
-			}
-			return result;
-		},
-
-		/**
-		 * Get multiple entities by IDs
-		 * @param {Context} ctx
-		 * @param {Object?} params
-		 * @param {Object?} opts
-		 */
-		async getEntities(ctx, params = ctx.params, opts = {}) {
-			let id = this._getIDFromParams(params);
-			if (id == null) {
-				return this.Promise.reject(
-					new MoleculerClientError("Missing id field.", 400, "MISSING_ID", { params })
-				);
-			}
-			if (!Array.isArray(id)) id = [id];
-			const origID = id;
-
-			if (opts.secureID != null) {
-				id = opts.secureID ? id.map(id => this.decodeID(id)) : id;
-			} else if (this.$primaryField && this.$primaryField.secure) {
-				id = id.map(id => this.decodeID(id));
-			}
-
-			params = this._applyScopes(params, ctx); // TODO: applying to the `query` which is not used later.
-			let result = await this.adapter.findByIds(id);
-			if (!result || result.length == 0)
-				return Promise.reject(new EntityNotFoundError(origID));
-
-			if (opts.transform !== false) {
-				result = await this.transformResult(result, params, ctx);
-			}
-			return result;
 		},
 
 		/**
@@ -273,28 +241,46 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} opts
 		 */
 		async resolveEntities(ctx, params = ctx.params, opts = {}) {
+			// Get ID value from params
 			let id = this._getIDFromParams(params);
-			if (id == null) {
-				return this.Promise.reject(
-					new MoleculerClientError("Missing id field.", 400, "MISSING_ID", { params })
-				);
+			const origID = id;
+			const multi = Array.isArray(id);
+			if (!multi) id = [id];
+
+			// Decode ID if need
+			if (opts.secureID != null) {
+				id = opts.secureID ? id.map(id => this.decodeID(id)) : id;
+			} else if (this.$primaryField.secure) {
+				id = id.map(id => this.decodeID(id));
 			}
 
-			let result;
-			if (Array.isArray(id)) {
-				result = await this.getEntities(ctx, params, opts);
+			// Apply scopes & set ID filtering
+			params = Object.assign({}, params);
+			const primaryFieldName = this.$primaryField.columnName;
+			params = this._applyScopes(params, ctx);
+			if (!params.query) params.query = {};
+
+			if (multi) {
+				params.query[primaryFieldName] = { $in: id };
 			} else {
-				result = await this.getEntity(ctx, params, opts);
+				params.query[primaryFieldName] = id[0];
 			}
 
-			if (params.mapping === true) {
-				const primaryFieldName =
-					this.$primaryField && this.$primaryField.columnName
-						? this.$primaryField.columnName
-						: this.$primaryField && this.$primaryField.name
-						? this.$primaryField.name
-						: "_id";
+			// Find the entities
+			let result = await this.adapter.find(params);
+			if (!result || result.length == 0) throw new EntityNotFoundError(origID);
 
+			if (!multi) {
+				result = result[0];
+			}
+
+			// Transforming
+			if (opts.transform !== false) {
+				result = await this.transformResult(result, params, ctx);
+			}
+
+			// Mapping
+			if (params.mapping === true) {
 				if (Array.isArray(result)) {
 					result = result.reduce((map, doc) => {
 						const id = doc[primaryFieldName];
@@ -347,7 +333,7 @@ module.exports = function (mixinOpts) {
 				result = await this.transformResult(result, params, ctx);
 			}
 
-			await this.entityChanged(result, ctx, { ...opts, type: "batchCreate" });
+			await this.entityChanged(result, ctx, { ...opts, type: "create", batch: true });
 			return result;
 		},
 
@@ -360,19 +346,14 @@ module.exports = function (mixinOpts) {
 		 */
 		async updateEntity(ctx, params = ctx.params, opts = {}) {
 			let id = this._getIDFromParams(params);
-			if (id == null) {
-				return this.Promise.reject(
-					new MoleculerClientError("Missing id field.", 400, "MISSING_ID", { params })
-				);
-			}
 
-			/*const oldEntity = */ await this.getEntity(ctx, params);
+			/*const oldEntity = */ await this.resolveEntities(ctx, params);
 
 			params = this.validateParams(ctx, params, { type: "update" });
 
 			if (opts.secureID != null) {
 				id = opts.secureID ? this.decodeID(id) : id;
-			} else if (this.$primaryField && this.$primaryField.secure) {
+			} else if (this.$primaryField.secure) {
 				id = this.decodeID(id);
 			}
 
@@ -401,19 +382,14 @@ module.exports = function (mixinOpts) {
 		 */
 		async replaceEntity(ctx, params = ctx.params, opts = {}) {
 			let id = this._getIDFromParams(params);
-			if (id == null) {
-				return this.Promise.reject(
-					new MoleculerClientError("Missing id field.", 400, "MISSING_ID", { params })
-				);
-			}
 
-			/*const oldEntity = */ await this.getEntity(ctx, params);
+			/*const oldEntity = */ await this.resolveEntities(ctx, params);
 
 			params = this.validateParams(ctx, params, { type: "replace" });
 
 			if (opts.secureID != null) {
 				id = opts.secureID ? this.decodeID(id) : id;
-			} else if (this.$primaryField && this.$primaryField.secure) {
+			} else if (this.$primaryField.secure) {
 				id = this.decodeID(id);
 			}
 
@@ -439,18 +415,13 @@ module.exports = function (mixinOpts) {
 		 */
 		async removeEntity(ctx, params = ctx.params, opts = {}) {
 			let id = this._getIDFromParams(params);
-			if (id == null) {
-				return this.Promise.reject(
-					new MoleculerClientError("Missing id field.", 400, "MISSING_ID", { params })
-				);
-			}
 			const origID = id;
 
-			const entity = await this.getEntity(ctx, params, { transform: false });
+			const entity = await this.resolveEntities(ctx, params, { transform: false });
 
 			if (opts.secureID != null) {
 				id = opts.secureID ? this.decodeID(id) : id;
-			} else if (this.$primaryField && this.$primaryField.secure) {
+			} else if (this.$primaryField.secure) {
 				id = this.decodeID(id);
 			}
 
@@ -487,7 +458,7 @@ module.exports = function (mixinOpts) {
 			await this.entityChanged(entity, ctx, {
 				...opts,
 				type: "remove",
-				softDelete: this.$softDelete
+				softDelete: !!this.$softDelete
 			});
 
 			return origID;

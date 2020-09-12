@@ -11,8 +11,8 @@ const _ = require("lodash");
 const { ServiceSchemaError } = require("moleculer").Errors;
 
 const Adapters = require("./adapters");
-const DbActions = require("./db-actions");
-const DbMethods = require("./db-methods");
+const DbActions = require("./actions");
+const DbMethods = require("./methods");
 
 /*
 

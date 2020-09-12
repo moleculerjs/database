@@ -14,8 +14,6 @@ module.exports = {
 	},
 	plugins: ["node", "promise", "security"],
 	rules: {
-		quotes: ["warn", "double"],
-		semi: ["error", "always"],
 		"no-var": ["error"],
 		"no-console": ["warn"],
 		"no-unused-vars": ["warn"],
