@@ -306,30 +306,6 @@ module.exports = function (opts) {
 	}
 
 	/**
-	 * Create many new entities.
-	 *
-	 * @actions
-	 *
-	 * @param {Array<Object>} entities - Entities to save.
-	 *
-	 * @returns {Array<Object>} Saved entity(ies).
-	 */
-	if (opts.createActions === true || opts.createActions.batchCreate === true) {
-		res.batchCreate = {
-			visibility: opts.actionVisibility,
-			params: {
-				entities: [
-					// TODO: generate from `fields`
-					{ type: "array", items: "object" }
-				]
-			},
-			async handler(ctx) {
-				return this.createEntities(ctx);
-			}
-		};
-	}
-
-	/**
 	 * Update an entity by ID. It's patch only the received fields.
 	 *
 	 * @actions

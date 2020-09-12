@@ -127,6 +127,15 @@ module.exports = function (mixinOpts) {
 			if (typeof p.searchFields === "string")
 				p.searchFields = p.searchFields.replace(/,/g, " ").split(" ");
 
+			if (opts && opts.removeLimit) {
+				if (p.limit) delete p.limit;
+				if (p.offset) delete p.offset;
+				if (p.page) delete p.page;
+				if (p.pageSize) delete p.pageSize;
+
+				return p;
+			}
+
 			if (opts && opts.list) {
 				// Default `pageSize`
 				if (!p.pageSize) p.pageSize = mixinOpts.defaultPageSize;
@@ -172,7 +181,7 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} params
 		 */
 		async countEntities(ctx, params = ctx.params) {
-			params = this.sanitizeParams(params);
+			params = this.sanitizeParams(params, { removeLimit: true });
 			params = this._applyScopes(params, ctx);
 
 			const result = await this.adapter.count(params);
@@ -327,7 +336,7 @@ module.exports = function (mixinOpts) {
 		 */
 		async createEntities(ctx, params = ctx.params, opts = {}) {
 			const entities = await Promise.all(
-				params.entities.map(entity => this.validateParams(ctx, entity, { type: "create" }))
+				params.map(entity => this.validateParams(ctx, entity, { type: "create" }))
 			);
 			let result = await this.adapter.insertMany(entities);
 			if (opts.transform !== false) {

@@ -270,24 +270,21 @@ class NeDBAdapter extends BaseAdapter {
 			let q;
 
 			// Text search
+			let query = params.query || {};
+
 			if (_.isString(params.search) && params.search !== "") {
-				// TODO: support additional filter? (in case of scoping)
-				q = this.db.find({
-					$where: function () {
-						let item = this;
-						if (params.searchFields) item = _.pick(this, params.searchFields);
+				query.$where = function () {
+					let item = this;
+					if (params.searchFields) item = _.pick(this, params.searchFields);
 
-						const res = _.values(item).find(
-							v => String(v).toLowerCase().indexOf(params.search.toLowerCase()) !== -1
-						);
+					const res = _.values(item).find(
+						v => String(v).toLowerCase().indexOf(params.search.toLowerCase()) !== -1
+					);
 
-						return res != null;
-					}
-				});
-			} else {
-				if (params.query) q = this.db.find(params.query);
-				else q = this.db.find({});
+					return res != null;
+				};
 			}
+			q = this.db.find(query);
 
 			// Sort
 			if (params.sort) {
