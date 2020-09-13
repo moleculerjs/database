@@ -40,7 +40,7 @@ jobs:
       working-directory: ./test
 
     - name: Run integration tests
-      run: npm run test:integration
+      run: npm test
 
     - name: Stop containers
       run: docker-compose down -v

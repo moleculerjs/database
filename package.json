@@ -9,7 +9,7 @@
     "ci:integration": "jest --testMatch \"**/integration/**/*.spec.js\" --runInBand --watch",
     "test:unit": "jest --testMatch \"**/unit/**/*.spec.js\"",
     "test:integration": "jest --testMatch \"**/integration/**/*.spec.js\" --runInBand --coverage",
-    "test": "npm run test:unit && test:integration",
+    "test": "npm run test:unit && npm run test:integration",
     "lint": "eslint --ext=.js src examples test",
     "deps": "npm-check -u",
     "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"

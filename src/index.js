@@ -54,6 +54,7 @@ const DbMethods = require("./methods");
 		- [ ] transformer
 		- [ ] populate
 		- [ ] scopes
+		- [ ] `find` with stream option  http://mongodb.github.io/node-mongodb-native/3.5/api/Cursor.html#stream
 
 	- [ ] Soft delete
 	- [ ] create validation from field definitions

@@ -4,6 +4,7 @@ const { ServiceBroker, Context } = require("moleculer");
 const { MoleculerClientError } = require("moleculer").Errors;
 const { EntityNotFoundError } = require("../../src/errors");
 const { addExpectAnyFields } = require("./utils");
+const { Stream } = require("stream");
 const DbService = require("../..").Service;
 
 const TEST_DOCS = {
@@ -289,6 +290,27 @@ module.exports = (adapter, adapterType) => {
 				expect(row).toBe(null);
 			});
 		});
+
+		if (["MongoDB"].indexOf(adapterType) !== -1) {
+			describe("Test streamEntities", () => {
+				it("should return all rows", async () => {
+					const rows = [];
+					const stream = await svc.streamEntities(ctx, {});
+
+					return new Promise((resolve, reject) => {
+						expect(stream).toBeInstanceOf(Stream);
+						stream.on("data", row => rows.push(row));
+
+						expect.assertions(2);
+						stream.on("error", reject);
+						stream.on("end", () => {
+							expect(rows).toEqual(expect.arrayContaining(Object.values(docs)));
+							resolve();
+						});
+					});
+				});
+			});
+		}
 	});
 
 	describe("Test createEntity & createEntities & resolveEntities method", () => {

@@ -9,8 +9,8 @@
 const { Context } = require("moleculer");
 const { EntityNotFoundError } = require("./errors");
 const { MoleculerClientError, ValidationError } = require("moleculer").Errors;
+const { Transform } = require("stream");
 const _ = require("lodash");
-const { doc } = require("prettier");
 
 module.exports = function (mixinOpts) {
 	const cacheOpts = mixinOpts.cache && mixinOpts.cache.enabled ? mixinOpts.cache : null;
@@ -187,6 +187,37 @@ module.exports = function (mixinOpts) {
 		},
 
 		/**
+		 * Find all entities by query & limit.
+		 *
+		 * @param {Context} ctx
+		 * @param {Object?} params
+		 * @param {Object?} opts
+		 * @returns {Promise<Stream>}
+		 */
+		async streamEntities(ctx, params = ctx.params, opts = {}) {
+			params = this.sanitizeParams(params);
+			params = this._applyScopes(params, ctx);
+
+			const stream = await this.adapter.findStream(params);
+
+			if (opts.transform !== false) {
+				const self = this;
+				const transform = new Transform({
+					objectMode: true,
+					transform: async function (doc, encoding, done) {
+						const res = await self.transformResult(doc, params, ctx);
+						this.push(res);
+						return done();
+					}
+				});
+				stream.pipe(transform);
+				return transform;
+			}
+
+			return stream;
+		},
+
+		/**
 		 * Count entities by query & limit.
 		 *
 		 * @param {Context} ctx
@@ -359,8 +390,9 @@ module.exports = function (mixinOpts) {
 				id = this.decodeID(id);
 			}
 
-			delete params[[this.$primaryField.columnName]];
-			delete params.id; // TODO: find better solution
+			delete params[this.$primaryField.columnName];
+			if (this.$primaryField.columnName != this.$primaryField.name)
+				delete params[this.$primaryField.name];
 
 			const rawUpdate = params.$raw === true;
 			if (rawUpdate) delete params.$raw;
@@ -395,8 +427,9 @@ module.exports = function (mixinOpts) {
 				id = this.decodeID(id);
 			}
 
-			delete params[[this.$primaryField.columnName]];
-			delete params.id; // TODO: find better solution
+			delete params[this.$primaryField.columnName];
+			if (this.$primaryField.columnName != this.$primaryField.name)
+				delete params[this.$primaryField.name];
 
 			let result = await this.adapter.replaceById(id, params);
 

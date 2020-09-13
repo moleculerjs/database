@@ -31,14 +31,14 @@ class BaseAdapter {
 	 * Connect adapter to database
 	 */
 	connect() {
-		return Promise.resolve();
+		throw new Error("This method is not implemented.");
 	}
 
 	/**
 	 * Disconnect adapter from database
 	 */
 	disconnect() {
-		return Promise.resolve();
+		throw new Error("This method is not implemented.");
 	}
 
 	/**
@@ -47,8 +47,8 @@ class BaseAdapter {
 	 * @param {Object} filters
 	 * @returns {Promise<Array>}
 	 */
-	find(/*filters*/) {
-		return Promise.resolve();
+	find(/*params*/) {
+		throw new Error("This method is not implemented.");
 	}
 
 	/**
@@ -58,7 +58,7 @@ class BaseAdapter {
 	 * @returns {Promise<Object>}
 	 */
 	findOne(/*query*/) {
-		return Promise.resolve();
+		throw new Error("This method is not implemented.");
 	}
 
 	/**
@@ -69,7 +69,7 @@ class BaseAdapter {
 	 *
 	 */
 	findById(/*id*/) {
-		return Promise.resolve();
+		throw new Error("This method is not implemented.");
 	}
 
 	/**
@@ -80,7 +80,17 @@ class BaseAdapter {
 	 *
 	 */
 	findByIds(/*idList*/) {
-		return Promise.resolve();
+		throw new Error("This method is not implemented.");
+	}
+
+	/**
+	 * Find all entities by filters and returns a Stream.
+	 *
+	 * @param {Object} params
+	 * @returns {Promise<Stream>}
+	 */
+	findStream(/*params*/) {
+		throw new Error("This method is not implemented.");
 	}
 
 	/**
@@ -90,7 +100,7 @@ class BaseAdapter {
 	 *
 	 */
 	count(/*filters*/) {
-		return Promise.resolve();
+		throw new Error("This method is not implemented.");
 	}
 
 	/**
@@ -101,7 +111,7 @@ class BaseAdapter {
 	 *
 	 */
 	insert(/*entity*/) {
-		return Promise.resolve();
+		throw new Error("This method is not implemented.");
 	}
 
 	/**
@@ -112,7 +122,7 @@ class BaseAdapter {
 	 *
 	 */
 	insertMany(/*entities*/) {
-		return Promise.resolve();
+		throw new Error("This method is not implemented.");
 	}
 
 	/**
@@ -124,7 +134,7 @@ class BaseAdapter {
 	 *
 	 */
 	updateById(/*id, changes*/) {
-		return Promise.resolve();
+		throw new Error("This method is not implemented.");
 	}
 
 	/**
@@ -136,7 +146,7 @@ class BaseAdapter {
 	 *
 	 */
 	updateMany(/*query, changes*/) {
-		return Promise.resolve();
+		throw new Error("This method is not implemented.");
 	}
 
 	/**
@@ -147,7 +157,7 @@ class BaseAdapter {
 	 *
 	 */
 	removeById(/*id*/) {
-		return Promise.resolve();
+		throw new Error("This method is not implemented.");
 	}
 
 	/**
@@ -158,7 +168,7 @@ class BaseAdapter {
 	 *
 	 */
 	removeMany(/*query*/) {
-		return Promise.resolve();
+		throw new Error("This method is not implemented.");
 	}
 
 	/**
@@ -167,7 +177,7 @@ class BaseAdapter {
 	 * @returns {Promise<Number>}
 	 */
 	clear() {
-		return Promise.resolve();
+		throw new Error("This method is not implemented.");
 	}
 
 	/**
@@ -187,7 +197,7 @@ class BaseAdapter {
 	 * @returns {Promise<void>}
 	 */
 	createIndex(/*def*/) {
-		return Promise.resolve();
+		throw new Error("This method is not implemented.");
 	}
 }
 

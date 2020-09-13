@@ -149,6 +149,16 @@ class MongoDBAdapter extends BaseAdapter {
 	}
 
 	/**
+	 * Find all entities by filters and returns a Stream.
+	 *
+	 * @param {Object} params
+	 * @returns {Promise<Stream>}
+	 */
+	findStream(params) {
+		return this.createQuery(params).transformStream();
+	}
+
+	/**
 	 * Get count of filtered entites.
 	 * @param {Object} [params]
 	 * @returns {Promise<Number>} Return with the count of documents.
