@@ -3,6 +3,8 @@
 const MethodTests = require("./methods.test");
 const ScopeTests = require("./scopes.test");
 
+console.log(process.env);
+
 /*const Adapters = Object.keys(require("../../").Adapters).filter(
 	s => ["resolve", "register", "Base"].indexOf(s) == -1
 );
