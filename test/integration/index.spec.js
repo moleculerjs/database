@@ -2,15 +2,16 @@
 
 const MethodTests = require("./methods.test");
 const ScopeTests = require("./scopes.test");
+const ValidationTests = require("./validation.test");
 
-console.log(process.env);
+// console.log(process.env);
 
 /*const Adapters = Object.keys(require("../../").Adapters).filter(
 	s => ["resolve", "register", "Base"].indexOf(s) == -1
 );
 */
 const Adapters = [
-	"NeDB",
+	"NeDB"
 	{ type: "MongoDB", options: { dbName: "db-int-test", collection: "users" } }
 ];
 
@@ -24,6 +25,9 @@ describe("Integration tests", () => {
 			});
 			describe("Test scopes", () => {
 				ScopeTests(adapter, adapterType);
+			});
+			describe.only("Test validations", () => {
+				ValidationTests(adapter, adapterType);
 			});
 		});
 	}

@@ -11,6 +11,7 @@ const { EntityNotFoundError } = require("./errors");
 const { MoleculerClientError, ValidationError } = require("moleculer").Errors;
 const { Transform } = require("stream");
 const _ = require("lodash");
+const { create } = require("lodash");
 
 module.exports = function (mixinOpts) {
 	const cacheOpts = mixinOpts.cache && mixinOpts.cache.enabled ? mixinOpts.cache : null;
@@ -79,6 +80,9 @@ module.exports = function (mixinOpts) {
 
 						if (field.primaryKey === true) this.$primaryField = field;
 						if (field.onDelete) this.$softDelete = true;
+
+						if (field.permission || field.readPermission)
+							this.$shouldAuthorizeFields = true;
 
 						return field;
 					})
@@ -281,11 +285,7 @@ module.exports = function (mixinOpts) {
 			if (!multi) id = [id];
 
 			// Decode ID if need
-			if (opts.secureID != null) {
-				id = opts.secureID ? id.map(id => this.decodeID(id)) : id;
-			} else if (this.$primaryField.secure) {
-				id = id.map(id => this.decodeID(id));
-			}
+			id = id.map(id => this._sanitizeID(id, opts));
 
 			// Apply scopes & set ID filtering
 			params = Object.assign({}, params);
@@ -380,15 +380,12 @@ module.exports = function (mixinOpts) {
 		async updateEntity(ctx, params = ctx.params, opts = {}) {
 			let id = this._getIDFromParams(params);
 
-			/*const oldEntity = */ await this.resolveEntities(ctx, params);
+			// Call because it throws error if entity is not exist
+			/*const oldEntity = */ await this.resolveEntities(ctx, params, { transform: false });
 
 			params = this.validateParams(ctx, params, { type: "update" });
 
-			if (opts.secureID != null) {
-				id = opts.secureID ? this.decodeID(id) : id;
-			} else if (this.$primaryField.secure) {
-				id = this.decodeID(id);
-			}
+			id = this._sanitizeID(id, opts);
 
 			delete params[this.$primaryField.columnName];
 			if (this.$primaryField.columnName != this.$primaryField.name)
@@ -417,15 +414,12 @@ module.exports = function (mixinOpts) {
 		async replaceEntity(ctx, params = ctx.params, opts = {}) {
 			let id = this._getIDFromParams(params);
 
-			/*const oldEntity = */ await this.resolveEntities(ctx, params);
+			// Call because it throws error if entity is not exist
+			/*const oldEntity = */ await this.resolveEntities(ctx, params, { transform: false });
 
 			params = this.validateParams(ctx, params, { type: "replace" });
 
-			if (opts.secureID != null) {
-				id = opts.secureID ? this.decodeID(id) : id;
-			} else if (this.$primaryField.secure) {
-				id = this.decodeID(id);
-			}
+			id = this._sanitizeID(id, opts);
 
 			delete params[this.$primaryField.columnName];
 			if (this.$primaryField.columnName != this.$primaryField.name)
@@ -454,11 +448,7 @@ module.exports = function (mixinOpts) {
 
 			let entity = await this.resolveEntities(ctx, params, { transform: false });
 
-			if (opts.secureID != null) {
-				id = opts.secureID ? this.decodeID(id) : id;
-			} else if (this.$primaryField.secure) {
-				id = this.decodeID(id);
-			}
+			id = this._sanitizeID(id, opts);
 
 			if (this.$softDelete) {
 				// Soft delete
@@ -515,15 +505,157 @@ module.exports = function (mixinOpts) {
 		},
 
 		/**
+		 * Authorize the fields based on logged in user (from ctx).
+		 *
+		 * @param {Context} ctx
+		 * @param {Object} params
+		 * @param {boolean} write
+		 * @returns {Array<Object>}
+		 */
+		async _authorizeFields(ctx, params, write) {
+			if (!this.$shouldAuthorizeFields) return this.$fields;
+
+			const res = [];
+			await Promise.all(
+				_.compact(
+					this.$fields.map(field => {
+						if (!write && field.readPermission) {
+							return this.checkAuthority(
+								ctx,
+								field.readPermission,
+								params,
+								field
+							).then(has => (has ? res.push(field) : null));
+						} else if (field.permission) {
+							return this.checkAuthority(
+								ctx,
+								field.permission,
+								params,
+								field
+							).then(has => (has ? res.push(field) : null));
+						}
+
+						res.push(field);
+					})
+				)
+			);
+			return res;
+		},
+
+		/**
+		 * Check the field authority. Should be implemented in the service.
+		 *
+		 * @param {Context} ctx
+		 * @param {any} permission
+		 * @param {Object} params
+		 * @param {Object} field
+		 */
+		async checkAuthority(/*ctx, permission, params, field*/) {
+			return true;
+		},
+
+		/**
 		 * Validate incoming parameters.
 		 *
 		 * @param {Context} ctx
 		 * @param {Object} params
 		 * @param {Object?} opts
 		 */
-		validateParams(ctx, params, opts) {
-			// TODO:
-			return params;
+		async validateParams(ctx, params, opts = {}) {
+			const type = opts.type || "create";
+
+			let entity = {};
+
+			// Copy all fields if fields in not defined in settings.
+			if (!this.$fields) {
+				return Object.assign(entity, params);
+			}
+
+			const setValue = function (field, value) {
+				if (value !== undefined) {
+					// TODO: type checking
+
+					// TODO: sanitizations
+
+					// Set the value to the entity, it's valid.
+					_.set(entity, field.columnName, value);
+				}
+			};
+
+			const authorizedFields = await this._authorizeFields(ctx, params, opts);
+			await Promise.all(
+				authorizedFields.map(async field => {
+					let value = _.get(params, field.name);
+
+					// Handlers
+					if (type == "create" && field.onCreate) {
+						if (_.isFunction(field.onCreate)) {
+							value = await field.onCreate.call(this, value, params, ctx);
+						} else {
+							value = field.onCreate;
+						}
+						return setValue(field, value);
+					} else if (type == "update" && field.onUpdate) {
+						if (_.isFunction(field.onUpdate)) {
+							value = await field.onUpdate.call(this, value, params, ctx);
+						} else {
+							value = field.onUpdate;
+						}
+						return setValue(field, value);
+					} else if (type == "replace" && field.onReplace) {
+						if (_.isFunction(field.onReplace)) {
+							value = await field.onReplace.call(this, value, params, ctx);
+						} else {
+							value = field.onReplace;
+						}
+						return setValue(field, value);
+					} else if (type == "remove" && field.onRemove) {
+						if (_.isFunction(field.onRemove)) {
+							value = await field.onRemove.call(this, value, params, ctx);
+						} else {
+							value = field.onRemove;
+						}
+						return setValue(field, value);
+					}
+
+					// Readonly
+					if (field.readonly) return;
+
+					if (type == "create") {
+						// Default value
+						if (type == "create" && value === undefined) {
+							if (field.default) {
+								if (_.isFunction(field.default)) {
+									value = await field.default.call(this, value, params, ctx);
+								} else {
+									value = field.default;
+								}
+							}
+						}
+
+						// Required
+						if (field.required) {
+							if ((value === null && !field.nullable) || value === undefined) {
+								throw new ValidationError(
+									`The '${field.name}' field is required`,
+									"REQUIRED_FIELD",
+									{
+										field: field.name,
+										value
+									}
+								);
+							}
+						}
+					}
+
+					// Updateable
+					if (["update", "replace"].includes(type) && field.updateable === false) return;
+
+					setValue(field, value);
+				})
+			);
+
+			return entity;
 		},
 
 		/**
@@ -597,6 +729,21 @@ module.exports = function (mixinOpts) {
 		 * @returns {any}
 		 */
 		decodeID(id) {
+			return id;
+		},
+
+		/**
+		 * Sanitize the input ID. Decode if it's secured.
+		 * @param {any} id
+		 * @param {Object?} opts
+		 * @returns {any}
+		 */
+		_sanitizeID(id, opts) {
+			if (opts.secureID != null) {
+				return opts.secureID ? this.decodeID(id) : id;
+			} else if (this.$primaryField.secure) {
+				return this.decodeID(id);
+			}
 			return id;
 		}
 	};
