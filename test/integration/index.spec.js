@@ -11,7 +11,7 @@ const ValidationTests = require("./validation.test");
 );
 */
 const Adapters = [
-	"NeDB"
+	"NeDB",
 	{ type: "MongoDB", options: { dbName: "db-int-test", collection: "users" } }
 ];
 
