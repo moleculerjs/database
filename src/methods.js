@@ -56,6 +56,9 @@ module.exports = function (mixinOpts) {
 		 */
 		_processFields() {
 			this.$fields = null;
+			this.$primaryField = null;
+			this.$softDelete = false;
+			this.$shouldAuthorizeFields = false;
 
 			if (_.isObject(this.settings.fields)) {
 				this.$fields = _.compact(
@@ -339,7 +342,7 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} opts
 		 */
 		async createEntity(ctx, params = ctx.params, opts = {}) {
-			params = this.validateParams(ctx, params, { type: "create" });
+			params = await this.validateParams(ctx, params, { type: "create" });
 
 			let result = await this.adapter.insert(params);
 			if (opts.transform !== false) {
@@ -359,7 +362,9 @@ module.exports = function (mixinOpts) {
 		 */
 		async createEntities(ctx, params = ctx.params, opts = {}) {
 			const entities = await Promise.all(
-				params.map(entity => this.validateParams(ctx, entity, { type: "create" }))
+				params.map(
+					async entity => await this.validateParams(ctx, entity, { type: "create" })
+				)
 			);
 			let result = await this.adapter.insertMany(entities);
 			if (opts.transform !== false) {
@@ -383,7 +388,7 @@ module.exports = function (mixinOpts) {
 			// Call because it throws error if entity is not exist
 			/*const oldEntity = */ await this.resolveEntities(ctx, params, { transform: false });
 
-			params = this.validateParams(ctx, params, { type: "update" });
+			params = await this.validateParams(ctx, params, { type: "update" });
 
 			id = this._sanitizeID(id, opts);
 
@@ -417,7 +422,7 @@ module.exports = function (mixinOpts) {
 			// Call because it throws error if entity is not exist
 			/*const oldEntity = */ await this.resolveEntities(ctx, params, { transform: false });
 
-			params = this.validateParams(ctx, params, { type: "replace" });
+			params = await this.validateParams(ctx, params, { type: "replace" });
 
 			id = this._sanitizeID(id, opts);
 
@@ -507,18 +512,19 @@ module.exports = function (mixinOpts) {
 		/**
 		 * Authorize the fields based on logged in user (from ctx).
 		 *
+		 * @param {Array<Object>} fields
 		 * @param {Context} ctx
 		 * @param {Object} params
 		 * @param {boolean} write
 		 * @returns {Array<Object>}
 		 */
-		async _authorizeFields(ctx, params, write) {
-			if (!this.$shouldAuthorizeFields) return this.$fields;
+		async _authorizeFields(fields, ctx, params, write) {
+			if (!this.$shouldAuthorizeFields) return fields;
 
 			const res = [];
 			await Promise.all(
 				_.compact(
-					this.$fields.map(field => {
+					fields.map(field => {
 						if (!write && field.readPermission) {
 							return this.checkAuthority(
 								ctx,
@@ -566,6 +572,11 @@ module.exports = function (mixinOpts) {
 
 			let entity = {};
 
+			// Drop all fields if hard delete
+			if (type == "remove" && !this.$softDelete) {
+				return {};
+			}
+
 			// Copy all fields if fields in not defined in settings.
 			if (!this.$fields) {
 				return Object.assign(entity, params);
@@ -573,16 +584,44 @@ module.exports = function (mixinOpts) {
 
 			const setValue = function (field, value) {
 				if (value !== undefined) {
-					// TODO: type checking
+					// Type checking
+					if (field.type == "string" && typeof value != "string" && value != null) {
+						value = String(value);
+					}
+					if (field.type == "number" && typeof value != "number" && value != null) {
+						value = Number(value);
+					}
+					if (field.type == "boolean" && typeof value != "boolean" && value != null) {
+						if (value === 1 || value === "true" || value === "1" || value === "on") {
+							value = true;
+						} else if (
+							value === 0 ||
+							value === "false" ||
+							value === "0" ||
+							value === "off"
+						) {
+							value = false;
+						}
+					}
 
-					// TODO: sanitizations
+					// Sanitizations
+					if (field.trim && value.trim) {
+						value = value.trim();
+					}
 
 					// Set the value to the entity, it's valid.
 					_.set(entity, field.columnName, value);
 				}
 			};
 
-			const authorizedFields = await this._authorizeFields(ctx, params, opts);
+			let fields = Array.from(this.$fields);
+			// Removing & Soft delete
+			if (type == "remove" && this.$softDelete) {
+				fields = fields.map(field => !!field.onRemove);
+			}
+
+			const authorizedFields = await this._authorizeFields(fields, ctx, params, false);
+
 			await Promise.all(
 				authorizedFields.map(async field => {
 					let value = _.get(params, field.name);
@@ -621,9 +660,9 @@ module.exports = function (mixinOpts) {
 					// Readonly
 					if (field.readonly) return;
 
-					if (type == "create") {
+					if (["create", "replace"].includes(type)) {
 						// Default value
-						if (type == "create" && value === undefined) {
+						if (value === undefined) {
 							if (field.default) {
 								if (_.isFunction(field.default)) {
 									value = await field.default.call(this, value, params, ctx);

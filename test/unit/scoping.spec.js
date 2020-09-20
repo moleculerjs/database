@@ -1,9 +1,9 @@
 "use strict";
 
 const { ServiceBroker, Context } = require("moleculer");
-const DbService = require("../../").Service;
+const DbService = require("../..").Service;
 
-describe("Test DbService", () => {
+describe("Test scoping", () => {
 	describe("Test applyScopes method", () => {
 		const broker = new ServiceBroker({ logger: false });
 		const scopeFn = jest.fn(q => {

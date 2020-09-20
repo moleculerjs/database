@@ -31,22 +31,22 @@ const DbMethods = require("./methods");
 	- [ ] Field handlers
 		- [ ] `id` field with `secure` option: { id: true, type: "string", readonly: true, secure: true, columnName: "_id" }
 		- [ ] `columnName` support: { id: true, type: "string", columnName: "_id" }
-		- [ ] Sanitizers
-			- [ ] trim title: { type: "string", trim: true, maxlength: 50, required: true },
+		- [x] Sanitizers
+			- [x] trim title: { type: "string", trim: true, maxlength: 50, required: true },
 		- [ ] set: custom set formatter: { set: (value, entity, ctx) => slug(entity.title) }
 		- [ ] get: custom get formatter: { get: (value, entity, ctx) => entity.firstName + ' ' + entity.lastName }
 		- [x] default value: status: { type: "number", default: 1 } // Optional field with default value
 		- [x] required: validation
-		- [ ] validate the type field with converting
+		- [x] validate the type field with converting
 		- [x] readonly: { type: "string", readonly: true } // Can't be set and modified
 		- [ ] hidden (password): password: { type: "string", hidden: true,
 		- [ ] custom validator: { type: "string", validate: (value, entity, ctx) => value.length > 6 },	// Custom validator
 		- [ ] populate: { populate: { action: "v1.accounts.resolve", fields: ["id", "name", "avatar"] }
 		- [x] permission: roles: { type: "array", permission: "administrator" } // Access control by permissions
 		- [x] readPermission: { type: "array", populate: "v1.accounts.resolve", readPermission: ["$owner"] }
-		- [ ] setOnCreate: createdAt: { type: "number", readonly: true, setOnCreate: () => Date.now() }, // Set value when entity is created
-		- [ ] setOnUpdate: updatedAt: { type: "number", readonly: true, setOnUpdate: () => Date.now() }, // Set value when entity is updated
-		- [ ] setOnDelete: deletedAt: { type: "number", readonly: true, setOnDelete: () => Date.now() }, // Set value when entity is deleted
+		- [x] setOnCreate: createdAt: { type: "number", readonly: true, setOnCreate: () => Date.now() }, // Set value when entity is created
+		- [x] setOnUpdate: updatedAt: { type: "number", readonly: true, setOnUpdate: () => Date.now() }, // Set value when entity is updated
+		- [x] setOnRemove: deletedAt: { type: "number", readonly: true, setOnRemove: () => Date.now() }, // Set value when entity is deleted
 		- [ ] nested types
 
 	- [ ] Methods (internal with _ prefix)

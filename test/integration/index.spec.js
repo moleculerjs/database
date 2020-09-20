@@ -11,8 +11,8 @@ const ValidationTests = require("./validation.test");
 );
 */
 const Adapters = [
-	"NeDB",
-	{ type: "MongoDB", options: { dbName: "db-int-test", collection: "users" } }
+	"NeDB"
+	//{ type: "MongoDB", options: { dbName: "db-int-test", collection: "users" } }
 ];
 
 describe("Integration tests", () => {
@@ -26,9 +26,9 @@ describe("Integration tests", () => {
 			describe("Test scopes", () => {
 				ScopeTests(adapter, adapterType);
 			});
-			describe.only("Test validations", () => {
+			/*describe("Test validations", () => {
 				ValidationTests(adapter, adapterType);
-			});
+			});*/
 		});
 	}
 });
