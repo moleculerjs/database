@@ -13,6 +13,53 @@ const _ = require("lodash");
 module.exports = function (mixinOpts) {
 	return {
 		/**
+		 * Processing the `fields` definition.
+		 *
+		 * @private
+		 */
+		_processFields() {
+			this.$fields = null;
+			this.$primaryField = null;
+			this.$softDelete = false;
+			this.$shouldAuthorizeFields = false;
+
+			if (_.isObject(this.settings.fields)) {
+				this.$fields = _.compact(
+					_.map(this.settings.fields, (def, name) => {
+						// Disabled field
+						if (def === false) return;
+
+						// Shorthand format { title: true } => { title: {} }
+						if (def === true) def = { type: "any" };
+
+						// Shorthand format: { title: "string" } => { title: { type: "string" } }
+						// TODO: | handling like if FastestValidator
+						if (_.isString(def)) def = { type: def };
+
+						// Copy the properties
+						const field = Object.assign({}, def);
+
+						// Set name of field
+						field.name = name;
+
+						if (!field.columnName) field.columnName = field.name;
+
+						if (field.primaryKey === true) this.$primaryField = field;
+						if (field.onRemove) this.$softDelete = true;
+
+						if (field.permission || field.readPermission)
+							this.$shouldAuthorizeFields = true;
+
+						return field;
+					})
+				);
+			}
+
+			if (!this.$primaryField) this.$primaryField = { name: "id", columnName: "_id" };
+			if (this.$softDelete) this.logger.debug("Soft delete mode: ENABLED");
+		},
+
+		/**
 		 * Check the field authority. Should be implemented in the service.
 		 *
 		 * @param {Context} ctx
@@ -172,7 +219,7 @@ module.exports = function (mixinOpts) {
 					if (["create", "replace"].includes(type)) {
 						// Default value
 						if (value === undefined) {
-							if (field.default) {
+							if (field.default !== undefined) {
 								if (_.isFunction(field.default)) {
 									value = await field.default.call(this, value, params, ctx);
 								} else {

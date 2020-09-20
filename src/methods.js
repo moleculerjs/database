@@ -49,53 +49,6 @@ module.exports = function (mixinOpts) {
 		},
 
 		/**
-		 * Processing the `fields` definition.
-		 *
-		 * @private
-		 */
-		_processFields() {
-			this.$fields = null;
-			this.$primaryField = null;
-			this.$softDelete = false;
-			this.$shouldAuthorizeFields = false;
-
-			if (_.isObject(this.settings.fields)) {
-				this.$fields = _.compact(
-					_.map(this.settings.fields, (def, name) => {
-						// Disabled field
-						if (def === false) return;
-
-						// Shorthand format { title: true } => { title: {} }
-						if (def === true) def = { type: "any" };
-
-						// Shorthand format: { title: "string" } => { title: { type: "string" } }
-						// TODO: | handling like if FastestValidator
-						if (_.isString(def)) def = { type: def };
-
-						// Copy the properties
-						const field = Object.assign({}, def);
-
-						// Set name of field
-						field.name = name;
-
-						if (!field.columnName) field.columnName = field.name;
-
-						if (field.primaryKey === true) this.$primaryField = field;
-						if (field.onRemove) this.$softDelete = true;
-
-						if (field.permission || field.readPermission)
-							this.$shouldAuthorizeFields = true;
-
-						return field;
-					})
-				);
-			}
-
-			if (!this.$primaryField) this.$primaryField = { name: "id", columnName: "_id" };
-			if (this.$softDelete) this.logger.debug("Soft delete mode: ENABLED");
-		},
-
-		/**
 		 * Apply scopes for the params query.
 		 *
 		 * @param {Object} params
@@ -125,10 +78,12 @@ module.exports = function (mixinOpts) {
 		/**
 		 * Sanitize incoming parameters for `find`, `list`, `count` actions.
 		 *
-		 * @param {Object} p
+		 * @param {Object} params
 		 * @param {Object?} opts
+		 * @returns {Object}
 		 */
-		sanitizeParams(p, opts) {
+		sanitizeParams(params, opts) {
+			const p = Object.assign({}, params);
 			if (typeof p.limit === "string") p.limit = Number(p.limit);
 			if (typeof p.offset === "string") p.offset = Number(p.offset);
 			if (typeof p.page === "string") p.page = Number(p.page);
@@ -452,7 +407,7 @@ module.exports = function (mixinOpts) {
 
 			let entity = await this.resolveEntities(ctx, params, { transform: false });
 
-			params = await this.validateParams(ctx, params, { type: "replace" });
+			params = await this.validateParams(ctx, params, { type: "remove" });
 
 			id = this._sanitizeID(id, opts);
 
@@ -548,7 +503,12 @@ module.exports = function (mixinOpts) {
 
 			docs = docs.map(doc => {
 				doc = this.adapter.entityToJSON(doc);
-				//doc[this.$primaryField.columnName] = this.encodeID(doc[this.$primaryField.columnName]);
+
+				if (this.$primaryField.secure) {
+					doc[this.$primaryField.columnName] = this.encodeID(
+						doc[this.$primaryField.columnName]
+					);
+				}
 				return doc;
 			});
 

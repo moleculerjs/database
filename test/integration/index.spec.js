@@ -2,6 +2,7 @@
 
 const MethodTests = require("./methods.test");
 const ScopeTests = require("./scopes.test");
+const ActionsTests = require("./actions.test");
 
 // console.log(process.env);
 
@@ -24,6 +25,9 @@ describe("Integration tests", () => {
 			});
 			describe("Test scopes", () => {
 				ScopeTests(adapter, adapterType);
+			});
+			describe("Test actions", () => {
+				ActionsTests(adapter, adapterType);
 			});
 		});
 	}
