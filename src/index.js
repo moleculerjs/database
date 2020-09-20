@@ -8,18 +8,18 @@
 "use strict";
 
 const _ = require("lodash");
-const { ServiceSchemaError } = require("moleculer").Errors;
 
 const Adapters = require("./adapters");
-const DbActions = require("./actions");
+const Actions = require("./actions");
 const DbMethods = require("./methods");
-const DbValidation = require("./validation");
-const DbTransform = require("./transform");
+const Validation = require("./validation");
+const Transform = require("./transform");
 
 /*
 
   TODO:
-	- [ ]
+	- [ ] Megpróbálni a transform-ot inicializáláskor létrehozni akár template szinten is. Sokkal gyorsabb tudni lenni, mert transform-nál csak végig kell menni és meghívni mindegyik függvényét.
+
 	- [x] Actions
 		- [x] `find`
 		- [x] `count`
@@ -119,7 +119,7 @@ module.exports = function DatabaseMixin(mixinOpts) {
 		 * Actions
 		 */
 		actions: {
-			...DbActions(mixinOpts)
+			...Actions(mixinOpts)
 		},
 
 		/**
@@ -127,8 +127,8 @@ module.exports = function DatabaseMixin(mixinOpts) {
 		 */
 		methods: {
 			...DbMethods(mixinOpts),
-			...DbValidation(mixinOpts),
-			...DbTransform(mixinOpts)
+			...Validation(mixinOpts),
+			...Transform(mixinOpts)
 		},
 
 		created() {
