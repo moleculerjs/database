@@ -509,7 +509,7 @@ describe("Test validation", () => {
 				expect(customValidate).toBeCalledWith("John Doe", params, svc.$fields[0], ctx);
 			});
 
-			it("should throw error if nto valid", async () => {
+			it("should throw error if not valid", async () => {
 				const params = {
 					name: "Al"
 				};
@@ -527,6 +527,44 @@ describe("Test validation", () => {
 						value: "Al"
 					});
 				}
+			});
+		});
+
+		describe("Test custom formatter", () => {
+			const customSet = jest.fn(v => (v ? v.toUpperCase() : v));
+			beforeAll(() => {
+				svc.settings.fields = {
+					name: { type: "string", set: customSet }
+				};
+
+				svc._processFields();
+			});
+
+			it("should untouch null values", async () => {
+				const params = {
+					name: null
+				};
+				const res = await svc.validateParams(ctx, params);
+				expect(res).toEqual({
+					name: null
+				});
+
+				expect(customSet).toBeCalledTimes(1);
+				expect(customSet).toBeCalledWith(null, params, svc.$fields[0], ctx);
+			});
+
+			it("should call custom formatter", async () => {
+				customSet.mockClear();
+				const params = {
+					name: "John Doe"
+				};
+				const res = await svc.validateParams(ctx, params);
+				expect(res).toEqual({
+					name: "JOHN DOE"
+				});
+
+				expect(customSet).toBeCalledTimes(1);
+				expect(customSet).toBeCalledWith("John Doe", params, svc.$fields[0], ctx);
 			});
 		});
 	});
@@ -722,7 +760,7 @@ describe("Test validation", () => {
 				expect(customValidate).toBeCalledWith("John Doe", params, svc.$fields[0], ctx);
 			});
 
-			it("should throw error if nto valid", async () => {
+			it("should throw error if not valid", async () => {
 				const params = {
 					name: "Al"
 				};
@@ -1057,7 +1095,7 @@ describe("Test validation", () => {
 				expect(customValidate).toBeCalledWith("John Doe", params, svc.$fields[0], ctx);
 			});
 
-			it("should throw error if nto valid", async () => {
+			it("should throw error if not valid", async () => {
 				const params = {
 					name: "Al"
 				};

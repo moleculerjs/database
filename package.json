@@ -65,6 +65,7 @@
     "node": ">= 10.x.x"
   },
   "dependencies": {
+    "fastest-validator": "^1.7.0",
     "lodash": "4.17.20"
   }
 }

@@ -603,8 +603,14 @@ module.exports = function (mixinOpts) {
 							value = false;
 						}
 					}
+
+					// Sanitizations
+					if (field.trim && value.trim) {
+						value = value.trim();
+					}
+
 					// Custom validator
-					// Syntax: `validate: (value, entity, ctx) => value.length > 6`
+					// Syntax: `validate: (value, entity, field, ctx) => value.length > 6`
 					if (field.validate) {
 						const res = field.validate.call(this, value, params, field, ctx);
 						if (res !== true) {
@@ -615,9 +621,10 @@ module.exports = function (mixinOpts) {
 						}
 					}
 
-					// Sanitizations
-					if (field.trim && value.trim) {
-						value = value.trim();
+					// Custom formatter
+					// Syntax: `set: (value, entity, field, ctx) => value.toUpperCase()`
+					if (field.set) {
+						value = field.set.call(this, value, params, field, ctx);
 					}
 
 					// Set the value to the entity, it's valid.

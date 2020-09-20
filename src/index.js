@@ -33,14 +33,14 @@ const DbMethods = require("./methods");
 		- [ ] `columnName` support: { id: true, type: "string", columnName: "_id" }
 		- [x] Sanitizers
 			- [x] trim title: { type: "string", trim: true, maxlength: 50, required: true },
-		- [ ] set: custom set formatter: { set: (value, entity, ctx) => slug(entity.title) }
-		- [ ] get: custom get formatter: { get: (value, entity, ctx) => entity.firstName + ' ' + entity.lastName }
+		- [ ] set: custom set formatter: { set: (value, entity, field, ctx) => slug(entity.title) }
+		- [ ] get: custom get formatter: { get: (value, entity, field, ctx) => entity.firstName + ' ' + entity.lastName }
 		- [x] default value: status: { type: "number", default: 1 } // Optional field with default value
 		- [x] required: validation
 		- [x] validate the type field with converting
 		- [x] readonly: { type: "string", readonly: true } // Can't be set and modified
 		- [ ] hidden (password): password: { type: "string", hidden: true,
-		- [ ] custom validator: { type: "string", validate: (value, entity, ctx) => value.length > 6 },	// Custom validator
+		- [x] custom validator: { type: "string", validate: (value, entity, field, ctx) => value.length > 6 },	// Custom validator
 		- [ ] populate: { populate: { action: "v1.accounts.resolve", fields: ["id", "name", "avatar"] }
 		- [x] permission: roles: { type: "array", permission: "administrator" } // Access control by permissions
 		- [x] readPermission: { type: "array", populate: "v1.accounts.resolve", readPermission: ["$owner"] }
