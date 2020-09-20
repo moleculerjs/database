@@ -245,44 +245,36 @@ module.exports = function (mixinOpts) {
 			id = id.map(id => this._sanitizeID(id, opts));
 
 			// Apply scopes & set ID filtering
-			params = Object.assign({}, params);
-			const primaryFieldName = this.$primaryField.columnName;
-			params = this._applyScopes(params, ctx);
+			params = this._applyScopes(Object.assign({}, params), ctx);
 			if (!params.query) params.query = {};
 
+			let idField = this.$primaryField.columnName;
+
 			if (multi) {
-				params.query[primaryFieldName] = { $in: id };
+				params.query[idField] = { $in: id };
 			} else {
-				params.query[primaryFieldName] = id[0];
+				params.query[idField] = id[0];
 			}
 
 			// Find the entities
 			let result = await this.adapter.find(params);
 			if (!result || result.length == 0) throw new EntityNotFoundError(origID);
 
-			if (!multi) {
-				result = result[0];
-			}
-
 			// Transforming
 			if (opts.transform !== false) {
 				result = await this.transformResult(result, params, ctx);
+				if (this.$fields) idField = this.$primaryField.name;
 			}
 
 			// Mapping
 			if (params.mapping === true) {
-				if (Array.isArray(result)) {
-					result = result.reduce((map, doc) => {
-						const id = doc[primaryFieldName];
-						map[id] = doc;
-						return map;
-					}, {});
-				} else {
-					const id = result[primaryFieldName];
-					result = {
-						[id]: result
-					};
-				}
+				result = result.reduce((map, doc) => {
+					const id = doc[idField];
+					map[id] = doc;
+					return map;
+				}, {});
+			} else if (!multi) {
+				result = result[0];
 			}
 
 			return result;
@@ -480,41 +472,6 @@ module.exports = function (mixinOpts) {
 				)
 			);
 			return res;
-		},
-
-		/**
-		 * Transform the result rows.
-		 *
-		 * @param {Object|Array<Object>} docs
-		 * @param {Object?} params
-		 * @param {Context} ctx
-		 */
-		transformResult(docs, params, ctx) {
-			let isDoc = false;
-			if (!Array.isArray(docs)) {
-				if (_.isObject(docs)) {
-					isDoc = true;
-					docs = [docs];
-				} else {
-					// Any other primitive value
-					return Promise.resolve(docs);
-				}
-			}
-
-			docs = docs.map(doc => {
-				doc = this.adapter.entityToJSON(doc);
-
-				if (this.$primaryField.secure) {
-					doc[this.$primaryField.columnName] = this.encodeID(
-						doc[this.$primaryField.columnName]
-					);
-				}
-				return doc;
-			});
-
-			// TODO:
-
-			return isDoc ? docs[0] : docs;
 		},
 
 		/**

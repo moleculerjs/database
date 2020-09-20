@@ -73,7 +73,7 @@ module.exports = (getAdapter, adapterType) => {
 				docs.push(doc);
 
 				expect(doc).toEqual({
-					_id: expect.any(String),
+					id: expect.any(String),
 					title: "First post",
 					content: "Content of first post",
 					author: "John Doe",
@@ -87,12 +87,12 @@ module.exports = (getAdapter, adapterType) => {
 			});
 
 			it("should get the newly created entity", async () => {
-				const doc = await broker.call("posts.get", { id: docs[0]._id });
+				const doc = await broker.call("posts.get", { id: docs[0].id });
 				expect(doc).toEqual(docs[0]);
 			});
 
 			it("should resolve the newly created entity", async () => {
-				const doc = await broker.call("posts.resolve", { id: docs[0]._id });
+				const doc = await broker.call("posts.resolve", { id: docs[0].id });
 				expect(doc).toEqual(docs[0]);
 			});
 
@@ -128,107 +128,109 @@ module.exports = (getAdapter, adapterType) => {
 			});
 		});
 
-		it("should update entity", async () => {
-			entityChanged.mockClear();
+		describe("Update & remove entity", () => {
+			it("should update entity", async () => {
+				entityChanged.mockClear();
 
-			const doc = await broker.call("posts.update", {
-				id: docs[0]._id,
-				title: "Modified title",
-				content: "Modified content of first title",
-				votes: 3,
-				status: 0
-			});
-			docs[0] = doc;
+				const doc = await broker.call("posts.update", {
+					id: docs[0].id,
+					title: "Modified title",
+					content: "Modified content of first title",
+					votes: 3,
+					status: 0
+				});
+				docs[0] = doc;
 
-			expect(doc).toEqual({
-				_id: expect.any(String),
-				title: "Modified title",
-				content: "Modified content of first title",
-				author: "John Doe",
-				votes: 3,
-				status: false,
-				createdAt: expect.any(Number),
-				updatedAt: expect.any(Number)
-			});
+				expect(doc).toEqual({
+					id: expect.any(String),
+					title: "Modified title",
+					content: "Modified content of first title",
+					author: "John Doe",
+					votes: 3,
+					status: false,
+					createdAt: expect.any(Number),
+					updatedAt: expect.any(Number)
+				});
 
-			expect(entityChanged).toBeCalledTimes(1);
-			expect(entityChanged).toBeCalledWith(doc, expect.any(Context), { type: "update" });
-		});
-
-		it("should get the newly created entity", async () => {
-			const doc = await broker.call("posts.get", { id: docs[0]._id });
-			expect(doc).toEqual(docs[0]);
-		});
-
-		it("should resolve the newly created entity", async () => {
-			const doc = await broker.call("posts.resolve", { id: docs[0]._id, mapping: true });
-			expect(doc).toEqual({
-				[docs[0]._id]: docs[0]
-			});
-		});
-
-		it("should find the newly created entity", async () => {
-			const res = await broker.call("posts.find");
-
-			expect(res).toEqual(docs);
-		});
-
-		it("should remove entity", async () => {
-			entityChanged.mockClear();
-			const res = await broker.call("posts.remove", {
-				id: docs[0]._id,
-				title: "Unused removed title"
+				expect(entityChanged).toBeCalledTimes(1);
+				expect(entityChanged).toBeCalledWith(doc, expect.any(Context), { type: "update" });
 			});
 
-			expect(res).toEqual(docs[0]._id);
-
-			expect(entityChanged).toBeCalledTimes(1);
-			expect(entityChanged).toBeCalledWith(docs[0], expect.any(Context), {
-				type: "remove",
-				softDelete: false
+			it("should get the newly created entity", async () => {
+				const doc = await broker.call("posts.get", { id: docs[0].id });
+				expect(doc).toEqual(docs[0]);
 			});
-		});
 
-		it("should throw EntityNotFound error", async () => {
-			expect.assertions(5);
-			try {
-				await broker.call("posts.get", { id: docs[0]._id });
-			} catch (err) {
-				expect(err).toBeInstanceOf(EntityNotFoundError);
-				expect(err.message).toEqual("Entity not found");
-				expect(err.type).toEqual("ENTITY_NOT_FOUND");
-				expect(err.code).toEqual(404);
-				expect(err.data).toEqual({ id: docs[0]._id });
-			}
-		});
+			it("should resolve the newly created entity", async () => {
+				const doc = await broker.call("posts.resolve", { id: docs[0].id, mapping: true });
+				expect(doc).toEqual({
+					[docs[0].id]: docs[0]
+				});
+			});
 
-		it("should throw EntityNotFound error", async () => {
-			expect.assertions(5);
-			try {
-				await broker.call("posts.resolve", { id: docs[0]._id, mapping: true });
-			} catch (err) {
-				expect(err).toBeInstanceOf(EntityNotFoundError);
-				expect(err.message).toEqual("Entity not found");
-				expect(err.type).toEqual("ENTITY_NOT_FOUND");
-				expect(err.code).toEqual(404);
-				expect(err.data).toEqual({ id: docs[0]._id });
-			}
-		});
+			it("should find the newly created entity", async () => {
+				const res = await broker.call("posts.find");
 
-		it("should return empty list", async () => {
-			const res = await broker.call("posts.find");
-			expect(res).toEqual([]);
-		});
+				expect(res).toEqual(docs);
+			});
 
-		it("should return empty list", async () => {
-			const res = await broker.call("posts.list");
+			it("should remove entity", async () => {
+				entityChanged.mockClear();
+				const res = await broker.call("posts.remove", {
+					id: docs[0].id,
+					title: "Unused removed title"
+				});
 
-			expect(res).toEqual({
-				rows: [],
-				page: 1,
-				pageSize: 10,
-				total: 0,
-				totalPages: 0
+				expect(res).toEqual(docs[0].id);
+
+				expect(entityChanged).toBeCalledTimes(1);
+				expect(entityChanged).toBeCalledWith(docs[0], expect.any(Context), {
+					type: "remove",
+					softDelete: false
+				});
+			});
+
+			it("should throw EntityNotFound error", async () => {
+				expect.assertions(5);
+				try {
+					await broker.call("posts.get", { id: docs[0].id });
+				} catch (err) {
+					expect(err).toBeInstanceOf(EntityNotFoundError);
+					expect(err.message).toEqual("Entity not found");
+					expect(err.type).toEqual("ENTITY_NOT_FOUND");
+					expect(err.code).toEqual(404);
+					expect(err.data).toEqual({ id: docs[0].id });
+				}
+			});
+
+			it("should throw EntityNotFound error", async () => {
+				expect.assertions(5);
+				try {
+					await broker.call("posts.resolve", { id: docs[0].id, mapping: true });
+				} catch (err) {
+					expect(err).toBeInstanceOf(EntityNotFoundError);
+					expect(err.message).toEqual("Entity not found");
+					expect(err.type).toEqual("ENTITY_NOT_FOUND");
+					expect(err.code).toEqual(404);
+					expect(err.data).toEqual({ id: docs[0].id });
+				}
+			});
+
+			it("should return empty list", async () => {
+				const res = await broker.call("posts.find");
+				expect(res).toEqual([]);
+			});
+
+			it("should return empty list", async () => {
+				const res = await broker.call("posts.list");
+
+				expect(res).toEqual({
+					rows: [],
+					page: 1,
+					pageSize: 10,
+					total: 0,
+					totalPages: 0
+				});
 			});
 		});
 	});
@@ -271,17 +273,17 @@ module.exports = (getAdapter, adapterType) => {
 					name: `Product ${i + 1}`
 				});
 				docs.push(doc);
-				expect(doc._id.startsWith("secured-")).toBe(true);
+				expect(doc.id.startsWith("secured-")).toBe(true);
 			}
 		});
 
 		it("should get the newly created entity", async () => {
-			const doc = await broker.call("products.get", { id: docs[5]._id });
+			const doc = await broker.call("products.get", { id: docs[5].id });
 			expect(doc).toEqual(docs[5]);
 		});
 
 		it("should resolve the newly created entity", async () => {
-			const doc = await broker.call("products.resolve", { id: docs[5]._id });
+			const doc = await broker.call("products.resolve", { id: docs[5].id });
 			expect(doc).toEqual(docs[5]);
 		});
 
@@ -318,26 +320,26 @@ module.exports = (getAdapter, adapterType) => {
 
 		it("should update entity", async () => {
 			const doc = await broker.call("products.update", {
-				id: docs[5]._id,
+				id: docs[5].id,
 				name: "Modified product"
 			});
 			docs[5] = doc;
 
 			expect(doc).toEqual({
-				_id: expect.any(String),
+				id: expect.any(String),
 				name: "Modified product"
 			});
 		});
 
 		it("should get the modified entity", async () => {
-			const doc = await broker.call("products.get", { id: docs[5]._id });
+			const doc = await broker.call("products.get", { id: docs[5].id });
 			expect(doc).toEqual(docs[5]);
 		});
 
 		it("should resolve the modified entity", async () => {
-			const doc = await broker.call("products.resolve", { id: docs[5]._id, mapping: true });
+			const doc = await broker.call("products.resolve", { id: docs[5].id, mapping: true });
 			expect(doc).toEqual({
-				[docs[5]._id]: docs[5]
+				[docs[5].id]: docs[5]
 			});
 		});
 
@@ -349,38 +351,39 @@ module.exports = (getAdapter, adapterType) => {
 
 		it("should remove entity", async () => {
 			const res = await broker.call("products.remove", {
-				id: docs[5]._id
+				id: docs[5].id
 			});
 
-			expect(res).toEqual(docs[5]._id);
+			expect(res).toEqual(docs[5].id);
 		});
 
 		it("should throw EntityNotFound error", async () => {
 			expect.assertions(5);
 			try {
-				await broker.call("products.get", { id: docs[5]._id });
+				await broker.call("products.get", { id: docs[5].id });
 			} catch (err) {
 				expect(err).toBeInstanceOf(EntityNotFoundError);
 				expect(err.message).toEqual("Entity not found");
 				expect(err.type).toEqual("ENTITY_NOT_FOUND");
 				expect(err.code).toEqual(404);
-				expect(err.data).toEqual({ id: docs[5]._id });
+				expect(err.data).toEqual({ id: docs[5].id });
 			}
 		});
 
 		it("should throw EntityNotFound error", async () => {
 			expect.assertions(5);
 			try {
-				await broker.call("products.resolve", { id: docs[5]._id, mapping: true });
+				await broker.call("products.resolve", { id: docs[5].id, mapping: true });
 			} catch (err) {
 				expect(err).toBeInstanceOf(EntityNotFoundError);
 				expect(err.message).toEqual("Entity not found");
 				expect(err.type).toEqual("ENTITY_NOT_FOUND");
 				expect(err.code).toEqual(404);
-				expect(err.data).toEqual({ id: docs[5]._id });
+				expect(err.data).toEqual({ id: docs[5].id });
 			}
 		});
 	});
+
 	describe("Test pagination", () => {
 		let docs = [];
 		let emailOrderedDocs = [];
@@ -395,8 +398,14 @@ module.exports = (getAdapter, adapterType) => {
 					id: { type: "string", primaryKey: true, columnName: "_id" },
 					firstName: { type: "string", trim: true, required: true },
 					lastName: { type: "string", trim: true, required: true },
+					fullName: {
+						type: "string",
+						readonly: true,
+						get: (v, entity) => entity.firstName + " " + entity.lastName
+					},
 					userName: { type: "string", trim: true, required: true },
 					email: { type: "string", trim: true, required: true },
+					password: { type: "string", hidden: true },
 					dob: { type: "string", trim: true, required: true },
 					age: { type: "number", required: true },
 					status: { type: "boolean", trim: true, default: true }
@@ -427,6 +436,9 @@ module.exports = (getAdapter, adapterType) => {
 			const rows = await broker.call("users.find");
 			expect(rows.length).toBe(20);
 			expect(rows).toEqual(expect.arrayContaining(docs));
+
+			expect(rows[0].password).toBeUndefined();
+			expect(rows[0].fullName).toBe(rows[0].firstName + " " + rows[0].lastName);
 		});
 
 		it("should list first page 10", async () => {

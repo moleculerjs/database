@@ -14,7 +14,7 @@ const Adapters = require("./adapters");
 const DbActions = require("./actions");
 const DbMethods = require("./methods");
 const DbValidation = require("./validation");
-const { mixin } = require("lodash");
+const DbTransform = require("./transform");
 
 /*
 
@@ -127,7 +127,8 @@ module.exports = function DatabaseMixin(mixinOpts) {
 		 */
 		methods: {
 			...DbMethods(mixinOpts),
-			...DbValidation(mixinOpts)
+			...DbValidation(mixinOpts),
+			...DbTransform(mixinOpts)
 		},
 
 		created() {

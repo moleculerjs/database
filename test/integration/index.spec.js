@@ -13,8 +13,8 @@ const RESTTests = require("./rest.test");
 );
 */
 const Adapters = [
-	{ type: "NeDB" }
-	//{ type: "MongoDB", options: { dbName: "db-int-test", collection: "users" } }
+	{ type: "NeDB" },
+	{ type: "MongoDB", options: { dbName: "db-int-test", collection: "users" } }
 ];
 
 describe("Integration tests", () => {
@@ -27,7 +27,7 @@ describe("Integration tests", () => {
 		};
 
 		describe(`Adapter: ${adapter.type}`, () => {
-			/*describe("Test common methods", () => {
+			describe("Test common methods", () => {
 				MethodTests(getAdapter, adapter.type);
 			});
 			describe("Test scopes", () => {
@@ -35,7 +35,7 @@ describe("Integration tests", () => {
 			});
 			describe("Test actions", () => {
 				ActionsTests(getAdapter, adapter.type);
-			});*/
+			});
 			describe("Test REST", () => {
 				RESTTests(getAdapter, adapter.type);
 			});

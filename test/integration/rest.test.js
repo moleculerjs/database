@@ -52,7 +52,7 @@ module.exports = getAdapter => {
 				docs.push(doc);
 
 				expect(doc).toEqual({
-					_id: expect.any(String),
+					id: expect.any(String),
 					title: "First post",
 					content: "Content of first post",
 					author: "John Doe",
@@ -76,7 +76,7 @@ module.exports = getAdapter => {
 					(
 						await axios.post(`${env.baseURL}/posts`, {
 							title: "Third post",
-							content: "Content of thord post",
+							content: "Content of third post",
 							author: "John Smith",
 							votes: 3
 						})
@@ -101,20 +101,20 @@ module.exports = getAdapter => {
 			});
 
 			it("should return a doc (GET)", async () => {
-				const data = (await axios.get(`${env.baseURL}/posts/${docs[0]._id}`)).data;
+				const data = (await axios.get(`${env.baseURL}/posts/${docs[0].id}`)).data;
 				expect(data).toEqual(docs[0]);
 			});
 
 			it("should update entity", async () => {
 				const doc = (
-					await axios.patch(`${env.baseURL}/posts/${docs[1]._id}`, {
+					await axios.patch(`${env.baseURL}/posts/${docs[1].id}`, {
 						title: "Modified post"
 					})
 				).data;
 				docs[1] = doc;
 
 				expect(doc).toEqual({
-					_id: expect.any(String),
+					id: expect.any(String),
 					title: "Modified post",
 					content: "Content of second post",
 					author: "Jane Doe",
@@ -126,19 +126,19 @@ module.exports = getAdapter => {
 			});
 
 			it("should return the modified doc (GET)", async () => {
-				const data = (await axios.get(`${env.baseURL}/posts/${docs[1]._id}`)).data;
+				const data = (await axios.get(`${env.baseURL}/posts/${docs[1].id}`)).data;
 				expect(data).toEqual(docs[1]);
 			});
 
 			it("should remove a doc (DELETE)", async () => {
-				const data = (await axios.delete(`${env.baseURL}/posts/${docs[1]._id}`)).data;
-				expect(data).toEqual(docs[1]._id);
+				const data = (await axios.delete(`${env.baseURL}/posts/${docs[1].id}`)).data;
+				expect(data).toEqual(docs[1].id);
 			});
 
 			it("should throw error while getting the removed doc", async () => {
 				expect.assertions(6);
 				try {
-					await axios.get(`${env.baseURL}/posts/${docs[1]._id}`);
+					await axios.get(`${env.baseURL}/posts/${docs[1].id}`);
 				} catch (error) {
 					const err = error.response.data;
 					expect(error.response.status).toBe(404);
@@ -146,7 +146,7 @@ module.exports = getAdapter => {
 					expect(err.message).toEqual("Entity not found");
 					expect(err.type).toEqual("ENTITY_NOT_FOUND");
 					expect(err.code).toEqual(404);
-					expect(err.data).toEqual({ id: docs[1]._id });
+					expect(err.data).toEqual({ id: docs[1].id });
 				}
 			});
 
@@ -191,9 +191,9 @@ module.exports = getAdapter => {
 
 			it("should soft remove a author (DELETE)", async () => {
 				const data = (
-					await axios.delete(`${env.baseURL}/authors/${env.authors.kevinJames._id}`)
+					await axios.delete(`${env.baseURL}/authors/${env.authors.kevinJames.id}`)
 				).data;
-				expect(data).toEqual(env.authors.kevinJames._id);
+				expect(data).toEqual(env.authors.kevinJames.id);
 			});
 
 			it("should return not deleted authors", async () => {
@@ -230,7 +230,7 @@ module.exports = getAdapter => {
 			it("should throw error accessing deleted author", async () => {
 				expect.assertions(6);
 				try {
-					await axios.get(`${env.baseURL}/authors/${env.authors.kevinJames._id}`);
+					await axios.get(`${env.baseURL}/authors/${env.authors.kevinJames.id}`);
 				} catch (error) {
 					const err = error.response.data;
 					expect(error.response.status).toBe(404);
@@ -238,7 +238,7 @@ module.exports = getAdapter => {
 					expect(err.message).toEqual("Entity not found");
 					expect(err.type).toEqual("ENTITY_NOT_FOUND");
 					expect(err.code).toEqual(404);
-					expect(err.data).toEqual({ id: env.authors.kevinJames._id });
+					expect(err.data).toEqual({ id: env.authors.kevinJames.id });
 				}
 			});
 		});
