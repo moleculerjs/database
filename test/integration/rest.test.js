@@ -5,9 +5,9 @@ const ApiGateway = require("moleculer-web");
 const axios = require("axios");
 const DbService = require("../..").Service;
 
-module.exports = adapter => {
+module.exports = getAdapter => {
 	describe("Test REST API with populates", () => {
-		const env = createEnvironment(adapter);
+		const env = createEnvironment(getAdapter);
 		const docs = [];
 
 		beforeAll(() => env.start());
@@ -161,14 +161,96 @@ module.exports = adapter => {
 				});
 			});
 		});
+
+		describe("Authors with scopes & softDelete", () => {
+			it("should return all authors (list)", async () => {
+				const data = (await axios.get(`${env.baseURL}/authors`)).data;
+				expect(data).toEqual({
+					rows: expect.arrayContaining(Object.values(env.authors)),
+					page: 1,
+					pageSize: 10,
+					total: 4,
+					totalPages: 1
+				});
+			});
+
+			it("should return only active authors", async () => {
+				const data = (await axios.get(`${env.baseURL}/authors?scope=onlyActive`)).data;
+				expect(data).toEqual({
+					rows: expect.arrayContaining([
+						env.authors.johnDoe,
+						env.authors.janeDoe,
+						env.authors.kevinJames
+					]),
+					page: 1,
+					pageSize: 10,
+					total: 3,
+					totalPages: 1
+				});
+			});
+
+			it("should soft remove a author (DELETE)", async () => {
+				const data = (
+					await axios.delete(`${env.baseURL}/authors/${env.authors.kevinJames._id}`)
+				).data;
+				expect(data).toEqual(env.authors.kevinJames._id);
+			});
+
+			it("should return not deleted authors", async () => {
+				const data = (await axios.get(`${env.baseURL}/authors`)).data;
+				expect(data).toEqual({
+					rows: expect.arrayContaining([
+						env.authors.johnDoe,
+						env.authors.janeDoe,
+						env.authors.bobSmith
+					]),
+					page: 1,
+					pageSize: 10,
+					total: 3,
+					totalPages: 1
+				});
+			});
+
+			it("should return all (including deleted) authors (list)", async () => {
+				const data = (await axios.get(`${env.baseURL}/authors?scope=false`)).data;
+				expect(data).toEqual({
+					rows: expect.arrayContaining([
+						env.authors.johnDoe,
+						env.authors.janeDoe,
+						env.authors.bobSmith,
+						Object.assign({}, env.authors.kevinJames, { deletedAt: expect.any(Number) })
+					]),
+					page: 1,
+					pageSize: 10,
+					total: 4,
+					totalPages: 1
+				});
+			});
+
+			it("should throw error accessing deleted author", async () => {
+				expect.assertions(6);
+				try {
+					await axios.get(`${env.baseURL}/authors/${env.authors.kevinJames._id}`);
+				} catch (error) {
+					const err = error.response.data;
+					expect(error.response.status).toBe(404);
+					expect(err.name).toBe("EntityNotFoundError");
+					expect(err.message).toEqual("Entity not found");
+					expect(err.type).toEqual("ENTITY_NOT_FOUND");
+					expect(err.code).toEqual(404);
+					expect(err.data).toEqual({ id: env.authors.kevinJames._id });
+				}
+			});
+		});
 	});
 };
 
-function createEnvironment(adapter) {
+function createEnvironment(getAdapter) {
 	const env = {
 		brokers: [],
 		port: null,
-		baseURL: null
+		baseURL: null,
+		authors: {}
 	};
 
 	// --- BROKER FOR API GATEWAY
@@ -192,7 +274,7 @@ function createEnvironment(adapter) {
 			]
 		},
 
-		dependencies: ["posts"],
+		dependencies: ["posts", "authors"],
 
 		started() {
 			const addr = this.server.address();
@@ -211,7 +293,7 @@ function createEnvironment(adapter) {
 
 	postBroker.createService({
 		name: "posts",
-		mixins: [DbService({ adapter })],
+		mixins: [DbService({ adapter: getAdapter("posts") })],
 		settings: {
 			fields: {
 				id: { type: "string", primaryKey: true, columnName: "_id" },
@@ -233,16 +315,16 @@ function createEnvironment(adapter) {
 	});
 	env.brokers.push(postBroker);
 
-	// --- BROKER FOR USERS SERVICE
-	const userBroker = new ServiceBroker({
+	// --- BROKER FOR AUTHORS SERVICE
+	const authorBroker = new ServiceBroker({
 		nodeID: "broker-2",
 		transporter: "Fake",
 		logger: false
 	});
 
-	userBroker.createService({
-		name: "users",
-		mixins: [DbService({ adapter })],
+	authorBroker.createService({
+		name: "authors",
+		mixins: [DbService({ adapter: getAdapter("authors") })],
 		settings: {
 			fields: {
 				id: { type: "string", primaryKey: true, columnName: "_id" },
@@ -250,17 +332,45 @@ function createEnvironment(adapter) {
 				age: { type: "number" },
 				status: { type: "boolean", default: true },
 				createdAt: { type: "number", onCreate: Date.now },
-				updatedAt: { type: "number", onUpdate: Date.now }
-			}
+				updatedAt: { type: "number", onUpdate: Date.now },
+				deletedAt: { type: "number", onRemove: Date.now }
+			},
+
+			scopes: {
+				notDeleted: { deletedAt: { $exists: false } },
+				onlyActive: { status: true }
+			},
+			defaultScopes: ["notDeleted"]
 		},
 
 		methods: {},
 
 		async started() {
 			await this.clearEntities();
+
+			env.authors.johnDoe = await this.createEntity(null, {
+				name: "John Doe",
+				age: 42,
+				status: true
+			});
+			env.authors.janeDoe = await this.createEntity(null, {
+				name: "Jane Doe",
+				age: 35,
+				status: true
+			});
+			env.authors.bobSmith = await this.createEntity(null, {
+				name: "Bob Smith",
+				age: 58,
+				status: false
+			});
+			env.authors.kevinJames = await this.createEntity(null, {
+				name: "Kevin James",
+				age: 48,
+				status: true
+			});
 		}
 	});
-	env.brokers.push(userBroker);
+	env.brokers.push(authorBroker);
 
 	env.start = () => apiBroker.Promise.all(env.brokers.map(broker => broker.start())).delay(1000);
 	env.stop = () => Promise.all(env.brokers.map(broker => broker.stop()));

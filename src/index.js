@@ -20,7 +20,7 @@ const { mixin } = require("lodash");
 
   TODO:
 	- [ ]
-	- [ ] Actions
+	- [x] Actions
 		- [x] `find`
 		- [x] `count`
 		- [x] `list`
@@ -32,7 +32,7 @@ const { mixin } = require("lodash");
 		- [x] `remove`
 
 	- [ ] Field handlers
-		- [ ] `id` field with `secure` option: { id: true, type: "string", readonly: true, secure: true, columnName: "_id" }
+		- [x] `id` field with `secure` option: { id: true, type: "string", readonly: true, secure: true, columnName: "_id" }
 		- [ ] `columnName` support: { id: true, type: "string", columnName: "_id" }
 		- [x] Sanitizers
 			- [x] trim title: { type: "string", trim: true, maxlength: 50, required: true },
@@ -54,7 +54,7 @@ const { mixin } = require("lodash");
 		- [ ] nested types
 
 	- [ ] Methods (internal with _ prefix)
-		- [ ] create indexes (execute the adapter)
+		- [x] create indexes (execute the adapter)
 		- [x] methods for actions (findEntities, getEntity, countEntities, createEntity, updateEntity, removeEntity)
 		- [x] sanitizator
 		- [ ] transformer

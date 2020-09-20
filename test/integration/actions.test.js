@@ -9,14 +9,14 @@ const DbService = require("../..").Service;
 
 const fakerator = new Fakerator();
 
-module.exports = (adapter, adapterType) => {
+module.exports = (getAdapter, adapterType) => {
 	describe("Test a common flow", () => {
 		const entityChanged = jest.fn();
 
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "posts",
-			mixins: [DbService({ adapter })],
+			mixins: [DbService({ adapter: getAdapter("posts") })],
 			settings: {
 				fields: {
 					id: { type: "string", primaryKey: true, columnName: "_id" },
@@ -237,7 +237,7 @@ module.exports = (adapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "products",
-			mixins: [DbService({ adapter })],
+			mixins: [DbService({ adapter: getAdapter("products") })],
 			settings: {
 				fields: {
 					id: { type: "string", secure: true, primaryKey: true, columnName: "_id" },
@@ -389,7 +389,7 @@ module.exports = (adapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		broker.createService({
 			name: "users",
-			mixins: [DbService({ adapter })],
+			mixins: [DbService({ adapter: getAdapter("users") })],
 			settings: {
 				fields: {
 					id: { type: "string", primaryKey: true, columnName: "_id" },

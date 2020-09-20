@@ -1,5 +1,6 @@
 "use strict";
 
+const _ = require("lodash");
 const MethodTests = require("./methods.test");
 const ScopeTests = require("./scopes.test");
 const ActionsTests = require("./actions.test");
@@ -12,26 +13,31 @@ const RESTTests = require("./rest.test");
 );
 */
 const Adapters = [
-	"NeDB",
-	{ type: "MongoDB", options: { dbName: "db-int-test", collection: "users" } }
+	{ type: "NeDB" }
+	//{ type: "MongoDB", options: { dbName: "db-int-test", collection: "users" } }
 ];
 
 describe("Integration tests", () => {
 	for (const adapter of Adapters) {
-		const adapterType = typeof adapter == "string" ? adapter : adapter.type;
+		const getAdapter = collection => {
+			if (adapter.options && adapter.options.collection)
+				return _.defaultsDeep({ options: { collection } }, adapter);
 
-		describe(`Adapter: ${adapterType}`, () => {
-			describe("Test common methods", () => {
-				MethodTests(adapter, adapterType);
+			return adapter;
+		};
+
+		describe(`Adapter: ${adapter.type}`, () => {
+			/*describe("Test common methods", () => {
+				MethodTests(getAdapter, adapter.type);
 			});
 			describe("Test scopes", () => {
-				ScopeTests(adapter, adapterType);
+				ScopeTests(getAdapter, adapter.type);
 			});
 			describe("Test actions", () => {
-				ActionsTests(adapter, adapterType);
-			});
+				ActionsTests(getAdapter, adapter.type);
+			});*/
 			describe("Test REST", () => {
-				RESTTests(adapter, adapterType);
+				RESTTests(getAdapter, adapter.type);
 			});
 		});
 	}

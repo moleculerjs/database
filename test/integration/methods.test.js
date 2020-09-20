@@ -41,12 +41,12 @@ const TEST_DOCS = {
 	}
 };
 
-module.exports = (adapter, adapterType) => {
+module.exports = (getAdapter, adapterType) => {
 	describe("Test findEntity, findEntities & countEntities method", () => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
-			mixins: [DbService({ adapter, createActions: false })]
+			mixins: [DbService({ adapter: getAdapter("users"), createActions: false })]
 		});
 
 		beforeAll(() => broker.start());
@@ -317,7 +317,7 @@ module.exports = (adapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
-			mixins: [DbService({ adapter, createActions: false })]
+			mixins: [DbService({ adapter: getAdapter("users"), createActions: false })]
 		});
 		svc.entityChanged = jest.fn();
 
@@ -443,7 +443,7 @@ module.exports = (adapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
-			mixins: [DbService({ adapter, createActions: false })]
+			mixins: [DbService({ adapter: getAdapter("users"), createActions: false })]
 		});
 		svc.entityChanged = jest.fn();
 
@@ -601,7 +601,7 @@ module.exports = (adapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
-			mixins: [DbService({ adapter, createActions: false })]
+			mixins: [DbService({ adapter: getAdapter("users"), createActions: false })]
 		});
 
 		svc.entityChanged = jest.fn();

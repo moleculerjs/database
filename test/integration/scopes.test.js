@@ -39,14 +39,14 @@ const TEST_DOCS = {
 	}
 };
 
-module.exports = adapter => {
+module.exports = getAdapter => {
 	describe("Test scopes", () => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
 			mixins: [
 				DbService({
-					adapter,
+					adapter: getAdapter("users"),
 					createActions: false
 				})
 			],
