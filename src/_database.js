@@ -173,7 +173,7 @@ module.exports = function (adapter, opts) {
 					if (field.readonly) return;
 
 					// Skip if not allowed to update the field
-					if (!isNew && field.updateable === false) return;
+					if (!isNew && field.immutable === true) return;
 				}
 
 				// Get previous value

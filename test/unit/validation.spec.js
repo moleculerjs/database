@@ -53,7 +53,7 @@ describe("Test validation", () => {
 					status: {
 						type: "string",
 						default: "A",
-						onDelete: "D"
+						onRemove: "D"
 					}
 				}
 			}
@@ -80,7 +80,7 @@ describe("Test validation", () => {
 					type: "string",
 					columnName: "status",
 					default: "A",
-					onDelete: "D"
+					onRemove: "D"
 				}
 			]);
 			expect(svc.$primaryField).toEqual({
@@ -321,12 +321,12 @@ describe("Test validation", () => {
 			});
 		});
 
-		describe("Test readonly & updateable", () => {
+		describe("Test readonly & immutable", () => {
 			beforeAll(() => {
 				svc.settings.fields = {
 					name: { type: "string", required: true },
 					password: { type: "string", readonly: true },
-					role: { type: "string", updateable: false }
+					role: { type: "string", immutable: true }
 				};
 
 				svc._processFields();
@@ -401,90 +401,7 @@ describe("Test validation", () => {
 			});
 		});
 
-		describe("Test type conversion", () => {
-			beforeAll(() => {
-				svc.settings.fields = {
-					snum: { type: "number" },
-					sbool: { type: "boolean" },
-					sstr: { type: "string" },
-					num: { type: "string" },
-					bool: { type: "string" },
-					str: { type: "string" }
-				};
-
-				svc._processFields();
-			});
-
-			it("should untouch null values", async () => {
-				const params = {
-					snum: null,
-					sbool: null,
-					sstr: null
-				};
-				const res = await svc.validateParams(ctx, params);
-				expect(res).toEqual({
-					snum: null,
-					sbool: null,
-					sstr: null
-				});
-			});
-
-			it("should untouch correct values", async () => {
-				const params = {
-					snum: 12345.67,
-					sbool: true,
-					sstr: "John"
-				};
-				const res = await svc.validateParams(ctx, params);
-				expect(res).toEqual({
-					snum: 12345.67,
-					sbool: true,
-					sstr: "John"
-				});
-			});
-
-			it("should convert incorrect values", async () => {
-				const params = {
-					snum: "12345.67",
-					sbool: "true",
-					sstr: "John"
-				};
-				const res = await svc.validateParams(ctx, params);
-				expect(res).toEqual({
-					snum: 12345.67,
-					sbool: true,
-					sstr: "John"
-				});
-			});
-
-			it("should convert incorrect values", async () => {
-				const params = {
-					num: 12345.67,
-					bool: true,
-					str: "John"
-				};
-				const res = await svc.validateParams(ctx, params);
-				expect(res).toEqual({
-					num: "12345.67",
-					bool: "true",
-					str: "John"
-				});
-			});
-
-			it("should untouch null values", async () => {
-				const params = {
-					num: null,
-					bool: null,
-					str: null
-				};
-				const res = await svc.validateParams(ctx, params);
-				expect(res).toEqual({
-					num: null,
-					bool: null,
-					str: null
-				});
-			});
-		});
+		testTypeConversion(ctx, svc, "create");
 
 		describe("Test custom validation", () => {
 			const customValidate = jest.fn(value => (value.length < 3 ? "Too short" : true));
@@ -657,12 +574,12 @@ describe("Test validation", () => {
 			});
 		});
 
-		describe("Test readonly & updateable", () => {
+		describe("Test readonly & immutable", () => {
 			beforeAll(() => {
 				svc.settings.fields = {
 					name: { type: "string", required: true },
 					password: { type: "string", readonly: true },
-					role: { type: "string", updateable: false }
+					role: { type: "string", immutable: true }
 				};
 
 				svc._processFields();
@@ -691,6 +608,8 @@ describe("Test validation", () => {
 				});
 			});
 		});
+
+		testTypeConversion(ctx, svc, "update");
 
 		describe("Test hook", () => {
 			const onUpdate = jest.fn(async () => "Now");
@@ -907,12 +826,12 @@ describe("Test validation", () => {
 			});
 		});
 
-		describe("Test readonly & updateable", () => {
+		describe("Test readonly & immutable", () => {
 			beforeAll(() => {
 				svc.settings.fields = {
 					name: { type: "string", required: true },
 					password: { type: "string", readonly: true },
-					role: { type: "string", updateable: false }
+					role: { type: "string", immutable: true }
 				};
 
 				svc._processFields();
@@ -987,90 +906,7 @@ describe("Test validation", () => {
 			});
 		});
 
-		describe("Test type checking", () => {
-			beforeAll(() => {
-				svc.settings.fields = {
-					snum: { type: "number" },
-					sbool: { type: "boolean" },
-					sstr: { type: "string" },
-					num: { type: "string" },
-					bool: { type: "string" },
-					str: { type: "string" }
-				};
-
-				svc._processFields();
-			});
-
-			it("should untouch null values", async () => {
-				const params = {
-					snum: null,
-					sbool: null,
-					sstr: null
-				};
-				const res = await svc.validateParams(ctx, params, { type: "replace" });
-				expect(res).toEqual({
-					snum: null,
-					sbool: null,
-					sstr: null
-				});
-			});
-
-			it("should untouch correct values", async () => {
-				const params = {
-					snum: 12345.67,
-					sbool: true,
-					sstr: "John"
-				};
-				const res = await svc.validateParams(ctx, params, { type: "replace" });
-				expect(res).toEqual({
-					snum: 12345.67,
-					sbool: true,
-					sstr: "John"
-				});
-			});
-
-			it("should convert incorrect values", async () => {
-				const params = {
-					snum: "12345.67",
-					sbool: "true",
-					sstr: "John"
-				};
-				const res = await svc.validateParams(ctx, params, { type: "replace" });
-				expect(res).toEqual({
-					snum: 12345.67,
-					sbool: true,
-					sstr: "John"
-				});
-			});
-
-			it("should convert incorrect values", async () => {
-				const params = {
-					num: 12345.67,
-					bool: true,
-					str: "John"
-				};
-				const res = await svc.validateParams(ctx, params, { type: "replace" });
-				expect(res).toEqual({
-					num: "12345.67",
-					bool: "true",
-					str: "John"
-				});
-			});
-
-			it("should untouch null values", async () => {
-				const params = {
-					num: null,
-					bool: null,
-					str: null
-				};
-				const res = await svc.validateParams(ctx, params, { type: "replace" });
-				expect(res).toEqual({
-					num: null,
-					bool: null,
-					str: null
-				});
-			});
-		});
+		testTypeConversion(ctx, svc, "replace");
 
 		describe("Test custom validation", () => {
 			const customValidate = jest.fn(value => (value.length < 3 ? "Too short" : true));
@@ -1174,51 +1010,193 @@ describe("Test validation", () => {
 				expect(res).toEqual({});
 			});
 		});
-		/*
+
 		describe("Test hook", () => {
-			const onReplace = jest.fn(async () => "Now");
+			const onRemove = jest.fn(async () => "Now");
 			beforeAll(() => {
 				svc.settings.fields = {
 					createdAt: { onCreate: "Past" },
-					createdBy: { onCreate: "Owner" },
 					updatedAt: { onUpdate: "updated" },
-					replacedAt: { onReplace },
 					replacedBy: { onReplace: "replaced" },
-					deletedAt: { onRemove: "removed" }
+					deletedAt: { onRemove },
+					deletedBy: { onRemove: "deleted" }
 				};
 
 				svc._processFields();
+			});
+
+			it("should set soft delete", async () => {
+				expect(svc.$softDelete).toBe(true);
 			});
 
 			it("should call hook if value not exists", async () => {
 				const params = {};
 				const res = await svc.validateParams(ctx, params, { type: "remove" });
 				expect(res).toEqual({
-					replacedAt: "Now",
-					replacedBy: "replaced"
+					deletedAt: "Now",
+					deletedBy: "deleted"
 				});
 
-				expect(onReplace).toBeCalledTimes(1);
-				expect(onReplace).toBeCalledWith(undefined, {}, ctx);
+				expect(onRemove).toBeCalledTimes(1);
+				expect(onRemove).toBeCalledWith(undefined, {}, ctx);
 			});
 
 			it("should call if value exists", async () => {
-				onReplace.mockClear();
+				onRemove.mockClear();
 
 				const params = {
-					replacedAt: "2020-09-19",
-					replacedBy: "John"
+					deletedAt: "2020-09-19",
+					deletedBy: "John"
 				};
 				const res = await svc.validateParams(ctx, params, { type: "remove" });
 				expect(res).toEqual({
-					replacedAt: "Now",
-					replacedBy: "replaced"
+					deletedAt: "Now",
+					deletedBy: "deleted"
 				});
 
-				expect(onReplace).toBeCalledTimes(1);
-				expect(onReplace).toBeCalledWith("2020-09-19", params, ctx);
+				expect(onRemove).toBeCalledTimes(1);
+				expect(onRemove).toBeCalledWith("2020-09-19", params, ctx);
 			});
 		});
-*/
 	});
 });
+
+function testTypeConversion(ctx, svc, type) {
+	describe("Test type checking", () => {
+		const date1 = new Date();
+		beforeAll(() => {
+			svc.settings.fields = {
+				snum: { type: "number" },
+				sbool: { type: "boolean" },
+				sdate: { type: "date" },
+				sstr: { type: "string" },
+				num: { type: "string" },
+				bool: { type: "string" },
+				date: { type: "string" },
+				str: { type: "string" }
+			};
+
+			svc._processFields();
+		});
+
+		it("should untouch null values", async () => {
+			const params = {
+				snum: null,
+				sbool: null,
+				sdate: null,
+				sstr: null
+			};
+			const res = await svc.validateParams(ctx, params, { type });
+			expect(res).toEqual({
+				snum: null,
+				sbool: null,
+				sdate: null,
+				sstr: null
+			});
+		});
+
+		it("should untouch correct values", async () => {
+			const params = {
+				snum: 12345.67,
+				sbool: true,
+				sdate: date1,
+				sstr: "John"
+			};
+			const res = await svc.validateParams(ctx, params, { type });
+			expect(res).toEqual({
+				snum: 12345.67,
+				sbool: true,
+				sdate: date1,
+				sstr: "John"
+			});
+		});
+
+		it("should convert incorrect values", async () => {
+			const params = {
+				snum: "12345.67",
+				sbool: "true",
+				sdate: date1.toISOString(),
+				sstr: "John"
+			};
+			const res = await svc.validateParams(ctx, params, { type });
+			expect(res).toEqual({
+				snum: 12345.67,
+				sbool: true,
+				sdate: date1,
+				sstr: "John"
+			});
+		});
+
+		it("should convert incorrect values", async () => {
+			const params = {
+				num: 12345.67,
+				bool: true,
+				date: date1,
+				str: "John"
+			};
+			const res = await svc.validateParams(ctx, params, { type });
+			expect(res).toEqual({
+				num: "12345.67",
+				bool: "true",
+				date: date1.toString(),
+				str: "John"
+			});
+		});
+
+		it("should untouch null values", async () => {
+			const params = {
+				num: null,
+				bool: null,
+				date: null,
+				str: null
+			};
+			const res = await svc.validateParams(ctx, params, { type });
+			expect(res).toEqual({
+				num: null,
+				bool: null,
+				date: null,
+				str: null
+			});
+		});
+
+		it("should throw Cast error for invalid number", async () => {
+			const params = {
+				snum: "John123"
+			};
+			expect.assertions(6);
+			try {
+				await svc.validateParams(ctx, params, { type });
+			} catch (err) {
+				expect(err).toBeInstanceOf(ValidationError);
+				expect(err.name).toBe("ValidationError");
+				expect(err.message).toBe("Cast to Number failed for value 'John123'");
+				expect(err.type).toBe("CAST_ERROR");
+				expect(err.code).toBe(422);
+				expect(err.data).toEqual({
+					field: "snum",
+					value: "John123"
+				});
+			}
+		});
+
+		it("should throw Cast error for invalid date", async () => {
+			const params = {
+				sdate: "John123"
+			};
+			expect.assertions(6);
+			try {
+				await svc.validateParams(ctx, params, { type });
+			} catch (err) {
+				expect(err).toBeInstanceOf(ValidationError);
+				expect(err.name).toBe("ValidationError");
+				expect(err.message).toBe("Cast to Date failed for value 'John123'");
+				expect(err.type).toBe("CAST_ERROR");
+				expect(err.code).toBe(422);
+				expect(err.data).toEqual({
+					field: "sdate",
+					value: "John123"
+				});
+			}
+		});
+	});
+}

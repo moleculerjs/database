@@ -62,19 +62,19 @@ module.exports = function (mixinOpts) {
 
 			if (_.isObject(this.settings.fields)) {
 				this.$fields = _.compact(
-					_.map(this.settings.fields, (value, name) => {
+					_.map(this.settings.fields, (def, name) => {
 						// Disabled field
-						if (value === false) return;
+						if (def === false) return;
 
 						// Shorthand format { title: true } => { title: {} }
-						if (value === true) value = { type: "any" };
+						if (def === true) def = { type: "any" };
 
 						// Shorthand format: { title: "string" } => { title: { type: "string" } }
 						// TODO: | handling like if FastestValidator
-						if (_.isString(value)) value = { type: value };
+						if (_.isString(def)) def = { type: def };
 
 						// Copy the properties
-						const field = Object.assign({}, value);
+						const field = Object.assign({}, def);
 
 						// Set name of field
 						field.name = name;
@@ -82,7 +82,7 @@ module.exports = function (mixinOpts) {
 						if (!field.columnName) field.columnName = field.name;
 
 						if (field.primaryKey === true) this.$primaryField = field;
-						if (field.onDelete) this.$softDelete = true;
+						if (field.onRemove) this.$softDelete = true;
 
 						if (field.permission || field.readPermission)
 							this.$shouldAuthorizeFields = true;
@@ -453,33 +453,13 @@ module.exports = function (mixinOpts) {
 
 			let entity = await this.resolveEntities(ctx, params, { transform: false });
 
+			params = await this.validateParams(ctx, params, { type: "replace" });
+
 			id = this._sanitizeID(id, opts);
 
 			if (this.$softDelete) {
 				// Soft delete
-				const changes = {};
-				await Promise.all(
-					this.$fields.map(async field => {
-						if (field.onDelete) {
-							if (_.isFunction(field.onDelete)) {
-								_.set(
-									changes,
-									field.name,
-									await field.onDelete.call(
-										this,
-										_.get(entity, field.name),
-										entity,
-										ctx
-									)
-								);
-							} else {
-								_.set(changes, field.name, field.onDelete);
-							}
-						}
-					})
-				);
-
-				await this.adapter.updateById(id, changes);
+				await this.adapter.updateById(id, params);
 			} else {
 				// Real delete
 				await this.adapter.removeById(id);
@@ -589,7 +569,18 @@ module.exports = function (mixinOpts) {
 						value = String(value);
 					}
 					if (field.type == "number" && typeof value != "number" && value != null) {
-						value = Number(value);
+						const newVal = Number(value);
+						if (Number.isNaN(newVal)) {
+							throw new ValidationError(
+								`Cast to Number failed for value '${value}'`,
+								"CAST_ERROR",
+								{
+									field: field.name,
+									value
+								}
+							);
+						}
+						value = newVal;
 					}
 					if (field.type == "boolean" && typeof value != "boolean" && value != null) {
 						if (value === 1 || value === "true" || value === "1" || value === "on") {
@@ -603,10 +594,26 @@ module.exports = function (mixinOpts) {
 							value = false;
 						}
 					}
+					if (field.type == "date" && !(value instanceof Date) && value != null) {
+						const newVal = new Date(value);
+						if (isNaN(newVal.getTime())) {
+							throw new ValidationError(
+								`Cast to Date failed for value '${value}'`,
+								"CAST_ERROR",
+								{
+									field: field.name,
+									value
+								}
+							);
+						}
+						value = newVal;
+					}
 
 					// Sanitizations
-					if (field.trim && value.trim) {
-						value = value.trim();
+					if (field.trim && typeof value == "string") {
+						if (field.trim === true) value = value.trim();
+						else if (field.trim === "right") value = value.trimRight();
+						else if (field.trim === "left") value = value.trimLeft();
 					}
 
 					// Custom validator
@@ -635,7 +642,7 @@ module.exports = function (mixinOpts) {
 			let fields = Array.from(this.$fields);
 			// Removing & Soft delete
 			if (type == "remove" && this.$softDelete) {
-				fields = fields.map(field => !!field.onRemove);
+				fields = fields.filter(field => !!field.onRemove);
 			}
 
 			const authorizedFields = await this._authorizeFields(fields, ctx, params, false);
@@ -705,8 +712,8 @@ module.exports = function (mixinOpts) {
 						}
 					}
 
-					// Updateable
-					if (["update", "replace"].includes(type) && field.updateable === false) return;
+					// Immutable
+					if (["update", "replace"].includes(type) && field.immutable === true) return;
 
 					setValue(field, value);
 				})

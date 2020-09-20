@@ -19,21 +19,22 @@ const DbMethods = require("./methods");
   TODO:
 	- [ ]
 	- [ ] Actions
-		- [ ] `find`
-		- [ ] `list`
-		- [ ] `get` - receive only one entity
-		- [ ] `resolve` - receive one or multiple entities (with mapping)
-		- [ ] `create`
-		- [ ] `insert`
-		- [ ] `update`
-		- [ ] `remove`
+		- [x] `find`
+		- [x] `count`
+		- [x] `list`
+		- [x] `get` - receive only one entity
+		- [x] `resolve` - receive one or multiple entities (with mapping)
+		- [x] `create`
+		- [x] `update`
+		- [x] `replace`
+		- [x] `remove`
 
 	- [ ] Field handlers
 		- [ ] `id` field with `secure` option: { id: true, type: "string", readonly: true, secure: true, columnName: "_id" }
 		- [ ] `columnName` support: { id: true, type: "string", columnName: "_id" }
 		- [x] Sanitizers
 			- [x] trim title: { type: "string", trim: true, maxlength: 50, required: true },
-		- [ ] set: custom set formatter: { set: (value, entity, field, ctx) => slug(entity.title) }
+		- [x] set: custom set formatter: { set: (value, entity, field, ctx) => slug(entity.title) }
 		- [ ] get: custom get formatter: { get: (value, entity, field, ctx) => entity.firstName + ' ' + entity.lastName }
 		- [x] default value: status: { type: "number", default: 1 } // Optional field with default value
 		- [x] required: validation
@@ -42,11 +43,12 @@ const DbMethods = require("./methods");
 		- [ ] hidden (password): password: { type: "string", hidden: true,
 		- [x] custom validator: { type: "string", validate: (value, entity, field, ctx) => value.length > 6 },	// Custom validator
 		- [ ] populate: { populate: { action: "v1.accounts.resolve", fields: ["id", "name", "avatar"] }
+		- [x] immutable: { author: { type: "string", immutable: true } }
 		- [x] permission: roles: { type: "array", permission: "administrator" } // Access control by permissions
 		- [x] readPermission: { type: "array", populate: "v1.accounts.resolve", readPermission: ["$owner"] }
-		- [x] setOnCreate: createdAt: { type: "number", readonly: true, setOnCreate: () => Date.now() }, // Set value when entity is created
-		- [x] setOnUpdate: updatedAt: { type: "number", readonly: true, setOnUpdate: () => Date.now() }, // Set value when entity is updated
-		- [x] setOnRemove: deletedAt: { type: "number", readonly: true, setOnRemove: () => Date.now() }, // Set value when entity is deleted
+		- [x] onCreate: createdAt: { type: "number", readonly: true, onCreate: () => Date.now() }, // Set value when entity is created
+		- [x] onUpdate: updatedAt: { type: "number", readonly: true, onUpdate: () => Date.now() }, // Set value when entity is updated
+		- [x] onRemove: deletedAt: { type: "number", readonly: true, onRemove: () => Date.now() }, // Set value when entity is deleted
 		- [ ] nested types
 
 	- [ ] Methods (internal with _ prefix)
