@@ -584,7 +584,7 @@ module.exports = function (mixinOpts) {
 
 			const setValue = function (field, value) {
 				if (value !== undefined) {
-					// Type checking
+					// Type conversion
 					if (field.type == "string" && typeof value != "string" && value != null) {
 						value = String(value);
 					}
@@ -601,6 +601,17 @@ module.exports = function (mixinOpts) {
 							value === "off"
 						) {
 							value = false;
+						}
+					}
+					// Custom validator
+					// Syntax: `validate: (value, entity, ctx) => value.length > 6`
+					if (field.validate) {
+						const res = field.validate.call(this, value, params, field, ctx);
+						if (res !== true) {
+							throw new ValidationError(res, "VALIDATION_ERROR", {
+								field: field.name,
+								value
+							});
 						}
 					}
 

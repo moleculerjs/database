@@ -401,7 +401,7 @@ describe("Test validation", () => {
 			});
 		});
 
-		describe("Test type checking", () => {
+		describe("Test type conversion", () => {
 			beforeAll(() => {
 				svc.settings.fields = {
 					snum: { type: "number" },
@@ -483,6 +483,50 @@ describe("Test validation", () => {
 					bool: null,
 					str: null
 				});
+			});
+		});
+
+		describe("Test custom validation", () => {
+			const customValidate = jest.fn(value => (value.length < 3 ? "Too short" : true));
+			beforeAll(() => {
+				svc.settings.fields = {
+					name: { type: "string", required: true, validate: customValidate }
+				};
+
+				svc._processFields();
+			});
+
+			it("should call custom validate", async () => {
+				const params = {
+					name: "John Doe"
+				};
+				const res = await svc.validateParams(ctx, params);
+				expect(res).toEqual({
+					name: "John Doe"
+				});
+
+				expect(customValidate).toBeCalledTimes(1);
+				expect(customValidate).toBeCalledWith("John Doe", params, svc.$fields[0], ctx);
+			});
+
+			it("should throw error if nto valid", async () => {
+				const params = {
+					name: "Al"
+				};
+				expect.assertions(6);
+				try {
+					await svc.validateParams(ctx, params);
+				} catch (err) {
+					expect(err).toBeInstanceOf(ValidationError);
+					expect(err.name).toBe("ValidationError");
+					expect(err.message).toBe("Too short");
+					expect(err.type).toBe("VALIDATION_ERROR");
+					expect(err.code).toBe(422);
+					expect(err.data).toEqual({
+						field: "name",
+						value: "Al"
+					});
+				}
 			});
 		});
 	});
@@ -652,6 +696,50 @@ describe("Test validation", () => {
 
 				expect(onUpdate).toBeCalledTimes(1);
 				expect(onUpdate).toBeCalledWith("2020-09-19", params, ctx);
+			});
+		});
+
+		describe("Test custom validation", () => {
+			const customValidate = jest.fn(value => (value.length < 3 ? "Too short" : true));
+			beforeAll(() => {
+				svc.settings.fields = {
+					name: { type: "string", required: true, validate: customValidate }
+				};
+
+				svc._processFields();
+			});
+
+			it("should call custom validate", async () => {
+				const params = {
+					name: "John Doe"
+				};
+				const res = await svc.validateParams(ctx, params, { type: "update" });
+				expect(res).toEqual({
+					name: "John Doe"
+				});
+
+				expect(customValidate).toBeCalledTimes(1);
+				expect(customValidate).toBeCalledWith("John Doe", params, svc.$fields[0], ctx);
+			});
+
+			it("should throw error if nto valid", async () => {
+				const params = {
+					name: "Al"
+				};
+				expect.assertions(6);
+				try {
+					await svc.validateParams(ctx, params, { type: "update" });
+				} catch (err) {
+					expect(err).toBeInstanceOf(ValidationError);
+					expect(err.name).toBe("ValidationError");
+					expect(err.message).toBe("Too short");
+					expect(err.type).toBe("VALIDATION_ERROR");
+					expect(err.code).toBe(422);
+					expect(err.data).toEqual({
+						field: "name",
+						value: "Al"
+					});
+				}
 			});
 		});
 	});
@@ -943,6 +1031,50 @@ describe("Test validation", () => {
 					bool: null,
 					str: null
 				});
+			});
+		});
+
+		describe("Test custom validation", () => {
+			const customValidate = jest.fn(value => (value.length < 3 ? "Too short" : true));
+			beforeAll(() => {
+				svc.settings.fields = {
+					name: { type: "string", required: true, validate: customValidate }
+				};
+
+				svc._processFields();
+			});
+
+			it("should call custom validate", async () => {
+				const params = {
+					name: "John Doe"
+				};
+				const res = await svc.validateParams(ctx, params, { type: "replace" });
+				expect(res).toEqual({
+					name: "John Doe"
+				});
+
+				expect(customValidate).toBeCalledTimes(1);
+				expect(customValidate).toBeCalledWith("John Doe", params, svc.$fields[0], ctx);
+			});
+
+			it("should throw error if nto valid", async () => {
+				const params = {
+					name: "Al"
+				};
+				expect.assertions(6);
+				try {
+					await svc.validateParams(ctx, params, { type: "replace" });
+				} catch (err) {
+					expect(err).toBeInstanceOf(ValidationError);
+					expect(err.name).toBe("ValidationError");
+					expect(err.message).toBe("Too short");
+					expect(err.type).toBe("VALIDATION_ERROR");
+					expect(err.code).toBe(422);
+					expect(err.data).toEqual({
+						field: "name",
+						value: "Al"
+					});
+				}
 			});
 		});
 	});
