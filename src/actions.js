@@ -259,7 +259,6 @@ module.exports = function (opts) {
 	if (opts.createActions === true || opts.createActions.resolve === true) {
 		res.resolve = {
 			visibility: opts.actionVisibility,
-			rest: "GET /resolve",
 			cache: cacheOpts
 				? {
 						keys: ["id", "populate", "fields", "mapping"]
@@ -294,7 +293,7 @@ module.exports = function (opts) {
 	if (opts.createActions === true || opts.createActions.create === true) {
 		res.create = {
 			visibility: opts.actionVisibility,
-			rest: "POST /",
+			rest: opts.rest ? "POST /" : null,
 			params: {
 				// TODO: generate from `fields`
 			},
@@ -316,7 +315,7 @@ module.exports = function (opts) {
 	if (opts.createActions === true || opts.createActions.update === true) {
 		res.update = {
 			visibility: opts.actionVisibility,
-			rest: "PATCH /:id",
+			rest: opts.rest ? "PATCH /:id" : null,
 			params: {
 				id: [{ type: "string" }, { type: "number" }] // TODO: get from `fields`,
 				// TODO: generate from `fields`
@@ -339,7 +338,7 @@ module.exports = function (opts) {
 	if (opts.createActions === true || opts.createActions.replace === true) {
 		res.replace = {
 			visibility: opts.actionVisibility,
-			rest: "PUT /:id",
+			rest: opts.rest ? "PUT /:id" : null,
 			params: {
 				id: [{ type: "string" }, { type: "number" }] // TODO: get from `fields`,
 				// TODO: generate from `fields`
@@ -363,6 +362,7 @@ module.exports = function (opts) {
 	if (opts.createActions === true || opts.createActions.remove === true) {
 		res.remove = {
 			visibility: opts.actionVisibility,
+			rest: opts.rest ? "DELETE /:id" : null,
 			params: {
 				id: [{ type: "string" }, { type: "number" }] // TODO: get from `fields`,
 			},

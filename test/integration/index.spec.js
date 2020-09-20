@@ -3,6 +3,7 @@
 const MethodTests = require("./methods.test");
 const ScopeTests = require("./scopes.test");
 const ActionsTests = require("./actions.test");
+const RESTTests = require("./rest.test");
 
 // console.log(process.env);
 
@@ -28,6 +29,9 @@ describe("Integration tests", () => {
 			});
 			describe("Test actions", () => {
 				ActionsTests(adapter, adapterType);
+			});
+			describe("Test REST", () => {
+				RESTTests(adapter, adapterType);
 			});
 		});
 	}
