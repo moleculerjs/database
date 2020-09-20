@@ -13,6 +13,8 @@ const { ServiceSchemaError } = require("moleculer").Errors;
 const Adapters = require("./adapters");
 const DbActions = require("./actions");
 const DbMethods = require("./methods");
+const DbValidation = require("./validation");
+const { mixin } = require("lodash");
 
 /*
 
@@ -124,7 +126,8 @@ module.exports = function DatabaseMixin(mixinOpts) {
 		 * Methods
 		 */
 		methods: {
-			...DbMethods(mixinOpts)
+			...DbMethods(mixinOpts),
+			...DbValidation(mixinOpts)
 		},
 
 		created() {
