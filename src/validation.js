@@ -7,7 +7,7 @@
 "use strict";
 
 const { Context } = require("moleculer");
-const { ValidationError } = require("moleculer").Errors;
+const { ServiceSchemaError, ValidationError } = require("moleculer").Errors;
 const _ = require("lodash");
 
 module.exports = function (mixinOpts) {
@@ -47,8 +47,29 @@ module.exports = function (mixinOpts) {
 						if (field.primaryKey === true) this.$primaryField = field;
 						if (field.onRemove) this.$softDelete = true;
 
-						if (field.permission || field.readPermission)
+						if (field.permission || field.readPermission) {
 							this.$shouldAuthorizeFields = true;
+						}
+
+						if (field.populate) {
+							if (_.isFunction(field.populate)) {
+								field.populate = { handler: field.populate };
+							} else if (_.isString(field.populate)) {
+								field.populate = { action: field.populate };
+							} else if (_.isObject(field.populate)) {
+								if (!field.populate.action && !field.populate.handler) {
+									throw new ServiceSchemaError(
+										`Invalid 'populate' definition in '${this.fullName}' service. Missing 'action' or 'handler'.`,
+										{ populate: field.populate }
+									);
+								}
+							} else {
+								throw new ServiceSchemaError(
+									`Invalid 'populate' definition in '${this.fullName}' service. It should be a 'Function', 'String' or 'Object'.`,
+									{ populate: field.populate }
+								);
+							}
+						}
 
 						return field;
 					})
@@ -69,6 +90,45 @@ module.exports = function (mixinOpts) {
 		 */
 		async checkAuthority(/*ctx, permission, params, field*/) {
 			return true;
+		},
+
+		/**
+		 * Authorize the fields based on logged in user (from ctx).
+		 *
+		 * @param {Array<Object>} fields
+		 * @param {Context} ctx
+		 * @param {Object} params
+		 * @param {boolean} write
+		 * @returns {Array<Object>}
+		 */
+		async _authorizeFields(fields, ctx, params, write) {
+			if (!this.$shouldAuthorizeFields) return fields;
+
+			const res = [];
+			await Promise.all(
+				_.compact(
+					fields.map(field => {
+						if (!write && field.readPermission) {
+							return this.checkAuthority(
+								ctx,
+								field.readPermission,
+								params,
+								field
+							).then(has => (has ? res.push(field) : null));
+						} else if (field.permission) {
+							return this.checkAuthority(
+								ctx,
+								field.permission,
+								params,
+								field
+							).then(has => (has ? res.push(field) : null));
+						}
+
+						res.push(field);
+					})
+				)
+			);
+			return res;
 		},
 
 		/**

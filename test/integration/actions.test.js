@@ -206,7 +206,11 @@ module.exports = (getAdapter, adapterType) => {
 			it("should throw EntityNotFound error", async () => {
 				expect.assertions(5);
 				try {
-					await broker.call("posts.resolve", { id: docs[0].id, mapping: true });
+					await broker.call("posts.resolve", {
+						id: docs[0].id,
+						mapping: true,
+						throwIfNotExist: true
+					});
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
 					expect(err.message).toEqual("Entity not found");
@@ -214,6 +218,12 @@ module.exports = (getAdapter, adapterType) => {
 					expect(err.code).toEqual(404);
 					expect(err.data).toEqual({ id: docs[0].id });
 				}
+			});
+
+			it("should not throw EntityNotFound error", async () => {
+				const res = (await broker.call("posts.resolve", { id: docs[0].id, mapping: true }))
+					.data;
+				expect(res).toEqual();
 			});
 
 			it("should return empty list", async () => {
@@ -345,7 +355,6 @@ module.exports = (getAdapter, adapterType) => {
 
 		it("should find the modified entity", async () => {
 			const res = await broker.call("products.find");
-
 			expect(res).toEqual(expect.arrayContaining(docs));
 		});
 
@@ -373,7 +382,11 @@ module.exports = (getAdapter, adapterType) => {
 		it("should throw EntityNotFound error", async () => {
 			expect.assertions(5);
 			try {
-				await broker.call("products.resolve", { id: docs[5].id, mapping: true });
+				await broker.call("products.resolve", {
+					id: docs[5].id,
+					mapping: true,
+					throwIfNotExist: true
+				});
 			} catch (err) {
 				expect(err).toBeInstanceOf(EntityNotFoundError);
 				expect(err.message).toEqual("Entity not found");

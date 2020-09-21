@@ -31,6 +31,7 @@ class BaseAdapter {
 	 * Connect adapter to database
 	 */
 	connect() {
+		/* istanbul ignore next */
 		throw new Error("This method is not implemented.");
 	}
 
@@ -38,6 +39,7 @@ class BaseAdapter {
 	 * Disconnect adapter from database
 	 */
 	disconnect() {
+		/* istanbul ignore next */
 		throw new Error("This method is not implemented.");
 	}
 
@@ -48,6 +50,7 @@ class BaseAdapter {
 	 * @returns {Promise<Array>}
 	 */
 	find(/*params*/) {
+		/* istanbul ignore next */
 		throw new Error("This method is not implemented.");
 	}
 
@@ -58,6 +61,7 @@ class BaseAdapter {
 	 * @returns {Promise<Object>}
 	 */
 	findOne(/*query*/) {
+		/* istanbul ignore next */
 		throw new Error("This method is not implemented.");
 	}
 
@@ -69,6 +73,7 @@ class BaseAdapter {
 	 *
 	 */
 	findById(/*id*/) {
+		/* istanbul ignore next */
 		throw new Error("This method is not implemented.");
 	}
 
@@ -80,6 +85,7 @@ class BaseAdapter {
 	 *
 	 */
 	findByIds(/*idList*/) {
+		/* istanbul ignore next */
 		throw new Error("This method is not implemented.");
 	}
 
@@ -90,6 +96,7 @@ class BaseAdapter {
 	 * @returns {Promise<Stream>}
 	 */
 	findStream(/*params*/) {
+		/* istanbul ignore next */
 		throw new Error("This method is not implemented.");
 	}
 
@@ -100,6 +107,7 @@ class BaseAdapter {
 	 *
 	 */
 	count(/*filters*/) {
+		/* istanbul ignore next */
 		throw new Error("This method is not implemented.");
 	}
 
@@ -111,6 +119,7 @@ class BaseAdapter {
 	 *
 	 */
 	insert(/*entity*/) {
+		/* istanbul ignore next */
 		throw new Error("This method is not implemented.");
 	}
 
@@ -122,6 +131,7 @@ class BaseAdapter {
 	 *
 	 */
 	insertMany(/*entities*/) {
+		/* istanbul ignore next */
 		throw new Error("This method is not implemented.");
 	}
 
@@ -134,6 +144,7 @@ class BaseAdapter {
 	 *
 	 */
 	updateById(/*id, changes*/) {
+		/* istanbul ignore next */
 		throw new Error("This method is not implemented.");
 	}
 
@@ -146,6 +157,7 @@ class BaseAdapter {
 	 *
 	 */
 	updateMany(/*query, changes*/) {
+		/* istanbul ignore next */
 		throw new Error("This method is not implemented.");
 	}
 
@@ -157,6 +169,7 @@ class BaseAdapter {
 	 *
 	 */
 	removeById(/*id*/) {
+		/* istanbul ignore next */
 		throw new Error("This method is not implemented.");
 	}
 
@@ -168,6 +181,7 @@ class BaseAdapter {
 	 *
 	 */
 	removeMany(/*query*/) {
+		/* istanbul ignore next */
 		throw new Error("This method is not implemented.");
 	}
 
@@ -177,6 +191,7 @@ class BaseAdapter {
 	 * @returns {Promise<Number>}
 	 */
 	clear() {
+		/* istanbul ignore next */
 		throw new Error("This method is not implemented.");
 	}
 
@@ -197,6 +212,7 @@ class BaseAdapter {
 	 * @returns {Promise<void>}
 	 */
 	createIndex(/*def*/) {
+		/* istanbul ignore next */
 		throw new Error("This method is not implemented.");
 	}
 }

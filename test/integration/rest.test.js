@@ -46,7 +46,7 @@ module.exports = getAdapter => {
 					await axios.post(`${env.baseURL}/posts`, {
 						title: "First post",
 						content: "Content of first post",
-						author: "John Doe"
+						author: env.authors.johnDoe.id
 					})
 				).data;
 				docs.push(doc);
@@ -55,7 +55,10 @@ module.exports = getAdapter => {
 					id: expect.any(String),
 					title: "First post",
 					content: "Content of first post",
-					author: "John Doe",
+					author: {
+						name: "John Doe",
+						age: 42
+					},
 					votes: 0,
 					status: true,
 					createdAt: expect.any(Number)
@@ -66,7 +69,7 @@ module.exports = getAdapter => {
 						await axios.post(`${env.baseURL}/posts`, {
 							title: "Second post",
 							content: "Content of second post",
-							author: "Jane Doe",
+							author: env.authors.janeDoe.id,
 							status: false
 						})
 					).data
@@ -77,11 +80,22 @@ module.exports = getAdapter => {
 						await axios.post(`${env.baseURL}/posts`, {
 							title: "Third post",
 							content: "Content of third post",
-							author: "John Smith",
+							author: env.authors.bobSmith.id,
 							votes: 3
 						})
 					).data
 				);
+
+				// Can't resolve the author because it's inactive
+				expect(docs[2]).toEqual({
+					id: expect.any(String),
+					title: "Third post",
+					content: "Content of third post",
+					author: env.authors.bobSmith.id,
+					votes: 3,
+					status: true,
+					createdAt: expect.any(Number)
+				});
 			});
 
 			it("should return all docs (list)", async () => {
@@ -117,7 +131,10 @@ module.exports = getAdapter => {
 					id: expect.any(String),
 					title: "Modified post",
 					content: "Content of second post",
-					author: "Jane Doe",
+					author: {
+						name: "Jane Doe",
+						age: 35
+					},
 					votes: 0,
 					status: false,
 					createdAt: expect.any(Number),
@@ -167,6 +184,26 @@ module.exports = getAdapter => {
 				const data = (await axios.get(`${env.baseURL}/authors`)).data;
 				expect(data).toEqual({
 					rows: expect.arrayContaining(Object.values(env.authors)),
+					page: 1,
+					pageSize: 10,
+					total: 4,
+					totalPages: 1
+				});
+			});
+
+			it("should return with postCount populate values", async () => {
+				const data = (
+					await axios.get(
+						`${env.baseURL}/authors?fields=name,postCount&populate=postCount&sort=name`
+					)
+				).data;
+				expect(data).toEqual({
+					rows: [
+						{ name: "Bob Smith", postCount: 1 },
+						{ name: "Jane Doe", postCount: 0 },
+						{ name: "John Doe", postCount: 1 },
+						{ name: "Kevin James", postCount: 0 }
+					],
 					page: 1,
 					pageSize: 10,
 					total: 4,
@@ -299,12 +336,21 @@ function createEnvironment(getAdapter) {
 				id: { type: "string", primaryKey: true, columnName: "_id" },
 				title: { type: "string", trim: true, required: true },
 				content: { type: "string" },
-				author: { type: "string" },
+				author: {
+					type: "string",
+					populate: {
+						action: "authors.resolve",
+						fields: ["name", "age"],
+						scope: "onlyActive"
+					}
+				},
 				votes: { type: "number", default: 0 },
 				status: { type: "boolean", default: true },
 				createdAt: { type: "number", onCreate: Date.now },
 				updatedAt: { type: "number", onUpdate: Date.now }
-			}
+			},
+
+			defaultPopulates: ["author"]
 		},
 
 		methods: {},
@@ -331,6 +377,14 @@ function createEnvironment(getAdapter) {
 				name: { type: "string", trim: true, required: true },
 				age: { type: "number" },
 				status: { type: "boolean", default: true },
+				postCount: {
+					type: "number",
+					populate(ctx, values, docs) {
+						return Promise.all(
+							docs.map(doc => ctx.call("posts.count", { query: { author: doc._id } }))
+						);
+					}
+				},
 				createdAt: { type: "number", onCreate: Date.now },
 				updatedAt: { type: "number", onUpdate: Date.now },
 				deletedAt: { type: "number", onRemove: Date.now }

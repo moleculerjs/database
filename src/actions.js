@@ -235,7 +235,7 @@ module.exports = function (opts) {
 				populate: PARAMS_POPULATE
 			},
 			async handler(ctx) {
-				return this.resolveEntities(ctx);
+				return this.resolveEntities(ctx, ctx.params, { throwIfNotExist: true });
 			}
 		};
 	}
@@ -275,10 +275,13 @@ module.exports = function (opts) {
 				fields: PARAMS_FIELDS,
 				scope: PARAMS_SCOPE,
 				populate: PARAMS_POPULATE,
-				mapping: { type: "boolean", optional: true }
+				mapping: { type: "boolean", optional: true },
+				throwIfNotExist: { type: "boolean", optional: true }
 			},
 			async handler(ctx) {
-				return this.resolveEntities(ctx);
+				return this.resolveEntities(ctx, ctx.params, {
+					throwIfNotExist: ctx.params.throwIfNotExist
+				});
 			}
 		};
 	}

@@ -42,7 +42,7 @@ const Transform = require("./transform");
 		- [x] required: validation
 		- [x] validate the type field with converting
 		- [x] readonly: { type: "string", readonly: true } // Can't be set and modified
-		- [ ] hidden (password): password: { type: "string", hidden: true,
+		- [x] hidden (password): password: { type: "string", hidden: true,
 		- [x] custom validator: { type: "string", validate: (value, entity, field, ctx) => value.length > 6 },	// Custom validator
 		- [ ] populate: { populate: { action: "v1.accounts.resolve", fields: ["id", "name", "avatar"] }
 		- [x] immutable: { author: { type: "string", immutable: true } }

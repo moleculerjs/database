@@ -217,7 +217,7 @@ module.exports = function (mixinOpts) {
 		 * @param {Object} params
 		 */
 		_getIDFromParams(params, throwIfNotExist = true) {
-			let id = params[this.$primaryField.columnName];
+			let id = params[this.$primaryField.name];
 			if (id == null) id = params.id;
 
 			if (throwIfNotExist && id == null) {
@@ -258,18 +258,24 @@ module.exports = function (mixinOpts) {
 
 			// Find the entities
 			let result = await this.adapter.find(params);
-			if (!result || result.length == 0) throw new EntityNotFoundError(origID);
+			if (!result || result.length == 0) {
+				if (opts.throwIfNotExist) throw new EntityNotFoundError(origID);
+			}
+
+			// For mapping
+			const unTransformedRes = Array.from(result);
 
 			// Transforming
 			if (opts.transform !== false) {
 				result = await this.transformResult(result, params, ctx);
-				if (this.$fields) idField = this.$primaryField.name;
 			}
 
 			// Mapping
 			if (params.mapping === true) {
-				result = result.reduce((map, doc) => {
-					const id = doc[idField];
+				result = result.reduce((map, doc, i) => {
+					let id = unTransformedRes[i][idField];
+					if (this.$primaryField.secure) id = this.encodeID(id);
+
 					map[id] = doc;
 					return map;
 				}, {});
@@ -292,7 +298,7 @@ module.exports = function (mixinOpts) {
 
 			let result = await this.adapter.insert(params);
 			if (opts.transform !== false) {
-				result = await this.transformResult(result, params, ctx);
+				result = await this.transformResult(result, {}, ctx);
 			}
 
 			await this.entityChanged(result, ctx, { ...opts, type: "create" });
@@ -314,7 +320,7 @@ module.exports = function (mixinOpts) {
 			);
 			let result = await this.adapter.insertMany(entities);
 			if (opts.transform !== false) {
-				result = await this.transformResult(result, params, ctx);
+				result = await this.transformResult(result, {}, ctx);
 			}
 
 			await this.entityChanged(result, ctx, { ...opts, type: "create", batch: true });
@@ -332,7 +338,10 @@ module.exports = function (mixinOpts) {
 			let id = this._getIDFromParams(params);
 
 			// Call because it throws error if entity is not exist
-			/*const oldEntity = */ await this.resolveEntities(ctx, params, { transform: false });
+			/*const oldEntity = */ await this.resolveEntities(ctx, params, {
+				transform: false,
+				throwIfNotExist: true
+			});
 
 			params = await this.validateParams(ctx, params, { type: "update" });
 
@@ -348,7 +357,7 @@ module.exports = function (mixinOpts) {
 			let result = await this.adapter.updateById(id, params, { raw: rawUpdate });
 
 			if (opts.transform !== false) {
-				result = await this.transformResult(result, params, ctx);
+				result = await this.transformResult(result, {}, ctx);
 			}
 
 			await this.entityChanged(result, ctx, { ...opts, type: "update" });
@@ -366,7 +375,10 @@ module.exports = function (mixinOpts) {
 			let id = this._getIDFromParams(params);
 
 			// Call because it throws error if entity is not exist
-			/*const oldEntity = */ await this.resolveEntities(ctx, params, { transform: false });
+			/*const oldEntity = */ await this.resolveEntities(ctx, params, {
+				transform: false,
+				throwIfNotExist: true
+			});
 
 			params = await this.validateParams(ctx, params, { type: "replace" });
 
@@ -379,7 +391,7 @@ module.exports = function (mixinOpts) {
 			let result = await this.adapter.replaceById(id, params);
 
 			if (opts.transform !== false) {
-				result = await this.transformResult(result, params, ctx);
+				result = await this.transformResult(result, {}, ctx);
 			}
 
 			await this.entityChanged(result, ctx, { ...opts, type: "replace" });
@@ -397,7 +409,10 @@ module.exports = function (mixinOpts) {
 			let id = this._getIDFromParams(params);
 			const origID = id;
 
-			let entity = await this.resolveEntities(ctx, params, { transform: false });
+			let entity = await this.resolveEntities(ctx, params, {
+				transform: false,
+				throwIfNotExist: true
+			});
 
 			params = await this.validateParams(ctx, params, { type: "remove" });
 
@@ -433,45 +448,6 @@ module.exports = function (mixinOpts) {
 		async clearEntities(ctx, params) {
 			const result = await this.adapter.clear(params);
 			return result;
-		},
-
-		/**
-		 * Authorize the fields based on logged in user (from ctx).
-		 *
-		 * @param {Array<Object>} fields
-		 * @param {Context} ctx
-		 * @param {Object} params
-		 * @param {boolean} write
-		 * @returns {Array<Object>}
-		 */
-		async _authorizeFields(fields, ctx, params, write) {
-			if (!this.$shouldAuthorizeFields) return fields;
-
-			const res = [];
-			await Promise.all(
-				_.compact(
-					fields.map(field => {
-						if (!write && field.readPermission) {
-							return this.checkAuthority(
-								ctx,
-								field.readPermission,
-								params,
-								field
-							).then(has => (has ? res.push(field) : null));
-						} else if (field.permission) {
-							return this.checkAuthority(
-								ctx,
-								field.permission,
-								params,
-								field
-							).then(has => (has ? res.push(field) : null));
-						}
-
-						res.push(field);
-					})
-				)
-			);
-			return res;
 		},
 
 		/**
