@@ -42,9 +42,10 @@ const Transform = require("./transform");
 		- [x] required: validation
 		- [x] validate the type field with converting
 		- [x] readonly: { type: "string", readonly: true } // Can't be set and modified
-		- [x] hidden (password): password: { type: "string", hidden: true,
+		- [ ] hidden (password): password: { type: "string", hidden: true,
+		  - [ ] { hidden: "byDefault" | "always" == true } hide if it's not requested in `fields`.
 		- [x] custom validator: { type: "string", validate: (value, entity, field, ctx) => value.length > 6 },	// Custom validator
-		- [x] populate: { populate: { action: "v1.accounts.resolve", fields: ["id", "name", "avatar"] }
+		- [ ] populate: { populate: { action: "v1.accounts.resolve", fields: ["id", "name", "avatar"] }
 		- [x] immutable: { author: { type: "string", immutable: true } }
 		- [x] permission: roles: { type: "array", permission: "administrator" } // Access control by permissions
 		- [x] readPermission: { type: "array", populate: "v1.accounts.resolve", readPermission: ["$owner"] }
