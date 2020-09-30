@@ -33,18 +33,18 @@ const Transform = require("./transform");
 
 	- [ ] Field handlers
 		- [x] `id` field with `secure` option: { id: true, type: "string", readonly: true, secure: true, columnName: "_id" }
-		- [ ] `columnName` support: { id: true, type: "string", columnName: "_id" }
+		- [x] `columnName` support: { id: true, type: "string", columnName: "_id" }
 		- [x] Sanitizers
 			- [x] trim title: { type: "string", trim: true, maxlength: 50, required: true },
 		- [x] set: custom set formatter: { set: (value, entity, field, ctx) => slug(entity.title) }
-		- [ ] get: custom get formatter: { get: (value, entity, field, ctx) => entity.firstName + ' ' + entity.lastName }
+		- [x] get: custom get formatter: { get: (value, entity, field, ctx) => entity.firstName + ' ' + entity.lastName }
 		- [x] default value: status: { type: "number", default: 1 } // Optional field with default value
 		- [x] required: validation
 		- [x] validate the type field with converting
 		- [x] readonly: { type: "string", readonly: true } // Can't be set and modified
 		- [x] hidden (password): password: { type: "string", hidden: true,
 		- [x] custom validator: { type: "string", validate: (value, entity, field, ctx) => value.length > 6 },	// Custom validator
-		- [ ] populate: { populate: { action: "v1.accounts.resolve", fields: ["id", "name", "avatar"] }
+		- [x] populate: { populate: { action: "v1.accounts.resolve", fields: ["id", "name", "avatar"] }
 		- [x] immutable: { author: { type: "string", immutable: true } }
 		- [x] permission: roles: { type: "array", permission: "administrator" } // Access control by permissions
 		- [x] readPermission: { type: "array", populate: "v1.accounts.resolve", readPermission: ["$owner"] }
@@ -57,12 +57,12 @@ const Transform = require("./transform");
 		- [x] create indexes (execute the adapter)
 		- [x] methods for actions (findEntities, getEntity, countEntities, createEntity, updateEntity, removeEntity)
 		- [x] sanitizator
-		- [ ] transformer
+		- [x] transformer
 		- [ ] populate (default populates)
 		- [x] scopes
 		- [x] `find` with stream option  http://mongodb.github.io/node-mongodb-native/3.5/api/Cursor.html#stream
 
-	- [ ] Soft delete
+	- [x] Soft delete
 	- [ ] create validation from field definitions
 	- [ ] nested objects in fields.
 	- [ ] Multi model/tenant solutions
