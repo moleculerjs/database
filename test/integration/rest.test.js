@@ -5,7 +5,12 @@ const ApiGateway = require("moleculer-web");
 const axios = require("axios");
 const DbService = require("../..").Service;
 
-module.exports = getAdapter => {
+const Fakerator = require("fakerator");
+const fakerator = new Fakerator();
+const fs = require("fs");
+const { Stream, Readable } = require("stream");
+
+module.exports = (getAdapter, adapterType) => {
 	describe("Test REST API with populates", () => {
 		const env = createEnvironment(getAdapter);
 		const docs = [];
@@ -280,6 +285,56 @@ module.exports = getAdapter => {
 			});
 		});
 	});
+
+	/*if (["MongoDB"].indexOf(adapterType) !== -1) {
+		describe("Test REST API with streams", () => {
+			const env = createEnvironment(getAdapter);
+			let docs = [];
+
+			beforeAll(() => env.start());
+			afterAll(() => env.stop());
+
+			it("should return empty array", async () => {
+				const res = await axios.get(`${env.baseURL}/posts`);
+				const data = res.data;
+
+				expect(data).toEqual({
+					rows: [],
+					page: 1,
+					pageSize: 10,
+					total: 0,
+					totalPages: 0
+				});
+			});
+
+			it("should seed table", async () => {
+				const posts = fakerator.times(fakerator.entity.post, 10);
+
+				docs = await Promise.all(
+					posts.map(async post => (await axios.post(`${env.baseURL}/posts`, post)).data)
+				);
+			});
+
+			it("should return rows as stream", async () => {
+				const res = await axios.get(`${env.baseURL}/posts/stream`, {
+					responseType: "stream"
+				});
+
+				expect.assertions(1);
+				const rows = [];
+				await new Promise((resolve, reject) => {
+					const stream = new Readable();
+					stream.on("data", row => rows.push(row));
+					stream.on("error", reject);
+					stream.on("end", resolve);
+
+					res.data.pipe(stream);
+				});
+
+				expect(rows).toEqual(expect.arrayContaining(docs));
+			});
+		});
+	}*/
 };
 
 function createEnvironment(getAdapter) {
@@ -351,6 +406,15 @@ function createEnvironment(getAdapter) {
 			},
 
 			defaultPopulates: ["author"]
+		},
+
+		actions: {
+			findStream: {
+				rest: "/stream",
+				handler(ctx) {
+					return this.streamEntities(ctx, ctx.params);
+				}
+			}
 		},
 
 		methods: {},

@@ -510,4 +510,67 @@ module.exports = (getAdapter, adapterType) => {
 			});
 		});
 	});
+
+	if (["MongoDB"].indexOf(adapterType) !== -1) {
+		describe("Test streaming", () => {
+			let docs = [];
+
+			const broker = new ServiceBroker({ logger: false });
+			broker.createService({
+				name: "users",
+				mixins: [DbService({ adapter: getAdapter("users") })],
+				settings: {
+					fields: {
+						id: { type: "string", primaryKey: true, columnName: "_id" },
+						firstName: { type: "string", trim: true, required: true },
+						lastName: { type: "string", trim: true, required: true },
+						fullName: {
+							type: "string",
+							readonly: true,
+							get: (v, entity) => entity.firstName + " " + entity.lastName
+						},
+						userName: { type: "string", trim: true, required: true },
+						email: { type: "string", trim: true, required: true },
+						password: { type: "string", hidden: true },
+						status: { type: "boolean", trim: true, default: true }
+					}
+				},
+
+				actions: {
+					findStream: {
+						handler(ctx) {
+							return this.streamEntities(ctx, ctx.params);
+						}
+					}
+				},
+
+				async started() {
+					await this.clearEntities();
+					const users = fakerator.times(fakerator.entity.user, 10);
+					docs = await this.createEntities(null, users);
+				}
+			});
+
+			beforeAll(() => broker.start());
+			afterAll(() => broker.stop());
+
+			it("should find all entities as stream", async () => {
+				const rows = [];
+
+				const res = await broker.call("users.findStream");
+
+				return new Promise((resolve, reject) => {
+					expect(res).toBeInstanceOf(Stream);
+					res.on("data", row => rows.push(row));
+
+					expect.assertions(2);
+					res.on("error", reject);
+					res.on("end", () => {
+						expect(rows).toEqual(expect.arrayContaining(docs));
+						resolve();
+					});
+				});
+			});
+		});
+	}
 };
