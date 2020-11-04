@@ -63,9 +63,11 @@ module.exports = function (mixinOpts) {
 		 * @param {Object} params
 		 */
 		async _transformFields(docs, ctx, params) {
+			let customFieldList = false;
 			let selectedFields = this.$fields;
 			if (Array.isArray(params.fields)) {
 				selectedFields = this.$fields.filter(f => params.fields.includes(f.name));
+				customFieldList = true;
 			}
 			const authorizedFields = await this._authorizeFields(
 				selectedFields,
@@ -84,6 +86,7 @@ module.exports = function (mixinOpts) {
 			await Promise.all(
 				authorizedFields.map(async field => {
 					if (field.hidden === true) return;
+					else if (field.hidden == "byDefault" && !customFieldList) return;
 
 					// Get field values
 					let values = docs.map(doc => _.get(doc, field.columnName));

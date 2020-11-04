@@ -5,9 +5,6 @@ const DbService = require("../..").Service;
 
 module.exports = getAdapter => {
 	describe("Test transformations", () => {
-		const friendCountFn = jest.fn(async (ctx, idList, docs, field) =>
-			docs.map(doc => (doc.friends ? doc.friends.length : 0))
-		);
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
@@ -26,7 +23,116 @@ module.exports = getAdapter => {
 						get: (v, entity) => (entity.name ? entity.name.toUpperCase() : entity.name)
 					},
 					password: { type: "string", hidden: true },
+					token: { type: "string", hidden: "byDefault" },
 					email: { type: "string", readPermission: "admin" },
+					phone: { type: "string", permission: "admin" }
+				}
+			}
+		});
+
+		beforeAll(() => broker.start());
+		afterAll(() => broker.stop());
+
+		const ctx = Context.create(broker, null, {});
+		const docs = {};
+
+		describe("Set up", () => {
+			it("should return empty array", async () => {
+				await svc.clearEntities();
+
+				const rows = await svc.findEntities(ctx);
+				expect(rows).toEqual([]);
+
+				const count = await svc.countEntities(ctx);
+				expect(count).toEqual(0);
+			});
+		});
+
+		describe("Test hidden fields, getter, readPermission", () => {
+			it("create test entity", async () => {
+				const res = await svc.createEntity(ctx, {
+					name: "John Doe",
+					upperName: "Nothing",
+					email: "john.doe@moleculer.services",
+					phone: "+1-555-1234",
+					password: "johnDoe1234",
+					token: "token1234"
+				});
+				docs.johnDoe = res;
+
+				expect(res).toEqual({
+					myID: expect.any(String),
+					name: "John Doe",
+					upperName: "JOHN DOE",
+					email: "john.doe@moleculer.services",
+					phone: "+1-555-1234"
+				});
+			});
+
+			it("should hide e-mail address", async () => {
+				svc.checkAuthority = jest.fn(async () => false);
+				const res = await svc.resolveEntities(ctx, { myID: docs.johnDoe.myID });
+				expect(res).toEqual({
+					myID: expect.any(String),
+					name: "John Doe",
+					upperName: "JOHN DOE"
+				});
+			});
+
+			it("should not transform the entity", async () => {
+				const res2 = await svc.resolveEntities(
+					ctx,
+					{ myID: docs.johnDoe.myID },
+					{ transform: false }
+				);
+				expect(res2).toEqual({
+					_id: expect.anything(),
+					name: "John Doe",
+					email: "john.doe@moleculer.services",
+					phone: "+1-555-1234",
+					password: "johnDoe1234",
+					token: "token1234"
+				});
+			});
+
+			it("should filter fields", async () => {
+				const res = await svc.resolveEntities(ctx, {
+					myID: docs.johnDoe.myID,
+					fields: ["upperName", "asdasdasd", "password", "email", "token"]
+				});
+				expect(res).toEqual({
+					upperName: "JOHN DOE",
+					token: "token1234"
+				});
+			});
+
+			it("should filter all fields", async () => {
+				const res = await svc.resolveEntities(ctx, {
+					myID: docs.johnDoe.myID,
+					fields: []
+				});
+				expect(res).toEqual({});
+			});
+		});
+	});
+
+	describe("Test transformations", () => {
+		const friendCountFn = jest.fn(async (ctx, idList, docs /*, field*/) =>
+			docs.map(doc => (doc.friends ? doc.friends.length : 0))
+		);
+		const broker = new ServiceBroker({ logger: false });
+		const svc = broker.createService({
+			name: "users",
+			mixins: [
+				DbService({
+					adapter: getAdapter("users")
+				})
+			],
+			settings: {
+				fields: {
+					id: { type: "string", primaryKey: true, columnName: "_id" },
+					name: { type: "string" },
+					email: { type: "string" },
 					referer: {
 						type: "string",
 						populate: {
@@ -54,7 +160,7 @@ module.exports = getAdapter => {
 		afterAll(() => broker.stop());
 
 		const ctx = Context.create(broker, null, {});
-		let docs = {};
+		const docs = {};
 
 		describe("Set up", () => {
 			it("should return empty array", async () => {
@@ -68,117 +174,69 @@ module.exports = getAdapter => {
 			});
 		});
 
-		describe("Test hidden fields, getter, readPermission", () => {
-			it("create test entity", async () => {
+		describe("Test populates", () => {
+			it("create entities", async () => {
+				// --- JOHN DOE ---
 				const res = await svc.createEntity(ctx, {
 					name: "John Doe",
-					upperName: "Nothing",
-					email: "john.doe@moleculer.services",
-					password: "johnDoe1234",
-					referer: null
+					email: "john.doe@moleculer.services"
 				});
 				docs.johnDoe = res;
 
 				expect(res).toEqual({
-					email: "john.doe@moleculer.services",
-					myID: expect.any(String),
+					id: expect.any(String),
 					name: "John Doe",
-					upperName: "JOHN DOE",
-					referer: null
-				});
-			});
-
-			it("should hide e-mail address", async () => {
-				svc.checkAuthority = jest.fn(async () => false);
-				const res = await svc.resolveEntities(ctx, { myID: docs.johnDoe.myID });
-				expect(res).toEqual({
-					myID: expect.any(String),
-					name: "John Doe",
-					upperName: "JOHN DOE",
-					referer: null
+					email: "john.doe@moleculer.services"
 				});
 
-				const res2 = await svc.resolveEntities(
-					ctx,
-					{ myID: docs.johnDoe.myID },
-					{ transform: false }
-				);
-				expect(res2).toEqual({
-					_id: expect.anything(),
-					name: "John Doe",
-					email: "john.doe@moleculer.services",
-					password: "johnDoe1234",
-					referer: null
-				});
-			});
-			it("should filter fields", async () => {
-				const res = await svc.resolveEntities(ctx, {
-					myID: docs.johnDoe.myID,
-					fields: ["upperName", "asdasdasd", "password", "email"]
-				});
-				expect(res).toEqual({
-					upperName: "JOHN DOE"
-				});
-			});
-
-			it("should filter all fields", async () => {
-				const res = await svc.resolveEntities(ctx, {
-					myID: docs.johnDoe.myID,
-					fields: []
-				});
-				expect(res).toEqual({});
-			});
-
-			it("create other entities", async () => {
-				const res = await svc.createEntity(ctx, {
+				// --- JANE DOE ---
+				const res2 = await svc.createEntity(ctx, {
 					name: "Jane Doe",
 					email: "jane.doe@moleculer.services",
-					password: "janeDoe1234",
-					referer: docs.johnDoe.myID
+					referer: docs.johnDoe.id
 				});
-				docs.janeDoe = res;
+				docs.janeDoe = res2;
 
-				expect(res).toEqual({
-					myID: expect.any(String),
+				expect(res2).toEqual({
+					id: expect.any(String),
 					name: "Jane Doe",
-					upperName: "JANE DOE",
+					email: "jane.doe@moleculer.services",
 					referer: {
 						name: "John Doe",
-						upperName: "JOHN DOE"
+						email: "john.doe@moleculer.services"
 					}
 				});
 
-				const res2 = await svc.createEntity(ctx, {
+				// --- BOB SMITH ---
+				const res3 = await svc.createEntity(ctx, {
 					name: "Bob Smith",
 					email: "bob.smith@moleculer.services",
-					password: "bobby1234",
-					referer: docs.johnDoe.myID,
-					friends: [docs.johnDoe.myID, docs.janeDoe.myID]
+					referer: docs.johnDoe.id,
+					friends: [docs.johnDoe.id, docs.janeDoe.id]
 				});
-				docs.bobSmith = res2;
+				docs.bobSmith = res3;
 
-				expect(res2).toEqual({
-					myID: expect.any(String),
+				expect(res3).toEqual({
+					id: expect.any(String),
 					name: "Bob Smith",
-					upperName: "BOB SMITH",
+					email: "bob.smith@moleculer.services",
 					referer: {
 						name: "John Doe",
-						upperName: "JOHN DOE"
+						email: "john.doe@moleculer.services"
 					},
 					friends: [
 						{
-							myID: docs.johnDoe.myID,
+							id: docs.johnDoe.id,
 							name: "John Doe",
-							upperName: "JOHN DOE",
-							referer: null
+							email: "john.doe@moleculer.services"
 						},
 						{
-							myID: docs.janeDoe.myID,
+							id: docs.janeDoe.id,
 							name: "Jane Doe",
-							upperName: "JANE DOE",
+							email: "jane.doe@moleculer.services",
 							referer: {
 								name: "John Doe",
-								upperName: "JOHN DOE"
+								email: "john.doe@moleculer.services"
 							}
 						}
 					]
@@ -189,20 +247,20 @@ module.exports = getAdapter => {
 				friendCountFn.mockClear();
 
 				const res = await svc.resolveEntities(ctx, {
-					id: docs.bobSmith.myID,
+					id: docs.bobSmith.id,
 					populate: ["friendCount"]
 				});
 				expect(res).toEqual({
-					myID: docs.bobSmith.myID,
+					id: docs.bobSmith.id,
 					name: "Bob Smith",
-					upperName: "BOB SMITH",
-					referer: docs.johnDoe.myID,
-					friends: [docs.johnDoe.myID, docs.janeDoe.myID],
+					email: "bob.smith@moleculer.services",
+					referer: docs.johnDoe.id,
+					friends: [docs.johnDoe.id, docs.janeDoe.id],
 					friendCount: 2
 				});
 
 				expect(friendCountFn).toBeCalledTimes(1);
-				expect(friendCountFn).toBeCalledWith(ctx, [], expect.any(Array), svc.$fields[7]);
+				expect(friendCountFn).toBeCalledWith(ctx, [], expect.any(Array), svc.$fields[5]);
 			});
 		});
 	});

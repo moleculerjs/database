@@ -42,8 +42,8 @@ const Transform = require("./transform");
 		- [x] required: validation
 		- [x] validate the type field with converting
 		- [x] readonly: { type: "string", readonly: true } // Can't be set and modified
-		- [ ] hidden (password): password: { type: "string", hidden: true,
-		  - [ ] { hidden: "byDefault" | "always" == true } hide if it's not requested in `fields`.
+		- [x] hidden (password): password: { type: "string", hidden: true,
+		  - [x] { hidden: "byDefault" | "always" == true } hide if it's not requested in `fields`.
 		- [x] custom validator: { type: "string", validate: (value, entity, field, ctx) => value.length > 6 },	// Custom validator
 		- [ ] populate: { populate: { action: "v1.accounts.resolve", fields: ["id", "name", "avatar"] }
 		- [x] immutable: { author: { type: "string", immutable: true } }
@@ -132,17 +132,26 @@ module.exports = function DatabaseMixin(mixinOpts) {
 			...Transform(mixinOpts)
 		},
 
+		/**
+		 * Create lifecycle hook of service
+		 */
 		created() {
 			this.adapter = Adapters.resolve(mixinOpts.adapter);
 			this.adapter.init(this);
 		},
 
+		/**
+		 * Start lifecycle hook of service
+		 */
 		async started() {
 			this._processFields();
 
 			return this.connect();
 		},
 
+		/**
+		 * Stop lifecycle hook of service
+		 */
 		async stopped() {
 			return this.disconnect();
 		}

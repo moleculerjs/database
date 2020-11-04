@@ -14,8 +14,8 @@ const RESTTests = require("./rest.test");
 );
 */
 const Adapters = [
-	//{ type: "NeDB" }
-	{ type: "MongoDB", options: { dbName: "db-int-test", collection: "users" } }
+	{ type: "NeDB" }
+	//{ type: "MongoDB", options: { dbName: "db-int-test", collection: "users" } }
 ];
 
 describe("Integration tests", () => {
