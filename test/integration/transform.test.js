@@ -80,12 +80,12 @@ module.exports = getAdapter => {
 			});
 
 			it("should not transform the entity", async () => {
-				const res2 = await svc.resolveEntities(
+				const res = await svc.resolveEntities(
 					ctx,
 					{ myID: docs.johnDoe.myID },
 					{ transform: false }
 				);
-				expect(res2).toEqual({
+				expect(res).toEqual({
 					_id: expect.anything(),
 					name: "John Doe",
 					email: "john.doe@moleculer.services",
@@ -133,10 +133,15 @@ module.exports = getAdapter => {
 					id: { type: "string", primaryKey: true, columnName: "_id" },
 					name: { type: "string" },
 					email: { type: "string" },
+					refererID: {
+						type: "string"
+					},
 					referer: {
-						type: "string",
+						type: "object",
+						readonly: true,
 						populate: {
 							action: "users.resolve",
+							keyField: "refererID",
 							fields: ["name", "upperName", "password", "email"]
 						}
 					},
@@ -193,7 +198,7 @@ module.exports = getAdapter => {
 				const res2 = await svc.createEntity(ctx, {
 					name: "Jane Doe",
 					email: "jane.doe@moleculer.services",
-					referer: docs.johnDoe.id
+					refererID: docs.johnDoe.id
 				});
 				docs.janeDoe = res2;
 
@@ -201,6 +206,7 @@ module.exports = getAdapter => {
 					id: expect.any(String),
 					name: "Jane Doe",
 					email: "jane.doe@moleculer.services",
+					refererID: docs.johnDoe.id,
 					referer: {
 						name: "John Doe",
 						email: "john.doe@moleculer.services"
@@ -211,7 +217,7 @@ module.exports = getAdapter => {
 				const res3 = await svc.createEntity(ctx, {
 					name: "Bob Smith",
 					email: "bob.smith@moleculer.services",
-					referer: docs.johnDoe.id,
+					refererID: docs.johnDoe.id,
 					friends: [docs.johnDoe.id, docs.janeDoe.id]
 				});
 				docs.bobSmith = res3;
@@ -220,6 +226,7 @@ module.exports = getAdapter => {
 					id: expect.any(String),
 					name: "Bob Smith",
 					email: "bob.smith@moleculer.services",
+					refererID: docs.johnDoe.id,
 					referer: {
 						name: "John Doe",
 						email: "john.doe@moleculer.services"
@@ -234,6 +241,7 @@ module.exports = getAdapter => {
 							id: docs.janeDoe.id,
 							name: "Jane Doe",
 							email: "jane.doe@moleculer.services",
+							refererID: docs.johnDoe.id,
 							referer: {
 								name: "John Doe",
 								email: "john.doe@moleculer.services"
@@ -254,13 +262,18 @@ module.exports = getAdapter => {
 					id: docs.bobSmith.id,
 					name: "Bob Smith",
 					email: "bob.smith@moleculer.services",
-					referer: docs.johnDoe.id,
+					refererID: docs.johnDoe.id,
 					friends: [docs.johnDoe.id, docs.janeDoe.id],
 					friendCount: 2
 				});
 
 				expect(friendCountFn).toBeCalledTimes(1);
-				expect(friendCountFn).toBeCalledWith(ctx, [], expect.any(Array), svc.$fields[5]);
+				expect(friendCountFn).toBeCalledWith(
+					ctx,
+					[],
+					expect.any(Array),
+					svc.$fields.find(f => f.name == "friendCount")
+				);
 			});
 		});
 	});

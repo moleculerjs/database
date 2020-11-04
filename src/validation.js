@@ -36,7 +36,7 @@ module.exports = function (mixinOpts) {
 						// TODO: | handling like if FastestValidator
 						if (_.isString(def)) def = { type: def };
 
-						// Copy the properties
+						// Copy the properties TOOD: deep clone due to nested fields
 						const field = Object.assign({}, def);
 
 						// Set name of field

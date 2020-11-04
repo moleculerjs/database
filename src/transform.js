@@ -6,7 +6,7 @@
 
 "use strict";
 
-const { Context } = require("moleculer");
+const { ServiceSchemaError, ValidationError } = require("moleculer").Errors;
 const _ = require("lodash");
 
 function deepResolve(values, resolvedObj) {
@@ -88,8 +88,8 @@ module.exports = function (mixinOpts) {
 					if (field.hidden === true) return;
 					else if (field.hidden == "byDefault" && !customFieldList) return;
 
-					// Get field values
-					let values = docs.map(doc => _.get(doc, field.columnName));
+					// Field values
+					let values;
 
 					// Populating
 					if (
@@ -97,11 +97,31 @@ module.exports = function (mixinOpts) {
 						needPopulates != null &&
 						needPopulates.includes(field.name)
 					) {
+						if (field.populate.keyField) {
+							// Using different field values as key values
+							const keyField = this.$fields.find(
+								f => f.name == field.populate.keyField
+							);
+							if (!keyField) {
+								throw new ServiceSchemaError(
+									`The 'keyField' is not exist in populate definition of '${field.name}' field.`,
+									{ field }
+								);
+							}
+
+							values = docs.map(doc => _.get(doc, keyField.columnName));
+						} else {
+							// Keys in the same field
+							values = docs.map(doc => _.get(doc, field.columnName));
+						}
+
 						const resolvedObj = await this._populateValues(field, values, docs, ctx);
 						// Received the values from custom populate
 						if (Array.isArray(resolvedObj)) values = resolvedObj;
 						// Received the values from action resolving
 						else values = deepResolve(values, resolvedObj);
+					} else {
+						values = docs.map(doc => _.get(doc, field.columnName));
 					}
 
 					// Virtual or formatted field

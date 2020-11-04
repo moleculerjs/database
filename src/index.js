@@ -45,7 +45,8 @@ const Transform = require("./transform");
 		- [x] hidden (password): password: { type: "string", hidden: true,
 		  - [x] { hidden: "byDefault" | "always" == true } hide if it's not requested in `fields`.
 		- [x] custom validator: { type: "string", validate: (value, entity, field, ctx) => value.length > 6 },	// Custom validator
-		- [ ] populate: { populate: { action: "v1.accounts.resolve", fields: ["id", "name", "avatar"] }
+		- [x] populate: { populate: { action: "v1.accounts.resolve", fields: ["id", "name", "avatar"] }
+			- [ ] using different field name
 		- [x] immutable: { author: { type: "string", immutable: true } }
 		- [x] permission: roles: { type: "array", permission: "administrator" } // Access control by permissions
 		- [x] readPermission: { type: "array", populate: "v1.accounts.resolve", readPermission: ["$owner"] }
@@ -59,7 +60,7 @@ const Transform = require("./transform");
 		- [x] methods for actions (findEntities, getEntity, countEntities, createEntity, updateEntity, removeEntity)
 		- [x] sanitizator
 		- [x] transformer
-		- [ ] populate (default populates)
+		- [x] populate (default populates)
 		- [x] scopes
 		- [x] `find` with stream option  http://mongodb.github.io/node-mongodb-native/3.5/api/Cursor.html#stream
 
