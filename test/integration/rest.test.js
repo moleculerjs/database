@@ -443,6 +443,7 @@ function createEnvironment(getAdapter) {
 				status: { type: "boolean", default: true },
 				postCount: {
 					type: "number",
+					readonly: true,
 					populate(ctx, values, docs) {
 						return Promise.all(
 							docs.map(doc => ctx.call("posts.count", { query: { author: doc._id } }))

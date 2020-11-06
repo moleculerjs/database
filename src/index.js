@@ -31,7 +31,7 @@ const Transform = require("./transform");
 		- [x] `replace`
 		- [x] `remove`
 
-	- [ ] Field handlers
+	- [x] Field handlers
 		- [x] `id` field with `secure` option: { id: true, type: "string", readonly: true, secure: true, columnName: "_id" }
 		- [x] `columnName` support: { id: true, type: "string", columnName: "_id" }
 		- [x] Sanitizers
@@ -46,7 +46,7 @@ const Transform = require("./transform");
 		  - [x] { hidden: "byDefault" | "always" == true } hide if it's not requested in `fields`.
 		- [x] custom validator: { type: "string", validate: (value, entity, field, ctx) => value.length > 6 },	// Custom validator
 		- [x] populate: { populate: { action: "v1.accounts.resolve", fields: ["id", "name", "avatar"] }
-			- [ ] using different field name
+			- [x] using different field name
 		- [x] immutable: { author: { type: "string", immutable: true } }
 		- [x] permission: roles: { type: "array", permission: "administrator" } // Access control by permissions
 		- [x] readPermission: { type: "array", populate: "v1.accounts.resolve", readPermission: ["$owner"] }
@@ -55,7 +55,7 @@ const Transform = require("./transform");
 		- [x] onRemove: deletedAt: { type: "number", readonly: true, onRemove: () => Date.now() }, // Set value when entity is deleted
 		- [ ] nested types
 
-	- [ ] Methods (internal with _ prefix)
+	- [x] Methods (internal with _ prefix)
 		- [x] create indexes (execute the adapter)
 		- [x] methods for actions (findEntities, getEntity, countEntities, createEntity, updateEntity, removeEntity)
 		- [x] sanitizator

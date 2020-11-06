@@ -288,7 +288,10 @@ module.exports = function (mixinOpts) {
 							}
 						}
 
-						// Required
+						// Required/optional
+						if (field.required == null && field.optional != null)
+							field.required = !field.optional;
+
 						if (field.required) {
 							if ((value === null && !field.nullable) || value === undefined) {
 								throw new ValidationError(
@@ -304,7 +307,10 @@ module.exports = function (mixinOpts) {
 					}
 
 					// Immutable
-					if (["update", "replace"].includes(type) && field.immutable === true) return;
+					if (["update", "replace"].includes(type) && field.immutable === true) {
+						// TODO throwing error instead of skipping?
+						return;
+					}
 
 					setValue(field, value);
 				})

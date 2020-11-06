@@ -5,6 +5,7 @@ const MethodTests = require("./methods.test");
 const ScopeTests = require("./scopes.test");
 const ActionsTests = require("./actions.test");
 const TransformTests = require("./transform.test");
+const PopulateTests = require("./populate.test");
 const RESTTests = require("./rest.test");
 
 // console.log(process.env);
@@ -39,6 +40,9 @@ describe("Integration tests", () => {
 			});
 			describe("Test transformations", () => {
 				TransformTests(getAdapter, adapter.type);
+			});
+			describe("Test populating", () => {
+				PopulateTests(getAdapter, adapter.type);
 			});
 			describe("Test REST", () => {
 				RESTTests(getAdapter, adapter.type);
