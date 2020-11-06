@@ -51,6 +51,11 @@ module.exports = function (mixinOpts) {
 							this.$shouldAuthorizeFields = true;
 						}
 
+						if (field.required == null) {
+							if (field.optional != null) field.required = !field.optional;
+							else field.required = false;
+						}
+
 						if (field.populate) {
 							if (_.isFunction(field.populate)) {
 								field.populate = { handler: field.populate };
@@ -289,9 +294,6 @@ module.exports = function (mixinOpts) {
 						}
 
 						// Required/optional
-						if (field.required == null && field.optional != null)
-							field.required = !field.optional;
-
 						if (field.required) {
 							if ((value === null && !field.nullable) || value === undefined) {
 								throw new ValidationError(
@@ -306,7 +308,7 @@ module.exports = function (mixinOpts) {
 						}
 					}
 
-					// Immutable
+					// Immutable (TODO: should check the previous value, if not set yet, we should enable)
 					if (["update", "replace"].includes(type) && field.immutable === true) {
 						// TODO throwing error instead of skipping?
 						return;
@@ -317,6 +319,62 @@ module.exports = function (mixinOpts) {
 			);
 
 			return entity;
+		},
+
+		_generateValidatorSchema(opts) {
+			const type = opts.type || "create";
+
+			const res = {
+				$$strict: true
+			};
+
+			if (this.$fields == null) return res;
+
+			this.$fields.forEach(field => {
+				const schema = this._generateFieldValidatorSchema(field, opts);
+				if (schema != null) res[field.name] = schema;
+			});
+
+			return res;
+		},
+
+		_generateFieldValidatorSchema(field, opts) {
+			const schema = _.omit(field, [
+				"name",
+				"columnName",
+				"primaryKey",
+				"optional",
+				"hidden",
+				"readonly",
+				"required",
+				"onCreate",
+				"onUpdate",
+				"onReplace",
+				"onRemove",
+				"permission",
+				"readPermission",
+				"populate"
+			]);
+
+			// Type
+			schema.type = field.type || "any";
+
+			// Readonly -> Forbidden
+			if (field.readonly == true) return null;
+
+			// Primary key forbidden
+			if (field.primaryKey && opts.type == "create") return null;
+
+			// Required/Optional
+			if (field.required === false) schema.optional = true;
+
+			// Type conversion (enable by default)
+			if (["number", "date", "boolean"].includes(field.type))
+				schema.convert = field.convert != null ? field.convert : true;
+
+			// Default value
+			if (field.default !== undefined) schema.default = field.default;
+			return schema;
 		}
 	};
 };

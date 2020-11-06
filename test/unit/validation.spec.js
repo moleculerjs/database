@@ -65,29 +65,38 @@ describe("Test validation", () => {
 
 		it("check the process fields", async () => {
 			expect(svc.$fields).toEqual([
-				{ columnName: "_id", name: "id", primaryKey: true, type: "string" },
-				{ columnName: "name", name: "name", type: "string" },
-				{ columnName: "age", name: "age", type: "any" },
+				{
+					columnName: "_id",
+					name: "id",
+					primaryKey: true,
+					type: "string",
+					required: false
+				},
+				{ columnName: "name", name: "name", type: "string", required: false },
+				{ columnName: "age", name: "age", type: "any", required: false },
 				{
 					name: "createdAt",
 					type: "date",
 					columnName: "createdAt",
 					onCreate: expect.any(Function),
-					readonly: true
+					readonly: true,
+					required: false
 				},
 				{
 					name: "status",
 					type: "string",
 					columnName: "status",
 					default: "A",
-					onRemove: "D"
+					onRemove: "D",
+					required: false
 				}
 			]);
 			expect(svc.$primaryField).toEqual({
 				name: "id",
 				columnName: "_id",
 				primaryKey: true,
-				type: "string"
+				type: "string",
+				required: false
 			});
 			expect(svc.$softDelete).toBe(true);
 			expect(svc.$shouldAuthorizeFields).toBe(false);
@@ -123,20 +132,28 @@ describe("Test validation", () => {
 
 		it("check the process fields", async () => {
 			expect(svc.$fields).toEqual([
-				{ columnName: "name", name: "name", type: "string" },
+				{ columnName: "name", name: "name", type: "string", required: false },
 				{
 					columnName: "password",
 					name: "password",
 					readPermission: "admin",
 					permission: "owner",
-					type: "string"
+					type: "string",
+					required: false
 				},
-				{ columnName: "email", name: "email", permission: "moderator", type: "string" },
+				{
+					columnName: "email",
+					name: "email",
+					permission: "moderator",
+					type: "string",
+					required: false
+				},
 				{
 					columnName: "phone",
 					name: "phone",
 					permission: ["admin", "moderator", "owner"],
-					type: "string"
+					type: "string",
+					required: false
 				}
 			]);
 			expect(svc.$shouldAuthorizeFields).toBe(true);
@@ -154,7 +171,9 @@ describe("Test validation", () => {
 			it("should return fields with read permission", async () => {
 				svc.checkAuthority = jest.fn(async () => false);
 				const res = await svc._authorizeFields(svc.$fields, ctx, { a: 5 });
-				expect(res).toEqual([{ columnName: "name", name: "name", type: "string" }]);
+				expect(res).toEqual([
+					{ columnName: "name", name: "name", type: "string", required: false }
+				]);
 
 				expect(svc.checkAuthority).toBeCalledTimes(3);
 				expect(svc.checkAuthority).toBeCalledWith(ctx, "admin", { a: 5 }, svc.$fields[1]);
@@ -175,7 +194,9 @@ describe("Test validation", () => {
 			it("should return fields with write permission", async () => {
 				svc.checkAuthority = jest.fn(async () => false);
 				const res = await svc._authorizeFields(svc.$fields, ctx, { a: 5 }, true);
-				expect(res).toEqual([{ columnName: "name", name: "name", type: "string" }]);
+				expect(res).toEqual([
+					{ columnName: "name", name: "name", type: "string", required: false }
+				]);
 
 				expect(svc.checkAuthority).toBeCalledTimes(3);
 				expect(svc.checkAuthority).toBeCalledWith(ctx, "owner", { a: 5 }, svc.$fields[1]);
@@ -1056,6 +1077,52 @@ describe("Test validation", () => {
 
 				expect(onRemove).toBeCalledTimes(1);
 				expect(onRemove).toBeCalledWith("2020-09-19", params, ctx);
+			});
+		});
+	});
+
+	describe("Test validator schema generation", () => {
+		const broker = new ServiceBroker({ logger: false });
+		const svc = broker.createService({
+			name: "users",
+			mixins: [DbService()],
+			settings: {
+				fields: {
+					id: { type: "string", primaryKey: true, columnName: "_id" },
+					name: { type: "string", optional: false },
+					username: { type: "string", required: true, min: 3, max: 100 },
+					email: "email",
+					password: { type: "string", hidden: true, min: 6 },
+					age: { type: "number", positive: true, integer: true },
+					bio: true,
+					token: false,
+					createdAt: { type: "date", readonly: true, onCreate: () => new Date() },
+					updatedAt: { type: "date", readonly: true, onUpdate: () => new Date() },
+					replacedAt: { type: "date", readonly: true, onReplace: () => new Date() },
+					status: { type: "string", default: "A", onRemove: "D" }
+				}
+			}
+		});
+
+		beforeAll(() => broker.start());
+		afterAll(() => broker.stop());
+
+		it("generate validator schema for 'create'", async () => {
+			expect(svc._generateValidatorSchema({ type: "create" })).toEqual({
+				$$strict: true,
+				name: { type: "string" },
+				username: { type: "string", max: 100, min: 3 },
+				email: { type: "email", optional: true },
+				password: { type: "string", min: 6, optional: true },
+				age: {
+					type: "number",
+					positive: true,
+					integer: true,
+					optional: true,
+					convert: true
+				},
+				bio: { type: "any", optional: true },
+				status: { type: "string", default: "A", optional: true }
 			});
 		});
 	});
