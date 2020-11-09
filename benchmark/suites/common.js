@@ -259,66 +259,66 @@ benchmark.run([bench1, bench2, bench3, bench4, bench5, bench6, bench7]);
 
 Platform info:
 ==============
-   Windows_NT 10.0.18362 x64
-   Node.JS: 10.17.0
-   V8: 6.8.275.32-node.54
-   Intel(R) Core(TM) i5-2400 CPU @ 3.10GHz × 4
+   Windows_NT 10.0.19041 x64
+   Node.JS: 12.14.1
+   V8: 7.7.299.13-node.16
+   Intel(R) Core(TM) i7-4770K CPU @ 3.50GHz × 8
 
 Suite: NeDB: Entity creation (1000)
-√ Without transform*           10,799 rps
-√ With transform*               9,291 rps
+√ Without transform*           36,303 rps
+√ With transform*              27,818 rps
 
-   Without transform* (#)       0%         (10,799 rps)   (avg: 92μs)
-   With transform*         -13.96%          (9,291 rps)   (avg: 107μs)
+   Without transform* (#)       0%         (36,303 rps)   (avg: 27μs)
+   With transform*         -23.37%         (27,818 rps)   (avg: 35μs)
 -----------------------------------------------------------------------
 
 Suite: NeDB: Entity listing (1000)
-√ Without transform*            5,543 rps
-√ With transform*               3,336 rps
+√ Without transform*            9,733 rps
+√ With transform*               7,614 rps
 
-   Without transform* (#)       0%          (5,543 rps)   (avg: 180μs)
-   With transform*         -39.82%          (3,336 rps)   (avg: 299μs)
+   Without transform* (#)       0%          (9,733 rps)   (avg: 102μs)
+   With transform*         -21.77%          (7,614 rps)   (avg: 131μs)
 -----------------------------------------------------------------------
 
 Suite: NeDB: Entity counting (1000)
-√ Without transform*              591 rps
+√ Without transform*            1,907 rps
 
-   Without transform* (#)       0%            (591 rps)   (avg: 1ms)
+   Without transform* (#)       0%          (1,907 rps)   (avg: 524μs)
 -----------------------------------------------------------------------
 
 Suite: NeDB: Entity getting (1000)
-√ Without transform*               17,678 rps
-√ With transform*                  12,576 rps
-√ Direct adapter access*           37,203 rps
+√ Without transform*               95,113 rps
+√ With transform*                  57,807 rps
+√ Direct adapter access*          103,682 rps
 
-   Without transform* (#)           0%         (17,678 rps)   (avg: 56μs)
-   With transform*             -28.86%         (12,576 rps)   (avg: 79μs)
-   Direct adapter access*     +110.44%         (37,203 rps)   (avg: 26μs)
+   Without transform* (#)           0%         (95,113 rps)   (avg: 10μs)
+   With transform*             -39.22%         (57,807 rps)   (avg: 17μs)
+   Direct adapter access*       +9.01%        (103,682 rps)   (avg: 9μs)
 -----------------------------------------------------------------------
 
 Suite: NeDB: Entity updating (1000)
-√ Without transform*            7,421 rps
-√ With transform*               6,458 rps
+√ Without transform*           23,939 rps
+√ With transform*              19,886 rps
 
-   Without transform* (#)       0%          (7,421 rps)   (avg: 134μs)
-   With transform*         -12.97%          (6,458 rps)   (avg: 154μs)
+   Without transform* (#)       0%         (23,939 rps)   (avg: 41μs)
+   With transform*         -16.93%         (19,886 rps)   (avg: 50μs)
 -----------------------------------------------------------------------
 
 Suite: NeDB: Entity replacing (1000)
-√ Without transform*            7,531 rps
-√ With transform*               6,338 rps
+√ Without transform*           22,764 rps
+√ With transform*              19,546 rps
 
-   Without transform* (#)       0%          (7,531 rps)   (avg: 132μs)
-   With transform*         -15.84%          (6,338 rps)   (avg: 157μs)
+   Without transform* (#)       0%         (22,764 rps)   (avg: 43μs)
+   With transform*         -14.14%         (19,546 rps)   (avg: 51μs)
 -----------------------------------------------------------------------
 
 Suite: NeDB: Entity deleting (1000)
-√ Without transform*           16,411 rps
-√ With transform*                 346 rps
+√ Without transform*           22,502 rps
+√ With transform*               4,745 rps
 Remaining record 0
 
-   Without transform* (#)       0%         (15,061 rps)   (avg: 66μs)
-   With transform*          -97.7%            (346 rps)   (avg: 2ms)
+   Without transform* (#)       0%         (23,413 rps)   (avg: 42μs)
+   With transform*         -72.19%          (6,510 rps)   (avg: 153μs)
 -----------------------------------------------------------------------
 
 */
