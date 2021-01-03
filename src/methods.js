@@ -83,7 +83,7 @@ module.exports = function (mixinOpts) {
 		 * Disconnect all adapters
 		 */
 		disconnectAll() {
-			const adapters = Array.from(this.adapters.values());
+			const adapters = Array.from(this.adapters.values()).map(item => item.adapter);
 			this.adapters.clear();
 
 			this.logger.info(`Disconnect ${adapters.length} adapters...`);

@@ -70,7 +70,7 @@ module.exports = (getAdapter, adapterType) => {
 
 			it("Adapter specific setups", async () => {
 				if (adapterType == "MongoDB") {
-					svc.adapter.collection.createIndex({
+					(await svc.getAdapter()).collection.createIndex({
 						name: "text",
 						age: "text",
 						roles: "text"

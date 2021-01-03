@@ -12,7 +12,7 @@ const TenantTests = require("./tenants.test");
 // console.log(process.env);
 
 let Adapters;
-if (process.env.CI) {
+if (process.env.GITHUB_ACTIONS_CI) {
 	/*const Adapters = Object.keys(require("../../").Adapters).filter(
 		s => ["resolve", "register", "Base"].indexOf(s) == -1
 	);
@@ -24,27 +24,27 @@ if (process.env.CI) {
 } else {
 	// Local development tests
 	Adapters = [
-		//{ type: "NeDB" }
+		{ type: "NeDB" },
 		{ type: "MongoDB", options: { dbName: "db-int-test", collection: "users" } }
 	];
 }
 
 describe("Integration tests", () => {
 	for (const adapter of Adapters) {
-		const getAdapter = opts => {
+		const getAdapter = options => {
 			if (adapter.options && adapter.options.collection)
-				return _.defaultsDeep({ options: { opts } }, adapter);
+				return _.defaultsDeep({}, { options }, adapter);
 
 			return adapter;
 		};
 
 		describe(`Adapter: ${adapter.type}`, () => {
-			// describe("Test common methods", () => MethodTests(getAdapter, adapter.type));
-			// describe("Test scopes", () => ScopeTests(getAdapter, adapter.type));
-			// describe("Test actions", () => ActionsTests(getAdapter, adapter.type));
-			// describe("Test transformations", () => TransformTests(getAdapter, adapter.type));
-			// describe("Test populating", () => PopulateTests(getAdapter, adapter.type));
-			// describe("Test REST", () => RESTTests(getAdapter, adapter.type));
+			describe("Test methods", () => MethodTests(getAdapter, adapter.type));
+			describe("Test scopes", () => ScopeTests(getAdapter, adapter.type));
+			describe("Test actions", () => ActionsTests(getAdapter, adapter.type));
+			describe("Test transformations", () => TransformTests(getAdapter, adapter.type));
+			describe("Test populating", () => PopulateTests(getAdapter, adapter.type));
+			describe("Test REST", () => RESTTests(getAdapter, adapter.type));
 			describe("Test Tenants", () => TenantTests(getAdapter, adapter.type));
 		});
 	}
