@@ -9,7 +9,6 @@
 
 const _ = require("lodash");
 
-const Adapters = require("./adapters");
 const Actions = require("./actions");
 const DbMethods = require("./methods");
 const Validation = require("./validation");
@@ -67,8 +66,8 @@ const Transform = require("./transform");
 	- [x] Soft delete
 	- [ ] create validation from field definitions
 	- [ ] nested objects in fields.
-	- [ ] Multi model/tenant solutions
-		- [ ] get connection/model dynamically
+	- [x] Multi model/tenant solutions
+		- [x] get connection/model dynamically
 	- [ ] `aggregate` action with params: `type: "sum", "avg", "count", "min", "max"` & `field: "price"`
 
 
@@ -137,8 +136,7 @@ module.exports = function DatabaseMixin(mixinOpts) {
 		 * Create lifecycle hook of service
 		 */
 		created() {
-			this.adapter = Adapters.resolve(mixinOpts.adapter);
-			this.adapter.init(this);
+			this.adapters = new Map();
 		},
 
 		/**
@@ -146,15 +144,13 @@ module.exports = function DatabaseMixin(mixinOpts) {
 		 */
 		async started() {
 			this._processFields();
-
-			return this.connect();
 		},
 
 		/**
 		 * Stop lifecycle hook of service
 		 */
 		async stopped() {
-			return this.disconnect();
+			return this.disconnectAll();
 		}
 	};
 

@@ -6,13 +6,23 @@
 [![NPM version](https://badgen.net/npm/v/@moleculer/database)](https://www.npmjs.com/package/@moleculer/database)
 
 # @moleculer/database 
-Advanced Database Access Service for Moleculer microservices framework
+Advanced Database Access Service for Moleculer microservices framework.
 
 ## Features
+- common CRUD actions for RESTful API
+- multiple pluggable adapters (NeDB (memory), MongoDB)
+- field sanitizations, validations
+- data transformation
+- populating between Moleculer services
+- field permissions (read/write)
+- onCcreate/Update/Remove hooks in fields
+- soft delete mode
+- scopes support
+- Multi-tenancy (record-based, collection/table-based, schema-based, db-based, server-based)
 
 ## Install
 ```
-npm install database --save
+npm i database
 ```
 
 ## Usage

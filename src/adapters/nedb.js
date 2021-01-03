@@ -13,6 +13,9 @@ const BaseAdapter = require("./base");
 class NeDBAdapter extends BaseAdapter {
 	/**
 	 * Constructor of adapter
+	 * More info about options:
+	 * 	https://github.com/louischatriot/nedb#creatingloading-a-database
+	 *
 	 * @param  {Object?} opts
 	 */
 	constructor(opts) {

@@ -224,12 +224,6 @@ module.exports = function (mixinOpts) {
 						}
 					}
 
-					// Custom formatter
-					// Syntax: `set: (value, entity, field, ctx) => value.toUpperCase()`
-					if (field.set) {
-						value = field.set.call(this, value, params, field, ctx);
-					}
-
 					// Set the value to the entity, it's valid.
 					_.set(entity, field.columnName, value);
 				}
@@ -246,6 +240,12 @@ module.exports = function (mixinOpts) {
 			await Promise.all(
 				authorizedFields.map(async field => {
 					let value = _.get(params, field.name);
+
+					// Custom formatter
+					// Syntax: `set: (value, entity, field, ctx) => value.toUpperCase()`
+					if (field.set) {
+						value = field.set.call(this, value, params, field, ctx);
+					}
 
 					// Handlers
 					if (type == "create" && field.onCreate) {

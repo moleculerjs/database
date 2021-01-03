@@ -52,7 +52,7 @@ class MongoDBAdapter extends BaseAdapter {
 	async connect() {
 		this.client = new MongoClient(
 			this.opts.uri || "mongodb://localhost:27017",
-			this.opts.mongoClientOptions
+			_.defaultsDeep(this.opts.mongoClientOptions, { useUnifiedTopology: true })
 		);
 
 		// Connect the client to the server
@@ -64,7 +64,9 @@ class MongoDBAdapter extends BaseAdapter {
 
 		this.collection = this.db.collection(this.opts.collection);
 
-		this.logger.info("MongoDB adapter has connected.");
+		this.logger.info(
+			`MongoDB adapter has connected. DB: '${this.opts.dbName}', Collection: '${this.opts.collection}'`
+		);
 
 		this.db.on("close", () => this.logger.warn("MongoDB adapter has disconnected."));
 		this.db.on("error", err => this.logger.error("MongoDB error.", err));

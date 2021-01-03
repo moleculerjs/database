@@ -6,6 +6,7 @@
 
 "use strict";
 
+const Adapters = require("./adapters");
 const { Context } = require("moleculer");
 const { EntityNotFoundError } = require("./errors");
 const { MoleculerClientError } = require("moleculer").Errors;
@@ -17,13 +18,42 @@ module.exports = function (mixinOpts) {
 
 	return {
 		/**
+		 * Get or create an adapter. Multi-tenant support method.
+		 * @param {Context?} ctx
+		 */
+		async getAdapter(ctx) {
+			const [hash, adapterOpts] = this.getAdapterByContext(ctx, mixinOpts.adapter);
+			const item = this.adapters.get(hash);
+			if (item) return item.adapter;
+
+			const adapter = Adapters.resolve(adapterOpts);
+			adapter.init(this);
+			this.adapters.set(hash, { hash, adapter });
+			await this._connect(adapter);
+
+			return adapter;
+		},
+
+		/**
+		 * For multi-tenant support this method generates a cache key
+		 * hash value from `ctx`. By default, it returns "default" hash key.
+		 * It can be overwritten to implement custom multi-tenant solution.
+		 *
+		 * @param {Context?} ctx
+		 * @param {Object|any?} adapterOpts
+		 */
+		getAdapterByContext(ctx, adapterOpts) {
+			return ["default", adapterOpts];
+		},
+
+		/**
 		 * Connect to the DB
 		 */
-		connect() {
+		_connect(adapter) {
 			return new this.Promise((resolve, reject) => {
 				const connecting = async () => {
 					try {
-						await this.adapter.connect();
+						await adapter.connect();
 						resolve();
 					} catch (err) {
 						this.logger.error("Connection error!", err);
@@ -42,10 +72,22 @@ module.exports = function (mixinOpts) {
 		},
 
 		/**
-		 * Disconnect from DB
+		 * Disconnect an adapter
 		 */
-		disconnect() {
-			if (this.adapter) return this.adapter.disconnect();
+		_disconnect(adapter) {
+			if (_.isFunction(adapter.disconnect)) return adapter.disconnect();
+			return this.Promise.resolve();
+		},
+
+		/**
+		 * Disconnect all adapters
+		 */
+		disconnectAll() {
+			const adapters = Array.from(this.adapters.values());
+			this.adapters.clear();
+
+			this.logger.info(`Disconnect ${adapters.length} adapters...`);
+			return Promise.all(adapters.map(adapter => this._disconnect(adapter)));
 		},
 
 		/**
@@ -140,9 +182,11 @@ module.exports = function (mixinOpts) {
 			params = this.sanitizeParams(params);
 			params = this._applyScopes(params, ctx);
 
-			let result = await this.adapter.find(params);
+			const adapter = await this.getAdapter(ctx);
+
+			let result = await adapter.find(params);
 			if (opts.transform !== false) {
-				result = await this.transformResult(result, params, ctx);
+				result = await this.transformResult(adapter, result, params, ctx);
 			}
 			return result;
 		},
@@ -159,14 +203,15 @@ module.exports = function (mixinOpts) {
 			params = this.sanitizeParams(params);
 			params = this._applyScopes(params, ctx);
 
-			const stream = await this.adapter.findStream(params);
+			const adapter = await this.getAdapter(ctx);
+			const stream = await adapter.findStream(params);
 
 			if (opts.transform !== false) {
 				const self = this;
 				const transform = new Transform({
 					objectMode: true,
 					transform: async function (doc, encoding, done) {
-						const res = await self.transformResult(doc, params, ctx);
+						const res = await self.transformResult(adapter, doc, params, ctx);
 						this.push(res);
 						return done();
 					}
@@ -188,7 +233,8 @@ module.exports = function (mixinOpts) {
 			params = this.sanitizeParams(params, { removeLimit: true });
 			params = this._applyScopes(params, ctx);
 
-			const result = await this.adapter.count(params);
+			const adapter = await this.getAdapter(ctx);
+			const result = await adapter.count(params);
 			return result;
 		},
 
@@ -204,9 +250,10 @@ module.exports = function (mixinOpts) {
 			params = this._applyScopes(params, ctx);
 			params.limit = 1;
 
-			let result = await this.adapter.findOne(params.query);
+			const adapter = await this.getAdapter(ctx);
+			let result = await adapter.findOne(params.query);
 			if (opts.transform !== false) {
-				result = await this.transformResult(result, params, ctx);
+				result = await this.transformResult(adapter, result, params, ctx);
 			}
 			return result;
 		},
@@ -256,8 +303,10 @@ module.exports = function (mixinOpts) {
 				params.query[idField] = id[0];
 			}
 
+			const adapter = await this.getAdapter(ctx);
+
 			// Find the entities
-			let result = await this.adapter.find(params);
+			let result = await adapter.find(params);
 			if (!result || result.length == 0) {
 				if (opts.throwIfNotExist) throw new EntityNotFoundError(origID);
 			}
@@ -267,7 +316,7 @@ module.exports = function (mixinOpts) {
 
 			// Transforming
 			if (opts.transform !== false) {
-				result = await this.transformResult(result, params, ctx);
+				result = await this.transformResult(adapter, result, params, ctx);
 			}
 
 			// Mapping
@@ -296,9 +345,10 @@ module.exports = function (mixinOpts) {
 		async createEntity(ctx, params = ctx.params, opts = {}) {
 			params = await this.validateParams(ctx, params, { type: "create" });
 
-			let result = await this.adapter.insert(params);
+			const adapter = await this.getAdapter(ctx);
+			let result = await adapter.insert(params);
 			if (opts.transform !== false) {
-				result = await this.transformResult(result, {}, ctx);
+				result = await this.transformResult(adapter, result, {}, ctx);
 			}
 
 			await this.entityChanged(result, ctx, { ...opts, type: "create" });
@@ -318,9 +368,11 @@ module.exports = function (mixinOpts) {
 					async entity => await this.validateParams(ctx, entity, { type: "create" })
 				)
 			);
-			let result = await this.adapter.insertMany(entities);
+
+			const adapter = await this.getAdapter(ctx);
+			let result = await adapter.insertMany(entities);
 			if (opts.transform !== false) {
-				result = await this.transformResult(result, {}, ctx);
+				result = await this.transformResult(adapter, result, {}, ctx);
 			}
 
 			await this.entityChanged(result, ctx, { ...opts, type: "create", batch: true });
@@ -354,10 +406,11 @@ module.exports = function (mixinOpts) {
 			const rawUpdate = params.$raw === true;
 			if (rawUpdate) delete params.$raw;
 
-			let result = await this.adapter.updateById(id, params, { raw: rawUpdate });
+			const adapter = await this.getAdapter(ctx);
+			let result = await adapter.updateById(id, params, { raw: rawUpdate });
 
 			if (opts.transform !== false) {
-				result = await this.transformResult(result, {}, ctx);
+				result = await this.transformResult(adapter, result, {}, ctx);
 			}
 
 			await this.entityChanged(result, ctx, { ...opts, type: "update" });
@@ -379,6 +432,7 @@ module.exports = function (mixinOpts) {
 				transform: false,
 				throwIfNotExist: true
 			});
+			const adapter = await this.getAdapter(ctx);
 
 			params = await this.validateParams(ctx, params, { type: "replace" });
 
@@ -388,10 +442,10 @@ module.exports = function (mixinOpts) {
 			if (this.$primaryField.columnName != this.$primaryField.name)
 				delete params[this.$primaryField.name];
 
-			let result = await this.adapter.replaceById(id, params);
+			let result = await adapter.replaceById(id, params);
 
 			if (opts.transform !== false) {
-				result = await this.transformResult(result, {}, ctx);
+				result = await this.transformResult(adapter, result, {}, ctx);
 			}
 
 			await this.entityChanged(result, ctx, { ...opts, type: "replace" });
@@ -414,20 +468,22 @@ module.exports = function (mixinOpts) {
 				throwIfNotExist: true
 			});
 
+			const adapter = await this.getAdapter(ctx);
+
 			params = await this.validateParams(ctx, params, { type: "remove" });
 
 			id = this._sanitizeID(id, opts);
 
 			if (this.$softDelete) {
 				// Soft delete
-				await this.adapter.updateById(id, params);
+				await adapter.updateById(id, params);
 			} else {
 				// Real delete
-				await this.adapter.removeById(id);
+				await adapter.removeById(id);
 			}
 
 			if (opts.transform !== false) {
-				entity = await this.transformResult(entity, params, ctx);
+				entity = await this.transformResult(adapter, entity, params, ctx);
 			}
 
 			await this.entityChanged(entity, ctx, {
@@ -446,7 +502,8 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} params
 		 */
 		async clearEntities(ctx, params) {
-			const result = await this.adapter.clear(params);
+			const adapter = await this.getAdapter(ctx);
+			const result = await adapter.clear(params);
 			return result;
 		},
 
@@ -455,8 +512,8 @@ module.exports = function (mixinOpts) {
 		 *
 		 * @param {Object} def
 		 */
-		createIndex(def) {
-			this.adapter.createIndex(def);
+		createIndex(adapter, def) {
+			adapter.createIndex(def);
 		},
 
 		/**

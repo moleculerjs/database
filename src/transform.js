@@ -30,11 +30,12 @@ module.exports = function (mixinOpts) {
 		/**
 		 * Transform the result rows.
 		 *
+		 * @param {Adapter} adapter
 		 * @param {Object|Array<Object>} docs
 		 * @param {Object?} params
 		 * @param {Context} ctx
 		 */
-		async transformResult(docs, params, ctx) {
+		async transformResult(adapter, docs, params, ctx) {
 			let isDoc = false;
 			if (!Array.isArray(docs)) {
 				if (_.isObject(docs)) {
@@ -46,7 +47,7 @@ module.exports = function (mixinOpts) {
 				}
 			}
 
-			docs = docs.map(doc => this.adapter.entityToJSON(doc));
+			docs = docs.map(doc => adapter.entityToJSON(doc));
 
 			if (this.$fields) {
 				docs = await this._transformFields(docs, ctx, params);
