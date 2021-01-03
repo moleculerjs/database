@@ -8,7 +8,7 @@ module.exports = getAdapter => {
 		const broker = new ServiceBroker({ logger: false });
 		const postSvc = broker.createService({
 			name: "posts",
-			mixins: [DbService({ adapter: getAdapter("posts") })],
+			mixins: [DbService({ adapter: getAdapter({ collection: "posts" }) })],
 			settings: {
 				fields: {
 					id: { type: "string", primaryKey: true, columnName: "_id" },
@@ -33,7 +33,7 @@ module.exports = getAdapter => {
 
 		const userSvc = broker.createService({
 			name: "users",
-			mixins: [DbService({ adapter: getAdapter("users") })],
+			mixins: [DbService({ adapter: getAdapter({ collection: "users" }) })],
 			settings: {
 				fields: {
 					id: { type: "string", primaryKey: true, columnName: "_id" },

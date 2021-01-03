@@ -385,7 +385,7 @@ function createEnvironment(getAdapter) {
 
 	postBroker.createService({
 		name: "posts",
-		mixins: [DbService({ adapter: getAdapter("posts") })],
+		mixins: [DbService({ adapter: getAdapter({ collection: "posts" }) })],
 		settings: {
 			fields: {
 				id: { type: "string", primaryKey: true, columnName: "_id" },
@@ -434,7 +434,7 @@ function createEnvironment(getAdapter) {
 
 	authorBroker.createService({
 		name: "authors",
-		mixins: [DbService({ adapter: getAdapter("authors") })],
+		mixins: [DbService({ adapter: getAdapter({ collection: "authors" }) })],
 		settings: {
 			fields: {
 				id: { type: "string", primaryKey: true, columnName: "_id" },

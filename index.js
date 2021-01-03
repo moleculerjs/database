@@ -8,5 +8,6 @@
 
 module.exports = {
 	Service: require("./src"),
-	Adapters: require("./src/adapters")
+	Adapters: require("./src/adapters"),
+	Errors: require("./src/errors")
 };

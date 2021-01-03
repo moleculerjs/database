@@ -40,10 +40,10 @@ module.exports = function (mixinOpts) {
 		 * It can be overwritten to implement custom multi-tenant solution.
 		 *
 		 * @param {Context?} ctx
-		 * @param {Object|any?} adapterOpts
+		 * @param {Object|any?} adapterDef
 		 */
-		getAdapterByContext(ctx, adapterOpts) {
-			return ["default", adapterOpts];
+		getAdapterByContext(ctx, adapterDef) {
+			return ["default", adapterDef];
 		},
 
 		/**

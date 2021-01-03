@@ -7,6 +7,7 @@ const ActionsTests = require("./actions.test");
 const TransformTests = require("./transform.test");
 const PopulateTests = require("./populate.test");
 const RESTTests = require("./rest.test");
+const TenantTests = require("./tenants.test");
 
 // console.log(process.env);
 
@@ -23,27 +24,28 @@ if (process.env.CI) {
 } else {
 	// Local development tests
 	Adapters = [
-		{ type: "NeDB" }
-		//{ type: "MongoDB", options: { dbName: "db-int-test", collection: "users" } }
+		//{ type: "NeDB" }
+		{ type: "MongoDB", options: { dbName: "db-int-test", collection: "users" } }
 	];
 }
 
 describe("Integration tests", () => {
 	for (const adapter of Adapters) {
-		const getAdapter = collection => {
+		const getAdapter = opts => {
 			if (adapter.options && adapter.options.collection)
-				return _.defaultsDeep({ options: { collection } }, adapter);
+				return _.defaultsDeep({ options: { opts } }, adapter);
 
 			return adapter;
 		};
 
 		describe(`Adapter: ${adapter.type}`, () => {
-			describe("Test common methods", () => MethodTests(getAdapter, adapter.type));
-			describe("Test scopes", () => ScopeTests(getAdapter, adapter.type));
-			describe("Test actions", () => ActionsTests(getAdapter, adapter.type));
-			describe("Test transformations", () => TransformTests(getAdapter, adapter.type));
-			describe("Test populating", () => PopulateTests(getAdapter, adapter.type));
-			describe("Test REST", () => RESTTests(getAdapter, adapter.type));
+			// describe("Test common methods", () => MethodTests(getAdapter, adapter.type));
+			// describe("Test scopes", () => ScopeTests(getAdapter, adapter.type));
+			// describe("Test actions", () => ActionsTests(getAdapter, adapter.type));
+			// describe("Test transformations", () => TransformTests(getAdapter, adapter.type));
+			// describe("Test populating", () => PopulateTests(getAdapter, adapter.type));
+			// describe("Test REST", () => RESTTests(getAdapter, adapter.type));
+			describe("Test Tenants", () => TenantTests(getAdapter, adapter.type));
 		});
 	}
 });

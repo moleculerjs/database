@@ -46,7 +46,7 @@ module.exports = getAdapter => {
 			name: "users",
 			mixins: [
 				DbService({
-					adapter: getAdapter("users"),
+					adapter: getAdapter({ collection: "users" }),
 					createActions: false
 				})
 			],
