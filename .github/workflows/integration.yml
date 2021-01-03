@@ -8,7 +8,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x, 14.x]
+        node-version: [10.x, 12.x, 14.x, 15.x]
       fail-fast: false
     steps:
     - uses: actions/checkout@v2
@@ -41,6 +41,8 @@ jobs:
 
     - name: Run integration tests
       run: npm test
+      env:
+        GITHUB_ACTIONS_CI: true
 
     - name: Stop containers
       run: docker-compose down -v

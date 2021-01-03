@@ -19,20 +19,26 @@ const broker = new ServiceBroker({
 	}
 });
 
-// Load my service
-const svc = broker.createService({
+// Create a service
+broker.createService({
 	name: "posts",
-	mixins: [DbService()]
+	mixins: [DbService()],
+	settings: {
+		fields: {
+			title: { type: "string", required: true },
+			content: { type: "string", required: false }
+		}
+	}
 });
 
 // Start server
-broker.start().then(() => {
-	broker.logger.info(svc.schema);
+broker.start().then(async () => {
+	await broker.call("posts.create", { title: "First post", content: "First content" });
+	await broker.call("posts.create", { title: "Second post", content: "Second content" });
+	await broker.call("posts.create", { title: "Third post", content: "Third content" });
+	await broker.call("posts.create", { title: "Fourth post", content: "Fourth content" });
+	await broker.call("posts.create", { title: "Fifth post", content: "Fifth content" });
 
-	/* Call action
-	broker
-		.call("database.test", { name: "John Doe" })
-		.then(broker.logger.info)
-		.catch(broker.logger.error);
-	*/
+	const res = await broker.call("posts.find");
+	broker.logger.info("Res: ", res);
 });

@@ -147,7 +147,10 @@ const bench4 = benchmark.createSuite(`NeDB: Entity getting (${COUNT})`);
 
 	bench.add("Direct adapter access", done => {
 		const entity = docs[Math.floor(Math.random() * docs.length)];
-		return svc.adapter.findById(entity.id).then(done);
+		return svc
+			.getAdapter(ctx)
+			.then(adapter => adapter.findById(entity.id))
+			.then(done);
 	});
 })(bench4);
 

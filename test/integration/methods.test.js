@@ -46,7 +46,9 @@ module.exports = (getAdapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
-			mixins: [DbService({ adapter: getAdapter("users"), createActions: false })]
+			mixins: [
+				DbService({ adapter: getAdapter({ collection: "users" }), createActions: false })
+			]
 		});
 
 		beforeAll(() => broker.start());
@@ -68,7 +70,7 @@ module.exports = (getAdapter, adapterType) => {
 
 			it("Adapter specific setups", async () => {
 				if (adapterType == "MongoDB") {
-					svc.adapter.collection.createIndex({
+					(await svc.getAdapter()).collection.createIndex({
 						name: "text",
 						age: "text",
 						roles: "text"
@@ -317,7 +319,9 @@ module.exports = (getAdapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
-			mixins: [DbService({ adapter: getAdapter("users"), createActions: false })]
+			mixins: [
+				DbService({ adapter: getAdapter({ collection: "users" }), createActions: false })
+			]
 		});
 		svc.entityChanged = jest.fn();
 
@@ -461,7 +465,9 @@ module.exports = (getAdapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
-			mixins: [DbService({ adapter: getAdapter("users"), createActions: false })]
+			mixins: [
+				DbService({ adapter: getAdapter({ collection: "users" }), createActions: false })
+			]
 		});
 		svc.entityChanged = jest.fn();
 
@@ -619,7 +625,9 @@ module.exports = (getAdapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
-			mixins: [DbService({ adapter: getAdapter("users"), createActions: false })]
+			mixins: [
+				DbService({ adapter: getAdapter({ collection: "users" }), createActions: false })
+			]
 		});
 
 		svc.entityChanged = jest.fn();

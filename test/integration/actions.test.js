@@ -16,7 +16,7 @@ module.exports = (getAdapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "posts",
-			mixins: [DbService({ adapter: getAdapter("posts") })],
+			mixins: [DbService({ adapter: getAdapter({ collection: "posts" }) })],
 			settings: {
 				fields: {
 					id: { type: "string", primaryKey: true, columnName: "_id" },
@@ -249,7 +249,7 @@ module.exports = (getAdapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "products",
-			mixins: [DbService({ adapter: getAdapter("products") })],
+			mixins: [DbService({ adapter: getAdapter({ collection: "products" }) })],
 			settings: {
 				fields: {
 					id: { type: "string", secure: true, primaryKey: true, columnName: "_id" },
@@ -405,7 +405,7 @@ module.exports = (getAdapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		broker.createService({
 			name: "users",
-			mixins: [DbService({ adapter: getAdapter("users") })],
+			mixins: [DbService({ adapter: getAdapter({ collection: "users" }) })],
 			settings: {
 				fields: {
 					id: { type: "string", primaryKey: true, columnName: "_id" },
@@ -518,7 +518,7 @@ module.exports = (getAdapter, adapterType) => {
 			const broker = new ServiceBroker({ logger: false });
 			broker.createService({
 				name: "users",
-				mixins: [DbService({ adapter: getAdapter("users") })],
+				mixins: [DbService({ adapter: getAdapter({ collection: "users" }) })],
 				settings: {
 					fields: {
 						id: { type: "string", primaryKey: true, columnName: "_id" },
@@ -559,11 +559,11 @@ module.exports = (getAdapter, adapterType) => {
 
 				const res = await broker.call("users.findStream");
 
+				expect.assertions(2);
 				return new Promise((resolve, reject) => {
 					expect(res).toBeInstanceOf(Stream);
 					res.on("data", row => rows.push(row));
 
-					expect.assertions(2);
 					res.on("error", reject);
 					res.on("end", () => {
 						expect(rows).toEqual(expect.arrayContaining(docs));
