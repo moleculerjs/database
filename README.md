@@ -22,22 +22,11 @@ Advanced Database Access Service for Moleculer microservices framework.
 
 ## Install
 ```
-npm i database
+npm i @moleculer/database
 ```
 
 ## Usage
 
-
-## Test
-```
-$ npm test
-```
-
-In development with watching
-
-```
-$ npm run ci
-```
 
 ## Contribution
 Please send pull requests improving the usage and fixing bugs, improving documentation and providing better examples, or providing some testing, because these things are important.
