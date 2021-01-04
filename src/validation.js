@@ -81,7 +81,7 @@ module.exports = function (mixinOpts) {
 				);
 			}
 
-			if (!this.$primaryField) this.$primaryField = { name: "id", columnName: "_id" };
+			if (!this.$primaryField) this.$primaryField = { name: "_id", columnName: "_id" };
 			if (this.$softDelete) this.logger.debug("Soft delete mode: ENABLED");
 		},
 
