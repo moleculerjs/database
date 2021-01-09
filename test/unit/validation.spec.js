@@ -19,7 +19,7 @@ describe("Test validation", () => {
 
 		it("check the process fields", async () => {
 			expect(svc.$fields).toBeNull();
-			expect(svc.$primaryField).toEqual({ name: "id", columnName: "_id" });
+			expect(svc.$primaryField).toEqual({ name: "_id", columnName: "_id" });
 			expect(svc.$softDelete).toBe(false);
 		});
 
@@ -366,7 +366,7 @@ describe("Test validation", () => {
 				});
 			});
 
-			it("should not touch updateabe field if not exist", async () => {
+			it("should not touch immutable field if not exist", async () => {
 				const params = {
 					name: "John",
 					password: "pass1234"

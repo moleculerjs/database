@@ -83,7 +83,7 @@ module.exports = (getAdapter, adapterType) => {
 				});
 
 				expect(entityChanged).toBeCalledTimes(1);
-				expect(entityChanged).toBeCalledWith(doc, expect.any(Context), { type: "create" });
+				expect(entityChanged).toBeCalledWith("create", doc, expect.any(Context));
 			});
 
 			it("should get the newly created entity", async () => {
@@ -153,7 +153,7 @@ module.exports = (getAdapter, adapterType) => {
 				});
 
 				expect(entityChanged).toBeCalledTimes(1);
-				expect(entityChanged).toBeCalledWith(doc, expect.any(Context), { type: "update" });
+				expect(entityChanged).toBeCalledWith("update", doc, expect.any(Context));
 			});
 
 			it("should get the newly created entity", async () => {
@@ -184,10 +184,7 @@ module.exports = (getAdapter, adapterType) => {
 				expect(res).toEqual(docs[0].id);
 
 				expect(entityChanged).toBeCalledTimes(1);
-				expect(entityChanged).toBeCalledWith(docs[0], expect.any(Context), {
-					type: "remove",
-					softDelete: false
-				});
+				expect(entityChanged).toBeCalledWith("remove", docs[0], expect.any(Context));
 			});
 
 			it("should throw EntityNotFound error", async () => {

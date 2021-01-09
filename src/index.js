@@ -69,6 +69,8 @@ const Transform = require("./transform");
 	- [x] Multi model/tenant solutions
 		- [x] get connection/model dynamically
 	- [ ] `aggregate` action with params: `type: "sum", "avg", "count", "min", "max"` & `field: "price"`
+	- [ ] permissions for scopes
+	- [ ] nested-et nem támogató adapter-ek warning-oljanak és flat-eljék az Object|Array-t JSON string-é és úgy tárolják le
 
 
 */

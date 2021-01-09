@@ -351,7 +351,7 @@ module.exports = function (mixinOpts) {
 				result = await this.transformResult(adapter, result, {}, ctx);
 			}
 
-			await this.entityChanged(result, ctx, { ...opts, type: "create" });
+			await this._entityChanged(result, ctx, { ...opts, type: "create" });
 			return result;
 		},
 
@@ -375,7 +375,7 @@ module.exports = function (mixinOpts) {
 				result = await this.transformResult(adapter, result, {}, ctx);
 			}
 
-			await this.entityChanged(result, ctx, { ...opts, type: "create", batch: true });
+			await this._entityChanged(result, ctx, { ...opts, type: "create", batch: true });
 			return result;
 		},
 
@@ -413,7 +413,7 @@ module.exports = function (mixinOpts) {
 				result = await this.transformResult(adapter, result, {}, ctx);
 			}
 
-			await this.entityChanged(result, ctx, { ...opts, type: "update" });
+			await this._entityChanged(result, ctx, { ...opts, type: "update" });
 			return result;
 		},
 
@@ -448,7 +448,7 @@ module.exports = function (mixinOpts) {
 				result = await this.transformResult(adapter, result, {}, ctx);
 			}
 
-			await this.entityChanged(result, ctx, { ...opts, type: "replace" });
+			await this._entityChanged(result, ctx, { ...opts, type: "replace" });
 			return result;
 		},
 
@@ -486,7 +486,7 @@ module.exports = function (mixinOpts) {
 				entity = await this.transformResult(adapter, entity, params, ctx);
 			}
 
-			await this.entityChanged(entity, ctx, {
+			await this._entityChanged(entity, ctx, {
 				...opts,
 				type: "remove",
 				softDelete: !!this.$softDelete
@@ -513,7 +513,7 @@ module.exports = function (mixinOpts) {
 		 * @param {Object} def
 		 */
 		createIndex(adapter, def) {
-			adapter.createIndex(def);
+			return adapter.createIndex(def);
 		},
 
 		/**
@@ -522,11 +522,23 @@ module.exports = function (mixinOpts) {
 		 * @param {Context?} ctx
 		 * @param {Object?} opts
 		 */
-		async entityChanged(data, ctx /*, opts = {}*/) {
+		async _entityChanged(data, ctx, opts = {}) {
 			if (cacheOpts && cacheOpts.eventName) {
 				// Cache cleaning event
 				(ctx || this.broker).broadcast(cacheOpts.eventName);
 			}
+
+			this.entityChanged(opts.type, data, ctx);
+		},
+
+		/**
+		 * Can be user-defined which is called when an entity changed.
+		 * @param {String} type
+		 * @param {any} data
+		 * @param {Context?} ctx
+		 */
+		entityChanged(type, data, ctx) {
+			// Abstract method
 		},
 
 		/**

@@ -27,6 +27,11 @@ const PARAMS_SCOPE = [
 	{ type: "array", optional: true, items: "string" }
 ];
 
+const PARAMS_QUERY = [
+	{ type: "object", optional: true },
+	{ type: "string", optional: true }
+];
+
 module.exports = function (opts) {
 	const res = {};
 
@@ -86,7 +91,7 @@ module.exports = function (opts) {
 				searchFields: PARAMS_SEARCHFIELDS,
 				scope: PARAMS_SCOPE,
 				populate: PARAMS_POPULATE,
-				query: { type: "object", optional: true }
+				query: PARAMS_QUERY
 			},
 			async handler(ctx) {
 				return this.findEntities(ctx);
@@ -120,7 +125,7 @@ module.exports = function (opts) {
 				search: { type: "string", optional: true },
 				searchFields: PARAMS_SEARCHFIELDS,
 				scope: PARAMS_SCOPE,
-				query: { type: "object", optional: true }
+				query: PARAMS_QUERY
 			},
 			async handler(ctx) {
 				return this.countEntities(ctx);
@@ -170,7 +175,7 @@ module.exports = function (opts) {
 				pageSize: {
 					type: "number",
 					integer: true,
-					min: 0,
+					min: 1,
 					max: maxLimit,
 					optional: true,
 					convert: true
@@ -181,7 +186,7 @@ module.exports = function (opts) {
 				searchFields: PARAMS_SEARCHFIELDS,
 				scope: PARAMS_SCOPE,
 				populate: PARAMS_POPULATE,
-				query: { type: "object", optional: true }
+				query: PARAMS_QUERY
 			},
 			async handler(ctx) {
 				const params = this.sanitizeParams(ctx.params, { list: true });
