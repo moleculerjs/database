@@ -1,6 +1,6 @@
 /*
  * @moleculer/database
- * Copyright (c) 2020 MoleculerJS (https://github.com/moleculerjs/database)
+ * Copyright (c) 2021 MoleculerJS (https://github.com/moleculerjs/database)
  * MIT Licensed
  */
 
