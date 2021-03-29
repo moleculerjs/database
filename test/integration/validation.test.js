@@ -1356,5 +1356,103 @@ module.exports = adapter => {
 				});
 			});
 		});
+
+		describe("Test transformations with nested fields", () => {
+			const broker = new ServiceBroker({ logger: false });
+			const svc = broker.createService({
+				name: "users",
+				mixins: [
+					DbService({
+						adapter,
+						createActions: true
+					})
+				],
+				settings: {
+					fields: {
+						id: { type: "string", primaryKey: true, columnName: "_id" },
+						name: { type: "string" },
+						email: { type: "string" },
+						address: {
+							type: "object",
+							properties: {
+								zip: { type: "number" },
+								street: { type: "string" },
+								state: { type: "string", optional: true },
+								city: { type: "string" },
+								country: { type: "string" },
+								primary: { type: "boolean", default: true }
+							}
+						},
+						roles: {
+							type: "array",
+							max: 3,
+							items: { type: "string" }
+						},
+
+						phones: {
+							type: "array",
+							items: {
+								type: "object",
+								properties: {
+									type: "string",
+									number: "string",
+									primary: { type: "boolean", default: false }
+								}
+							}
+						}
+					}
+				}
+			});
+
+			beforeAll(async () => {
+				await broker.start();
+				await svc.clearEntities();
+			});
+			afterAll(() => broker.stop());
+
+			describe("Test nested object", () => {
+				let entity;
+
+				it("create test entity", async () => {
+					const res = await broker.call("users.create", {
+						name: "John Doe",
+						email: "john.doe@moleculer.services",
+						address: {
+							zip: 1234,
+							street: "Main Street 15",
+							city: "London",
+							country: "England",
+							extra: "some"
+						},
+						//roles: ["admin", 1234]
+						phones: [
+							{ type: "home", number: "+1-555-1234", primary: true },
+							{ type: "mobile", number: "+1-555-9999" }
+						]
+					});
+					expect(res).toStrictEqual({
+						id: expect.any(String),
+						name: "John Doe",
+						email: "john.doe@moleculer.services",
+						address: {
+							zip: 1234,
+							street: "Main Street 15",
+							city: "London",
+							country: "England",
+							primary: true
+						},
+						//roles: ["admin", "1234"]
+						phones: [
+							{ type: "home", number: "+1-555-1234", primary: true },
+							{ type: "mobile", number: "+1-555-9999", primary: false }
+						]
+					});
+					entity = res;
+
+					const res2 = await broker.call("users.get", { id: entity.id });
+					expect(res2).toStrictEqual(entity);
+				});
+			});
+		});
 	});
 };

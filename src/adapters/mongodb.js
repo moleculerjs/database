@@ -31,6 +31,13 @@ class MongoDBAdapter extends BaseAdapter {
 	}
 
 	/**
+	 * The adapter has nested-field support.
+	 */
+	get hasNestedFieldSupport() {
+		return true;
+	}
+
+	/**
 	 * Initialize the adapter.
 	 *
 	 * @param {Service} service
@@ -295,7 +302,7 @@ class MongoDBAdapter extends BaseAdapter {
 	}
 
 	/**
-	 * Createa query based on filters
+	 * Create a query based on filters
 	 *
 	 * Available filters:
 	 *  - search

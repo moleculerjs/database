@@ -16,6 +16,13 @@ class BaseAdapter {
 	}
 
 	/**
+	 * The adapter has nested-field support.
+	 */
+	get hasNestedFieldSupport() {
+		return false;
+	}
+
+	/**
 	 * Initialize the adapter.
 	 *
 	 * @param {Service} service

@@ -24,65 +24,81 @@ module.exports = function (mixinOpts) {
 			this.$shouldAuthorizeFields = false;
 
 			if (_.isObject(this.settings.fields)) {
-				this.$fields = _.compact(
-					_.map(this.settings.fields, (def, name) => {
-						// Disabled field
-						if (def === false) return;
-
-						// Shorthand format { title: true } => { title: {} }
-						if (def === true) def = { type: "any" };
-
-						// Shorthand format: { title: "string" } => { title: { type: "string" } }
-						// TODO: | handling like if FastestValidator
-						if (_.isString(def)) def = { type: def };
-
-						// Copy the properties TOOD: deep clone due to nested fields
-						const field = Object.assign({}, def);
-
-						// Set name of field
-						field.name = name;
-
-						if (!field.columnName) field.columnName = field.name;
-
-						if (field.primaryKey === true) this.$primaryField = field;
-						if (field.onRemove) this.$softDelete = true;
-
-						if (field.permission || field.readPermission) {
-							this.$shouldAuthorizeFields = true;
-						}
-
-						if (field.required == null) {
-							if (field.optional != null) field.required = !field.optional;
-							else field.required = false;
-						}
-
-						if (field.populate) {
-							if (_.isFunction(field.populate)) {
-								field.populate = { handler: field.populate };
-							} else if (_.isString(field.populate)) {
-								field.populate = { action: field.populate };
-							} else if (_.isObject(field.populate)) {
-								if (!field.populate.action && !field.populate.handler) {
-									throw new ServiceSchemaError(
-										`Invalid 'populate' definition in '${this.fullName}' service. Missing 'action' or 'handler'.`,
-										{ populate: field.populate }
-									);
-								}
-							} else {
-								throw new ServiceSchemaError(
-									`Invalid 'populate' definition in '${this.fullName}' service. It should be a 'Function', 'String' or 'Object'.`,
-									{ populate: field.populate }
-								);
-							}
-						}
-
-						return field;
-					})
-				);
+				this.$fields = this._processFieldObject(this.settings.fields);
 			}
 
 			if (!this.$primaryField) this.$primaryField = { name: "_id", columnName: "_id" };
 			if (this.$softDelete) this.logger.debug("Soft delete mode: ENABLED");
+		},
+
+		_processFieldObject(fields) {
+			return _.compact(
+				_.map(fields, (def, name) => {
+					// Disabled field
+					if (def === false) return;
+
+					// Shorthand format { title: true } => { title: {} }
+					if (def === true) def = { type: "any" };
+
+					// Shorthand format: { title: "string" } => { title: { type: "string" } }
+					// TODO: | handling like if FastestValidator
+					if (_.isString(def)) def = { type: def };
+
+					// Copy the properties TOOD: deep clone due to nested fields
+					const field = Object.assign({}, def);
+
+					// Set name of field
+					field.name = name;
+
+					if (!field.columnName) field.columnName = field.name;
+
+					if (field.primaryKey === true) this.$primaryField = field;
+					if (field.onRemove) this.$softDelete = true;
+
+					if (field.permission || field.readPermission) {
+						this.$shouldAuthorizeFields = true;
+					}
+
+					if (field.required == null) {
+						if (field.optional != null) field.required = !field.optional;
+						else field.required = false;
+					}
+
+					if (field.populate) {
+						if (_.isFunction(field.populate)) {
+							field.populate = { handler: field.populate };
+						} else if (_.isString(field.populate)) {
+							field.populate = { action: field.populate };
+						} else if (_.isObject(field.populate)) {
+							if (!field.populate.action && !field.populate.handler) {
+								throw new ServiceSchemaError(
+									`Invalid 'populate' definition in '${this.fullName}' service. Missing 'action' or 'handler'.`,
+									{ populate: field.populate }
+								);
+							}
+						} else {
+							throw new ServiceSchemaError(
+								`Invalid 'populate' definition in '${this.fullName}' service. It should be a 'Function', 'String' or 'Object'.`,
+								{ populate: field.populate }
+							);
+						}
+					}
+
+					if (field.type == "object" && _.isPlainObject(field.properties)) {
+						field.properties = this._processFieldObject(field.properties);
+					}
+
+					if (field.type == "array") {
+						if (_.isPlainObject(field.items)) {
+							field.items = this._processFieldObject(field.items);
+						} else if (_.isString(field.items)) {
+							// ?
+						}
+					}
+
+					return field;
+				})
+			);
 		},
 
 		/**
@@ -146,8 +162,6 @@ module.exports = function (mixinOpts) {
 		async validateParams(ctx, params, opts = {}) {
 			const type = opts.type || "create";
 
-			let entity = {};
-
 			// Drop all fields if hard delete
 			if (type == "remove" && !this.$softDelete) {
 				return {};
@@ -155,10 +169,33 @@ module.exports = function (mixinOpts) {
 
 			// Copy all fields if fields in not defined in settings.
 			if (!this.$fields) {
-				return Object.assign(entity, params);
+				return Object.assign({}, params);
 			}
 
-			const setValue = function (field, value) {
+			const fields = Array.from(this.$fields);
+			const entity = await this._validateObject(ctx, fields, params, type);
+
+			return entity;
+		},
+
+		/**
+		 * Validate an object against field definitions.
+		 *
+		 * @param {Context} ctx
+		 * @param {Array<Object>} fields
+		 * @param {Object} params
+		 * @param {String} type
+		 * @returns
+		 */
+		async _validateObject(ctx, fields, params, type) {
+			let entity = {};
+
+			// Removing & Soft delete
+			if (type == "remove" && this.$softDelete) {
+				fields = fields.filter(field => !!field.onRemove);
+			}
+
+			const setValue = async (field, value) => {
 				if (value !== undefined) {
 					// Type conversion
 					if (field.type == "string" && typeof value != "string" && value != null) {
@@ -224,16 +261,44 @@ module.exports = function (mixinOpts) {
 						}
 					}
 
+					// Nested-object
+					if (field.type == "object" && field.properties) {
+						value = await this._validateObject(ctx, field.properties, value, type);
+					}
+
+					// Array
+					if (field.type == "array") {
+						if (!Array.isArray(value)) {
+							throw new ValidationError(
+								`The field '${field.name}' must be an Array.`,
+								"VALIDATION_ERROR",
+								{
+									field: field.name,
+									value
+								}
+							);
+						}
+
+						if (field.items) {
+							if (typeof field.items == "string") {
+								// ?
+							} else if (typeof field.items == "object") {
+								for (let i = 0; i < value.length; i++) {
+									value[i] = await this._validateObject(
+										ctx,
+										field.items,
+										value[i],
+										type
+									);
+								}
+							}
+						}
+					}
+
 					// Set the value to the entity, it's valid.
 					_.set(entity, field.columnName, value);
 				}
 			};
-
-			let fields = Array.from(this.$fields);
-			// Removing & Soft delete
-			if (type == "remove" && this.$softDelete) {
-				fields = fields.filter(field => !!field.onRemove);
-			}
 
 			const authorizedFields = await this._authorizeFields(fields, ctx, params, false);
 
@@ -241,10 +306,10 @@ module.exports = function (mixinOpts) {
 				authorizedFields.map(async field => {
 					let value = _.get(params, field.name);
 
-					// Custom formatter
+					// Custom formatter (can be async)
 					// Syntax: `set: (value, entity, field, ctx) => value.toUpperCase()`
 					if (field.set) {
-						value = field.set.call(this, value, params, field, ctx);
+						value = await field.set.call(this, value, params, field, ctx);
 					}
 
 					// Handlers
@@ -314,7 +379,7 @@ module.exports = function (mixinOpts) {
 						return;
 					}
 
-					setValue(field, value);
+					await setValue(field, value);
 				})
 			);
 

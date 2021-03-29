@@ -25,6 +25,13 @@ class NeDBAdapter extends BaseAdapter {
 	}
 
 	/**
+	 * The adapter has nested-field support.
+	 */
+	get hasNestedFieldSupport() {
+		return true;
+	}
+
+	/**
 	 * Connect adapter to database
 	 */
 	async connect() {
