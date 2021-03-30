@@ -111,7 +111,7 @@ module.exports = adapter => {
 					} catch (err) {
 						expect(err).toBeInstanceOf(ValidationError);
 						expect(err.name).toBe("ValidationError");
-						expect(err.message).toBe("The 'name' field is required");
+						expect(err.message).toBe("The field 'name' is required.");
 						expect(err.type).toBe("REQUIRED_FIELD");
 						expect(err.code).toBe(422);
 						expect(err.data).toEqual({
@@ -166,7 +166,7 @@ module.exports = adapter => {
 					} catch (err) {
 						expect(err).toBeInstanceOf(ValidationError);
 						expect(err.name).toBe("ValidationError");
-						expect(err.message).toBe("The 'name' field is required");
+						expect(err.message).toBe("The field 'name' is required.");
 						expect(err.type).toBe("REQUIRED_FIELD");
 						expect(err.code).toBe(422);
 						expect(err.data).toEqual({
@@ -1378,7 +1378,7 @@ module.exports = adapter => {
 								zip: { type: "number" },
 								street: { type: "string" },
 								state: { type: "string", optional: true },
-								city: { type: "string" },
+								city: { type: "string", required: true },
 								country: { type: "string" },
 								primary: { type: "boolean", default: true }
 							}
@@ -1395,7 +1395,7 @@ module.exports = adapter => {
 								type: "object",
 								properties: {
 									type: "string",
-									number: "string",
+									number: { type: "string", required: true },
 									primary: { type: "boolean", default: false }
 								}
 							}
@@ -1413,18 +1413,65 @@ module.exports = adapter => {
 			describe("Test nested object", () => {
 				let entity;
 
+				it("should throw error if a nested field is missing", async () => {
+					expect.assertions(3);
+					try {
+						await broker.call("users.create", {
+							name: "John Doe",
+							email: "john.doe@moleculer.services",
+							address: {
+								zip: "1234"
+							}
+						});
+					} catch (err) {
+						expect(err).toBeInstanceOf(ValidationError);
+						expect(err.message).toBe("The field 'city' is required.");
+						expect(err.data).toEqual({ field: "city", value: undefined });
+					}
+				});
+
+				it("should throw error if an array is not array", async () => {
+					expect.assertions(3);
+					try {
+						await broker.call("users.create", {
+							name: "John Doe",
+							email: "john.doe@moleculer.services",
+							roles: "admin"
+						});
+					} catch (err) {
+						expect(err).toBeInstanceOf(ValidationError);
+						expect(err.message).toBe("The field 'roles' must be an Array.");
+						expect(err.data).toEqual({ field: "roles", value: "admin" });
+					}
+				});
+
+				it("should throw error if an object is not valid in the array", async () => {
+					expect.assertions(3);
+					try {
+						await broker.call("users.create", {
+							name: "John Doe",
+							email: "john.doe@moleculer.services",
+							phones: [{ type: "home" }]
+						});
+					} catch (err) {
+						expect(err).toBeInstanceOf(ValidationError);
+						expect(err.message).toBe("The field 'number' is required.");
+						expect(err.data).toEqual({ field: "number", value: undefined });
+					}
+				});
+
 				it("create test entity", async () => {
 					const res = await broker.call("users.create", {
 						name: "John Doe",
 						email: "john.doe@moleculer.services",
 						address: {
-							zip: 1234,
+							zip: "1234",
 							street: "Main Street 15",
 							city: "London",
 							country: "England",
 							extra: "some"
 						},
-						//roles: ["admin", 1234]
+						roles: ["admin", 1234],
 						phones: [
 							{ type: "home", number: "+1-555-1234", primary: true },
 							{ type: "mobile", number: "+1-555-9999" }
@@ -1441,7 +1488,7 @@ module.exports = adapter => {
 							country: "England",
 							primary: true
 						},
-						//roles: ["admin", "1234"]
+						roles: ["admin", "1234"],
 						phones: [
 							{ type: "home", number: "+1-555-1234", primary: true },
 							{ type: "mobile", number: "+1-555-9999", primary: false }

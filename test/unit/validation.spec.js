@@ -276,7 +276,7 @@ describe("Test validation", () => {
 				} catch (err) {
 					expect(err).toBeInstanceOf(ValidationError);
 					expect(err.name).toBe("ValidationError");
-					expect(err.message).toBe("The 'name' field is required");
+					expect(err.message).toBe("The field 'name' is required.");
 					expect(err.type).toBe("REQUIRED_FIELD");
 					expect(err.code).toBe(422);
 					expect(err.data).toEqual({
@@ -296,7 +296,7 @@ describe("Test validation", () => {
 				} catch (err) {
 					expect(err).toBeInstanceOf(ValidationError);
 					expect(err.name).toBe("ValidationError");
-					expect(err.message).toBe("The 'name' field is required");
+					expect(err.message).toBe("The field 'name' is required.");
 					expect(err.type).toBe("REQUIRED_FIELD");
 					expect(err.code).toBe(422);
 					expect(err.data).toEqual({
@@ -331,7 +331,7 @@ describe("Test validation", () => {
 				} catch (err) {
 					expect(err).toBeInstanceOf(ValidationError);
 					expect(err.name).toBe("ValidationError");
-					expect(err.message).toBe("The 'name' field is required");
+					expect(err.message).toBe("The field 'name' is required.");
 					expect(err.type).toBe("REQUIRED_FIELD");
 					expect(err.code).toBe(422);
 					expect(err.data).toEqual({
@@ -781,7 +781,7 @@ describe("Test validation", () => {
 				} catch (err) {
 					expect(err).toBeInstanceOf(ValidationError);
 					expect(err.name).toBe("ValidationError");
-					expect(err.message).toBe("The 'name' field is required");
+					expect(err.message).toBe("The field 'name' is required.");
 					expect(err.type).toBe("REQUIRED_FIELD");
 					expect(err.code).toBe(422);
 					expect(err.data).toEqual({
@@ -801,7 +801,7 @@ describe("Test validation", () => {
 				} catch (err) {
 					expect(err).toBeInstanceOf(ValidationError);
 					expect(err.name).toBe("ValidationError");
-					expect(err.message).toBe("The 'name' field is required");
+					expect(err.message).toBe("The field 'name' is required.");
 					expect(err.type).toBe("REQUIRED_FIELD");
 					expect(err.code).toBe(422);
 					expect(err.data).toEqual({
@@ -836,7 +836,7 @@ describe("Test validation", () => {
 				} catch (err) {
 					expect(err).toBeInstanceOf(ValidationError);
 					expect(err.name).toBe("ValidationError");
-					expect(err.message).toBe("The 'name' field is required");
+					expect(err.message).toBe("The field 'name' is required.");
 					expect(err.type).toBe("REQUIRED_FIELD");
 					expect(err.code).toBe(422);
 					expect(err.data).toEqual({
@@ -1085,30 +1085,57 @@ describe("Test validation", () => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
-			mixins: [DbService()],
-			settings: {
-				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
-					name: { type: "string", optional: false },
-					username: { type: "string", required: true, min: 3, max: 100 },
-					email: "email",
-					password: { type: "string", hidden: true, min: 6 },
-					age: { type: "number", positive: true, integer: true },
-					bio: true,
-					token: false,
-					createdAt: { type: "date", readonly: true, onCreate: () => new Date() },
-					updatedAt: { type: "date", readonly: true, onUpdate: () => new Date() },
-					replacedAt: { type: "date", readonly: true, onReplace: () => new Date() },
-					status: { type: "string", default: "A", onRemove: "D" }
-				}
-			}
+			mixins: [DbService()]
 		});
 
 		beforeAll(() => broker.start());
 		afterAll(() => broker.stop());
 
 		it("generate validator schema for 'create'", async () => {
-			expect(svc._generateValidatorSchema({ type: "create" })).toEqual({
+			const fields = svc._processFieldObject({
+				id: { type: "string", primaryKey: true, columnName: "_id" },
+				name: { type: "string", optional: false },
+				username: { type: "string", required: true, min: 3, max: 100 },
+				email: "email",
+				password: { type: "string", hidden: true, min: 6 },
+				age: { type: "number", positive: true, integer: true },
+				bio: true,
+				token: false,
+				address: {
+					type: "object",
+					properties: {
+						zip: { type: "number" },
+						street: { type: "string" },
+						state: { type: "string", optional: true },
+						city: { type: "string", required: true },
+						country: { type: "string" },
+						primary: { type: "boolean", default: true }
+					}
+				},
+				roles: {
+					type: "array",
+					max: 3,
+					items: { type: "string" }
+				},
+
+				phones: {
+					type: "array",
+					items: {
+						type: "object",
+						properties: {
+							type: "string",
+							number: { type: "string", required: true },
+							primary: { type: "boolean", default: false }
+						}
+					}
+				},
+				createdAt: { type: "date", readonly: true, onCreate: () => new Date() },
+				updatedAt: { type: "date", readonly: true, onUpdate: () => new Date() },
+				replacedAt: { type: "date", readonly: true, onReplace: () => new Date() },
+				status: { type: "string", default: "A", onRemove: "D" }
+			});
+
+			expect(svc._generateValidatorSchemaForFields(fields, { type: "create" })).toEqual({
 				$$strict: true,
 				name: { type: "string" },
 				username: { type: "string", max: 100, min: 3 },
@@ -1120,6 +1147,39 @@ describe("Test validation", () => {
 					integer: true,
 					optional: true,
 					convert: true
+				},
+				address: {
+					type: "object",
+					optional: true,
+					properties: {
+						$$strict: true,
+						zip: { type: "number", optional: true, convert: true },
+						street: { type: "string", optional: true },
+						state: { type: "string", optional: true },
+						city: { type: "string" },
+						country: { type: "string", optional: true },
+						primary: { type: "boolean", convert: true, optional: true, default: true }
+					}
+				},
+				roles: {
+					type: "array",
+					max: 3,
+					optional: true,
+					items: {
+						type: "string"
+					}
+				},
+				phones: {
+					type: "array",
+					optional: true,
+					items: {
+						type: "object",
+						properties: {
+							type: "string",
+							number: { type: "string", required: true },
+							primary: { type: "boolean", default: false }
+						}
+					}
 				},
 				bio: { type: "any", optional: true },
 				status: { type: "string", default: "A", optional: true }

@@ -85,14 +85,15 @@ module.exports = function (mixinOpts) {
 					}
 
 					if (field.type == "object" && _.isPlainObject(field.properties)) {
-						field.properties = this._processFieldObject(field.properties);
+						field.itemProperties = this._processFieldObject(field.properties);
 					}
 
-					if (field.type == "array") {
-						if (_.isPlainObject(field.items)) {
-							field.items = this._processFieldObject(field.items);
-						} else if (_.isString(field.items)) {
-							// ?
+					if (field.type == "array" && _.isObject(field.items)) {
+						let itemsDef = field.items;
+						if (_.isString(field.items)) itemsDef = { type: field.items };
+
+						if (itemsDef.type == "object" && itemsDef.properties) {
+							field.itemProperties = this._processFieldObject(itemsDef.properties);
 						}
 					}
 
@@ -195,7 +196,7 @@ module.exports = function (mixinOpts) {
 				fields = fields.filter(field => !!field.onRemove);
 			}
 
-			const setValue = async (field, value) => {
+			const sanitizeValue = async (field, value) => {
 				if (value !== undefined) {
 					// Type conversion
 					if (field.type == "string" && typeof value != "string" && value != null) {
@@ -262,8 +263,8 @@ module.exports = function (mixinOpts) {
 					}
 
 					// Nested-object
-					if (field.type == "object" && field.properties) {
-						value = await this._validateObject(ctx, field.properties, value, type);
+					if (field.type == "object" && field.itemProperties) {
+						value = await this._validateObject(ctx, field.itemProperties, value, type);
 					}
 
 					// Array
@@ -280,21 +281,31 @@ module.exports = function (mixinOpts) {
 						}
 
 						if (field.items) {
-							if (typeof field.items == "string") {
-								// ?
-							} else if (typeof field.items == "object") {
+							if (field.itemProperties) {
 								for (let i = 0; i < value.length; i++) {
 									value[i] = await this._validateObject(
 										ctx,
-										field.items,
+										field.itemProperties,
 										value[i],
 										type
 									);
 								}
+							} else if (field.items.type) {
+								for (let i = 0; i < value.length; i++) {
+									value[i] = await sanitizeValue(field.items, value[i]);
+								}
 							}
 						}
 					}
+				}
 
+				return value;
+			};
+
+			const setValue = async (field, value) => {
+				value = await sanitizeValue(field, value);
+
+				if (value !== undefined) {
 					// Set the value to the entity, it's valid.
 					_.set(entity, field.columnName, value);
 				}
@@ -362,7 +373,7 @@ module.exports = function (mixinOpts) {
 						if (field.required) {
 							if ((value === null && !field.nullable) || value === undefined) {
 								throw new ValidationError(
-									`The '${field.name}' field is required`,
+									`The field '${field.name}' is required.`,
 									"REQUIRED_FIELD",
 									{
 										field: field.name,
@@ -387,15 +398,17 @@ module.exports = function (mixinOpts) {
 		},
 
 		_generateValidatorSchema(opts) {
-			const type = opts.type || "create";
+			return this._generateValidatorSchemaForFields(this.$fields, opts);
+		},
 
+		_generateValidatorSchemaForFields(fields, opts) {
 			const res = {
 				$$strict: true
 			};
 
-			if (this.$fields == null) return res;
+			if (fields == null || fields.length == 0) return res;
 
-			this.$fields.forEach(field => {
+			fields.forEach(field => {
 				const schema = this._generateFieldValidatorSchema(field, opts);
 				if (schema != null) res[field.name] = schema;
 			});
@@ -412,13 +425,18 @@ module.exports = function (mixinOpts) {
 				"hidden",
 				"readonly",
 				"required",
+				"immutable",
 				"onCreate",
 				"onUpdate",
 				"onReplace",
 				"onRemove",
 				"permission",
 				"readPermission",
-				"populate"
+				"populate",
+				"itemProperties",
+				"set",
+				"get",
+				"validate"
 			]);
 
 			// Type
@@ -427,11 +445,11 @@ module.exports = function (mixinOpts) {
 			// Readonly -> Forbidden
 			if (field.readonly == true) return null;
 
-			// Primary key forbidden
+			// Primary key forbidden on create
 			if (field.primaryKey && opts.type == "create") return null;
 
 			// Required/Optional
-			if (field.required === false) schema.optional = true;
+			if (!field.required) schema.optional = true;
 
 			// Type conversion (enable by default)
 			if (["number", "date", "boolean"].includes(field.type))
@@ -439,6 +457,15 @@ module.exports = function (mixinOpts) {
 
 			// Default value
 			if (field.default !== undefined) schema.default = field.default;
+
+			// Nested object
+			if (field.type == "object" && field.itemProperties) {
+				schema.properties = this._generateValidatorSchemaForFields(
+					field.itemProperties,
+					opts
+				);
+			}
+
 			return schema;
 		}
 	};
