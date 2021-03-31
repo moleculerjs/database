@@ -46,7 +46,7 @@ describe("Test validation", () => {
 			settings: {
 				fields: {
 					id: { type: "string", primaryKey: true, columnName: "_id" },
-					name: "string",
+					name: "string|min:3|max:100|no-required",
 					age: true,
 					password: false,
 					createdAt: { type: "date", readonly: true, onCreate: () => new Date() },
@@ -72,7 +72,14 @@ describe("Test validation", () => {
 					type: "string",
 					required: false
 				},
-				{ columnName: "name", name: "name", type: "string", required: false },
+				{
+					columnName: "name",
+					name: "name",
+					type: "string",
+					required: false,
+					min: 3,
+					max: 100
+				},
 				{ columnName: "age", name: "age", type: "any", required: false },
 				{
 					name: "createdAt",
@@ -607,18 +614,24 @@ describe("Test validation", () => {
 			});
 
 			it("should remove password & role fields", async () => {
+				const oldEntity = {
+					name: "John",
+					password: "pass1234",
+					role: "user"
+				};
+
 				const params = {
 					name: "John",
 					password: "pass1234",
 					role: "admin"
 				};
-				const res = await svc.validateParams(ctx, params, { type: "update" });
+				const res = await svc.validateParams(ctx, params, { type: "update", oldEntity });
 				expect(res).toEqual({
 					name: "John"
 				});
 			});
 
-			it("should not touch updateabe field if not exist", async () => {
+			it("should not touch immutable field if not exist", async () => {
 				const params = {
 					name: "John",
 					password: "pass1234"
@@ -858,26 +871,38 @@ describe("Test validation", () => {
 				svc._processFields();
 			});
 
-			it("should remove password & role field", async () => {
+			it("should remove password & use the previous role value", async () => {
+				const oldEntity = {
+					name: "John",
+					password: "pass1234",
+					role: "user"
+				};
 				const params = {
 					name: "John",
 					password: "pass1234",
 					role: "admin"
 				};
-				const res = await svc.validateParams(ctx, params, { type: "replace" });
+				const res = await svc.validateParams(ctx, params, { type: "replace", oldEntity });
 				expect(res).toEqual({
-					name: "John"
+					name: "John",
+					role: "user"
 				});
 			});
 
-			it("should not touch updateabe field if not exist", async () => {
+			it("should not touch immutable field if not exist", async () => {
+				const oldEntity = {
+					name: "John",
+					password: "pass1234",
+					role: "user"
+				};
 				const params = {
 					name: "John",
 					password: "pass1234"
 				};
-				const res = await svc.validateParams(ctx, params, { type: "replace" });
+				const res = await svc.validateParams(ctx, params, { type: "replace", oldEntity });
 				expect(res).toEqual({
-					name: "John"
+					name: "John",
+					role: "user"
 				});
 			});
 		});

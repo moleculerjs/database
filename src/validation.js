@@ -6,9 +6,14 @@
 
 "use strict";
 
-const { Context } = require("moleculer");
+const { Context } = require("moleculer"); // eslint-disable-line no-unused-vars
 const { ServiceSchemaError, ValidationError } = require("moleculer").Errors;
 const _ = require("lodash");
+
+const Validator = require("fastest-validator");
+const validator = new Validator({
+	useNewCustomCheckerFunction: true
+});
 
 module.exports = function (mixinOpts) {
 	return {
@@ -40,9 +45,9 @@ module.exports = function (mixinOpts) {
 					// Shorthand format { title: true } => { title: {} }
 					if (def === true) def = { type: "any" };
 
-					// Shorthand format: { title: "string" } => { title: { type: "string" } }
-					// TODO: | handling like if FastestValidator
-					if (_.isString(def)) def = { type: def };
+					// Shorthand format: { title: "string|min:3" } => { title: { type: "string", min: 3 } }
+					// Same as in FastestValidator
+					if (_.isString(def)) def = validator.parseShortHand(def);
 
 					// Copy the properties TOOD: deep clone due to nested fields
 					const field = Object.assign({}, def);
