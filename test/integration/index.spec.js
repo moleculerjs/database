@@ -40,14 +40,14 @@ describe("Integration tests", () => {
 		};
 
 		describe(`Adapter: ${adapter.type}`, () => {
-			// describe("Test methods", () => MethodTests(getAdapter, adapter.type));
-			// describe("Test scopes", () => ScopeTests(getAdapter, adapter.type));
-			// describe("Test actions", () => ActionsTests(getAdapter, adapter.type));
-			// describe("Test transformations", () => TransformTests(getAdapter, adapter.type));
-			// describe("Test populating", () => PopulateTests(getAdapter, adapter.type));
+			describe("Test methods", () => MethodTests(getAdapter, adapter.type));
+			describe("Test scopes", () => ScopeTests(getAdapter, adapter.type));
+			describe("Test actions", () => ActionsTests(getAdapter, adapter.type));
+			describe("Test transformations", () => TransformTests(getAdapter, adapter.type));
+			describe("Test populating", () => PopulateTests(getAdapter, adapter.type));
 			describe("Test Validations", () => ValidationTests(getAdapter, adapter.type));
-			// describe("Test REST", () => RESTTests(getAdapter, adapter.type));
-			// describe("Test Tenants", () => TenantTests(getAdapter, adapter.type));
+			describe("Test REST", () => RESTTests(getAdapter, adapter.type));
+			describe("Test Tenants", () => TenantTests(getAdapter, adapter.type));
 		});
 	}
 });

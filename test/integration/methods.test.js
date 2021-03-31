@@ -571,14 +571,13 @@ module.exports = (getAdapter, adapterType) => {
 			it("should replace an entity", async () => {
 				svc.entityChanged.mockClear();
 				const row = await svc.replaceEntity(ctx, {
-					id: docs.kevinJames._id,
+					_id: docs.kevinJames._id,
 					name: "Kevin",
 					age: 72,
 					height: 185
 				});
 				expect(row).toEqual({
 					_id: docs.kevinJames._id,
-					id: docs.kevinJames._id, // TODO: fix it
 					name: "Kevin",
 					age: 72,
 					height: 185

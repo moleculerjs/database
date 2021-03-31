@@ -105,7 +105,6 @@ module.exports = function DatabaseMixin(mixinOpts) {
 		 * Default settings
 		 */
 		settings: {
-			// TODO: model: { fields: { ... } } ???
 			/** @type {Object?} Field filtering list. It must be an `Object`. If the value is `null` it won't filter the fields of entities. */
 			fields: null,
 

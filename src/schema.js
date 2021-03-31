@@ -18,10 +18,10 @@ function generateValidatorSchemaFromFields(fields, opts) {
 
 	if (fields == null || Object.keys(fields).length == 0) return res;
 
-	res.$$strict = true;
-
 	opts == opts || {};
 	if (opts.level == null) opts.level = 0;
+
+	if (opts.level == 0) res.$$strict = "remove";
 
 	_.map(fields, (field, name) => {
 		if (field === false) return;
@@ -56,7 +56,8 @@ function generateFieldValidatorSchema(field, opts) {
 		"itemProperties",
 		"set",
 		"get",
-		"validate"
+		"validate",
+		"default"
 	]);
 
 	// Type
@@ -68,8 +69,9 @@ function generateFieldValidatorSchema(field, opts) {
 	// Primary key forbidden on create
 	if (field.primaryKey && opts.type == "create") return null;
 
-	// Required/Optional
-	if (!field.required) schema.optional = true;
+	// Required
+	// If there is `set` we can't set the required maybe the value will be set in the `set`
+	if (!field.required || field.set) schema.optional = true;
 
 	// On update, every field is optional except primaryKey
 	if (opts.type == "update") schema.optional = !field.primaryKey;
@@ -78,14 +80,16 @@ function generateFieldValidatorSchema(field, opts) {
 	if (opts.type == "replace" && field.primaryKey) schema.optional = false;
 
 	// Type conversion (enable by default)
-	if (["number", "date", "boolean"].includes(field.type))
+	if (["string", "number", "date", "boolean"].includes(field.type))
 		schema.convert = field.convert != null ? field.convert : true;
 
-	// Default value
-	if (field.default !== undefined) schema.default = _.cloneDeep(field.default);
+	// Default value (if not "update"), Function default value is not supported by FV
+	if (field.default !== undefined && !_.isFunction(field.default) && opts.type != "update")
+		schema.default = _.cloneDeep(field.default);
 
 	// Nested object
 	if (field.type == "object" && field.properties) {
+		schema.strict = "remove";
 		schema.properties = generateValidatorSchemaFromFields(field.properties, {
 			...opts,
 			level: opts.level + 1

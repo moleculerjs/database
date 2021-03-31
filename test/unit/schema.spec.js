@@ -54,11 +54,11 @@ describe("Test validator schema generation", () => {
 
 	it("generate validator schema for 'create'", async () => {
 		expect(generateValidatorSchemaFromFields(fields, { type: "create" })).toEqual({
-			$$strict: true,
-			name: { type: "string" },
-			username: { type: "string", max: 100, min: 3 },
+			$$strict: "remove",
+			name: { type: "string", convert: true },
+			username: { type: "string", max: 100, min: 3, convert: true },
 			email: { type: "email", optional: true },
-			password: { type: "string", min: 6, optional: true },
+			password: { type: "string", min: 6, optional: true, convert: true },
 			age: {
 				type: "number",
 				positive: true,
@@ -69,13 +69,13 @@ describe("Test validator schema generation", () => {
 			address: {
 				type: "object",
 				optional: true,
+				strict: "remove",
 				properties: {
-					$$strict: true,
 					zip: { type: "number", optional: true, convert: true },
-					street: { type: "string", optional: true },
-					state: { type: "string", optional: true },
-					city: { type: "string" },
-					country: { type: "string", optional: true },
+					street: { type: "string", optional: true, convert: true },
+					state: { type: "string", optional: true, convert: true },
+					city: { type: "string", convert: true },
+					country: { type: "string", optional: true, convert: true },
 					primary: { type: "boolean", convert: true, optional: true, default: true }
 				}
 			},
@@ -85,7 +85,8 @@ describe("Test validator schema generation", () => {
 				optional: true,
 				items: {
 					type: "string",
-					optional: true
+					optional: true,
+					convert: true
 				}
 			},
 			phones: {
@@ -94,10 +95,10 @@ describe("Test validator schema generation", () => {
 				items: {
 					type: "object",
 					optional: true,
+					strict: "remove",
 					properties: {
-						$$strict: true,
-						type: { type: "string", optional: true },
-						number: { type: "string" },
+						type: { type: "string", optional: true, convert: true },
+						number: { type: "string", convert: true },
 						primary: {
 							type: "boolean",
 							convert: true,
@@ -113,18 +114,18 @@ describe("Test validator schema generation", () => {
 				default: {}
 			},
 			bio: { type: "any", optional: true },
-			status: { type: "string", default: "A", optional: true }
+			status: { type: "string", default: "A", optional: true, convert: true }
 		});
 	});
 
 	it("generate validator schema for 'update'", async () => {
 		expect(generateValidatorSchemaFromFields(fields, { type: "update" })).toEqual({
-			$$strict: true,
-			id: { type: "string", optional: false },
-			name: { type: "string", optional: true },
-			username: { type: "string", max: 100, min: 3, optional: true },
+			$$strict: "remove",
+			id: { type: "string", optional: false, convert: true },
+			name: { type: "string", optional: true, convert: true },
+			username: { type: "string", max: 100, min: 3, optional: true, convert: true },
 			email: { type: "email", optional: true },
-			password: { type: "string", min: 6, optional: true },
+			password: { type: "string", min: 6, optional: true, convert: true },
 			age: {
 				type: "number",
 				positive: true,
@@ -135,14 +136,14 @@ describe("Test validator schema generation", () => {
 			address: {
 				type: "object",
 				optional: true,
+				strict: "remove",
 				properties: {
-					$$strict: true,
 					zip: { type: "number", optional: true, convert: true },
-					street: { type: "string", optional: true },
-					state: { type: "string", optional: true },
-					city: { type: "string", optional: true },
-					country: { type: "string", optional: true },
-					primary: { type: "boolean", convert: true, optional: true, default: true }
+					street: { type: "string", optional: true, convert: true },
+					state: { type: "string", optional: true, convert: true },
+					city: { type: "string", optional: true, convert: true },
+					country: { type: "string", optional: true, convert: true },
+					primary: { type: "boolean", convert: true, optional: true }
 				}
 			},
 			roles: {
@@ -151,7 +152,8 @@ describe("Test validator schema generation", () => {
 				optional: true,
 				items: {
 					type: "string",
-					optional: true
+					optional: true,
+					convert: true
 				}
 			},
 			phones: {
@@ -160,37 +162,35 @@ describe("Test validator schema generation", () => {
 				items: {
 					type: "object",
 					optional: true,
+					strict: "remove",
 					properties: {
-						$$strict: true,
-						type: { type: "string", optional: true },
-						number: { type: "string", optional: true },
+						type: { type: "string", optional: true, convert: true },
+						number: { type: "string", optional: true, convert: true },
 						primary: {
 							type: "boolean",
 							convert: true,
-							optional: true,
-							default: false
+							optional: true
 						}
 					}
 				}
 			},
 			settings: {
 				type: "object",
-				optional: true,
-				default: {}
+				optional: true
 			},
 			bio: { type: "any", optional: true },
-			status: { type: "string", default: "A", optional: true }
+			status: { type: "string", optional: true, convert: true }
 		});
 	});
 
 	it("generate validator schema for 'replace'", async () => {
 		expect(generateValidatorSchemaFromFields(fields, { type: "replace" })).toEqual({
-			$$strict: true,
-			id: { type: "string", optional: false },
-			name: { type: "string" },
-			username: { type: "string", max: 100, min: 3 },
+			$$strict: "remove",
+			id: { type: "string", optional: false, convert: true },
+			name: { type: "string", convert: true },
+			username: { type: "string", max: 100, min: 3, convert: true },
 			email: { type: "email", optional: true },
-			password: { type: "string", min: 6, optional: true },
+			password: { type: "string", min: 6, optional: true, convert: true },
 			age: {
 				type: "number",
 				positive: true,
@@ -201,13 +201,13 @@ describe("Test validator schema generation", () => {
 			address: {
 				type: "object",
 				optional: true,
+				strict: "remove",
 				properties: {
-					$$strict: true,
 					zip: { type: "number", optional: true, convert: true },
-					street: { type: "string", optional: true },
-					state: { type: "string", optional: true },
-					city: { type: "string" },
-					country: { type: "string", optional: true },
+					street: { type: "string", optional: true, convert: true },
+					state: { type: "string", optional: true, convert: true },
+					city: { type: "string", convert: true },
+					country: { type: "string", optional: true, convert: true },
 					primary: { type: "boolean", convert: true, optional: true, default: true }
 				}
 			},
@@ -217,7 +217,8 @@ describe("Test validator schema generation", () => {
 				optional: true,
 				items: {
 					type: "string",
-					optional: true
+					optional: true,
+					convert: true
 				}
 			},
 			phones: {
@@ -226,10 +227,10 @@ describe("Test validator schema generation", () => {
 				items: {
 					type: "object",
 					optional: true,
+					strict: "remove",
 					properties: {
-						$$strict: true,
-						type: { type: "string", optional: true },
-						number: { type: "string" },
+						type: { type: "string", optional: true, convert: true },
+						number: { type: "string", convert: true },
 						primary: {
 							type: "boolean",
 							convert: true,
@@ -245,7 +246,7 @@ describe("Test validator schema generation", () => {
 				default: {}
 			},
 			bio: { type: "any", optional: true },
-			status: { type: "string", default: "A", optional: true }
+			status: { type: "string", default: "A", optional: true, convert: true }
 		});
 	});
 });

@@ -283,13 +283,17 @@ describe("Test validation", () => {
 				} catch (err) {
 					expect(err).toBeInstanceOf(ValidationError);
 					expect(err.name).toBe("ValidationError");
-					expect(err.message).toBe("The field 'name' is required.");
-					expect(err.type).toBe("REQUIRED_FIELD");
+					expect(err.message).toBe("Parameters validation error!");
+					expect(err.type).toBe("VALIDATION_ERROR");
 					expect(err.code).toBe(422);
-					expect(err.data).toEqual({
-						field: "name",
-						value: undefined
-					});
+					expect(err.data).toEqual([
+						{
+							actual: undefined,
+							field: "name",
+							message: "The 'name' field is required.",
+							type: "required"
+						}
+					]);
 				}
 			});
 
@@ -303,13 +307,17 @@ describe("Test validation", () => {
 				} catch (err) {
 					expect(err).toBeInstanceOf(ValidationError);
 					expect(err.name).toBe("ValidationError");
-					expect(err.message).toBe("The field 'name' is required.");
-					expect(err.type).toBe("REQUIRED_FIELD");
+					expect(err.message).toBe("Parameters validation error!");
+					expect(err.type).toBe("VALIDATION_ERROR");
 					expect(err.code).toBe(422);
-					expect(err.data).toEqual({
-						field: "name",
-						value: null
-					});
+					expect(err.data).toEqual([
+						{
+							actual: null,
+							field: "name",
+							message: "The 'name' field is required.",
+							type: "required"
+						}
+					]);
 				}
 			});
 
@@ -338,13 +346,17 @@ describe("Test validation", () => {
 				} catch (err) {
 					expect(err).toBeInstanceOf(ValidationError);
 					expect(err.name).toBe("ValidationError");
-					expect(err.message).toBe("The field 'name' is required.");
-					expect(err.type).toBe("REQUIRED_FIELD");
+					expect(err.message).toBe("Parameters validation error!");
+					expect(err.type).toBe("VALIDATION_ERROR");
 					expect(err.code).toBe(422);
-					expect(err.data).toEqual({
-						field: "name",
-						value: undefined
-					});
+					expect(err.data).toEqual([
+						{
+							actual: undefined,
+							field: "name",
+							message: "The 'name' field is required.",
+							type: "required"
+						}
+					]);
 				}
 			});
 		});
@@ -794,13 +806,17 @@ describe("Test validation", () => {
 				} catch (err) {
 					expect(err).toBeInstanceOf(ValidationError);
 					expect(err.name).toBe("ValidationError");
-					expect(err.message).toBe("The field 'name' is required.");
-					expect(err.type).toBe("REQUIRED_FIELD");
+					expect(err.message).toBe("Parameters validation error!");
+					expect(err.type).toBe("VALIDATION_ERROR");
 					expect(err.code).toBe(422);
-					expect(err.data).toEqual({
-						field: "name",
-						value: undefined
-					});
+					expect(err.data).toEqual([
+						{
+							actual: undefined,
+							field: "name",
+							message: "The 'name' field is required.",
+							type: "required"
+						}
+					]);
 				}
 			});
 
@@ -814,13 +830,17 @@ describe("Test validation", () => {
 				} catch (err) {
 					expect(err).toBeInstanceOf(ValidationError);
 					expect(err.name).toBe("ValidationError");
-					expect(err.message).toBe("The field 'name' is required.");
-					expect(err.type).toBe("REQUIRED_FIELD");
+					expect(err.message).toBe("Parameters validation error!");
+					expect(err.type).toBe("VALIDATION_ERROR");
 					expect(err.code).toBe(422);
-					expect(err.data).toEqual({
-						field: "name",
-						value: null
-					});
+					expect(err.data).toEqual([
+						{
+							actual: null,
+							field: "name",
+							message: "The 'name' field is required.",
+							type: "required"
+						}
+					]);
 				}
 			});
 
@@ -849,13 +869,17 @@ describe("Test validation", () => {
 				} catch (err) {
 					expect(err).toBeInstanceOf(ValidationError);
 					expect(err.name).toBe("ValidationError");
-					expect(err.message).toBe("The field 'name' is required.");
-					expect(err.type).toBe("REQUIRED_FIELD");
+					expect(err.message).toBe("Parameters validation error!");
+					expect(err.type).toBe("VALIDATION_ERROR");
 					expect(err.code).toBe(422);
-					expect(err.data).toEqual({
-						field: "name",
-						value: undefined
-					});
+					expect(err.data).toEqual([
+						{
+							actual: undefined,
+							field: "name",
+							message: "The 'name' field is required.",
+							type: "required"
+						}
+					]);
 				}
 			});
 		});
@@ -1205,7 +1229,7 @@ function testTypeConversion(ctx, svc, type) {
 			});
 		});
 
-		it("should throw Cast error for invalid number", async () => {
+		it("should throw ValidationError for invalid number", async () => {
 			const params = {
 				snum: "John123"
 			};
@@ -1215,17 +1239,21 @@ function testTypeConversion(ctx, svc, type) {
 			} catch (err) {
 				expect(err).toBeInstanceOf(ValidationError);
 				expect(err.name).toBe("ValidationError");
-				expect(err.message).toBe("Cast to Number failed for value 'John123'");
-				expect(err.type).toBe("CAST_ERROR");
+				expect(err.message).toBe("Parameters validation error!");
+				expect(err.type).toBe("VALIDATION_ERROR");
 				expect(err.code).toBe(422);
-				expect(err.data).toEqual({
-					field: "snum",
-					value: "John123"
-				});
+				expect(err.data).toEqual([
+					{
+						actual: "John123",
+						field: "snum",
+						message: "The 'snum' field must be a number.",
+						type: "number"
+					}
+				]);
 			}
 		});
 
-		it("should throw Cast error for invalid date", async () => {
+		it("should throw ValidationError for invalid date", async () => {
 			const params = {
 				sdate: "John123"
 			};
@@ -1235,13 +1263,17 @@ function testTypeConversion(ctx, svc, type) {
 			} catch (err) {
 				expect(err).toBeInstanceOf(ValidationError);
 				expect(err.name).toBe("ValidationError");
-				expect(err.message).toBe("Cast to Date failed for value 'John123'");
-				expect(err.type).toBe("CAST_ERROR");
+				expect(err.message).toBe("Parameters validation error!");
+				expect(err.type).toBe("VALIDATION_ERROR");
 				expect(err.code).toBe(422);
-				expect(err.data).toEqual({
-					field: "sdate",
-					value: "John123"
-				});
+				expect(err.data).toEqual([
+					{
+						actual: "John123",
+						field: "sdate",
+						message: "The 'sdate' field must be a Date.",
+						type: "date"
+					}
+				]);
 			}
 		});
 	});

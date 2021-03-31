@@ -104,7 +104,7 @@ module.exports = (getAdapter, adapterType) => {
 
 			if (tenantStrategy == "record") {
 				it("should throw error if tenantId is missing", async () => {
-					expect.assertions(2);
+					expect.assertions(4);
 					try {
 						await broker.call("posts.create", {
 							title: "Post #7",
@@ -112,7 +112,16 @@ module.exports = (getAdapter, adapterType) => {
 						});
 					} catch (err) {
 						expect(err.name).toBe("ValidationError");
-						expect(err.message).toBe("The field 'tenantId' is required.");
+						expect(err.message).toBe("Parameters validation error!");
+						expect(err.code).toBe(422);
+						expect(err.data).toEqual([
+							{
+								actual: undefined,
+								field: "tenantId",
+								message: "The 'tenantId' field is required.",
+								type: "required"
+							}
+						]);
 					}
 				});
 			} else {
@@ -697,7 +706,9 @@ module.exports = (getAdapter, adapterType) => {
 			}
 		});
 
-		beforeAll(() => broker.start());
+		beforeAll(() => {
+			return broker.start();
+		});
 		afterAll(() => broker.stop());
 
 		runTenantTestcases(broker, svc, "record");
