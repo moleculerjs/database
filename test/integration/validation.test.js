@@ -692,7 +692,7 @@ module.exports = adapter => {
 					expect(res2).toStrictEqual(entity);
 				});
 
-				it.skip("should skip role field at replace", async () => {
+				it("should skip role field at replace", async () => {
 					const res = await broker.call("users.replace", {
 						id: entity.id,
 						name: "Jane Doe",
@@ -727,7 +727,7 @@ module.exports = adapter => {
 					expect(res2).toStrictEqual(entity);
 				});
 
-				it.skip("should skip role field at update", async () => {
+				it("should skip role field at update", async () => {
 					const res = await broker.call("users.update", {
 						id: entity.id,
 						name: "John Doe",
@@ -762,7 +762,7 @@ module.exports = adapter => {
 					expect(res2).toStrictEqual(entity);
 				});
 
-				it.skip("should skip role field at replace", async () => {
+				it("should set role field at replace because it not set yet", async () => {
 					const res = await broker.call("users.replace", {
 						id: entity.id,
 						name: "Jane Doe",

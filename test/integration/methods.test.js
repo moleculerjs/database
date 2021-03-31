@@ -298,6 +298,7 @@ module.exports = (getAdapter, adapterType) => {
 				it("should return all rows", async () => {
 					const rows = [];
 					const stream = await svc.streamEntities(ctx, {});
+					expect.assertions(2);
 
 					return new Promise((resolve, reject) => {
 						expect(stream).toBeInstanceOf(Stream);

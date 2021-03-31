@@ -174,7 +174,7 @@ module.exports = function (mixinOpts) {
 			}
 
 			const fields = Array.from(this.$fields);
-			const entity = await this._validateObject(ctx, fields, params, type);
+			const entity = await this._validateObject(ctx, fields, params, opts);
 
 			return entity;
 		},
@@ -185,10 +185,13 @@ module.exports = function (mixinOpts) {
 		 * @param {Context} ctx
 		 * @param {Array<Object>} fields
 		 * @param {Object} params
-		 * @param {String} type
+		 * @param {Object} opts
 		 * @returns
 		 */
-		async _validateObject(ctx, fields, params, type) {
+		async _validateObject(ctx, fields, params, opts) {
+			const type = opts.type || "create";
+			const oldEntity = opts.oldEntity;
+
 			let entity = {};
 
 			// Removing & Soft delete
@@ -384,10 +387,18 @@ module.exports = function (mixinOpts) {
 						}
 					}
 
-					// Immutable (TODO: should check the previous value, if not set yet, we should enable)
+					// Immutable (should check the previous value, if not set yet, we should enable)
 					if (["update", "replace"].includes(type) && field.immutable === true) {
-						// TODO throwing error instead of skipping?
-						return;
+						const prevValue = _.get(oldEntity, field.columnName);
+						if (prevValue !== undefined) {
+							if (type == "update") {
+								// Skip on update
+								return;
+							} else {
+								// Use the previous value on replace
+								value = prevValue;
+							}
+						}
 					}
 
 					await setValue(field, value);
