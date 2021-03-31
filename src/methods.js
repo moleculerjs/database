@@ -1,6 +1,6 @@
 /*
  * @moleculer/database
- * Copyright (c) 2020 MoleculerJS (https://github.com/moleculerjs/database)
+ * Copyright (c) 2021 MoleculerJS (https://github.com/moleculerjs/database)
  * MIT Licensed
  */
 
@@ -351,7 +351,7 @@ module.exports = function (mixinOpts) {
 				result = await this.transformResult(adapter, result, {}, ctx);
 			}
 
-			await this.entityChanged(result, ctx, { ...opts, type: "create" });
+			await this._entityChanged(result, ctx, { ...opts, type: "create" });
 			return result;
 		},
 
@@ -375,7 +375,7 @@ module.exports = function (mixinOpts) {
 				result = await this.transformResult(adapter, result, {}, ctx);
 			}
 
-			await this.entityChanged(result, ctx, { ...opts, type: "create", batch: true });
+			await this._entityChanged(result, ctx, { ...opts, type: "create", batch: true });
 			return result;
 		},
 
@@ -390,21 +390,23 @@ module.exports = function (mixinOpts) {
 			let id = this._getIDFromParams(params);
 
 			// Call because it throws error if entity is not exist
-			/*const oldEntity = */ await this.resolveEntities(ctx, params, {
+			const oldEntity = await this.resolveEntities(ctx, params, {
 				transform: false,
 				throwIfNotExist: true
 			});
 
-			params = await this.validateParams(ctx, params, { type: "update" });
+			const rawUpdate = params.$raw === true;
+			if (rawUpdate) delete params.$raw;
+
+			if (!rawUpdate) {
+				params = await this.validateParams(ctx, params, { type: "update", oldEntity });
+			}
 
 			id = this._sanitizeID(id, opts);
 
 			delete params[this.$primaryField.columnName];
 			if (this.$primaryField.columnName != this.$primaryField.name)
 				delete params[this.$primaryField.name];
-
-			const rawUpdate = params.$raw === true;
-			if (rawUpdate) delete params.$raw;
 
 			const adapter = await this.getAdapter(ctx);
 			let result = await adapter.updateById(id, params, { raw: rawUpdate });
@@ -413,7 +415,7 @@ module.exports = function (mixinOpts) {
 				result = await this.transformResult(adapter, result, {}, ctx);
 			}
 
-			await this.entityChanged(result, ctx, { ...opts, type: "update" });
+			await this._entityChanged(result, ctx, { ...opts, type: "update" });
 			return result;
 		},
 
@@ -428,13 +430,13 @@ module.exports = function (mixinOpts) {
 			let id = this._getIDFromParams(params);
 
 			// Call because it throws error if entity is not exist
-			/*const oldEntity = */ await this.resolveEntities(ctx, params, {
+			const oldEntity = await this.resolveEntities(ctx, params, {
 				transform: false,
 				throwIfNotExist: true
 			});
 			const adapter = await this.getAdapter(ctx);
 
-			params = await this.validateParams(ctx, params, { type: "replace" });
+			params = await this.validateParams(ctx, params, { type: "replace", oldEntity });
 
 			id = this._sanitizeID(id, opts);
 
@@ -448,7 +450,7 @@ module.exports = function (mixinOpts) {
 				result = await this.transformResult(adapter, result, {}, ctx);
 			}
 
-			await this.entityChanged(result, ctx, { ...opts, type: "replace" });
+			await this._entityChanged(result, ctx, { ...opts, type: "replace" });
 			return result;
 		},
 
@@ -486,7 +488,7 @@ module.exports = function (mixinOpts) {
 				entity = await this.transformResult(adapter, entity, params, ctx);
 			}
 
-			await this.entityChanged(entity, ctx, {
+			await this._entityChanged(entity, ctx, {
 				...opts,
 				type: "remove",
 				softDelete: !!this.$softDelete
@@ -513,7 +515,7 @@ module.exports = function (mixinOpts) {
 		 * @param {Object} def
 		 */
 		createIndex(adapter, def) {
-			adapter.createIndex(def);
+			return adapter.createIndex(def);
 		},
 
 		/**
@@ -522,11 +524,23 @@ module.exports = function (mixinOpts) {
 		 * @param {Context?} ctx
 		 * @param {Object?} opts
 		 */
-		async entityChanged(data, ctx /*, opts = {}*/) {
+		async _entityChanged(data, ctx, opts = {}) {
 			if (cacheOpts && cacheOpts.eventName) {
 				// Cache cleaning event
 				(ctx || this.broker).broadcast(cacheOpts.eventName);
 			}
+
+			this.entityChanged(opts.type, data, ctx);
+		},
+
+		/**
+		 * Can be user-defined which is called when an entity changed.
+		 * @param {String} type
+		 * @param {any} data
+		 * @param {Context?} ctx
+		 */
+		entityChanged(type, data, ctx) {
+			// Abstract method
 		},
 
 		/**

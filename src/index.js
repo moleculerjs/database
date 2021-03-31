@@ -1,7 +1,7 @@
 /*
 /*
  * @moleculer/database
- * Copyright (c) 2020 MoleculerJS (https://github.com/moleculerjs/database)
+ * Copyright (c) 2021 MoleculerJS (https://github.com/moleculerjs/database)
  * MIT Licensed
  */
 
@@ -17,7 +17,6 @@ const Transform = require("./transform");
 /*
 
   TODO:
-	- [ ] Megpróbálni a transform-ot inicializáláskor létrehozni akár template szinten is. Sokkal gyorsabb tudni lenni, mert transform-nál csak végig kell menni és meghívni mindegyik függvényét.
 
 	- [x] Actions
 		- [x] `find`
@@ -65,10 +64,14 @@ const Transform = require("./transform");
 
 	- [x] Soft delete
 	- [ ] create validation from field definitions
-	- [ ] nested objects in fields.
+	- [x] nested objects in fields.
+	- [ ] change optional -> required like in fastest-validator
 	- [x] Multi model/tenant solutions
 		- [x] get connection/model dynamically
 	- [ ] `aggregate` action with params: `type: "sum", "avg", "count", "min", "max"` & `field: "price"`
+	- [ ] permissions for scopes
+	- [ ] nested-et nem támogató adapter-ek warning-oljanak és flat-eljék az Object-t|Array-t JSON string-é és úgy tárolják le
+	- [ ] Megpróbálni a transform-ot inicializáláskor létrehozni akár template szinten is. Sokkal gyorsabb tudni lenni, mert transform-nál csak végig kell menni és meghívni mindegyik függvényét.
 
 
 */

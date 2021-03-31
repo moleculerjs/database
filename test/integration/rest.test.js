@@ -39,7 +39,7 @@ module.exports = (getAdapter, adapterType) => {
 				} catch (error) {
 					const err = error.response.data;
 					expect(err.name).toBe("ValidationError");
-					expect(err.message).toEqual("The 'title' field is required");
+					expect(err.message).toEqual("The field 'title' is required.");
 					expect(err.type).toEqual("REQUIRED_FIELD");
 					expect(err.code).toEqual(422);
 					expect(err.data).toEqual({ field: "title", value: undefined });

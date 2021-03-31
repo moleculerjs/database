@@ -6,8 +6,8 @@
 
 "use strict";
 
-module.exports = {
-	Service: require("./src"),
-	Adapters: require("./src/adapters"),
-	Errors: require("./src/errors")
-};
+const BaseAdapter = require("./base");
+
+class KnexAdapter extends BaseAdapter {}
+
+module.exports = KnexAdapter;

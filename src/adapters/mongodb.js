@@ -1,16 +1,17 @@
 /*
  * @moleculer/database
- * Copyright (c) 2020 MoleculerJS (https://github.com/moleculerjs/database)
+ * Copyright (c) 2021 MoleculerJS (https://github.com/moleculerjs/database)
  * MIT Licensed
  */
 
 "use strict";
 
 const _ = require("lodash");
-const { MongoClient, ObjectID } = require("mongodb");
 const { ServiceSchemaError } = require("moleculer").Errors;
 
 const BaseAdapter = require("./base");
+
+let MongoClient, ObjectID;
 
 class MongoDBAdapter extends BaseAdapter {
 	/**
@@ -19,7 +20,8 @@ class MongoDBAdapter extends BaseAdapter {
 	 * @param  {Object?} opts
 	 * @param  {String} opts.dbName
 	 * @param  {String} opts.collection
-	 * @param  {Object?} opts.mongoClientOptions More Info: https://docs.mongodb.com/drivers/node/fundamentals/connection#id1
+	 * @param  {Object?} opts.mongoClientOptions More Info: https://docs.mongodb.com/drivers/node/current/fundamentals/connection/#connection-options
+	 * @param  {Object?} opts.dbOptions More Info: http://mongodb.github.io/node-mongodb-native/3.6/api/MongoClient.html#db
 	 */
 	constructor(opts) {
 		if (_.isString(opts)) opts = { uri: opts };
@@ -28,6 +30,13 @@ class MongoDBAdapter extends BaseAdapter {
 
 		this.client = null;
 		this.db = null;
+	}
+
+	/**
+	 * The adapter has nested-field support.
+	 */
+	get hasNestedFieldSupport() {
+		return true;
 	}
 
 	/**
@@ -44,29 +53,56 @@ class MongoDBAdapter extends BaseAdapter {
 		if (!this.opts.collection) {
 			throw new ServiceSchemaError("Missing `collection` in adapter options!");
 		}
+
+		try {
+			MongoClient = require("mongodb").MongoClient;
+			ObjectID = require("mongodb").ObjectID;
+		} catch (err) {
+			/* istanbul ignore next */
+			this.broker.fatal(
+				"The 'mongodb' package is missing! Please install it with 'npm install mongodb --save' command.",
+				err,
+				true
+			);
+		}
+
+		this.checkClientLibVersion("mongodb", "^3.6.5");
 	}
 
 	/**
 	 * Connect adapter to database
 	 */
 	async connect() {
+		const uri = this.opts.uri || "mongodb://localhost:27017";
+
+		this.logger.debug(`MongoDB adapter is connecting to '${uri}'...`);
 		this.client = new MongoClient(
-			this.opts.uri || "mongodb://localhost:27017",
-			_.defaultsDeep(this.opts.mongoClientOptions, { useUnifiedTopology: true })
+			uri,
+			_.defaultsDeep(this.opts.mongoClientOptions, {
+				useUnifiedTopology: true,
+				useNewUrlParser: true
+			})
 		);
 
-		// Connect the client to the server
-		await this.client.connect();
+		try {
+			// Connect the client to the server
+			await this.client.connect();
 
-		// Select DB and verify connection
-		this.db = this.client.db(this.opts.dbName);
-		await this.db.command({ ping: 1 });
+			// Select DB and verify connection
+			this.logger.debug("Selecting database:", this.opts.dbName);
+			this.db = this.client.db(this.opts.dbName, this.opts.dbOptions);
+			await this.db.command({ ping: 1 });
+			this.logger.debug("Database selected successfully.");
 
-		this.collection = this.db.collection(this.opts.collection);
+			this.logger.debug("Open collection:", this.opts.collection);
+			this.collection = this.db.collection(this.opts.collection);
 
-		this.logger.info(
-			`MongoDB adapter has connected. DB: '${this.opts.dbName}', Collection: '${this.opts.collection}'`
-		);
+			this.logger.info(
+				`MongoDB adapter has connected. Database: '${this.opts.dbName}', Collection: '${this.opts.collection}'`
+			);
+		} catch (err) {
+			this.logger.error("MongoDB error.", err);
+		}
 
 		this.db.on("close", () => this.logger.warn("MongoDB adapter has disconnected."));
 		this.db.on("error", err => this.logger.error("MongoDB error.", err));
@@ -295,7 +331,7 @@ class MongoDBAdapter extends BaseAdapter {
 	}
 
 	/**
-	 * Createa query based on filters
+	 * Create a query based on filters
 	 *
 	 * Available filters:
 	 *  - search
@@ -362,6 +398,10 @@ class MongoDBAdapter extends BaseAdapter {
 				if (!opts.counting && params.sort && q.sort) {
 					const sort = this.transformSort(params.sort);
 					if (sort) q.sort(sort);
+
+					// Collation
+					// https://docs.mongodb.com/manual/reference/method/cursor.collation/
+					if (params.collation) q.collation(params.collation);
 				}
 			}
 
@@ -372,6 +412,10 @@ class MongoDBAdapter extends BaseAdapter {
 				// Limit
 				if (_.isNumber(params.limit) && params.limit > 0) q.limit(params.limit);
 			}
+
+			// Hint
+			// https://docs.mongodb.com/manual/reference/method/cursor.hint/
+			if (params.hint) q.hint(params.hint);
 
 			return q;
 		}
@@ -388,13 +432,14 @@ class MongoDBAdapter extends BaseAdapter {
 	 * @memberof MongoDbAdapter
 	 */
 	transformSort(sort) {
-		if (Array.isArray(sort)) {
-			const sortObj = {};
-			sort.forEach(s => {
-				if (s.startsWith("-")) sortObj[s.slice(1)] = -1;
-				else sortObj[s] = 1;
-			});
-			return sortObj;
+		if (typeof sort == "string") {
+			return { sort: 1 };
+		} else if (Array.isArray(sort)) {
+			return sort.reduce((res, s) => {
+				if (s.startsWith("-")) res[s.slice(1)] = -1;
+				else res[s] = 1;
+				return res;
+			}, {});
 		}
 
 		return sort;

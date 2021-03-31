@@ -112,7 +112,7 @@ module.exports = (getAdapter, adapterType) => {
 						});
 					} catch (err) {
 						expect(err.name).toBe("ValidationError");
-						expect(err.message).toBe("The 'tenantId' field is required");
+						expect(err.message).toBe("The field 'tenantId' is required.");
 					}
 				});
 			} else {

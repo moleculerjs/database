@@ -40,7 +40,7 @@ jobs:
       working-directory: ./test
 
     - name: Run integration tests
-      run: npm test
+      run: npm run test:integration
       env:
         GITHUB_ACTIONS_CI: true
 

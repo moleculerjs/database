@@ -1,6 +1,6 @@
 /*
  * @moleculer/database
- * Copyright (c) 2020 MoleculerJS (https://github.com/moleculerjs/database)
+ * Copyright (c) 2021 MoleculerJS (https://github.com/moleculerjs/database)
  * MIT Licensed
  */
 
@@ -22,6 +22,13 @@ class NeDBAdapter extends BaseAdapter {
 		super(opts);
 
 		this.db = null;
+	}
+
+	/**
+	 * The adapter has nested-field support.
+	 */
+	get hasNestedFieldSupport() {
+		return true;
 	}
 
 	/**

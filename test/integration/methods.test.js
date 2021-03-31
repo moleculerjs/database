@@ -298,6 +298,7 @@ module.exports = (getAdapter, adapterType) => {
 				it("should return all rows", async () => {
 					const rows = [];
 					const stream = await svc.streamEntities(ctx, {});
+					expect.assertions(2);
 
 					return new Promise((resolve, reject) => {
 						expect(stream).toBeInstanceOf(Stream);
@@ -348,9 +349,7 @@ module.exports = (getAdapter, adapterType) => {
 			expect(docs.johnDoe).toEqual({ ...TEST_DOCS.johnDoe, _id: expect.any(String) });
 
 			expect(svc.entityChanged).toBeCalledTimes(1);
-			expect(svc.entityChanged).toBeCalledWith(docs.johnDoe, ctx, {
-				type: "create"
-			});
+			expect(svc.entityChanged).toBeCalledWith("create", docs.johnDoe, ctx);
 		});
 
 		it("create multiple entities", async () => {
@@ -374,10 +373,7 @@ module.exports = (getAdapter, adapterType) => {
 			});
 
 			expect(svc.entityChanged).toBeCalledTimes(1);
-			expect(svc.entityChanged).toBeCalledWith(res, ctx, {
-				type: "create",
-				batch: true
-			});
+			expect(svc.entityChanged).toBeCalledWith("create", res, ctx);
 		});
 
 		describe("Test resolveEntities method", () => {
@@ -499,7 +495,7 @@ module.exports = (getAdapter, adapterType) => {
 			it("should update an entity", async () => {
 				svc.entityChanged.mockClear();
 				const row = await svc.updateEntity(ctx, {
-					id: docs.janeDoe._id,
+					_id: docs.janeDoe._id,
 					status: true,
 					age: 28,
 					height: 168
@@ -515,15 +511,13 @@ module.exports = (getAdapter, adapterType) => {
 				});
 
 				expect(svc.entityChanged).toBeCalledTimes(1);
-				expect(svc.entityChanged).toBeCalledWith(row, ctx, {
-					type: "update"
-				});
+				expect(svc.entityChanged).toBeCalledWith("update", row, ctx);
 			});
 
 			it("should raw update an entity", async () => {
 				svc.entityChanged.mockClear();
 				const row = await svc.updateEntity(ctx, {
-					id: docs.johnDoe._id,
+					_id: docs.johnDoe._id,
 					$raw: true,
 
 					$set: {
@@ -547,9 +541,7 @@ module.exports = (getAdapter, adapterType) => {
 				});
 
 				expect(svc.entityChanged).toBeCalledTimes(1);
-				expect(svc.entityChanged).toBeCalledWith(row, ctx, {
-					type: "update"
-				});
+				expect(svc.entityChanged).toBeCalledWith("update", row, ctx);
 			});
 
 			it("throw Missing ID", async () => {
@@ -586,15 +578,14 @@ module.exports = (getAdapter, adapterType) => {
 				});
 				expect(row).toEqual({
 					_id: docs.kevinJames._id,
+					id: docs.kevinJames._id, // TODO: fix it
 					name: "Kevin",
 					age: 72,
 					height: 185
 				});
 
 				expect(svc.entityChanged).toBeCalledTimes(1);
-				expect(svc.entityChanged).toBeCalledWith(row, ctx, {
-					type: "replace"
-				});
+				expect(svc.entityChanged).toBeCalledWith("replace", row, ctx);
 			});
 
 			it("throw Missing ID", async () => {
@@ -680,10 +671,7 @@ module.exports = (getAdapter, adapterType) => {
 				expect(count).toEqual(3);
 
 				expect(svc.entityChanged).toBeCalledTimes(1);
-				expect(svc.entityChanged).toBeCalledWith(docs.janeDoe, ctx, {
-					type: "remove",
-					softDelete: false
-				});
+				expect(svc.entityChanged).toBeCalledWith("remove", docs.janeDoe, ctx);
 			});
 
 			it("throw Missing ID", async () => {

@@ -1,6 +1,6 @@
 /*
  * @moleculer/database
- * Copyright (c) 2020 MoleculerJS (https://github.com/moleculerjs/database)
+ * Copyright (c) 2021 MoleculerJS (https://github.com/moleculerjs/database)
  * MIT Licensed
  */
 
@@ -11,7 +11,10 @@ const { ServiceSchemaError } = require("moleculer").Errors;
 
 const Adapters = {
 	Base: require("./base"),
+	Cassandra: require("./cassandra"),
+	CouchBase: require("./couchbase"),
 	CouchDB: require("./couchdb"),
+	Knex: require("./knex"),
 	MongoDB: require("./mongodb"),
 	Mongoose: require("./mongoose"),
 	NeDB: require("./nedb"),
