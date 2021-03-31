@@ -89,6 +89,7 @@ module.exports = function (opts) {
 				sort: { type: "string", optional: true },
 				search: { type: "string", optional: true },
 				searchFields: PARAMS_SEARCHFIELDS,
+				collation: { type: "object", optional: true },
 				scope: PARAMS_SCOPE,
 				populate: PARAMS_POPULATE,
 				query: PARAMS_QUERY
@@ -184,6 +185,7 @@ module.exports = function (opts) {
 				sort: { type: "string", optional: true },
 				search: { type: "string", optional: true },
 				searchFields: PARAMS_SEARCHFIELDS,
+				collation: { type: "object", optional: true },
 				scope: PARAMS_SCOPE,
 				populate: PARAMS_POPULATE,
 				query: PARAMS_QUERY

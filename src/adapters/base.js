@@ -6,6 +6,8 @@
 
 "use strict";
 
+const semver = require("semver");
+
 class BaseAdapter {
 	/**
 	 * Constructor of adapter
@@ -32,6 +34,29 @@ class BaseAdapter {
 		this.logger = service.logger;
 		this.broker = service.broker;
 		this.Promise = this.broker.Promise;
+	}
+
+	/**
+	 * Check the installed client library version.
+	 * https://github.com/npm/node-semver#usage
+	 *
+	 * @param {String} installedVersion
+	 * @param {String} requiredVersions
+	 * @returns {Boolean}
+	 */
+	checkClientLibVersion(library, requiredVersions) {
+		const pkg = require("mongodb/package.json");
+		const installedVersion = pkg.version;
+
+		if (semver.satisfies(installedVersion, requiredVersions)) {
+			return true;
+		} else {
+			this.logger.warn(
+				`The installed ${library}client library is not supported officially. Functionality is not guaranteed. Supported versions:`,
+				requiredVersions
+			);
+			return false;
+		}
 	}
 
 	/**

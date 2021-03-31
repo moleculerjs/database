@@ -390,21 +390,23 @@ module.exports = function (mixinOpts) {
 			let id = this._getIDFromParams(params);
 
 			// Call because it throws error if entity is not exist
-			/*const oldEntity = */ await this.resolveEntities(ctx, params, {
+			const oldEntity = await this.resolveEntities(ctx, params, {
 				transform: false,
 				throwIfNotExist: true
 			});
 
-			params = await this.validateParams(ctx, params, { type: "update" });
+			const rawUpdate = params.$raw === true;
+			if (rawUpdate) delete params.$raw;
+
+			if (!rawUpdate) {
+				params = await this.validateParams(ctx, params, { type: "update", oldEntity });
+			}
 
 			id = this._sanitizeID(id, opts);
 
 			delete params[this.$primaryField.columnName];
 			if (this.$primaryField.columnName != this.$primaryField.name)
 				delete params[this.$primaryField.name];
-
-			const rawUpdate = params.$raw === true;
-			if (rawUpdate) delete params.$raw;
 
 			const adapter = await this.getAdapter(ctx);
 			let result = await adapter.updateById(id, params, { raw: rawUpdate });
@@ -428,13 +430,13 @@ module.exports = function (mixinOpts) {
 			let id = this._getIDFromParams(params);
 
 			// Call because it throws error if entity is not exist
-			/*const oldEntity = */ await this.resolveEntities(ctx, params, {
+			const oldEntity = await this.resolveEntities(ctx, params, {
 				transform: false,
 				throwIfNotExist: true
 			});
 			const adapter = await this.getAdapter(ctx);
 
-			params = await this.validateParams(ctx, params, { type: "replace" });
+			params = await this.validateParams(ctx, params, { type: "replace", oldEntity });
 
 			id = this._sanitizeID(id, opts);
 

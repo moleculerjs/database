@@ -120,11 +120,62 @@ module.exports = (getAdapter, adapterType) => {
 					await broker.call("posts.create", {});
 				} catch (err) {
 					expect(err).toBeInstanceOf(ValidationError);
-					expect(err.message).toEqual("The 'title' field is required");
+					expect(err.message).toEqual("The field 'title' is required.");
 					expect(err.type).toEqual("REQUIRED_FIELD");
 					expect(err.code).toEqual(422);
 					expect(err.data).toEqual({ field: "title", value: undefined });
 				}
+			});
+		});
+
+		describe("Update with modifiers", () => {
+			it("should update entity", async () => {
+				entityChanged.mockClear();
+
+				const doc = await broker.call("posts.update", {
+					id: docs[0].id,
+					$raw: true,
+					$set: {
+						title: "Updated title",
+						content: "Updated content of first title"
+					},
+					$inc: {
+						votes: 1
+					}
+				});
+				docs[0] = doc;
+
+				expect(doc).toEqual({
+					id: expect.any(String),
+					title: "Updated title",
+					content: "Updated content of first title",
+					author: "John Doe",
+					votes: 1,
+					status: true,
+					createdAt: expect.any(Number)
+					// updatedAt: expect.any(Number)
+				});
+
+				expect(entityChanged).toBeCalledTimes(1);
+				expect(entityChanged).toBeCalledWith("update", doc, expect.any(Context));
+			});
+
+			it("should get the newly created entity", async () => {
+				const doc = await broker.call("posts.get", { id: docs[0].id });
+				expect(doc).toEqual(docs[0]);
+			});
+
+			it("should resolve the newly created entity", async () => {
+				const doc = await broker.call("posts.resolve", { id: docs[0].id, mapping: true });
+				expect(doc).toEqual({
+					[docs[0].id]: docs[0]
+				});
+			});
+
+			it("should find the newly created entity", async () => {
+				const res = await broker.call("posts.find");
+
+				expect(res).toEqual(docs);
 			});
 		});
 
@@ -318,7 +369,7 @@ module.exports = (getAdapter, adapterType) => {
 				await broker.call("products.create", {});
 			} catch (err) {
 				expect(err).toBeInstanceOf(ValidationError);
-				expect(err.message).toEqual("The 'name' field is required");
+				expect(err.message).toEqual("The field 'name' is required.");
 				expect(err.type).toEqual("REQUIRED_FIELD");
 				expect(err.code).toEqual(422);
 				expect(err.data).toEqual({ field: "name", value: undefined });
