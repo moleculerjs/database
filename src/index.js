@@ -63,7 +63,7 @@ const Transform = require("./transform");
 		- [x] `find` with stream option  http://mongodb.github.io/node-mongodb-native/3.5/api/Cursor.html#stream
 
 	- [x] Soft delete
-	- [ ] create validation from field definitions
+	- [ ] create validation from field definitions (nem lehet, mert a `serviceCreating` ahol lehetne, azt csak middleware-el lehet elkapni. Ott kell a `this.settings.fields` alapján.)
 	- [x] nested objects in fields.
 	- [ ] change optional -> required like in fastest-validator
 	- [x] Multi model/tenant solutions

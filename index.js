@@ -6,8 +6,12 @@
 
 "use strict";
 
+const Schema = require("./src/schema");
+
 module.exports = {
 	Service: require("./src"),
 	Adapters: require("./src/adapters"),
-	Errors: require("./src/errors")
+	Errors: require("./src/errors"),
+	generateValidatorSchemaFromFields: Schema.generateValidatorSchemaFromFields,
+	generateFieldValidatorSchema: Schema.generateFieldValidatorSchema
 };

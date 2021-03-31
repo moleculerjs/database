@@ -1501,5 +1501,66 @@ module.exports = adapter => {
 				});
 			});
 		});
+
+		/*describe("Test generated validator schemas in action definitions", () => {
+			const broker = new ServiceBroker({ logger: false });
+			const svc = broker.createService({
+				name: "users",
+				mixins: [
+					DbService({
+						adapter,
+						createActions: true
+					})
+				],
+				settings: {
+					fields: {
+						id: { type: "string", primaryKey: true, columnName: "_id" },
+						name: "string|required",
+						email: "email",
+						address: {
+							type: "object",
+							strict: true,
+							properties: {
+								zip: { type: "number" },
+								street: { type: "string" },
+								state: { type: "string", optional: true },
+								city: { type: "string", required: true },
+								country: { type: "string" },
+								primary: { type: "boolean", default: true }
+							}
+						},
+						roles: {
+							type: "array",
+							max: 3,
+							items: { type: "string" }
+						},
+
+						phones: {
+							type: "array",
+							items: {
+								type: "object",
+								properties: {
+									type: "string",
+									number: { type: "string", required: true },
+									primary: { type: "boolean", default: false }
+								}
+							}
+						},
+
+						status: { type: "boolean", default: true }
+					}
+				}
+			});
+
+			beforeAll(async () => {
+				await broker.start();
+				await svc.clearEntities();
+			});
+			afterAll(() => broker.stop());
+
+			it("check 'create' action params", async () => {
+				expect(svc.schema.actions.create.params).toEqual();
+			});
+		});*/
 	});
 };
