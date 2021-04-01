@@ -69,16 +69,27 @@ const {
 		- [x] `find` with stream option  http://mongodb.github.io/node-mongodb-native/3.5/api/Cursor.html#stream
 
 	- [x] Soft delete
-	- [x] create validation from field definitions ("merged" lifecycle event-el lehet.)
+	- [x] create validation from field definitions
 	- [x] nested objects in fields.
 	- [ ] change optional -> required like in fastest-validator
 	- [x] Multi model/tenant solutions
 		- [x] get connection/model dynamically
 	- [ ] `aggregate` action with params: `type: "sum", "avg", "count", "min", "max"` & `field: "price"`
 	- [ ] permissions for scopes
+	- [ ] ad-hoc populate in find/list actions `populate: ["author", { key: "createdBy", action: "users.resolve", fields: ["name", "avatar"] }]` { }
 	- [ ] nested-et nem támogató adapter-ek warning-oljanak és flat-eljék az Object-t|Array-t JSON string-é és úgy tárolják le
 	- [ ] Megpróbálni a transform-ot inicializáláskor létrehozni akár template szinten is. Sokkal gyorsabb tudni lenni, mert transform-nál csak végig kell menni és meghívni mindegyik függvényét.
+	- [ ] `strict: false|true|"remove"` mode in the mixinOptions. Using it in the validator schemas.
 
+	- [ ] Adapters
+		- [ ] Cassandra
+		- [ ] Couchbase
+		- [ ] CouchDB
+		- [ ] Knex (!)
+		- [x] MongoDB
+		- [ ] Mongoose
+		- [x] NeDB
+		- [ ] Sequelize
 
 */
 
@@ -206,7 +217,7 @@ module.exports = function DatabaseMixin(mixinOpts) {
 				}
 
 				if (primaryKeyField) {
-					// Set `id` field in `get` and `resolve`` actions
+					// Set `id` field name & type in `get` and `resolve` actions
 					if (schema.actions.get && schema.actions.get.params) {
 						schema.actions.get.params[primaryKeyField.name] = {
 							type: primaryKeyField.type
@@ -219,7 +230,7 @@ module.exports = function DatabaseMixin(mixinOpts) {
 						];
 					}
 
-					// Fix the ":id" variable name in the `get`, `update`, `replace` and `remove` actions
+					// Fix the ":id" variable name in the actions
 					fixIDInRestPath(schema.actions.get, primaryKeyField);
 					fixIDInRestPath(schema.actions.update, primaryKeyField);
 					fixIDInRestPath(schema.actions.replace, primaryKeyField);
