@@ -46,7 +46,9 @@ module.exports = (getAdapter, adapterType) => {
 						{
 							field: "title",
 							message: "The 'title' field is required.",
-							type: "required"
+							type: "required",
+							action: "posts.create",
+							nodeID: env.brokers[0].nodeID
 						}
 					]);
 				}

@@ -35,10 +35,14 @@ module.exports = function (mixinOpts) {
 				// Compile validators for basic methods
 				this.$validators = {
 					create: validator.compile(
-						generateValidatorSchemaFromFields(this.settings.fields, { type: "create" })
+						generateValidatorSchemaFromFields(this.settings.fields, {
+							type: "create"
+						})
 					),
 					update: validator.compile(
-						generateValidatorSchemaFromFields(this.settings.fields, { type: "update" })
+						generateValidatorSchemaFromFields(this.settings.fields, {
+							type: "update"
+						})
 					),
 					replace: validator.compile(
 						generateValidatorSchemaFromFields(this.settings.fields, {

@@ -30,6 +30,12 @@ module.exports = (getAdapter, adapterType) => {
 				}
 			},
 
+			actions: {
+				updateRaw(ctx) {
+					return this.updateEntity(ctx);
+				}
+			},
+
 			methods: {
 				entityChanged
 			},
@@ -128,7 +134,9 @@ module.exports = (getAdapter, adapterType) => {
 							actual: undefined,
 							field: "title",
 							message: "The 'title' field is required.",
-							type: "required"
+							type: "required",
+							action: "posts.create",
+							nodeID: broker.nodeID
 						}
 					]);
 				}
@@ -139,7 +147,7 @@ module.exports = (getAdapter, adapterType) => {
 			it("should update entity", async () => {
 				entityChanged.mockClear();
 
-				const doc = await broker.call("posts.update", {
+				const doc = await broker.call("posts.updateRaw", {
 					id: docs[0].id,
 					$raw: true,
 					$set: {
@@ -384,7 +392,9 @@ module.exports = (getAdapter, adapterType) => {
 						actual: undefined,
 						field: "name",
 						message: "The 'name' field is required.",
-						type: "required"
+						type: "required",
+						action: "products.create",
+						nodeID: broker.nodeID
 					}
 				]);
 			}

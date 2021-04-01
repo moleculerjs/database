@@ -13,6 +13,7 @@ const Actions = require("./actions");
 const DbMethods = require("./methods");
 const Validation = require("./validation");
 const Transform = require("./transform");
+const { generateValidatorSchemaFromFields } = require("./schema");
 
 /*
 
@@ -80,6 +81,7 @@ module.exports = function DatabaseMixin(mixinOpts) {
 	mixinOpts = _.defaultsDeep(mixinOpts, {
 		createActions: true,
 		actionVisibility: "published",
+		generateActionParams: true,
 		cache: {
 			enable: true,
 			eventName: null
@@ -130,8 +132,8 @@ module.exports = function DatabaseMixin(mixinOpts) {
 		 */
 		methods: {
 			...DbMethods(mixinOpts),
-			...Validation(mixinOpts),
-			...Transform(mixinOpts)
+			...Transform(mixinOpts),
+			...Validation(mixinOpts)
 		},
 
 		/**
@@ -153,6 +155,37 @@ module.exports = function DatabaseMixin(mixinOpts) {
 		 */
 		async stopped() {
 			return this.disconnectAll();
+		},
+
+		/**
+		 * It is called when the Service schema mixins are merged. At this
+		 * point, we can generate the validator schemas for the actions.
+		 *
+		 * @param {Object} schema
+		 */
+		merged(schema) {
+			if (mixinOpts.generateActionParams && schema.actions && schema.settings.fields) {
+				const fields = schema.settings.fields;
+				if (Object.keys(fields).length > 0) {
+					if (schema.actions.create) {
+						schema.actions.create.params = generateValidatorSchemaFromFields(fields, {
+							type: "create"
+						});
+					}
+
+					if (schema.actions.update) {
+						schema.actions.update.params = generateValidatorSchemaFromFields(fields, {
+							type: "update"
+						});
+					}
+
+					if (schema.actions.replace) {
+						schema.actions.replace.params = generateValidatorSchemaFromFields(fields, {
+							type: "replace"
+						});
+					}
+				}
+			}
 		}
 	};
 

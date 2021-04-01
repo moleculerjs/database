@@ -2,6 +2,7 @@
 
 const { ServiceBroker, Context } = require("moleculer");
 const DbService = require("../..").Service;
+const { ValidationError } = require("moleculer").Errors;
 //const { EntityNotFoundError } = require("../..").Errors;
 
 module.exports = (getAdapter, adapterType) => {
@@ -566,12 +567,16 @@ module.exports = (getAdapter, adapterType) => {
 			});
 
 			it("should throw error if tenantId is missing", async () => {
-				await expect(
-					broker.call("posts.replace", {
+				expect.assertions(1);
+				try {
+					await broker.call("posts.replace", {
 						id: posts.post1.id,
+						title: "Replaced title",
 						content: "Replaced content"
-					})
-				).rejects.toThrow("Missing tenantId!");
+					});
+				} catch (err) {
+					expect(err.message).toBe("Missing tenantId!");
+				}
 			});
 		});
 
@@ -588,9 +593,12 @@ module.exports = (getAdapter, adapterType) => {
 			};
 
 			it("should throw error if tenantId is missing", async () => {
-				await expect(broker.call("posts.remove", { id: posts.post1.id })).rejects.toThrow(
-					"Missing tenantId!"
-				);
+				expect.assertions(1);
+				try {
+					await broker.call("posts.remove", { id: posts.post1.id });
+				} catch (err) {
+					expect(err.message).toBe("Missing tenantId!");
+				}
 			});
 
 			it("should not remove other tenant's posts by Tenant #0", async () => {

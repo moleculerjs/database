@@ -119,7 +119,9 @@ module.exports = adapter => {
 							actual: undefined,
 							field: "name",
 							message: "The 'name' field is required.",
-							type: "required"
+							type: "required",
+							action: "users.create",
+							nodeID: broker.nodeID
 						}
 					]);
 				}
@@ -172,7 +174,9 @@ module.exports = adapter => {
 							actual: undefined,
 							field: "name",
 							message: "The 'name' field is required.",
-							type: "required"
+							type: "required",
+							action: "users.replace",
+							nodeID: broker.nodeID
 						}
 					]);
 				}
@@ -1431,7 +1435,9 @@ module.exports = adapter => {
 							actual: undefined,
 							field: "address.city",
 							message: "The 'address.city' field is required.",
-							type: "required"
+							type: "required",
+							action: "users.create",
+							nodeID: broker.nodeID
 						}
 					]);
 				}
@@ -1452,7 +1458,9 @@ module.exports = adapter => {
 							actual: "admin",
 							field: "roles",
 							message: "The 'roles' field must be an array.",
-							type: "array"
+							type: "array",
+							action: "users.create",
+							nodeID: broker.nodeID
 						}
 					]);
 				}
@@ -1473,7 +1481,9 @@ module.exports = adapter => {
 							actual: undefined,
 							field: "phones[0].number",
 							message: "The 'phones[0].number' field is required.",
-							type: "required"
+							type: "required",
+							action: "users.create",
+							nodeID: broker.nodeID
 						}
 					]);
 				}
@@ -1521,64 +1531,198 @@ module.exports = adapter => {
 		});
 	});
 
-	/*describe("Test generated validator schemas in action definitions", () => {
-			const broker = new ServiceBroker({ logger: false });
-			const svc = broker.createService({
-				name: "users",
-				mixins: [
-					DbService({
-						adapter,
-						createActions: true
-					})
-				],
-				settings: {
-					fields: {
-						id: { type: "string", primaryKey: true, columnName: "_id" },
-						name: "string|required",
-						email: "email",
-						address: {
+	describe("Test generated validator schemas in action definitions", () => {
+		const broker = new ServiceBroker({ logger: false });
+		const svc = broker.createService({
+			name: "users",
+			mixins: [
+				DbService({
+					adapter,
+					createActions: true
+				})
+			],
+			settings: {
+				fields: {
+					id: { type: "string", primaryKey: true, columnName: "_id" },
+					name: "string|required",
+					email: "email",
+					address: {
+						type: "object",
+						strict: true,
+						properties: {
+							zip: { type: "number" },
+							street: { type: "string" },
+							state: { type: "string", optional: true },
+							city: { type: "string", required: true },
+							country: { type: "string" },
+							primary: { type: "boolean", default: true }
+						}
+					},
+					roles: {
+						type: "array",
+						max: 3,
+						items: { type: "string" }
+					},
+
+					phones: {
+						type: "array",
+						items: {
 							type: "object",
-							strict: true,
 							properties: {
-								zip: { type: "number" },
-								street: { type: "string" },
-								state: { type: "string", optional: true },
-								city: { type: "string", required: true },
-								country: { type: "string" },
-								primary: { type: "boolean", default: true }
+								type: "string",
+								number: { type: "string", required: true },
+								primary: { type: "boolean", default: false }
 							}
-						},
-						roles: {
-							type: "array",
-							max: 3,
-							items: { type: "string" }
-						},
+						}
+					},
 
-						phones: {
-							type: "array",
-							items: {
-								type: "object",
-								properties: {
-									type: "string",
-									number: { type: "string", required: true },
-									primary: { type: "boolean", default: false }
-								}
-							}
-						},
-
-						status: { type: "boolean", default: true }
-					}
+					status: { type: "boolean", default: true }
 				}
-			});
+			}
+		});
 
-			beforeAll(async () => {
-				await broker.start();
-				await svc.clearEntities();
-			});
-			afterAll(() => broker.stop());
+		beforeAll(async () => {
+			await broker.start();
+			await svc.clearEntities();
+		});
+		afterAll(() => broker.stop());
 
-			it("check 'create' action params", async () => {
-				expect(svc.schema.actions.create.params).toEqual();
+		it("check 'create' action params", async () => {
+			expect(svc.schema.actions.create.params).toEqual({
+				$$strict: "remove",
+				name: { convert: true, type: "string" },
+				email: { optional: true, type: "email" },
+				address: {
+					optional: true,
+					properties: {
+						city: { convert: true, type: "string" },
+						country: { convert: true, optional: true, type: "string" },
+						primary: { convert: true, default: true, optional: true, type: "boolean" },
+						state: { convert: true, optional: true, type: "string" },
+						street: { convert: true, optional: true, type: "string" },
+						zip: { convert: true, optional: true, type: "number" }
+					},
+					strict: "remove",
+					type: "object"
+				},
+				phones: {
+					items: {
+						optional: true,
+						properties: {
+							number: { convert: true, type: "string" },
+							primary: {
+								convert: true,
+								default: false,
+								optional: true,
+								type: "boolean"
+							},
+							type: { convert: true, optional: true, type: "string" }
+						},
+						strict: "remove",
+						type: "object"
+					},
+					optional: true,
+					type: "array"
+				},
+				roles: {
+					items: { convert: true, optional: true, type: "string" },
+					max: 3,
+					optional: true,
+					type: "array"
+				},
+				status: { convert: true, default: true, optional: true, type: "boolean" }
 			});
-		});*/
+		});
+
+		it("check 'update' action params", async () => {
+			expect(svc.schema.actions.update.params).toEqual({
+				$$strict: "remove",
+				id: { convert: true, optional: false, type: "string" },
+				name: { convert: true, optional: true, type: "string" },
+				email: { optional: true, type: "email" },
+				address: {
+					optional: true,
+					properties: {
+						city: { convert: true, optional: true, type: "string" },
+						country: { convert: true, optional: true, type: "string" },
+						primary: { convert: true, optional: true, type: "boolean" },
+						state: { convert: true, optional: true, type: "string" },
+						street: { convert: true, optional: true, type: "string" },
+						zip: { convert: true, optional: true, type: "number" }
+					},
+					strict: "remove",
+					type: "object"
+				},
+				phones: {
+					items: {
+						optional: true,
+						properties: {
+							number: { convert: true, optional: true, type: "string" },
+							primary: { convert: true, optional: true, type: "boolean" },
+							type: { convert: true, optional: true, type: "string" }
+						},
+						strict: "remove",
+						type: "object"
+					},
+					optional: true,
+					type: "array"
+				},
+				roles: {
+					items: { convert: true, optional: true, type: "string" },
+					max: 3,
+					optional: true,
+					type: "array"
+				},
+				status: { convert: true, optional: true, type: "boolean" }
+			});
+		});
+
+		it("check 'replace' action params", async () => {
+			expect(svc.schema.actions.replace.params).toEqual({
+				$$strict: "remove",
+				id: { convert: true, optional: false, type: "string" },
+				name: { convert: true, type: "string" },
+				email: { optional: true, type: "email" },
+				address: {
+					optional: true,
+					properties: {
+						city: { convert: true, type: "string" },
+						country: { convert: true, optional: true, type: "string" },
+						primary: { convert: true, default: true, optional: true, type: "boolean" },
+						state: { convert: true, optional: true, type: "string" },
+						street: { convert: true, optional: true, type: "string" },
+						zip: { convert: true, optional: true, type: "number" }
+					},
+					strict: "remove",
+					type: "object"
+				},
+				phones: {
+					items: {
+						optional: true,
+						properties: {
+							number: { convert: true, type: "string" },
+							primary: {
+								convert: true,
+								default: false,
+								optional: true,
+								type: "boolean"
+							},
+							type: { convert: true, optional: true, type: "string" }
+						},
+						strict: "remove",
+						type: "object"
+					},
+					optional: true,
+					type: "array"
+				},
+				roles: {
+					items: { convert: true, optional: true, type: "string" },
+					max: 3,
+					optional: true,
+					type: "array"
+				},
+				status: { convert: true, default: true, optional: true, type: "boolean" }
+			});
+		});
+	});
 };
