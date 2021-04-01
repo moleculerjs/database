@@ -25,6 +25,7 @@ broker.createService({
 	mixins: [DbService()],
 	settings: {
 		fields: {
+			id: { type: "string", primaryKey: true, columnName: "_id" },
 			title: { type: "string", required: true },
 			content: { type: "string", required: false }
 		}
