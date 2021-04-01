@@ -35,7 +35,7 @@ const PARAMS_QUERY = [
 module.exports = function (opts) {
 	const res = {};
 
-	const cacheOpts = opts.cache && opts.cache.enabled ? opts.cache : null;
+	const cacheOpts = opts.cache && opts.cache.enable ? opts.cache : null;
 	const maxLimit = opts.maxLimit > 0 ? opts.maxLimit : null;
 
 	/**
@@ -236,7 +236,7 @@ module.exports = function (opts) {
 				  }
 				: null,
 			params: {
-				id: [{ type: "string" }, { type: "number" }], // TODO: get from `fields`
+				// The "id" field get from `fields`
 				fields: PARAMS_FIELDS,
 				scope: PARAMS_SCOPE,
 				populate: PARAMS_POPULATE
@@ -272,13 +272,7 @@ module.exports = function (opts) {
 				  }
 				: null,
 			params: {
-				id: [
-					// TODO: get from `fields`
-					{ type: "string" },
-					{ type: "number" },
-					{ type: "array", items: "string" },
-					{ type: "array", items: "number" }
-				],
+				// The "id" field get from `fields`
 				fields: PARAMS_FIELDS,
 				scope: PARAMS_SCOPE,
 				populate: PARAMS_POPULATE,

@@ -315,7 +315,7 @@ module.exports = (getAdapter, adapterType) => {
 			mixins: [DbService({ adapter: getAdapter({ collection: "products" }) })],
 			settings: {
 				fields: {
-					id: { type: "string", secure: true, primaryKey: true, columnName: "_id" },
+					key: { type: "string", secure: true, primaryKey: true, columnName: "_id" },
 					name: { type: "string", trim: true, required: true }
 				}
 			},
@@ -341,22 +341,23 @@ module.exports = (getAdapter, adapterType) => {
 		let docs = [];
 
 		it("should create a new entity", async () => {
+			expect.assertions(10);
 			for (let i = 0; i < 10; i++) {
 				const doc = await broker.call("products.create", {
 					name: `Product ${i + 1}`
 				});
 				docs.push(doc);
-				expect(doc.id.startsWith("secured-")).toBe(true);
+				expect(doc.key.startsWith("secured-")).toBe(true);
 			}
 		});
 
 		it("should get the newly created entity", async () => {
-			const doc = await broker.call("products.get", { id: docs[5].id });
+			const doc = await broker.call("products.get", { key: docs[5].key });
 			expect(doc).toEqual(docs[5]);
 		});
 
 		it("should resolve the newly created entity", async () => {
-			const doc = await broker.call("products.resolve", { id: docs[5].id });
+			const doc = await broker.call("products.resolve", { key: docs[5].key });
 			expect(doc).toEqual(docs[5]);
 		});
 
@@ -402,26 +403,26 @@ module.exports = (getAdapter, adapterType) => {
 
 		it("should update entity", async () => {
 			const doc = await broker.call("products.update", {
-				id: docs[5].id,
+				key: docs[5].key,
 				name: "Modified product"
 			});
 			docs[5] = doc;
 
 			expect(doc).toEqual({
-				id: expect.any(String),
+				key: expect.any(String),
 				name: "Modified product"
 			});
 		});
 
 		it("should get the modified entity", async () => {
-			const doc = await broker.call("products.get", { id: docs[5].id });
+			const doc = await broker.call("products.get", { key: docs[5].key });
 			expect(doc).toEqual(docs[5]);
 		});
 
 		it("should resolve the modified entity", async () => {
-			const doc = await broker.call("products.resolve", { id: docs[5].id, mapping: true });
+			const doc = await broker.call("products.resolve", { key: docs[5].key, mapping: true });
 			expect(doc).toEqual({
-				[docs[5].id]: docs[5]
+				[docs[5].key]: docs[5]
 			});
 		});
 
@@ -432,22 +433,22 @@ module.exports = (getAdapter, adapterType) => {
 
 		it("should remove entity", async () => {
 			const res = await broker.call("products.remove", {
-				id: docs[5].id
+				key: docs[5].key
 			});
 
-			expect(res).toEqual(docs[5].id);
+			expect(res).toEqual(docs[5].key);
 		});
 
 		it("should throw EntityNotFound error", async () => {
 			expect.assertions(5);
 			try {
-				await broker.call("products.get", { id: docs[5].id });
+				await broker.call("products.get", { key: docs[5].key });
 			} catch (err) {
 				expect(err).toBeInstanceOf(EntityNotFoundError);
 				expect(err.message).toEqual("Entity not found");
 				expect(err.type).toEqual("ENTITY_NOT_FOUND");
 				expect(err.code).toEqual(404);
-				expect(err.data).toEqual({ id: docs[5].id });
+				expect(err.data).toEqual({ id: docs[5].key });
 			}
 		});
 
@@ -455,7 +456,7 @@ module.exports = (getAdapter, adapterType) => {
 			expect.assertions(5);
 			try {
 				await broker.call("products.resolve", {
-					id: docs[5].id,
+					key: docs[5].key,
 					mapping: true,
 					throwIfNotExist: true
 				});
@@ -464,7 +465,7 @@ module.exports = (getAdapter, adapterType) => {
 				expect(err.message).toEqual("Entity not found");
 				expect(err.type).toEqual("ENTITY_NOT_FOUND");
 				expect(err.code).toEqual(404);
-				expect(err.data).toEqual({ id: docs[5].id });
+				expect(err.data).toEqual({ id: docs[5].key });
 			}
 		});
 	});

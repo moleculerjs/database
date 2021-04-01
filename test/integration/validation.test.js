@@ -43,14 +43,13 @@ module.exports = adapter => {
 
 			it("should update fields", async () => {
 				const res = await broker.call("users.update", {
-					id: entity._id,
+					_id: entity._id,
 					username: 123,
 					password: true,
 					country: "USA"
 				});
 				expect(res).toStrictEqual({
 					_id: entity._id,
-					id: entity._id,
 					age: 42,
 					country: "USA",
 					password: true,
@@ -62,12 +61,10 @@ module.exports = adapter => {
 			it("should replace fields", async () => {
 				const res = await broker.call("users.replace", {
 					...entity,
-					id: entity._id,
-					_id: undefined
+					_id: entity._id
 				});
 				expect(res).toStrictEqual({
 					_id: entity._id,
-					id: entity._id,
 					username: "John",
 					password: "john1234",
 					age: 42,
@@ -1543,7 +1540,7 @@ module.exports = adapter => {
 			],
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					key: { type: "string", primaryKey: true, columnName: "_id" },
 					name: "string|required",
 					email: "email",
 					address: {
@@ -1587,141 +1584,369 @@ module.exports = adapter => {
 		});
 		afterAll(() => broker.stop());
 
-		it("check 'create' action params", async () => {
-			expect(svc.schema.actions.create.params).toEqual({
-				$$strict: "remove",
-				name: { convert: true, type: "string" },
-				email: { optional: true, type: "email" },
-				address: {
-					optional: true,
-					properties: {
-						city: { convert: true, type: "string" },
-						country: { convert: true, optional: true, type: "string" },
-						primary: { convert: true, default: true, optional: true, type: "boolean" },
-						state: { convert: true, optional: true, type: "string" },
-						street: { convert: true, optional: true, type: "string" },
-						zip: { convert: true, optional: true, type: "number" }
-					},
-					strict: "remove",
-					type: "object"
-				},
-				phones: {
-					items: {
+		it("check 'create' action", async () => {
+			expect(svc.schema.actions.create).toEqual({
+				handler: expect.any(Function),
+				rest: "POST /",
+				visibility: "published",
+				params: {
+					$$strict: "remove",
+					name: { convert: true, type: "string" },
+					email: { optional: true, type: "email" },
+					address: {
 						optional: true,
 						properties: {
-							number: { convert: true, type: "string" },
+							city: { convert: true, type: "string" },
+							country: { convert: true, optional: true, type: "string" },
 							primary: {
 								convert: true,
-								default: false,
+								default: true,
 								optional: true,
 								type: "boolean"
 							},
-							type: { convert: true, optional: true, type: "string" }
+							state: { convert: true, optional: true, type: "string" },
+							street: { convert: true, optional: true, type: "string" },
+							zip: { convert: true, optional: true, type: "number" }
 						},
 						strict: "remove",
 						type: "object"
 					},
-					optional: true,
-					type: "array"
-				},
-				roles: {
-					items: { convert: true, optional: true, type: "string" },
-					max: 3,
-					optional: true,
-					type: "array"
-				},
-				status: { convert: true, default: true, optional: true, type: "boolean" }
+					phones: {
+						items: {
+							optional: true,
+							properties: {
+								number: { convert: true, type: "string" },
+								primary: {
+									convert: true,
+									default: false,
+									optional: true,
+									type: "boolean"
+								},
+								type: { convert: true, optional: true, type: "string" }
+							},
+							strict: "remove",
+							type: "object"
+						},
+						optional: true,
+						type: "array"
+					},
+					roles: {
+						items: { convert: true, optional: true, type: "string" },
+						max: 3,
+						optional: true,
+						type: "array"
+					},
+					status: { convert: true, default: true, optional: true, type: "boolean" }
+				}
 			});
 		});
 
-		it("check 'update' action params", async () => {
-			expect(svc.schema.actions.update.params).toEqual({
-				$$strict: "remove",
-				id: { convert: true, optional: false, type: "string" },
-				name: { convert: true, optional: true, type: "string" },
-				email: { optional: true, type: "email" },
-				address: {
-					optional: true,
-					properties: {
-						city: { convert: true, optional: true, type: "string" },
-						country: { convert: true, optional: true, type: "string" },
-						primary: { convert: true, optional: true, type: "boolean" },
-						state: { convert: true, optional: true, type: "string" },
-						street: { convert: true, optional: true, type: "string" },
-						zip: { convert: true, optional: true, type: "number" }
-					},
-					strict: "remove",
-					type: "object"
-				},
-				phones: {
-					items: {
+		it("check 'update' action", async () => {
+			expect(svc.schema.actions.update).toEqual({
+				handler: expect.any(Function),
+				rest: "PATCH /:key",
+				visibility: "published",
+				params: {
+					$$strict: "remove",
+					key: { convert: true, optional: false, type: "string" },
+					name: { convert: true, optional: true, type: "string" },
+					email: { optional: true, type: "email" },
+					address: {
 						optional: true,
 						properties: {
-							number: { convert: true, optional: true, type: "string" },
+							city: { convert: true, optional: true, type: "string" },
+							country: { convert: true, optional: true, type: "string" },
 							primary: { convert: true, optional: true, type: "boolean" },
-							type: { convert: true, optional: true, type: "string" }
+							state: { convert: true, optional: true, type: "string" },
+							street: { convert: true, optional: true, type: "string" },
+							zip: { convert: true, optional: true, type: "number" }
 						},
 						strict: "remove",
 						type: "object"
 					},
-					optional: true,
-					type: "array"
-				},
-				roles: {
-					items: { convert: true, optional: true, type: "string" },
-					max: 3,
-					optional: true,
-					type: "array"
-				},
-				status: { convert: true, optional: true, type: "boolean" }
+					phones: {
+						items: {
+							optional: true,
+							properties: {
+								number: { convert: true, optional: true, type: "string" },
+								primary: { convert: true, optional: true, type: "boolean" },
+								type: { convert: true, optional: true, type: "string" }
+							},
+							strict: "remove",
+							type: "object"
+						},
+						optional: true,
+						type: "array"
+					},
+					roles: {
+						items: { convert: true, optional: true, type: "string" },
+						max: 3,
+						optional: true,
+						type: "array"
+					},
+					status: { convert: true, optional: true, type: "boolean" }
+				}
 			});
 		});
 
-		it("check 'replace' action params", async () => {
-			expect(svc.schema.actions.replace.params).toEqual({
-				$$strict: "remove",
-				id: { convert: true, optional: false, type: "string" },
-				name: { convert: true, type: "string" },
-				email: { optional: true, type: "email" },
-				address: {
-					optional: true,
-					properties: {
-						city: { convert: true, type: "string" },
-						country: { convert: true, optional: true, type: "string" },
-						primary: { convert: true, default: true, optional: true, type: "boolean" },
-						state: { convert: true, optional: true, type: "string" },
-						street: { convert: true, optional: true, type: "string" },
-						zip: { convert: true, optional: true, type: "number" }
-					},
-					strict: "remove",
-					type: "object"
-				},
-				phones: {
-					items: {
+		it("check 'replace' action", async () => {
+			expect(svc.schema.actions.replace).toEqual({
+				handler: expect.any(Function),
+				rest: "PUT /:key",
+				visibility: "published",
+				params: {
+					$$strict: "remove",
+					key: { convert: true, optional: false, type: "string" },
+					name: { convert: true, type: "string" },
+					email: { optional: true, type: "email" },
+					address: {
 						optional: true,
 						properties: {
-							number: { convert: true, type: "string" },
+							city: { convert: true, type: "string" },
+							country: { convert: true, optional: true, type: "string" },
 							primary: {
 								convert: true,
-								default: false,
+								default: true,
 								optional: true,
 								type: "boolean"
 							},
-							type: { convert: true, optional: true, type: "string" }
+							state: { convert: true, optional: true, type: "string" },
+							street: { convert: true, optional: true, type: "string" },
+							zip: { convert: true, optional: true, type: "number" }
 						},
 						strict: "remove",
 						type: "object"
 					},
-					optional: true,
-					type: "array"
+					phones: {
+						items: {
+							optional: true,
+							properties: {
+								number: { convert: true, type: "string" },
+								primary: {
+									convert: true,
+									default: false,
+									optional: true,
+									type: "boolean"
+								},
+								type: { convert: true, optional: true, type: "string" }
+							},
+							strict: "remove",
+							type: "object"
+						},
+						optional: true,
+						type: "array"
+					},
+					roles: {
+						items: { convert: true, optional: true, type: "string" },
+						max: 3,
+						optional: true,
+						type: "array"
+					},
+					status: { convert: true, default: true, optional: true, type: "boolean" }
+				}
+			});
+		});
+
+		it("check 'get' action", async () => {
+			expect(svc.schema.actions.get).toEqual({
+				handler: expect.any(Function),
+				cache: { keys: ["key", "populate", "fields"] },
+				rest: "GET /:key",
+				visibility: "published",
+				params: {
+					fields: [
+						{ optional: true, type: "string" },
+						{ items: "string", optional: true, type: "array" }
+					],
+					key: { type: "string" },
+					populate: [
+						{ optional: true, type: "string" },
+						{ items: "string", optional: true, type: "array" }
+					],
+					scope: [
+						{ optional: true, type: "boolean" },
+						{ optional: true, type: "string" },
+						{ items: "string", optional: true, type: "array" }
+					]
+				}
+			});
+		});
+
+		it("check 'resolve' action", async () => {
+			expect(svc.schema.actions.resolve).toEqual({
+				handler: expect.any(Function),
+				cache: { keys: ["key", "populate", "fields", "mapping"] },
+				visibility: "published",
+				params: {
+					fields: [
+						{ optional: true, type: "string" },
+						{ items: "string", optional: true, type: "array" }
+					],
+					key: [{ type: "string" }, { items: { type: "string" }, type: "array" }],
+					mapping: { optional: true, type: "boolean" },
+					populate: [
+						{ optional: true, type: "string" },
+						{ items: "string", optional: true, type: "array" }
+					],
+					scope: [
+						{ optional: true, type: "boolean" },
+						{ optional: true, type: "string" },
+						{ items: "string", optional: true, type: "array" }
+					],
+					throwIfNotExist: { optional: true, type: "boolean" }
+				}
+			});
+		});
+
+		it("check 'remove' action", async () => {
+			expect(svc.schema.actions.remove).toEqual({
+				handler: expect.any(Function),
+				params: {},
+				rest: "DELETE /:key",
+				visibility: "published"
+			});
+		});
+
+		it("check 'find' action", async () => {
+			expect(svc.schema.actions.find).toEqual({
+				handler: expect.any(Function),
+				rest: "GET /all",
+				visibility: "published",
+				cache: {
+					keys: [
+						"limit",
+						"offset",
+						"fields",
+						"sort",
+						"search",
+						"searchFields",
+						"scope",
+						"populate",
+						"query"
+					]
 				},
-				roles: {
-					items: { convert: true, optional: true, type: "string" },
-					max: 3,
-					optional: true,
-					type: "array"
+				params: {
+					collation: { optional: true, type: "object" },
+					fields: [
+						{ optional: true, type: "string" },
+						{ items: "string", optional: true, type: "array" }
+					],
+					limit: {
+						convert: true,
+						integer: true,
+						max: null,
+						min: 0,
+						optional: true,
+						type: "number"
+					},
+					offset: {
+						convert: true,
+						integer: true,
+						min: 0,
+						optional: true,
+						type: "number"
+					},
+					populate: [
+						{ optional: true, type: "string" },
+						{ items: "string", optional: true, type: "array" }
+					],
+					query: [
+						{ optional: true, type: "object" },
+						{ optional: true, type: "string" }
+					],
+					scope: [
+						{ optional: true, type: "boolean" },
+						{ optional: true, type: "string" },
+						{ items: "string", optional: true, type: "array" }
+					],
+					search: { optional: true, type: "string" },
+					searchFields: [
+						{ optional: true, type: "string" },
+						{ items: "string", optional: true, type: "array" }
+					],
+					sort: { optional: true, type: "string" }
+				}
+			});
+		});
+
+		it("check 'list' action", async () => {
+			expect(svc.schema.actions.list).toEqual({
+				handler: expect.any(Function),
+				rest: "GET /",
+				visibility: "published",
+				cache: {
+					keys: [
+						"page",
+						"pageSize",
+						"fields",
+						"sort",
+						"search",
+						"searchFields",
+						"scope",
+						"populate",
+						"query"
+					]
 				},
-				status: { convert: true, default: true, optional: true, type: "boolean" }
+				params: {
+					collation: { optional: true, type: "object" },
+					fields: [
+						{ optional: true, type: "string" },
+						{ items: "string", optional: true, type: "array" }
+					],
+					page: { convert: true, integer: true, min: 1, optional: true, type: "number" },
+					pageSize: {
+						convert: true,
+						integer: true,
+						max: null,
+						min: 1,
+						optional: true,
+						type: "number"
+					},
+					populate: [
+						{ optional: true, type: "string" },
+						{ items: "string", optional: true, type: "array" }
+					],
+					query: [
+						{ optional: true, type: "object" },
+						{ optional: true, type: "string" }
+					],
+					scope: [
+						{ optional: true, type: "boolean" },
+						{ optional: true, type: "string" },
+						{ items: "string", optional: true, type: "array" }
+					],
+					search: { optional: true, type: "string" },
+					searchFields: [
+						{ optional: true, type: "string" },
+						{ items: "string", optional: true, type: "array" }
+					],
+					sort: { optional: true, type: "string" }
+				}
+			});
+		});
+
+		it("check 'count' action", async () => {
+			expect(svc.schema.actions.count).toEqual({
+				handler: expect.any(Function),
+				cache: { keys: ["search", "searchFields", "scope", "query"] },
+				rest: "GET /count",
+				visibility: "published",
+				params: {
+					query: [
+						{ optional: true, type: "object" },
+						{ optional: true, type: "string" }
+					],
+					scope: [
+						{ optional: true, type: "boolean" },
+						{ optional: true, type: "string" },
+						{ items: "string", optional: true, type: "array" }
+					],
+					search: { optional: true, type: "string" },
+					searchFields: [
+						{ optional: true, type: "string" },
+						{ items: "string", optional: true, type: "array" }
+					]
+				}
 			});
 		});
 	});

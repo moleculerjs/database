@@ -1,7 +1,6 @@
 "use strict";
 
 const { ServiceBroker, Context } = require("moleculer");
-const { MoleculerClientError } = require("moleculer").Errors;
 const { EntityNotFoundError } = require("../../src/errors");
 const DbService = require("../..").Service;
 
@@ -202,7 +201,7 @@ module.exports = getAdapter => {
 				expect.assertions(2);
 				try {
 					await svc.updateEntity(ctx, {
-						id: docs.janeDoe._id,
+						_id: docs.janeDoe._id,
 						age: 99
 					});
 				} catch (err) {
@@ -215,7 +214,7 @@ module.exports = getAdapter => {
 				expect.assertions(2);
 				try {
 					await svc.replaceEntity(ctx, {
-						id: docs.janeDoe._id,
+						_id: docs.janeDoe._id,
 						age: 99
 					});
 				} catch (err) {
@@ -228,7 +227,7 @@ module.exports = getAdapter => {
 				expect.assertions(2);
 				try {
 					await svc.removeEntity(ctx, {
-						id: docs.janeDoe._id
+						_id: docs.janeDoe._id
 					});
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);

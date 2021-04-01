@@ -265,7 +265,7 @@ module.exports = function (mixinOpts) {
 		 */
 		_getIDFromParams(params, throwIfNotExist = true) {
 			let id = params[this.$primaryField.name];
-			if (id == null) id = params.id;
+			// TODO: not need anymore: if (id == null) id = params.id;
 
 			if (throwIfNotExist && id == null) {
 				throw new MoleculerClientError("Missing id field.", 400, "MISSING_ID", { params });

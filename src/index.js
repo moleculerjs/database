@@ -13,7 +13,12 @@ const Actions = require("./actions");
 const DbMethods = require("./methods");
 const Validation = require("./validation");
 const Transform = require("./transform");
-const { generateValidatorSchemaFromFields } = require("./schema");
+const {
+	generateValidatorSchemaFromFields,
+	getPrimaryKeyFromFields,
+	fixIDInRestPath,
+	fixIDInCacheKeys
+} = require("./schema");
 
 /*
 
@@ -64,7 +69,7 @@ const { generateValidatorSchemaFromFields } = require("./schema");
 		- [x] `find` with stream option  http://mongodb.github.io/node-mongodb-native/3.5/api/Cursor.html#stream
 
 	- [x] Soft delete
-	- [ ] create validation from field definitions ("merged" lifecycle event-el lehet.)
+	- [x] create validation from field definitions ("merged" lifecycle event-el lehet.)
 	- [x] nested objects in fields.
 	- [ ] change optional -> required like in fastest-validator
 	- [x] Multi model/tenant solutions
@@ -164,26 +169,65 @@ module.exports = function DatabaseMixin(mixinOpts) {
 		 * @param {Object} schema
 		 */
 		merged(schema) {
-			if (mixinOpts.generateActionParams && schema.actions && schema.settings.fields) {
+			if (schema.actions && schema.settings.fields) {
 				const fields = schema.settings.fields;
-				if (Object.keys(fields).length > 0) {
-					if (schema.actions.create) {
-						schema.actions.create.params = generateValidatorSchemaFromFields(fields, {
-							type: "create"
-						});
+				const primaryKeyField = getPrimaryKeyFromFields(fields);
+
+				if (mixinOpts.generateActionParams) {
+					// Generate action params
+					if (Object.keys(fields).length > 0) {
+						if (schema.actions.create) {
+							schema.actions.create.params = generateValidatorSchemaFromFields(
+								fields,
+								{
+									type: "create"
+								}
+							);
+						}
+
+						if (schema.actions.update) {
+							schema.actions.update.params = generateValidatorSchemaFromFields(
+								fields,
+								{
+									type: "update"
+								}
+							);
+						}
+
+						if (schema.actions.replace) {
+							schema.actions.replace.params = generateValidatorSchemaFromFields(
+								fields,
+								{
+									type: "replace"
+								}
+							);
+						}
+					}
+				}
+
+				if (primaryKeyField) {
+					// Set `id` field in `get` and `resolve`` actions
+					if (schema.actions.get && schema.actions.get.params) {
+						schema.actions.get.params[primaryKeyField.name] = {
+							type: primaryKeyField.type
+						};
+					}
+					if (schema.actions.resolve && schema.actions.resolve.params) {
+						schema.actions.resolve.params[primaryKeyField.name] = [
+							{ type: primaryKeyField.type },
+							{ type: "array", items: { type: primaryKeyField.type } }
+						];
 					}
 
-					if (schema.actions.update) {
-						schema.actions.update.params = generateValidatorSchemaFromFields(fields, {
-							type: "update"
-						});
-					}
+					// Fix the ":id" variable name in the `get`, `update`, `replace` and `remove` actions
+					fixIDInRestPath(schema.actions.get, primaryKeyField);
+					fixIDInRestPath(schema.actions.update, primaryKeyField);
+					fixIDInRestPath(schema.actions.replace, primaryKeyField);
+					fixIDInRestPath(schema.actions.remove, primaryKeyField);
 
-					if (schema.actions.replace) {
-						schema.actions.replace.params = generateValidatorSchemaFromFields(fields, {
-							type: "replace"
-						});
-					}
+					// Fix the "id" key name in the cache keys
+					fixIDInCacheKeys(schema.actions.get, primaryKeyField);
+					fixIDInCacheKeys(schema.actions.resolve, primaryKeyField);
 				}
 			}
 		}

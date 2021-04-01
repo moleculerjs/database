@@ -68,7 +68,7 @@ module.exports = function (mixinOpts) {
 					// Parse shorthand format: { title: "string|min:3" } => { title: { type: "string", min: 3 } }
 					if (_.isString(def)) def = validator.parseShortHand(def);
 
-					// Copy the properties TODO: deep clone due to nested fields
+					// Copy the properties
 					const field = _.cloneDeep(def);
 
 					// Set name of field

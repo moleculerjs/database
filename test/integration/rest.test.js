@@ -343,9 +343,131 @@ module.exports = (getAdapter, adapterType) => {
 			});
 		});
 	}*/
+
+	describe("Test REST API with secure ID and 'key' ID field", () => {
+		const env = createEnvironment(getAdapter, {
+			fields: {
+				key: { type: "string", primaryKey: true, secure: true, columnName: "_id" },
+				title: { type: "string", trim: true, required: true },
+				content: { type: "string" }
+			},
+			methods: {
+				encodeID(id) {
+					return "secured-" + id;
+				},
+
+				decodeID(id) {
+					if (id.startsWith("secured-")) return id.slice(8);
+				}
+			}
+		});
+		const docs = [];
+
+		beforeAll(() => env.start());
+		afterAll(() => env.stop());
+
+		it("should return empty array", async () => {
+			const res = await axios.get(`${env.baseURL}/posts`);
+			const data = res.data;
+
+			expect(data).toEqual({
+				rows: [],
+				page: 1,
+				pageSize: 10,
+				total: 0,
+				totalPages: 0
+			});
+		});
+
+		it("should create posts", async () => {
+			const doc = (
+				await axios.post(`${env.baseURL}/posts`, {
+					title: "First post",
+					content: "Content of first post"
+				})
+			).data;
+			docs.push(doc);
+
+			expect(doc).toEqual({
+				key: expect.any(String),
+				title: "First post",
+				content: "Content of first post"
+			});
+			expect(doc.key.startsWith("secured-")).toBe(true);
+		});
+
+		it("should return all docs (list)", async () => {
+			const data = (await axios.get(`${env.baseURL}/posts`)).data;
+			expect(data).toEqual({
+				rows: expect.arrayContaining(docs),
+				page: 1,
+				pageSize: 10,
+				total: 1,
+				totalPages: 1
+			});
+		});
+
+		it("should return all docs (find)", async () => {
+			const data = (await axios.get(`${env.baseURL}/posts/all`)).data;
+			expect(data).toEqual(expect.arrayContaining(docs));
+		});
+
+		it("should return a doc (GET)", async () => {
+			const data = (await axios.get(`${env.baseURL}/posts/${docs[0].key}`)).data;
+			expect(data).toEqual(docs[0]);
+		});
+
+		it("should update entity", async () => {
+			const doc = (
+				await axios.patch(`${env.baseURL}/posts/${docs[0].key}`, {
+					title: "Modified post"
+				})
+			).data;
+
+			expect(doc).toEqual({
+				key: docs[0].key,
+				title: "Modified post",
+				content: "Content of first post"
+			});
+
+			docs[0] = doc;
+		});
+
+		it("should return the modified doc (GET)", async () => {
+			const data = (await axios.get(`${env.baseURL}/posts/${docs[0].key}`)).data;
+			expect(data).toEqual(docs[0]);
+		});
+
+		it("should replace entity", async () => {
+			const doc = (
+				await axios.put(`${env.baseURL}/posts/${docs[0].key}`, {
+					title: "Replaced post",
+					content: "Replaced content"
+				})
+			).data;
+
+			expect(doc).toEqual({
+				key: docs[0].key,
+				title: "Replaced post",
+				content: "Replaced content"
+			});
+
+			docs[0] = doc;
+		});
+
+		it("should return the modified doc (GET)", async () => {
+			const data = (await axios.get(`${env.baseURL}/posts/${docs[0].key}`)).data;
+			expect(data).toEqual(docs[0]);
+		});
+
+		it("should remove a doc (DELETE)", async () => {
+			const data = (await axios.delete(`${env.baseURL}/posts/${docs[0].key}`)).data;
+			expect(data).toEqual(docs[0].key);
+		});
+	});
 };
 
-function createEnvironment(getAdapter) {
+function createEnvironment(getAdapter, opts = {}) {
 	const env = {
 		brokers: [],
 		port: null,
@@ -395,23 +517,25 @@ function createEnvironment(getAdapter) {
 		name: "posts",
 		mixins: [DbService({ adapter: getAdapter({ collection: "posts" }) })],
 		settings: {
-			fields: {
-				id: { type: "string", primaryKey: true, columnName: "_id" },
-				title: { type: "string", trim: true, required: true },
-				content: { type: "string" },
-				author: {
-					type: "string",
-					populate: {
-						action: "authors.resolve",
-						fields: ["name", "age"],
-						scope: "onlyActive"
-					}
-				},
-				votes: { type: "number", default: 0 },
-				status: { type: "boolean", default: true },
-				createdAt: { type: "number", onCreate: Date.now },
-				updatedAt: { type: "number", onUpdate: Date.now }
-			},
+			fields: opts.fields
+				? opts.fields
+				: {
+						id: { type: "string", primaryKey: true, columnName: "_id" },
+						title: { type: "string", trim: true, required: true },
+						content: { type: "string" },
+						author: {
+							type: "string",
+							populate: {
+								action: "authors.resolve",
+								fields: ["name", "age"],
+								scope: "onlyActive"
+							}
+						},
+						votes: { type: "number", default: 0 },
+						status: { type: "boolean", default: true },
+						createdAt: { type: "number", onCreate: Date.now },
+						updatedAt: { type: "number", onUpdate: Date.now }
+				  },
 
 			defaultPopulates: ["author"]
 		},
@@ -425,7 +549,9 @@ function createEnvironment(getAdapter) {
 			}
 		},
 
-		methods: {},
+		methods: {
+			...(opts.methods || {})
+		},
 
 		async started() {
 			await this.clearEntities();

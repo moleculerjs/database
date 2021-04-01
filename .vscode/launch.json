@@ -20,7 +20,7 @@
 			"request": "launch",
 			"name": "Jest",
 			"program": "${workspaceRoot}/node_modules/jest-cli/bin/jest.js",
-			"args": ["--runInBand"],
+			"args": ["--testMatch", "\"**/integration/**/*.spec.js\"", "--runInBand"],
 			"cwd": "${workspaceRoot}",
 			"runtimeArgs": [
                 "--nolazy"

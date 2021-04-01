@@ -378,21 +378,24 @@ module.exports = (getAdapter, adapterType) => {
 
 		describe("Test resolveEntities method", () => {
 			it("resolve entities by IDs", async () => {
-				const res = await svc.resolveEntities(ctx, { id: docs.janeDoe._id });
+				const res = await svc.resolveEntities(ctx, { _id: docs.janeDoe._id });
 				expect(res).toEqual(docs.janeDoe);
 
 				const res2 = await svc.resolveEntities(ctx, {
-					id: [docs.johnDoe._id, docs.bobSmith._id]
+					_id: [docs.johnDoe._id, docs.bobSmith._id]
 				});
 				expect(res2).toEqual([docs.johnDoe, docs.bobSmith]);
 			});
 
 			it("resolve entities by IDs with mapping", async () => {
-				const res = await svc.resolveEntities(ctx, { id: docs.janeDoe._id, mapping: true });
+				const res = await svc.resolveEntities(ctx, {
+					_id: docs.janeDoe._id,
+					mapping: true
+				});
 				expect(res).toEqual({ [docs.janeDoe._id]: docs.janeDoe });
 
 				const res2 = await svc.resolveEntities(ctx, {
-					id: [docs.johnDoe._id, docs.bobSmith._id],
+					_id: [docs.johnDoe._id, docs.bobSmith._id],
 					mapping: true
 				});
 				expect(res2).toEqual({
@@ -414,11 +417,11 @@ module.exports = (getAdapter, adapterType) => {
 			});
 
 			it("should not throw EntityNotFound", async () => {
-				const res = await svc.resolveEntities(ctx, { id: "1234567890abcdef12345678" });
+				const res = await svc.resolveEntities(ctx, { _id: "1234567890abcdef12345678" });
 				expect(res).toEqual();
 
 				const res2 = await svc.resolveEntities(ctx, {
-					id: ["1234567890abcdef12345678", "234567890abcdef123456789"]
+					_id: ["1234567890abcdef12345678", "234567890abcdef123456789"]
 				});
 				expect(res2).toEqual([]);
 			});
@@ -428,7 +431,7 @@ module.exports = (getAdapter, adapterType) => {
 				try {
 					await svc.resolveEntities(
 						ctx,
-						{ id: "1234567890abcdef12345678" },
+						{ _id: "1234567890abcdef12345678" },
 						{ throwIfNotExist: true }
 					);
 				} catch (err) {
@@ -443,7 +446,7 @@ module.exports = (getAdapter, adapterType) => {
 					await svc.resolveEntities(
 						ctx,
 						{
-							id: ["1234567890abcdef12345678", "234567890abcdef123456789"]
+							_id: ["1234567890abcdef12345678", "234567890abcdef123456789"]
 						},
 						{ throwIfNotExist: true }
 					);
@@ -559,7 +562,7 @@ module.exports = (getAdapter, adapterType) => {
 			it("throw EntityNotFound", async () => {
 				expect.assertions(2);
 				try {
-					await svc.updateEntity(ctx, { id: "1234567890abcdef12345678" });
+					await svc.updateEntity(ctx, { _id: "1234567890abcdef12345678" });
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
 					expect(err.data).toEqual({ id: "1234567890abcdef12345678" });
@@ -602,7 +605,7 @@ module.exports = (getAdapter, adapterType) => {
 			it("throw EntityNotFound", async () => {
 				expect.assertions(2);
 				try {
-					await svc.replaceEntity(ctx, { id: "1234567890abcdef12345678" });
+					await svc.replaceEntity(ctx, { _id: "1234567890abcdef12345678" });
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
 					expect(err.data).toEqual({ id: "1234567890abcdef12345678" });
@@ -658,7 +661,7 @@ module.exports = (getAdapter, adapterType) => {
 			it("should return the remaining rows", async () => {
 				svc.entityChanged.mockClear();
 
-				const res = await svc.removeEntity(ctx, { id: docs.janeDoe._id });
+				const res = await svc.removeEntity(ctx, { _id: docs.janeDoe._id });
 				expect(res).toBe(docs.janeDoe._id);
 
 				const rows = await svc.findEntities(ctx, {});
@@ -688,7 +691,7 @@ module.exports = (getAdapter, adapterType) => {
 			it("throw EntityNotFound", async () => {
 				expect.assertions(2);
 				try {
-					await svc.removeEntity(ctx, { id: "1234567890abcdef12345678" });
+					await svc.removeEntity(ctx, { _id: "1234567890abcdef12345678" });
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
 					expect(err.data).toEqual({ id: "1234567890abcdef12345678" });

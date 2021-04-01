@@ -13,6 +13,32 @@ const validator = new Validator({
 	useNewCustomCheckerFunction: true
 });
 
+function getPrimaryKeyFromFields(fields) {
+	let field = null;
+	_.forEach(fields, (f, name) => {
+		if (!field && f.primaryKey) {
+			field = {
+				...f,
+				name
+			};
+		}
+	});
+
+	return field || { name: "_id", type: "string", columnName: "_id" };
+}
+
+function fixIDInRestPath(def, primaryKeyField) {
+	if (def && def.rest) {
+		def.rest = def.rest.replace(/:id/, `:${primaryKeyField.name}`);
+	}
+}
+
+function fixIDInCacheKeys(def, primaryKeyField) {
+	if (def && def.cache && def.cache.keys) {
+		def.cache.keys = def.cache.keys.map(key => (key == "id" ? primaryKeyField.name : key));
+	}
+}
+
 function generateValidatorSchemaFromFields(fields, opts) {
 	const res = {};
 
@@ -105,6 +131,9 @@ function generateFieldValidatorSchema(field, opts) {
 }
 
 module.exports = {
+	getPrimaryKeyFromFields,
+	fixIDInRestPath,
+	fixIDInCacheKeys,
 	generateValidatorSchemaFromFields,
 	generateFieldValidatorSchema
 };
