@@ -283,13 +283,17 @@ describe("Test validation", () => {
 				} catch (err) {
 					expect(err).toBeInstanceOf(ValidationError);
 					expect(err.name).toBe("ValidationError");
-					expect(err.message).toBe("The field 'name' is required.");
-					expect(err.type).toBe("REQUIRED_FIELD");
+					expect(err.message).toBe("Parameters validation error!");
+					expect(err.type).toBe("VALIDATION_ERROR");
 					expect(err.code).toBe(422);
-					expect(err.data).toEqual({
-						field: "name",
-						value: undefined
-					});
+					expect(err.data).toEqual([
+						{
+							actual: undefined,
+							field: "name",
+							message: "The 'name' field is required.",
+							type: "required"
+						}
+					]);
 				}
 			});
 
@@ -303,13 +307,17 @@ describe("Test validation", () => {
 				} catch (err) {
 					expect(err).toBeInstanceOf(ValidationError);
 					expect(err.name).toBe("ValidationError");
-					expect(err.message).toBe("The field 'name' is required.");
-					expect(err.type).toBe("REQUIRED_FIELD");
+					expect(err.message).toBe("Parameters validation error!");
+					expect(err.type).toBe("VALIDATION_ERROR");
 					expect(err.code).toBe(422);
-					expect(err.data).toEqual({
-						field: "name",
-						value: null
-					});
+					expect(err.data).toEqual([
+						{
+							actual: null,
+							field: "name",
+							message: "The 'name' field is required.",
+							type: "required"
+						}
+					]);
 				}
 			});
 
@@ -338,13 +346,17 @@ describe("Test validation", () => {
 				} catch (err) {
 					expect(err).toBeInstanceOf(ValidationError);
 					expect(err.name).toBe("ValidationError");
-					expect(err.message).toBe("The field 'name' is required.");
-					expect(err.type).toBe("REQUIRED_FIELD");
+					expect(err.message).toBe("Parameters validation error!");
+					expect(err.type).toBe("VALIDATION_ERROR");
 					expect(err.code).toBe(422);
-					expect(err.data).toEqual({
-						field: "name",
-						value: undefined
-					});
+					expect(err.data).toEqual([
+						{
+							actual: undefined,
+							field: "name",
+							message: "The 'name' field is required.",
+							type: "required"
+						}
+					]);
 				}
 			});
 		});
@@ -794,13 +806,17 @@ describe("Test validation", () => {
 				} catch (err) {
 					expect(err).toBeInstanceOf(ValidationError);
 					expect(err.name).toBe("ValidationError");
-					expect(err.message).toBe("The field 'name' is required.");
-					expect(err.type).toBe("REQUIRED_FIELD");
+					expect(err.message).toBe("Parameters validation error!");
+					expect(err.type).toBe("VALIDATION_ERROR");
 					expect(err.code).toBe(422);
-					expect(err.data).toEqual({
-						field: "name",
-						value: undefined
-					});
+					expect(err.data).toEqual([
+						{
+							actual: undefined,
+							field: "name",
+							message: "The 'name' field is required.",
+							type: "required"
+						}
+					]);
 				}
 			});
 
@@ -814,13 +830,17 @@ describe("Test validation", () => {
 				} catch (err) {
 					expect(err).toBeInstanceOf(ValidationError);
 					expect(err.name).toBe("ValidationError");
-					expect(err.message).toBe("The field 'name' is required.");
-					expect(err.type).toBe("REQUIRED_FIELD");
+					expect(err.message).toBe("Parameters validation error!");
+					expect(err.type).toBe("VALIDATION_ERROR");
 					expect(err.code).toBe(422);
-					expect(err.data).toEqual({
-						field: "name",
-						value: null
-					});
+					expect(err.data).toEqual([
+						{
+							actual: null,
+							field: "name",
+							message: "The 'name' field is required.",
+							type: "required"
+						}
+					]);
 				}
 			});
 
@@ -849,13 +869,17 @@ describe("Test validation", () => {
 				} catch (err) {
 					expect(err).toBeInstanceOf(ValidationError);
 					expect(err.name).toBe("ValidationError");
-					expect(err.message).toBe("The field 'name' is required.");
-					expect(err.type).toBe("REQUIRED_FIELD");
+					expect(err.message).toBe("Parameters validation error!");
+					expect(err.type).toBe("VALIDATION_ERROR");
 					expect(err.code).toBe(422);
-					expect(err.data).toEqual({
-						field: "name",
-						value: undefined
-					});
+					expect(err.data).toEqual([
+						{
+							actual: undefined,
+							field: "name",
+							message: "The 'name' field is required.",
+							type: "required"
+						}
+					]);
 				}
 			});
 		});
@@ -1105,112 +1129,6 @@ describe("Test validation", () => {
 			});
 		});
 	});
-
-	describe("Test validator schema generation", () => {
-		const broker = new ServiceBroker({ logger: false });
-		const svc = broker.createService({
-			name: "users",
-			mixins: [DbService()]
-		});
-
-		beforeAll(() => broker.start());
-		afterAll(() => broker.stop());
-
-		it("generate validator schema for 'create'", async () => {
-			const fields = svc._processFieldObject({
-				id: { type: "string", primaryKey: true, columnName: "_id" },
-				name: { type: "string", optional: false },
-				username: { type: "string", required: true, min: 3, max: 100 },
-				email: "email",
-				password: { type: "string", hidden: true, min: 6 },
-				age: { type: "number", positive: true, integer: true },
-				bio: true,
-				token: false,
-				address: {
-					type: "object",
-					properties: {
-						zip: { type: "number" },
-						street: { type: "string" },
-						state: { type: "string", optional: true },
-						city: { type: "string", required: true },
-						country: { type: "string" },
-						primary: { type: "boolean", default: true }
-					}
-				},
-				roles: {
-					type: "array",
-					max: 3,
-					items: { type: "string" }
-				},
-
-				phones: {
-					type: "array",
-					items: {
-						type: "object",
-						properties: {
-							type: "string",
-							number: { type: "string", required: true },
-							primary: { type: "boolean", default: false }
-						}
-					}
-				},
-				createdAt: { type: "date", readonly: true, onCreate: () => new Date() },
-				updatedAt: { type: "date", readonly: true, onUpdate: () => new Date() },
-				replacedAt: { type: "date", readonly: true, onReplace: () => new Date() },
-				status: { type: "string", default: "A", onRemove: "D" }
-			});
-
-			expect(svc._generateValidatorSchemaForFields(fields, { type: "create" })).toEqual({
-				$$strict: true,
-				name: { type: "string" },
-				username: { type: "string", max: 100, min: 3 },
-				email: { type: "email", optional: true },
-				password: { type: "string", min: 6, optional: true },
-				age: {
-					type: "number",
-					positive: true,
-					integer: true,
-					optional: true,
-					convert: true
-				},
-				address: {
-					type: "object",
-					optional: true,
-					properties: {
-						$$strict: true,
-						zip: { type: "number", optional: true, convert: true },
-						street: { type: "string", optional: true },
-						state: { type: "string", optional: true },
-						city: { type: "string" },
-						country: { type: "string", optional: true },
-						primary: { type: "boolean", convert: true, optional: true, default: true }
-					}
-				},
-				roles: {
-					type: "array",
-					max: 3,
-					optional: true,
-					items: {
-						type: "string"
-					}
-				},
-				phones: {
-					type: "array",
-					optional: true,
-					items: {
-						type: "object",
-						properties: {
-							type: "string",
-							number: { type: "string", required: true },
-							primary: { type: "boolean", default: false }
-						}
-					}
-				},
-				bio: { type: "any", optional: true },
-				status: { type: "string", default: "A", optional: true }
-			});
-		});
-	});
 });
 
 function testTypeConversion(ctx, svc, type) {
@@ -1311,7 +1229,7 @@ function testTypeConversion(ctx, svc, type) {
 			});
 		});
 
-		it("should throw Cast error for invalid number", async () => {
+		it("should throw ValidationError for invalid number", async () => {
 			const params = {
 				snum: "John123"
 			};
@@ -1321,17 +1239,21 @@ function testTypeConversion(ctx, svc, type) {
 			} catch (err) {
 				expect(err).toBeInstanceOf(ValidationError);
 				expect(err.name).toBe("ValidationError");
-				expect(err.message).toBe("Cast to Number failed for value 'John123'");
-				expect(err.type).toBe("CAST_ERROR");
+				expect(err.message).toBe("Parameters validation error!");
+				expect(err.type).toBe("VALIDATION_ERROR");
 				expect(err.code).toBe(422);
-				expect(err.data).toEqual({
-					field: "snum",
-					value: "John123"
-				});
+				expect(err.data).toEqual([
+					{
+						actual: "John123",
+						field: "snum",
+						message: "The 'snum' field must be a number.",
+						type: "number"
+					}
+				]);
 			}
 		});
 
-		it("should throw Cast error for invalid date", async () => {
+		it("should throw ValidationError for invalid date", async () => {
 			const params = {
 				sdate: "John123"
 			};
@@ -1341,13 +1263,17 @@ function testTypeConversion(ctx, svc, type) {
 			} catch (err) {
 				expect(err).toBeInstanceOf(ValidationError);
 				expect(err.name).toBe("ValidationError");
-				expect(err.message).toBe("Cast to Date failed for value 'John123'");
-				expect(err.type).toBe("CAST_ERROR");
+				expect(err.message).toBe("Parameters validation error!");
+				expect(err.type).toBe("VALIDATION_ERROR");
 				expect(err.code).toBe(422);
-				expect(err.data).toEqual({
-					field: "sdate",
-					value: "John123"
-				});
+				expect(err.data).toEqual([
+					{
+						actual: "John123",
+						field: "sdate",
+						message: "The 'sdate' field must be a Date.",
+						type: "date"
+					}
+				]);
 			}
 		});
 	});

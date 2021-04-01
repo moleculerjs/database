@@ -25,8 +25,8 @@ if (process.env.GITHUB_ACTIONS_CI) {
 } else {
 	// Local development tests
 	Adapters = [
-		//{ type: "NeDB" }
-		{ type: "MongoDB", options: { dbName: "db-int-test", collection: "users" } }
+		{ type: "NeDB" }
+		//{ type: "MongoDB", options: { dbName: "db-int-test", collection: "users" } }
 	];
 }
 

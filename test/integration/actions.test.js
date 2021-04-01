@@ -120,10 +120,17 @@ module.exports = (getAdapter, adapterType) => {
 					await broker.call("posts.create", {});
 				} catch (err) {
 					expect(err).toBeInstanceOf(ValidationError);
-					expect(err.message).toEqual("The field 'title' is required.");
-					expect(err.type).toEqual("REQUIRED_FIELD");
+					expect(err.message).toBe("Parameters validation error!");
+					expect(err.type).toBe("VALIDATION_ERROR");
 					expect(err.code).toEqual(422);
-					expect(err.data).toEqual({ field: "title", value: undefined });
+					expect(err.data).toEqual([
+						{
+							actual: undefined,
+							field: "title",
+							message: "The 'title' field is required.",
+							type: "required"
+						}
+					]);
 				}
 			});
 		});
@@ -369,10 +376,17 @@ module.exports = (getAdapter, adapterType) => {
 				await broker.call("products.create", {});
 			} catch (err) {
 				expect(err).toBeInstanceOf(ValidationError);
-				expect(err.message).toEqual("The field 'name' is required.");
-				expect(err.type).toEqual("REQUIRED_FIELD");
+				expect(err.message).toBe("Parameters validation error!");
+				expect(err.type).toBe("VALIDATION_ERROR");
 				expect(err.code).toEqual(422);
-				expect(err.data).toEqual({ field: "name", value: undefined });
+				expect(err.data).toEqual([
+					{
+						actual: undefined,
+						field: "name",
+						message: "The 'name' field is required.",
+						type: "required"
+					}
+				]);
 			}
 		});
 

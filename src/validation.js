@@ -9,6 +9,7 @@
 const { Context } = require("moleculer"); // eslint-disable-line no-unused-vars
 const { ServiceSchemaError, ValidationError } = require("moleculer").Errors;
 const _ = require("lodash");
+const { generateValidatorSchemaFromFields } = require("./schema");
 
 const Validator = require("fastest-validator");
 const validator = new Validator({
@@ -30,6 +31,21 @@ module.exports = function (mixinOpts) {
 
 			if (_.isObject(this.settings.fields)) {
 				this.$fields = this._processFieldObject(this.settings.fields);
+
+				// Compile validators for basic methods
+				this.$validators = {
+					create: validator.compile(
+						generateValidatorSchemaFromFields(this.settings.fields, { type: "create" })
+					),
+					update: validator.compile(
+						generateValidatorSchemaFromFields(this.settings.fields, { type: "update" })
+					),
+					replace: validator.compile(
+						generateValidatorSchemaFromFields(this.settings.fields, {
+							type: "replace"
+						})
+					)
+				};
 			}
 
 			if (!this.$primaryField) this.$primaryField = { name: "_id", columnName: "_id" };
@@ -45,12 +61,11 @@ module.exports = function (mixinOpts) {
 					// Shorthand format { title: true } => { title: {} }
 					if (def === true) def = { type: "any" };
 
-					// Shorthand format: { title: "string|min:3" } => { title: { type: "string", min: 3 } }
-					// Same as in FastestValidator
+					// Parse shorthand format: { title: "string|min:3" } => { title: { type: "string", min: 3 } }
 					if (_.isString(def)) def = validator.parseShortHand(def);
 
-					// Copy the properties TOOD: deep clone due to nested fields
-					const field = Object.assign({}, def);
+					// Copy the properties TODO: deep clone due to nested fields
+					const field = _.cloneDeep(def);
 
 					// Set name of field
 					field.name = name;
@@ -89,10 +104,12 @@ module.exports = function (mixinOpts) {
 						}
 					}
 
+					// Handle nested object properties
 					if (field.type == "object" && _.isPlainObject(field.properties)) {
 						field.itemProperties = this._processFieldObject(field.properties);
 					}
 
+					// Handle array items
 					if (field.type == "array" && _.isObject(field.items)) {
 						let itemsDef = field.items;
 						if (_.isString(field.items)) itemsDef = { type: field.items };
@@ -204,60 +221,20 @@ module.exports = function (mixinOpts) {
 				fields = fields.filter(field => !!field.onRemove);
 			}
 
+			// Validating (only the root level)
+			if (!opts.nested) {
+				const check = this.$validators[type];
+				if (check) {
+					const res = check(params);
+					if (res !== true) {
+						//console.log(res);
+						throw new ValidationError("Parameters validation error!", null, res);
+					}
+				}
+			}
+
 			const sanitizeValue = async (field, value) => {
 				if (value !== undefined) {
-					// Type conversion
-					if (field.type == "string" && typeof value != "string" && value != null) {
-						value = String(value);
-					}
-					if (field.type == "number" && typeof value != "number" && value != null) {
-						const newVal = Number(value);
-						if (Number.isNaN(newVal)) {
-							throw new ValidationError(
-								`Cast to Number failed for value '${value}'`,
-								"CAST_ERROR",
-								{
-									field: field.name,
-									value
-								}
-							);
-						}
-						value = newVal;
-					}
-					if (field.type == "boolean" && typeof value != "boolean" && value != null) {
-						if (value === 1 || value === "true" || value === "1" || value === "on") {
-							value = true;
-						} else if (
-							value === 0 ||
-							value === "false" ||
-							value === "0" ||
-							value === "off"
-						) {
-							value = false;
-						}
-					}
-					if (field.type == "date" && !(value instanceof Date) && value != null) {
-						const newVal = new Date(value);
-						if (isNaN(newVal.getTime())) {
-							throw new ValidationError(
-								`Cast to Date failed for value '${value}'`,
-								"CAST_ERROR",
-								{
-									field: field.name,
-									value
-								}
-							);
-						}
-						value = newVal;
-					}
-
-					// Sanitizations
-					if (field.trim && typeof value == "string") {
-						if (field.trim === true) value = value.trim();
-						else if (field.trim === "right") value = value.trimRight();
-						else if (field.trim === "left") value = value.trimLeft();
-					}
-
 					// Custom validator
 					// Syntax: `validate: (value, entity, field, ctx) => value.length > 6`
 					if (field.validate) {
@@ -272,7 +249,10 @@ module.exports = function (mixinOpts) {
 
 					// Nested-object
 					if (field.type == "object" && field.itemProperties) {
-						value = await this._validateObject(ctx, field.itemProperties, value, type);
+						value = await this._validateObject(ctx, field.itemProperties, value, {
+							...opts,
+							nested: true
+						});
 					}
 
 					// Array
@@ -295,7 +275,10 @@ module.exports = function (mixinOpts) {
 										ctx,
 										field.itemProperties,
 										value[i],
-										type
+										{
+											...opts,
+											nested: true
+										}
 									);
 								}
 							} else if (field.items.type) {
@@ -381,12 +364,16 @@ module.exports = function (mixinOpts) {
 						if (field.required) {
 							if ((value === null && !field.nullable) || value === undefined) {
 								throw new ValidationError(
-									`The field '${field.name}' is required.`,
-									"REQUIRED_FIELD",
-									{
-										field: field.name,
-										value
-									}
+									"Parameters validation error!",
+									"VALIDATION_ERROR",
+									[
+										{
+											type: "required",
+											field: field.name,
+											message: `The '${field.name}' field is required.`,
+											actual: value
+										}
+									]
 								);
 							}
 						}
@@ -411,78 +398,6 @@ module.exports = function (mixinOpts) {
 			);
 
 			return entity;
-		},
-
-		_generateValidatorSchema(opts) {
-			return this._generateValidatorSchemaForFields(this.$fields, opts);
-		},
-
-		_generateValidatorSchemaForFields(fields, opts) {
-			const res = {
-				$$strict: true
-			};
-
-			if (fields == null || fields.length == 0) return res;
-
-			fields.forEach(field => {
-				const schema = this._generateFieldValidatorSchema(field, opts);
-				if (schema != null) res[field.name] = schema;
-			});
-
-			return res;
-		},
-
-		_generateFieldValidatorSchema(field, opts) {
-			const schema = _.omit(field, [
-				"name",
-				"columnName",
-				"primaryKey",
-				"optional",
-				"hidden",
-				"readonly",
-				"required",
-				"immutable",
-				"onCreate",
-				"onUpdate",
-				"onReplace",
-				"onRemove",
-				"permission",
-				"readPermission",
-				"populate",
-				"itemProperties",
-				"set",
-				"get",
-				"validate"
-			]);
-
-			// Type
-			schema.type = field.type || "any";
-
-			// Readonly -> Forbidden
-			if (field.readonly == true) return null;
-
-			// Primary key forbidden on create
-			if (field.primaryKey && opts.type == "create") return null;
-
-			// Required/Optional
-			if (!field.required) schema.optional = true;
-
-			// Type conversion (enable by default)
-			if (["number", "date", "boolean"].includes(field.type))
-				schema.convert = field.convert != null ? field.convert : true;
-
-			// Default value
-			if (field.default !== undefined) schema.default = field.default;
-
-			// Nested object
-			if (field.type == "object" && field.itemProperties) {
-				schema.properties = this._generateValidatorSchemaForFields(
-					field.itemProperties,
-					opts
-				);
-			}
-
-			return schema;
 		}
 	};
 };
