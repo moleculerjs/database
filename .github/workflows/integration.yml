@@ -44,14 +44,15 @@ jobs:
       env:
         GITHUB_ACTIONS_CI: true
 
-    - name: Run leak detection tests
-      run: npm run test:leak
-      env:
-        GITHUB_ACTIONS_CI: true
+    # - name: Run leak detection tests
+    #   run: npm run test:leak
+    #   env:
+    #     GITHUB_ACTIONS_CI: true
 
     - name: Show container logs (in case of failure)
       run: docker-compose logs
       if: failure()
+      working-directory: ./test
 
     - name: Stop containers
       run: docker-compose down -v
