@@ -84,29 +84,25 @@ class MongoDBAdapter extends BaseAdapter {
 			})
 		);
 
-		try {
-			// Connect the client to the server
-			await this.client.connect();
-
-			// Select DB and verify connection
-			this.logger.debug("Selecting database:", this.opts.dbName);
-			this.db = this.client.db(this.opts.dbName, this.opts.dbOptions);
-			await this.db.command({ ping: 1 });
-			this.logger.debug("Database selected successfully.");
-
-			this.logger.debug("Open collection:", this.opts.collection);
-			this.collection = this.db.collection(this.opts.collection);
-
+		this.client.on("open", () =>
 			this.logger.info(
 				`MongoDB adapter has connected. Database: '${this.opts.dbName}', Collection: '${this.opts.collection}'`
-			);
-		} catch (err) {
-			this.logger.error("MongoDB error.", err);
-		}
+			)
+		);
+		this.client.on("close", () => this.logger.warn("MongoDB adapter has disconnected."));
+		this.client.on("error", err => this.logger.error("MongoDB error.", err));
 
-		this.db.on("close", () => this.logger.warn("MongoDB adapter has disconnected."));
-		this.db.on("error", err => this.logger.error("MongoDB error.", err));
-		this.db.on("reconnect", () => this.logger.info("MongoDB adapter has reconnected."));
+		// Connect the client to the server
+		await this.client.connect();
+
+		// Select DB and verify connection
+		this.logger.debug("Selecting database:", this.opts.dbName);
+		this.db = this.client.db(this.opts.dbName, this.opts.dbOptions);
+		await this.db.command({ ping: 1 });
+		this.logger.debug("Database selected successfully.");
+
+		this.logger.debug("Open collection:", this.opts.collection);
+		this.collection = this.db.collection(this.opts.collection);
 	}
 
 	/**

@@ -28,7 +28,14 @@ broker.createService({
 	name: "posts",
 	mixins: [
 		DbService({
-			adapter: { type: "MongoDB", options: { dbName: "tenants", collection: "posts" } }
+			adapter: {
+				type: "MongoDB",
+				options: {
+					uri: "mongodb://localhost:27017",
+					dbName: "tenants",
+					collection: "posts"
+				}
+			}
 		})
 	],
 	settings: {
