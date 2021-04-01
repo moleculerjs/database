@@ -29,7 +29,7 @@
   "author": "MoleculerJS",
   "license": "MIT",
   "peerDependencies": {
-    "moleculer": "^0.14.0"
+    "moleculer": "^0.14.12"
   },
   "devDependencies": {
     "@icebob/node-memwatch": "^2.1.0",

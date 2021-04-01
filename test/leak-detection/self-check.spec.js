@@ -2,6 +2,8 @@
 
 const memwatch = require("@icebob/node-memwatch");
 
+jest.setTimeout(3 * 60 * 1000); // 3mins
+
 describe("leak detector", function () {
 	// let leakCB = jest.fn();
 	// memwatch.on("leak", leakCB);
@@ -25,5 +27,5 @@ describe("leak detector", function () {
 				leaks.push(str);
 			}
 		}, 10);
-	}, 10000);
+	});
 });
