@@ -296,7 +296,7 @@ class MongoDBAdapter extends BaseAdapter {
 	 */
 	async removeById(id) {
 		const res = await this.collection.findOneAndDelete({ _id: this.stringToObjectID(id) });
-		return res.value;
+		return id;
 	}
 
 	/**
@@ -437,9 +437,8 @@ class MongoDBAdapter extends BaseAdapter {
 	 * @memberof MongoDbAdapter
 	 */
 	transformSort(sort) {
-		if (typeof sort == "string") {
-			return { sort: 1 };
-		} else if (Array.isArray(sort)) {
+		if (typeof sort == "string") sort = [sort];
+		if (Array.isArray(sort)) {
 			return sort.reduce((res, s) => {
 				if (s.startsWith("-")) res[s.slice(1)] = -1;
 				else res[s] = 1;

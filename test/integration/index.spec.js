@@ -1,6 +1,7 @@
 "use strict";
 
 const _ = require("lodash");
+const AdapterTests = require("./adapter.test");
 const MethodTests = require("./methods.test");
 const ScopeTests = require("./scopes.test");
 const ActionsTests = require("./actions.test");
@@ -25,8 +26,19 @@ if (process.env.GITHUB_ACTIONS_CI) {
 } else {
 	// Local development tests
 	Adapters = [
-		{ type: "NeDB" }
-		//{ type: "MongoDB", options: { dbName: "db-int-test", collection: "users" } }
+		{ type: "NeDB" },
+		{ type: "MongoDB", options: { dbName: "db-int-test", collection: "users" } },
+		{
+			type: "Knex",
+			options: {
+				knex: {
+					client: "sqlite3",
+					connection: {
+						filename: ":memory:"
+					}
+				}
+			}
+		}
 	];
 }
 
@@ -40,6 +52,7 @@ describe("Integration tests", () => {
 		};
 
 		describe(`Adapter: ${adapter.type}`, () => {
+			describe("Test adapter", () => AdapterTests(getAdapter, adapter.type));
 			describe("Test methods", () => MethodTests(getAdapter, adapter.type));
 			describe("Test scopes", () => ScopeTests(getAdapter, adapter.type));
 			describe("Test actions", () => ActionsTests(getAdapter, adapter.type));

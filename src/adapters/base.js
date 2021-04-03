@@ -45,14 +45,14 @@ class BaseAdapter {
 	 * @returns {Boolean}
 	 */
 	checkClientLibVersion(library, requiredVersions) {
-		const pkg = require("mongodb/package.json");
+		const pkg = require(`${library}/package.json`);
 		const installedVersion = pkg.version;
 
 		if (semver.satisfies(installedVersion, requiredVersions)) {
 			return true;
 		} else {
 			this.logger.warn(
-				`The installed ${library}client library is not supported officially. Functionality is not guaranteed. Supported versions:`,
+				`The installed ${library} library is not supported officially. Functionality is not guaranteed. Supported versions:`,
 				requiredVersions
 			);
 			return false;

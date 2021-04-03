@@ -324,8 +324,11 @@ class NeDBAdapter extends BaseAdapter {
 
 			// Sort
 			if (params.sort) {
+				let pSort = params.sort;
+				if (typeof pSort == "string") pSort = [pSort];
+
 				const sortFields = {};
-				params.sort.forEach(field => {
+				pSort.forEach(field => {
 					if (field.startsWith("-")) sortFields[field.slice(1)] = -1;
 					else sortFields[field] = 1;
 				});
@@ -346,15 +349,29 @@ class NeDBAdapter extends BaseAdapter {
 
 	/**
 	 * Create an index. The `def` is adapter specific.
+	 * More info: https://github.com/louischatriot/nedb#indexing
 	 *
 	 * @param {Object} def
+	 * @param {String|Array<String>} def.fields
+	 * @param {Boolean?} def.unique
+	 * @param {Boolean?} def.sparse
+	 * @param {Number?} def.expireAfterSeconds
+	 * @param {String?} def.name
 	 */
 	createIndex(def) {
 		return new this.Promise((resolve, reject) => {
-			this.db.ensureIndex(def, err => {
-				if (err) return reject(err);
-				resolve();
-			});
+			this.db.ensureIndex(
+				{
+					fieldName: def.fieldName || def.fields,
+					unique: def.unique,
+					sparse: def.sparse,
+					expireAfterSeconds: def.expireAfterSeconds
+				},
+				err => {
+					if (err) return reject(err);
+					resolve();
+				}
+			);
 		});
 	}
 }

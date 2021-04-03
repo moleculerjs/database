@@ -290,9 +290,9 @@ module.exports = function (mixinOpts) {
 			// Decode ID if need
 			id = id.map(id => this._sanitizeID(id, opts));
 
+			if (!params.query) params.query = {};
 			// Apply scopes & set ID filtering
 			params = this._applyScopes(Object.assign({}, params), ctx);
-			if (!params.query) params.query = {};
 
 			let idField = this.$primaryField.columnName;
 
@@ -308,6 +308,7 @@ module.exports = function (mixinOpts) {
 			let result = await adapter.find(params);
 			if (!result || result.length == 0) {
 				if (opts.throwIfNotExist) throw new EntityNotFoundError(origID);
+				return params.mapping === true ? {} : null;
 			}
 
 			// For mapping
