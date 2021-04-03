@@ -1,7 +1,7 @@
 "use strict";
 
 const { ServiceBroker, Context } = require("moleculer");
-const { MoleculerClientError } = require("moleculer").Errors;
+const { MoleculerClientError, ValidationError } = require("moleculer").Errors;
 const { EntityNotFoundError } = require("../../src/errors");
 const { addExpectAnyFields } = require("./utils");
 const { Stream } = require("stream");
@@ -697,6 +697,132 @@ module.exports = (getAdapter, adapterType) => {
 					expect(err.data).toEqual({ id: "1234567890abcdef12345678" });
 				}
 			});
+		});
+	});
+
+	describe("Test methods withouth 'ctx'", () => {
+		const broker = new ServiceBroker({ logger: false });
+		const svc = broker.createService({
+			name: "users",
+			mixins: [
+				DbService({ adapter: getAdapter({ collection: "users" }), createActions: false })
+			],
+			settings: {
+				fields: {
+					id: { type: "string", primaryKey: true, columnName: "_id" },
+					name: { type: "string", required: true },
+					email: { type: "string", required: true },
+					age: { type: "number", integer: true, positive: true, required: true }
+				}
+			}
+		});
+
+		beforeAll(() => broker.start());
+		afterAll(() => broker.stop());
+
+		let entity;
+
+		it("setup", async () => {
+			await svc.clearEntities();
+
+			const rows = await svc.findEntities(null, {});
+			expect(rows).toEqual([]);
+
+			const count = await svc.countEntities(null, {});
+			expect(count).toEqual(0);
+		});
+
+		it("should throw error if missing a field", async () => {
+			expect.assertions(2);
+			try {
+				await svc.createEntity(null, {
+					name: "John Doe",
+					email: "john.doe@moleculer.services"
+				});
+			} catch (err) {
+				expect(err).toBeInstanceOf(ValidationError);
+				expect(err.data).toEqual([
+					{
+						actual: undefined,
+						field: "age",
+						message: "The 'age' field is required.",
+						type: "required"
+					}
+				]);
+			}
+		});
+
+		it("should create entity", async () => {
+			entity = await svc.createEntity(null, {
+				name: "John Doe",
+				email: "john.doe@moleculer.services",
+				age: 30
+			});
+
+			expect(entity).toEqual({
+				id: expect.any(String),
+				name: "John Doe",
+				email: "john.doe@moleculer.services",
+				age: 30
+			});
+		});
+
+		it("should update entity", async () => {
+			const res = await svc.updateEntity(null, {
+				id: entity.id,
+				name: "Dr. John Doe",
+				age: 33
+			});
+
+			expect(res).toEqual({
+				id: entity.id,
+				name: "Dr. John Doe",
+				email: "john.doe@moleculer.services",
+				age: 33
+			});
+
+			entity = res;
+		});
+
+		it("should find entities", async () => {
+			const rows = await svc.findEntities(null, {});
+			expect(rows).toEqual([
+				{
+					id: entity.id,
+					name: "Dr. John Doe",
+					email: "john.doe@moleculer.services",
+					age: 33
+				}
+			]);
+		});
+
+		it("should count entities", async () => {
+			const rows = await svc.countEntities(null, {});
+			expect(rows).toBe(1);
+		});
+
+		it("should replace entity", async () => {
+			const res = await svc.replaceEntity(null, {
+				id: entity.id,
+				name: "Mr. John Doe",
+				email: "john.doe@moleculer.services",
+				age: 44
+			});
+
+			expect(res).toEqual({
+				id: entity.id,
+				name: "Mr. John Doe",
+				email: "john.doe@moleculer.services",
+				age: 44
+			});
+
+			entity = res;
+		});
+
+		it("should remove entity", async () => {
+			const res = await svc.removeEntity(null, { id: entity.id });
+
+			expect(res).toEqual(entity.id);
 		});
 	});
 };
