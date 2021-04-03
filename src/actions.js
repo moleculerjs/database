@@ -298,9 +298,7 @@ module.exports = function (opts) {
 		res.create = {
 			visibility: opts.actionVisibility,
 			rest: opts.rest ? "POST /" : null,
-			params: {
-				// generate from `fields` in the `merged`
-			},
+			// params: {}, generate from `fields` in the `merged`
 			async handler(ctx) {
 				return this.createEntity(ctx);
 			}
@@ -320,9 +318,7 @@ module.exports = function (opts) {
 		res.update = {
 			visibility: opts.actionVisibility,
 			rest: opts.rest ? "PATCH /:id" : null,
-			params: {
-				// generate from `fields` in the `merged`
-			},
+			// params: {}, generate from `fields` in the `merged`
 			async handler(ctx) {
 				return this.updateEntity(ctx);
 			}
@@ -342,9 +338,7 @@ module.exports = function (opts) {
 		res.replace = {
 			visibility: opts.actionVisibility,
 			rest: opts.rest ? "PUT /:id" : null,
-			params: {
-				// generate from `fields` in the `merged`
-			},
+			// params: {}, generate from `fields` in the `merged`
 			async handler(ctx) {
 				return this.replaceEntity(ctx);
 			}
@@ -365,9 +359,7 @@ module.exports = function (opts) {
 		res.remove = {
 			visibility: opts.actionVisibility,
 			rest: opts.rest ? "DELETE /:id" : null,
-			params: {
-				// generate from `fields` in the `merged`
-			},
+			// params: {}, generate from `fields` in the `merged`
 			async handler(ctx) {
 				return this.removeEntity(ctx);
 			}

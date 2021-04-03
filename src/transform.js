@@ -33,7 +33,7 @@ module.exports = function (mixinOpts) {
 		 * @param {Adapter} adapter
 		 * @param {Object|Array<Object>} docs
 		 * @param {Object?} params
-		 * @param {Context} ctx
+		 * @param {Context?} ctx
 		 */
 		async transformResult(adapter, docs, params, ctx) {
 			let isDoc = false;
@@ -60,7 +60,7 @@ module.exports = function (mixinOpts) {
 		 * Transform fields on documents.
 		 *
 		 * @param {Array<Object>} docs
-		 * @param {Context} ctx
+		 * @param {Context?} ctx
 		 * @param {Object} params
 		 */
 		async _transformFields(docs, ctx, params) {
@@ -153,7 +153,7 @@ module.exports = function (mixinOpts) {
 		 * @param {Object} field
 		 * @param {Array<any>} values
 		 * @param {Array<Object>} docs
-		 * @param {Context} ctx
+		 * @param {Context?} ctx
 		 * @returns {Object}
 		 */
 		async _populateValues(field, values, docs, ctx) {
@@ -173,7 +173,8 @@ module.exports = function (mixinOpts) {
 					fields: rule.fields,
 					populate: rule.populate,
 					scope: rule.scope,
-					query: rule.query
+					query: rule.query,
+					throwIfNotExist: false
 				},
 				rule.params || {}
 			);

@@ -1359,7 +1359,7 @@ module.exports = adapter => {
 		});
 	});
 
-	describe("Test transformations with nested fields", () => {
+	describe("Test with nested fields", () => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
@@ -1525,6 +1525,191 @@ module.exports = adapter => {
 				const res2 = await broker.call("users.get", { id: entity.id });
 				expect(res2).toStrictEqual(entity);
 			});
+
+			it("update a nested property in the entity", async () => {
+				const res = await broker.call("users.update", {
+					id: entity.id,
+					name: "Dr. John Doe",
+					address: {
+						zip: "9999"
+					}
+				});
+
+				expect(res).toStrictEqual({
+					id: expect.any(String),
+					name: "Dr. John Doe",
+					email: "john.doe@moleculer.services",
+					address: {
+						zip: 9999,
+						street: "Main Street 15",
+						city: "London",
+						country: "England",
+						primary: true
+					},
+					roles: ["admin", "1234"],
+					phones: [
+						{ type: "home", number: "+1-555-1234", primary: true },
+						{ type: "mobile", number: "+1-555-9999", primary: false }
+					]
+				});
+				entity = res;
+
+				const res2 = await broker.call("users.get", { id: entity.id });
+				expect(res2).toStrictEqual(entity);
+			});
+		});
+	});
+
+	describe("Test with very strict schema", () => {
+		const broker = new ServiceBroker({ logger: false });
+		const svc = broker.createService({
+			name: "users",
+			mixins: [
+				DbService({
+					adapter,
+					createActions: true,
+					strict: true
+				})
+			],
+			settings: {
+				fields: {
+					id: { type: "string", primaryKey: true, columnName: "_id" },
+					name: { type: "string" },
+					email: { type: "string" }
+				}
+			}
+		});
+
+		beforeAll(async () => {
+			await broker.start();
+			await svc.clearEntities();
+		});
+		afterAll(() => broker.stop());
+
+		let entity;
+
+		it("should throw error if it contains extra field", async () => {
+			expect.assertions(2);
+			try {
+				await broker.call("users.create", {
+					name: "John Doe",
+					email: "john.doe@moleculer.services",
+					age: 30
+				});
+			} catch (err) {
+				expect(err).toBeInstanceOf(ValidationError);
+				expect(err.data).toEqual([
+					{
+						actual: "age",
+						expected: "name, email",
+						field: undefined,
+						message: "The object '' contains forbidden keys: 'age'.",
+						type: "objectStrict",
+						action: "users.create",
+						nodeID: broker.nodeID
+					}
+				]);
+			}
+		});
+
+		it("create test entity", async () => {
+			const res = await broker.call("users.create", {
+				name: "John Doe",
+				email: "john.doe@moleculer.services"
+			});
+			expect(res).toStrictEqual({
+				id: expect.any(String),
+				name: "John Doe",
+				email: "john.doe@moleculer.services"
+			});
+			entity = res;
+
+			const res2 = await broker.call("users.get", { id: entity.id });
+			expect(res2).toStrictEqual(entity);
+		});
+
+		it("should throw error when update with an extra property", async () => {
+			expect.assertions(2);
+			try {
+				await broker.call("users.update", {
+					id: entity.id,
+					name: "Dr. John Doe",
+					age: 30
+				});
+			} catch (err) {
+				expect(err).toBeInstanceOf(ValidationError);
+				expect(err.data).toEqual([
+					{
+						actual: "age",
+						expected: "id, name, email",
+						field: undefined,
+						message: "The object '' contains forbidden keys: 'age'.",
+						type: "objectStrict",
+						action: "users.update",
+						nodeID: broker.nodeID
+					}
+				]);
+			}
+		});
+
+		it("update entity", async () => {
+			const res = await broker.call("users.update", {
+				id: entity.id,
+				name: "Dr. John Doe"
+			});
+
+			expect(res).toStrictEqual({
+				id: expect.any(String),
+				name: "Dr. John Doe",
+				email: "john.doe@moleculer.services"
+			});
+			entity = res;
+
+			const res2 = await broker.call("users.get", { id: entity.id });
+			expect(res2).toStrictEqual(entity);
+		});
+
+		it("should throw error when replace with an extra property", async () => {
+			expect.assertions(2);
+			try {
+				await broker.call("users.replace", {
+					id: entity.id,
+					name: "Mr. John Doe",
+					email: "john.doe@moleculer.services",
+					age: 30
+				});
+			} catch (err) {
+				expect(err).toBeInstanceOf(ValidationError);
+				expect(err.data).toEqual([
+					{
+						actual: "age",
+						expected: "id, name, email",
+						field: undefined,
+						message: "The object '' contains forbidden keys: 'age'.",
+						type: "objectStrict",
+						action: "users.replace",
+						nodeID: broker.nodeID
+					}
+				]);
+			}
+		});
+
+		it("replace entity", async () => {
+			const res = await broker.call("users.replace", {
+				id: entity.id,
+				name: "Mr. John Doe",
+				email: "john.doe@moleculer.services"
+			});
+
+			expect(res).toStrictEqual({
+				id: expect.any(String),
+				name: "Mr. John Doe",
+				email: "john.doe@moleculer.services"
+			});
+			entity = res;
+
+			const res2 = await broker.call("users.get", { id: entity.id });
+			expect(res2).toStrictEqual(entity);
 		});
 	});
 
@@ -1801,7 +1986,6 @@ module.exports = adapter => {
 		it("check 'remove' action", async () => {
 			expect(svc.schema.actions.remove).toEqual({
 				handler: expect.any(Function),
-				params: {},
 				rest: "DELETE /:key",
 				visibility: "published"
 			});

@@ -47,7 +47,7 @@ function generateValidatorSchemaFromFields(fields, opts) {
 	opts == opts || {};
 	if (opts.level == null) opts.level = 0;
 
-	if (opts.level == 0) res.$$strict = "remove";
+	if (opts.level == 0) res.$$strict = opts.strict;
 
 	_.map(fields, (field, name) => {
 		if (field === false) return;

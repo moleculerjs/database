@@ -19,6 +19,7 @@ const {
 	fixIDInRestPath,
 	fixIDInCacheKeys
 } = require("./schema");
+const pkg = require("../package.json");
 
 /*
 
@@ -78,8 +79,11 @@ const {
 	- [ ] permissions for scopes
 	- [ ] ad-hoc populate in find/list actions `populate: ["author", { key: "createdBy", action: "users.resolve", fields: ["name", "avatar"] }]` { }
 	- [ ] nested-et nem támogató adapter-ek warning-oljanak és flat-eljék az Object-t|Array-t JSON string-é és úgy tárolják le
-	- [ ] Megpróbálni a transform-ot inicializáláskor létrehozni akár template szinten is. Sokkal gyorsabb tudni lenni, mert transform-nál csak végig kell menni és meghívni mindegyik függvényét.
+	- [ ] TEST: metódusok hívása `ctx` nélkül is mennie kell
 	- [ ] `strict: false|true|"remove"` mode in the mixinOptions. Using it in the validator schemas.
+	- [x] convert the `$set` to flatten when it's needed
+			https://github.com/moleculerjs/moleculer-db/blob/720d04160e5acdc5598437adb7b2b39b31462842/packages/moleculer-db/src/index.js#L893-L893
+	- [ ] `bulkCreate` action without REST
 
 	- [ ] Adapters
 		- [ ] Cassandra
@@ -95,11 +99,23 @@ const {
 
 module.exports = function DatabaseMixin(mixinOpts) {
 	mixinOpts = _.defaultsDeep(mixinOpts, {
+		/** @type {Boolean} Generate CRUD actions */
 		createActions: true,
+
+		/** @type {String} Default visibility of generated actions */
 		actionVisibility: "published",
+
+		/** @type {Boolean} Generate `params` schema for generated actions based on the `fields` */
 		generateActionParams: true,
+
+		/** @type {Boolean|String} Strict mode in validation schema for objects. Values: true|false|"remove" */
+		strict: "remove",
+
+		/** @type {Object} Caching settings */
 		cache: {
+			/** @type {Boolean} Enable caching of actions */
 			enable: true,
+			/** @type {String} Name of event for clearing cache */
 			eventName: null
 		},
 		/** @type {Boolean} Set auto-aliasing fields */
@@ -118,6 +134,21 @@ module.exports = function DatabaseMixin(mixinOpts) {
 	const schema = {
 		// Must overwrite it
 		name: "",
+
+		/**
+		 * Metadata
+		 */
+		// Service's metadata
+		metadata: {
+			$category: "database",
+			$description: "Official Data Access service",
+			$official: true,
+			$package: {
+				name: pkg.name,
+				version: pkg.version,
+				repo: pkg.repository ? pkg.repository.url : null
+			}
+		},
 
 		/**
 		 * Default settings
@@ -180,7 +211,7 @@ module.exports = function DatabaseMixin(mixinOpts) {
 		 * @param {Object} schema
 		 */
 		merged(schema) {
-			if (schema.actions && schema.settings.fields) {
+			if (mixinOpts.createActions && schema.actions && schema.settings.fields) {
 				const fields = schema.settings.fields;
 				const primaryKeyField = getPrimaryKeyFromFields(fields);
 
@@ -191,7 +222,8 @@ module.exports = function DatabaseMixin(mixinOpts) {
 							schema.actions.create.params = generateValidatorSchemaFromFields(
 								fields,
 								{
-									type: "create"
+									type: "create",
+									strict: mixinOpts.strict
 								}
 							);
 						}
@@ -200,7 +232,8 @@ module.exports = function DatabaseMixin(mixinOpts) {
 							schema.actions.update.params = generateValidatorSchemaFromFields(
 								fields,
 								{
-									type: "update"
+									type: "update",
+									strict: mixinOpts.strict
 								}
 							);
 						}
@@ -209,7 +242,8 @@ module.exports = function DatabaseMixin(mixinOpts) {
 							schema.actions.replace.params = generateValidatorSchemaFromFields(
 								fields,
 								{
-									type: "replace"
+									type: "replace",
+									strict: mixinOpts.strict
 								}
 							);
 						}

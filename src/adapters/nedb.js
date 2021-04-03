@@ -8,6 +8,7 @@
 
 const _ = require("lodash");
 const Datastore = require("nedb");
+const { flatten } = require("../utils");
 const BaseAdapter = require("./base");
 
 class NeDBAdapter extends BaseAdapter {
@@ -172,10 +173,16 @@ class NeDBAdapter extends BaseAdapter {
 	 *
 	 */
 	updateById(id, changes, opts) {
+		const raw = opts && opts.raw ? true : false;
+		if (!raw) {
+			// Flatten the changes to dot notation
+			changes = flatten(changes, { safe: true });
+		}
+
 		return new this.Promise((resolve, reject) => {
 			this.db.update(
 				{ _id: id },
-				opts && opts.raw ? changes : { $set: changes },
+				raw ? changes : { $set: changes },
 				{ returnUpdatedDocs: true },
 				(err, numAffected, affectedDocuments) => {
 					if (err) return reject(err);
@@ -195,8 +202,14 @@ class NeDBAdapter extends BaseAdapter {
 	 *
 	 */
 	updateMany(query, changes, opts) {
+		const raw = opts && opts.raw ? true : false;
+		if (!raw) {
+			// Flatten the changes to dot notation
+			changes = flatten(changes, { safe: true });
+		}
+
 		return new this.Promise((resolve, reject) => {
-			this.db.update(query, opts && opts.raw ? changes : { $set: changes }, { multi: true }, (
+			this.db.update(query, raw ? changes : { $set: changes }, { multi: true }, (
 				err,
 				numAffected /*, affectedDocuments*/
 			) => {

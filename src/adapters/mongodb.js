@@ -8,7 +8,7 @@
 
 const _ = require("lodash");
 const { ServiceSchemaError } = require("moleculer").Errors;
-
+const { flatten } = require("../utils");
 const BaseAdapter = require("./base");
 
 let MongoClient, ObjectID;
@@ -236,9 +236,15 @@ class MongoDBAdapter extends BaseAdapter {
 	 *
 	 */
 	async updateById(id, changes, opts) {
+		const raw = opts && opts.raw ? true : false;
+		if (!raw) {
+			// Flatten the changes to dot notation
+			changes = flatten(changes, { safe: true });
+		}
+
 		const res = await this.collection.findOneAndUpdate(
 			{ _id: this.stringToObjectID(id) },
-			opts && opts.raw ? changes : { $set: changes },
+			raw ? changes : { $set: changes },
 			{ returnOriginal: false }
 		);
 		return res.value;
@@ -254,10 +260,13 @@ class MongoDBAdapter extends BaseAdapter {
 	 *
 	 */
 	async updateMany(query, changes, opts) {
-		const res = await this.collection.updateMany(
-			query,
-			opts && opts.raw ? changes : { $set: changes }
-		);
+		const raw = opts && opts.raw ? true : false;
+		if (!raw) {
+			// Flatten the changes to dot notation
+			changes = flatten(changes, { safe: true });
+		}
+
+		const res = await this.collection.updateMany(query, raw ? changes : { $set: changes });
 		return res.modifiedCount;
 	}
 
