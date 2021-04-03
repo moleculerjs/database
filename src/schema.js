@@ -115,7 +115,7 @@ function generateFieldValidatorSchema(field, opts) {
 
 	// Nested object
 	if (field.type == "object" && field.properties) {
-		schema.strict = "remove";
+		schema.strict = opts.strict;
 		schema.properties = generateValidatorSchemaFromFields(field.properties, {
 			...opts,
 			level: opts.level + 1
