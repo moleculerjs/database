@@ -3,12 +3,14 @@
 const { ServiceBroker, Context } = require("moleculer");
 const DbService = require("../..").Service;
 
-module.exports = getAdapter => {
+module.exports = (getAdapter, adapterType) => {
 	describe("Test multi populating", () => {
 		const broker = new ServiceBroker({ logger: false });
 		const postSvc = broker.createService({
 			name: "posts",
-			mixins: [DbService({ adapter: getAdapter({ collection: "posts" }) })],
+			mixins: [
+				DbService({ adapter: getAdapter({ collection: "posts", tableName: "posts" }) })
+			],
 			settings: {
 				fields: {
 					id: { type: "string", primaryKey: true, columnName: "_id" },
@@ -28,19 +30,36 @@ module.exports = getAdapter => {
 					updatedAt: { type: "number", onUpdate: Date.now }
 				},
 				defaultPopulates: ["author"]
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.client.schema.createTable("posts", function (table) {
+						table.increments("_id");
+						table.string("title").index();
+						table.string("content").index();
+						table.string("authorID");
+						table.timestamp("createdAt");
+						table.timestamp("updatedAt");
+					});
+				}
 			}
 		});
 
 		const userSvc = broker.createService({
 			name: "users",
-			mixins: [DbService({ adapter: getAdapter({ collection: "users" }) })],
+			mixins: [
+				DbService({ adapter: getAdapter({ collection: "users", tableName: "users" }) })
+			],
 			settings: {
 				fields: {
 					id: { type: "string", primaryKey: true, columnName: "_id" },
 					name: { type: "string" },
 					email: { type: "string", readPermission: ["admin"] },
 					password: { type: "string", hidden: true },
-					favoritePosts: { type: "array", populate: "posts.resolve" },
+					favoritePosts: { type: "array", items: "string", populate: "posts.resolve" },
 					postCount: {
 						type: "number",
 						readonly: true,
@@ -54,6 +73,20 @@ module.exports = getAdapter => {
 					}
 				},
 				defaultPopulates: ["postCount"]
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.client.schema.createTable("users", function (table) {
+						table.increments("_id");
+						table.string("name").index();
+						table.string("email").index();
+						table.string("password");
+						table.string("favoritePosts");
+					});
+				}
 			}
 		});
 
@@ -233,9 +266,10 @@ module.exports = getAdapter => {
 										name: "Jane Doe",
 										postCount: 5
 									},
-									authorID: users.janeDoe.id,
+									authorID: "" + users.janeDoe.id,
 									content: "Content of post #5",
 									createdAt: expect.any(Number),
+									...(adapterType == "Knex" ? { updatedAt: null } : {}),
 									id: posts.post5.id,
 									title: "Post #5"
 								},
@@ -245,9 +279,10 @@ module.exports = getAdapter => {
 										name: "Jane Doe",
 										postCount: 5
 									},
-									authorID: users.janeDoe.id,
+									authorID: "" + users.janeDoe.id,
 									content: "Content of post #2",
 									createdAt: expect.any(Number),
+									...(adapterType == "Knex" ? { updatedAt: null } : {}),
 									id: posts.post2.id,
 									title: "Post #2"
 								},
@@ -257,9 +292,10 @@ module.exports = getAdapter => {
 										name: "Jane Doe",
 										postCount: 5
 									},
-									authorID: users.janeDoe.id,
+									authorID: "" + users.janeDoe.id,
 									content: "Content of post #10",
 									createdAt: expect.any(Number),
+									...(adapterType == "Knex" ? { updatedAt: null } : {}),
 									id: posts.post10.id,
 									title: "Post #10"
 								},
@@ -269,9 +305,10 @@ module.exports = getAdapter => {
 										name: "Jane Doe",
 										postCount: 5
 									},
-									authorID: users.janeDoe.id,
+									authorID: "" + users.janeDoe.id,
 									content: "Content of post #8",
 									createdAt: expect.any(Number),
+									...(adapterType == "Knex" ? { updatedAt: null } : {}),
 									id: posts.post8.id,
 									title: "Post #8"
 								}
@@ -288,9 +325,10 @@ module.exports = getAdapter => {
 										name: "John Doe",
 										postCount: 3
 									},
-									authorID: users.johnDoe.id,
+									authorID: "" + users.johnDoe.id,
 									content: "Content of post #1",
 									createdAt: expect.any(Number),
+									...(adapterType == "Knex" ? { updatedAt: null } : {}),
 									id: posts.post1.id,
 									title: "Post #1"
 								},
@@ -300,9 +338,10 @@ module.exports = getAdapter => {
 										name: "Jane Doe",
 										postCount: 5
 									},
-									authorID: users.janeDoe.id,
+									authorID: "" + users.janeDoe.id,
 									content: "Content of post #2",
 									createdAt: expect.any(Number),
+									...(adapterType == "Knex" ? { updatedAt: null } : {}),
 									id: posts.post2.id,
 									title: "Post #2"
 								},
@@ -312,9 +351,10 @@ module.exports = getAdapter => {
 										name: "John Doe",
 										postCount: 3
 									},
-									authorID: users.johnDoe.id,
+									authorID: "" + users.johnDoe.id,
 									content: "Content of post #4",
 									createdAt: expect.any(Number),
+									...(adapterType == "Knex" ? { updatedAt: null } : {}),
 									id: posts.post4.id,
 									title: "Post #4"
 								},
@@ -324,9 +364,10 @@ module.exports = getAdapter => {
 										name: "Jane Doe",
 										postCount: 5
 									},
-									authorID: users.janeDoe.id,
+									authorID: "" + users.janeDoe.id,
 									content: "Content of post #7",
 									createdAt: expect.any(Number),
+									...(adapterType == "Knex" ? { updatedAt: null } : {}),
 									id: posts.post7.id,
 									title: "Post #7"
 								},
@@ -336,9 +377,10 @@ module.exports = getAdapter => {
 										name: "Bob Smith",
 										postCount: 2
 									},
-									authorID: users.bobSmith.id,
+									authorID: "" + users.bobSmith.id,
 									content: "Content of post #9",
 									createdAt: expect.any(Number),
+									...(adapterType == "Knex" ? { updatedAt: null } : {}),
 									id: posts.post9.id,
 									title: "Post #9"
 								},
@@ -348,9 +390,10 @@ module.exports = getAdapter => {
 										name: "Jane Doe",
 										postCount: 5
 									},
-									authorID: users.janeDoe.id,
+									authorID: "" + users.janeDoe.id,
 									content: "Content of post #10",
 									createdAt: expect.any(Number),
+									...(adapterType == "Knex" ? { updatedAt: null } : {}),
 									id: posts.post10.id,
 									title: "Post #10"
 								}
@@ -367,9 +410,10 @@ module.exports = getAdapter => {
 										name: "Jane Doe",
 										postCount: 5
 									},
-									authorID: users.janeDoe.id,
+									authorID: "" + users.janeDoe.id,
 									content: "Content of post #2",
 									createdAt: expect.any(Number),
+									...(adapterType == "Knex" ? { updatedAt: null } : {}),
 									id: posts.post2.id,
 									title: "Post #2"
 								},
@@ -379,9 +423,10 @@ module.exports = getAdapter => {
 										name: "Bob Smith",
 										postCount: 2
 									},
-									authorID: users.bobSmith.id,
+									authorID: "" + users.bobSmith.id,
 									content: "Content of post #3",
 									createdAt: expect.any(Number),
+									...(adapterType == "Knex" ? { updatedAt: null } : {}),
 									id: posts.post3.id,
 									title: "Post #3"
 								},
@@ -391,9 +436,10 @@ module.exports = getAdapter => {
 										name: "John Doe",
 										postCount: 3
 									},
-									authorID: users.johnDoe.id,
+									authorID: "" + users.johnDoe.id,
 									content: "Content of post #6",
 									createdAt: expect.any(Number),
+									...(adapterType == "Knex" ? { updatedAt: null } : {}),
 									id: posts.post6.id,
 									title: "Post #6"
 								}
@@ -444,33 +490,36 @@ module.exports = getAdapter => {
 								name: "Jane Doe",
 								postCount: 5
 							},
-							authorID: users.janeDoe.id,
+							authorID: "" + users.janeDoe.id,
 							content: "Content of post #2",
 							createdAt: expect.any(Number),
 							id: posts.post2.id,
-							title: "Post #2"
+							title: "Post #2",
+							...(adapterType == "Knex" ? { updatedAt: null } : {})
 						},
 						{
 							author: {
 								name: "Bob Smith",
 								postCount: 2
 							},
-							authorID: users.bobSmith.id,
+							authorID: "" + users.bobSmith.id,
 							content: "Content of post #3",
 							createdAt: expect.any(Number),
 							id: posts.post3.id,
-							title: "Post #3"
+							title: "Post #3",
+							...(adapterType == "Knex" ? { updatedAt: null } : {})
 						},
 						{
 							author: {
 								name: "John Doe",
 								postCount: 3
 							},
-							authorID: users.johnDoe.id,
+							authorID: "" + users.johnDoe.id,
 							content: "Content of post #6",
 							createdAt: expect.any(Number),
 							id: posts.post6.id,
-							title: "Post #6"
+							title: "Post #6",
+							...(adapterType == "Knex" ? { updatedAt: null } : {})
 						}
 					]
 				});

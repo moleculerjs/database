@@ -42,13 +42,53 @@ const TEST_DOCS = {
 };
 
 module.exports = (getAdapter, adapterType) => {
+	let expectedID;
+	if (["Knex"].includes(adapterType)) {
+		expectedID = expect.any(Number);
+	} else {
+		expectedID = expect.any(String);
+	}
+
 	describe("Test findEntity, findEntities & countEntities method", () => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
 			mixins: [
 				DbService({ adapter: getAdapter({ collection: "users" }), createActions: false })
-			]
+			],
+
+			settings: {
+				fields: {
+					id: { type: "string", primaryKey: true, columnName: "_id" },
+					name: { type: "string", trim: true, required: true },
+					age: { type: "number" },
+					dob: { type: "number" },
+					roles: { type: "array", items: "string" },
+					status: {
+						type: "boolean",
+						default: true,
+						get: adapterType == "Knex" ? v => !!v : undefined
+					},
+					_score: { type: "number", readonly: true }
+				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.client.schema.createTable("users", function (table) {
+						table.increments("_id");
+						table.string("name").index();
+						table.integer("age");
+						table.date("dob");
+						table.boolean("status");
+						table.string("roles").index();
+					});
+				}
+
+				await this.clearEntities();
+			}
 		});
 
 		beforeAll(() => broker.start());
@@ -59,8 +99,6 @@ module.exports = (getAdapter, adapterType) => {
 
 		describe("Set up", () => {
 			it("should return empty array", async () => {
-				await svc.clearEntities();
-
 				const rows = await svc.findEntities(ctx);
 				expect(rows).toEqual([]);
 
@@ -70,10 +108,8 @@ module.exports = (getAdapter, adapterType) => {
 
 			it("Adapter specific setups", async () => {
 				if (adapterType == "MongoDB") {
-					(await svc.getAdapter()).collection.createIndex({
-						name: "text",
-						age: "text",
-						roles: "text"
+					(await svc.getAdapter()).createIndex({
+						fields: { name: "text", age: "text", roles: "text" }
 					});
 				}
 			});
@@ -82,12 +118,12 @@ module.exports = (getAdapter, adapterType) => {
 				for (const [key, value] of Object.entries(TEST_DOCS)) {
 					docs[key] = await svc.createEntity(ctx, Object.assign({}, value));
 				}
-				expect(docs.johnDoe).toEqual({ ...TEST_DOCS.johnDoe, _id: expect.any(String) });
-				expect(docs.janeDoe).toEqual({ ...TEST_DOCS.janeDoe, _id: expect.any(String) });
-				expect(docs.bobSmith).toEqual({ ...TEST_DOCS.bobSmith, _id: expect.any(String) });
+				expect(docs.johnDoe).toEqual({ ...TEST_DOCS.johnDoe, id: expectedID });
+				expect(docs.janeDoe).toEqual({ ...TEST_DOCS.janeDoe, id: expectedID });
+				expect(docs.bobSmith).toEqual({ ...TEST_DOCS.bobSmith, id: expectedID });
 				expect(docs.kevinJames).toEqual({
 					...TEST_DOCS.kevinJames,
-					_id: expect.any(String)
+					id: expectedID
 				});
 			});
 		});
@@ -137,7 +173,7 @@ module.exports = (getAdapter, adapterType) => {
 
 		describe("Test full-text search", () => {
 			it("should filter by searchText", async () => {
-				const params = { search: "Doe" };
+				const params = { search: "Doe", searchFields: ["name"] };
 				const rows = await svc.findEntities(ctx, params);
 				if (adapterType == "MongoDB") {
 					expect(rows).toEqual(
@@ -153,7 +189,7 @@ module.exports = (getAdapter, adapterType) => {
 			});
 
 			it("should filter by searchText", async () => {
-				const params = { search: "user" };
+				const params = { search: "user", searchFields: ["roles"] };
 				const rows = await svc.findEntities(ctx, params);
 				if (adapterType == "MongoDB") {
 					expect(rows).toEqual(
@@ -238,7 +274,8 @@ module.exports = (getAdapter, adapterType) => {
 			it("should filter by query & full-text search", async () => {
 				const params = {
 					query: { status: false },
-					search: "Doe"
+					search: "Doe",
+					searchFields: ["name"]
 				};
 				const rows = await svc.findEntities(ctx, params);
 				if (adapterType == "MongoDB") {
@@ -260,6 +297,7 @@ module.exports = (getAdapter, adapterType) => {
 				const params = {
 					query: { status: false },
 					search: "Doe",
+					searchFields: ["name"],
 					sort: "age",
 					limit: 1
 				};
@@ -289,7 +327,7 @@ module.exports = (getAdapter, adapterType) => {
 			it("should return null if no match", async () => {
 				const params = { query: { age: 88 } };
 				const row = await svc.findEntity(ctx, params);
-				expect(row).toBe(null);
+				expect(row == null).toBe(true);
 			});
 		});
 
@@ -322,7 +360,39 @@ module.exports = (getAdapter, adapterType) => {
 			name: "users",
 			mixins: [
 				DbService({ adapter: getAdapter({ collection: "users" }), createActions: false })
-			]
+			],
+
+			settings: {
+				fields: {
+					id: { type: "string", primaryKey: true, columnName: "_id" },
+					name: { type: "string", trim: true, required: true },
+					age: { type: "number" },
+					dob: { type: "number" },
+					roles: { type: "array", items: "string" },
+					status: {
+						type: "boolean",
+						default: true,
+						get: adapterType == "Knex" ? v => !!v : undefined
+					}
+				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.client.schema.createTable("users", function (table) {
+						table.increments("_id");
+						table.string("name").index();
+						table.integer("age");
+						table.date("dob");
+						table.boolean("status");
+						table.string("roles").index();
+					});
+				}
+
+				await this.clearEntities();
+			}
 		});
 		svc.entityChanged = jest.fn();
 
@@ -333,8 +403,6 @@ module.exports = (getAdapter, adapterType) => {
 		let docs = {};
 
 		it("should return empty array", async () => {
-			await svc.clearEntities();
-
 			const rows = await svc.findEntities(ctx);
 			expect(rows).toEqual([]);
 
@@ -346,7 +414,7 @@ module.exports = (getAdapter, adapterType) => {
 			svc.entityChanged.mockClear();
 			docs.johnDoe = await svc.createEntity(ctx, TEST_DOCS.johnDoe);
 
-			expect(docs.johnDoe).toEqual({ ...TEST_DOCS.johnDoe, _id: expect.any(String) });
+			expect(docs.johnDoe).toEqual({ ...TEST_DOCS.johnDoe, id: expectedID });
 
 			expect(svc.entityChanged).toBeCalledTimes(1);
 			expect(svc.entityChanged).toBeCalledWith("create", docs.johnDoe, ctx);
@@ -365,11 +433,11 @@ module.exports = (getAdapter, adapterType) => {
 			docs.bobSmith = res[1];
 			docs.kevinJames = res[2];
 
-			expect(docs.janeDoe).toEqual({ ...TEST_DOCS.janeDoe, _id: expect.any(String) });
-			expect(docs.bobSmith).toEqual({ ...TEST_DOCS.bobSmith, _id: expect.any(String) });
+			expect(docs.janeDoe).toEqual({ ...TEST_DOCS.janeDoe, id: expectedID });
+			expect(docs.bobSmith).toEqual({ ...TEST_DOCS.bobSmith, id: expectedID });
 			expect(docs.kevinJames).toEqual({
 				...TEST_DOCS.kevinJames,
-				_id: expect.any(String)
+				id: expectedID
 			});
 
 			expect(svc.entityChanged).toBeCalledTimes(1);
@@ -378,29 +446,29 @@ module.exports = (getAdapter, adapterType) => {
 
 		describe("Test resolveEntities method", () => {
 			it("resolve entities by IDs", async () => {
-				const res = await svc.resolveEntities(ctx, { _id: docs.janeDoe._id });
+				const res = await svc.resolveEntities(ctx, { id: docs.janeDoe.id });
 				expect(res).toEqual(docs.janeDoe);
 
 				const res2 = await svc.resolveEntities(ctx, {
-					_id: [docs.johnDoe._id, docs.bobSmith._id]
+					id: [docs.johnDoe.id, docs.bobSmith.id]
 				});
 				expect(res2).toEqual([docs.johnDoe, docs.bobSmith]);
 			});
 
 			it("resolve entities by IDs with mapping", async () => {
 				const res = await svc.resolveEntities(ctx, {
-					_id: docs.janeDoe._id,
+					id: docs.janeDoe.id,
 					mapping: true
 				});
-				expect(res).toEqual({ [docs.janeDoe._id]: docs.janeDoe });
+				expect(res).toEqual({ [docs.janeDoe.id]: docs.janeDoe });
 
 				const res2 = await svc.resolveEntities(ctx, {
-					_id: [docs.johnDoe._id, docs.bobSmith._id],
+					id: [docs.johnDoe.id, docs.bobSmith.id],
 					mapping: true
 				});
 				expect(res2).toEqual({
-					[docs.johnDoe._id]: docs.johnDoe,
-					[docs.bobSmith._id]: docs.bobSmith
+					[docs.johnDoe.id]: docs.johnDoe,
+					[docs.bobSmith.id]: docs.bobSmith
 				});
 			});
 
@@ -417,11 +485,11 @@ module.exports = (getAdapter, adapterType) => {
 			});
 
 			it("should not throw EntityNotFound", async () => {
-				const res = await svc.resolveEntities(ctx, { _id: "1234567890abcdef12345678" });
-				expect(res).toEqual();
+				const res = await svc.resolveEntities(ctx, { id: "1234567890abcdef12345678" });
+				expect(res == null).toBeTruthy();
 
 				const res2 = await svc.resolveEntities(ctx, {
-					_id: ["1234567890abcdef12345678", "234567890abcdef123456789"]
+					id: ["1234567890abcdef12345678", "234567890abcdef123456789"]
 				});
 				expect(res2).toEqual([]);
 			});
@@ -431,7 +499,7 @@ module.exports = (getAdapter, adapterType) => {
 				try {
 					await svc.resolveEntities(
 						ctx,
-						{ _id: "1234567890abcdef12345678" },
+						{ id: "1234567890abcdef12345678" },
 						{ throwIfNotExist: true }
 					);
 				} catch (err) {
@@ -446,7 +514,7 @@ module.exports = (getAdapter, adapterType) => {
 					await svc.resolveEntities(
 						ctx,
 						{
-							_id: ["1234567890abcdef12345678", "234567890abcdef123456789"]
+							id: ["1234567890abcdef12345678", "234567890abcdef123456789"]
 						},
 						{ throwIfNotExist: true }
 					);
@@ -466,7 +534,41 @@ module.exports = (getAdapter, adapterType) => {
 			name: "users",
 			mixins: [
 				DbService({ adapter: getAdapter({ collection: "users" }), createActions: false })
-			]
+			],
+
+			settings: {
+				fields: {
+					id: { type: "string", primaryKey: true, columnName: "_id" },
+					name: { type: "string", trim: true, required: true },
+					age: { type: "number" },
+					dob: { type: "number" },
+					height: { type: "number" },
+					roles: { type: "array", items: "string" },
+					status: {
+						type: "boolean",
+						default: true,
+						get: adapterType == "Knex" ? v => !!v : undefined
+					}
+				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.client.schema.createTable("users", function (table) {
+						table.increments("_id");
+						table.string("name").index();
+						table.integer("age");
+						table.integer("height");
+						table.date("dob");
+						table.boolean("status");
+						table.string("roles").index();
+					});
+				}
+
+				await this.clearEntities();
+			}
 		});
 		svc.entityChanged = jest.fn();
 
@@ -478,8 +580,6 @@ module.exports = (getAdapter, adapterType) => {
 
 		describe("Set up", () => {
 			it("should return empty array", async () => {
-				await svc.clearEntities();
-
 				const rows = await svc.findEntities(ctx);
 				expect(rows).toEqual([]);
 
@@ -498,13 +598,13 @@ module.exports = (getAdapter, adapterType) => {
 			it("should update an entity", async () => {
 				svc.entityChanged.mockClear();
 				const row = await svc.updateEntity(ctx, {
-					_id: docs.janeDoe._id,
+					id: docs.janeDoe.id,
 					status: true,
 					age: 28,
 					height: 168
 				});
 				expect(row).toEqual({
-					_id: docs.janeDoe._id,
+					id: docs.janeDoe.id,
 					name: "Jane Doe",
 					age: 28,
 					dob: docs.janeDoe.dob,
@@ -517,35 +617,37 @@ module.exports = (getAdapter, adapterType) => {
 				expect(svc.entityChanged).toBeCalledWith("update", row, ctx);
 			});
 
-			it("should raw update an entity", async () => {
-				svc.entityChanged.mockClear();
-				const row = await svc.updateEntity(ctx, {
-					_id: docs.johnDoe._id,
-					$raw: true,
+			if (adapterType == "MongoDB" || adapterType == "NeDB") {
+				it("should raw update an entity", async () => {
+					svc.entityChanged.mockClear();
+					const row = await svc.updateEntity(ctx, {
+						id: docs.johnDoe.id,
+						$raw: true,
 
-					$set: {
-						status: false,
-						height: 192
-					},
-					$inc: {
-						age: 1
-					},
-					$unset: {
-						dob: true
-					}
-				});
-				expect(row).toEqual({
-					_id: docs.johnDoe._id,
-					name: "John Doe",
-					age: 43,
-					height: 192,
-					roles: ["admin", "user"],
-					status: false
-				});
+						$set: {
+							status: false,
+							height: 192
+						},
+						$inc: {
+							age: 1
+						},
+						$unset: {
+							dob: true
+						}
+					});
+					expect(row).toEqual({
+						id: docs.johnDoe.id,
+						name: "John Doe",
+						age: 43,
+						height: 192,
+						roles: ["admin", "user"],
+						status: false
+					});
 
-				expect(svc.entityChanged).toBeCalledTimes(1);
-				expect(svc.entityChanged).toBeCalledWith("update", row, ctx);
-			});
+					expect(svc.entityChanged).toBeCalledTimes(1);
+					expect(svc.entityChanged).toBeCalledWith("update", row, ctx);
+				});
+			}
 
 			it("throw Missing ID", async () => {
 				expect.assertions(4);
@@ -562,7 +664,7 @@ module.exports = (getAdapter, adapterType) => {
 			it("throw EntityNotFound", async () => {
 				expect.assertions(2);
 				try {
-					await svc.updateEntity(ctx, { _id: "1234567890abcdef12345678" });
+					await svc.updateEntity(ctx, { id: "1234567890abcdef12345678" });
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
 					expect(err.data).toEqual({ id: "1234567890abcdef12345678" });
@@ -571,24 +673,27 @@ module.exports = (getAdapter, adapterType) => {
 		});
 
 		describe("Test replaceEntity method", () => {
-			it("should replace an entity", async () => {
-				svc.entityChanged.mockClear();
-				const row = await svc.replaceEntity(ctx, {
-					_id: docs.kevinJames._id,
-					name: "Kevin",
-					age: 72,
-					height: 185
-				});
-				expect(row).toEqual({
-					_id: docs.kevinJames._id,
-					name: "Kevin",
-					age: 72,
-					height: 185
-				});
+			if (adapterType == "MongoDB" || adapterType == "NeDB") {
+				it("should replace an entity", async () => {
+					svc.entityChanged.mockClear();
+					const row = await svc.replaceEntity(ctx, {
+						id: docs.kevinJames.id,
+						name: "Kevin",
+						age: 72,
+						height: 185
+					});
+					expect(row).toEqual({
+						id: docs.kevinJames.id,
+						name: "Kevin",
+						age: 72,
+						height: 185,
+						status: true
+					});
 
-				expect(svc.entityChanged).toBeCalledTimes(1);
-				expect(svc.entityChanged).toBeCalledWith("replace", row, ctx);
-			});
+					expect(svc.entityChanged).toBeCalledTimes(1);
+					expect(svc.entityChanged).toBeCalledWith("replace", row, ctx);
+				});
+			}
 
 			it("throw Missing ID", async () => {
 				expect.assertions(4);
@@ -605,7 +710,7 @@ module.exports = (getAdapter, adapterType) => {
 			it("throw EntityNotFound", async () => {
 				expect.assertions(2);
 				try {
-					await svc.replaceEntity(ctx, { _id: "1234567890abcdef12345678" });
+					await svc.replaceEntity(ctx, { id: "1234567890abcdef12345678" });
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
 					expect(err.data).toEqual({ id: "1234567890abcdef12345678" });
@@ -620,7 +725,40 @@ module.exports = (getAdapter, adapterType) => {
 			name: "users",
 			mixins: [
 				DbService({ adapter: getAdapter({ collection: "users" }), createActions: false })
-			]
+			],
+
+			settings: {
+				fields: {
+					id: { type: "string", primaryKey: true, columnName: "_id" },
+					name: { type: "string", trim: true, required: true },
+					age: { type: "number" },
+					dob: { type: "number" },
+					height: { type: "number" },
+					roles: { type: "array", items: "string" },
+					status: {
+						type: "boolean",
+						default: true,
+						get: adapterType == "Knex" ? v => !!v : undefined
+					}
+				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.client.schema.createTable("users", function (table) {
+						table.increments("_id");
+						table.string("name").index();
+						table.integer("age");
+						table.date("dob");
+						table.boolean("status");
+						table.string("roles").index();
+					});
+				}
+
+				await this.clearEntities();
+			}
 		});
 
 		svc.entityChanged = jest.fn();
@@ -633,8 +771,6 @@ module.exports = (getAdapter, adapterType) => {
 
 		describe("Set up", () => {
 			it("should return empty array", async () => {
-				await svc.clearEntities();
-
 				const rows = await svc.findEntities(ctx);
 				expect(rows).toEqual([]);
 
@@ -661,8 +797,8 @@ module.exports = (getAdapter, adapterType) => {
 			it("should return the remaining rows", async () => {
 				svc.entityChanged.mockClear();
 
-				const res = await svc.removeEntity(ctx, { _id: docs.janeDoe._id });
-				expect(res).toBe(docs.janeDoe._id);
+				const res = await svc.removeEntity(ctx, { id: docs.janeDoe.id });
+				expect(res).toBe(docs.janeDoe.id);
 
 				const rows = await svc.findEntities(ctx, {});
 				expect(rows).toEqual(
@@ -691,7 +827,7 @@ module.exports = (getAdapter, adapterType) => {
 			it("throw EntityNotFound", async () => {
 				expect.assertions(2);
 				try {
-					await svc.removeEntity(ctx, { _id: "1234567890abcdef12345678" });
+					await svc.removeEntity(ctx, { id: "1234567890abcdef12345678" });
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
 					expect(err.data).toEqual({ id: "1234567890abcdef12345678" });
@@ -714,6 +850,20 @@ module.exports = (getAdapter, adapterType) => {
 					email: { type: "string", required: true },
 					age: { type: "number", integer: true, positive: true, required: true }
 				}
+			},
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.client.schema.createTable("users", function (table) {
+						table.increments("_id");
+						table.string("name");
+						table.string("email");
+						table.integer("age");
+					});
+				}
+
+				await this.clearEntities();
 			}
 		});
 
@@ -723,8 +873,6 @@ module.exports = (getAdapter, adapterType) => {
 		let entity;
 
 		it("setup", async () => {
-			await svc.clearEntities();
-
 			const rows = await svc.findEntities(null, {});
 			expect(rows).toEqual([]);
 
@@ -760,7 +908,7 @@ module.exports = (getAdapter, adapterType) => {
 			});
 
 			expect(entity).toEqual({
-				id: expect.any(String),
+				id: expectedID,
 				name: "John Doe",
 				email: "john.doe@moleculer.services",
 				age: 30

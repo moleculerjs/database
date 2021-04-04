@@ -77,6 +77,7 @@ const pkg = require("../package.json");
 		- [x] get connection/model dynamically
 	- [ ] `aggregate` action with params: `type: "sum", "avg", "count", "min", "max"` & `field: "price"`
 	- [ ] permissions for scopes
+	- [ ] permissions for populates
 	- [ ] ad-hoc populate in find/list actions `populate: ["author", { key: "createdBy", action: "users.resolve", fields: ["name", "avatar"] }]` { }
 	- [ ] nested-et nem támogató adapter-ek warning-oljanak és flat-eljék az Object-t|Array-t JSON string-é és úgy tárolják le
 	- [x] TEST: metódusok hívása `ctx` nélkül is mennie kell
@@ -254,13 +255,14 @@ module.exports = function DatabaseMixin(mixinOpts) {
 					// Set `id` field name & type in `get` and `resolve` actions
 					if (schema.actions.get && schema.actions.get.params) {
 						schema.actions.get.params[primaryKeyField.name] = {
-							type: primaryKeyField.type
+							type: primaryKeyField.type,
+							convert: true
 						};
 					}
 					if (schema.actions.resolve && schema.actions.resolve.params) {
 						schema.actions.resolve.params[primaryKeyField.name] = [
-							{ type: primaryKeyField.type },
-							{ type: "array", items: { type: primaryKeyField.type } }
+							{ type: "array", items: { type: primaryKeyField.type, convert: true } },
+							{ type: primaryKeyField.type, convert: true }
 						];
 					}
 

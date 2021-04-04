@@ -329,7 +329,37 @@ class KnexAdapter extends BaseAdapter {
 			const query = params.query ? Object.assign({}, params.query) : {};
 
 			Object.entries(query).forEach(([key, value]) => {
-				q = q.where(key, value);
+				if (typeof value == "object") {
+					if (value.$in && Array.isArray(value.$in)) {
+						q = q.whereIn(key, value.$in);
+					} else if (value.$nin && Array.isArray(value.$nin)) {
+						q = q.whereNotIn(key, value.$nin);
+					} else if (value.$gt) {
+						q = q.where(key, ">", value.$gt);
+					} else if (value.$gte) {
+						q = q.where(key, ">=", value.$gte);
+					} else if (value.$lt) {
+						q = q.where(key, "<", value.$lt);
+					} else if (value.$lte) {
+						q = q.where(key, "<=", value.$lte);
+					} else if (value.$eq) {
+						q = q.where(key, "=", value.$eq);
+					} else if (value.$ne) {
+						q = q.where(key, "=", value.$ne);
+					} else if (value.$exist === true) {
+						q = q.whereNotNull(key);
+					} else if (value.$exist === false) {
+						q = q.whereNull(key);
+					} else if (value.$raw) {
+						if (typeof value.$raw == "string") {
+							q = q.whereRaw(value.$raw);
+						} else if (typeof value.$raw == "object") {
+							q = q.whereRaw(value.$raw.condition, value.$raw.bindings);
+						}
+					}
+				} else {
+					q = q.where(key, value);
+				}
 			});
 
 			if (_.isString(params.search) && params.search !== "" && params.searchFields) {

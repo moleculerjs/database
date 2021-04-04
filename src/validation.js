@@ -301,6 +301,14 @@ module.exports = function (mixinOpts) {
 				value = await sanitizeValue(field, value);
 
 				if (value !== undefined) {
+					if (field.type == "array" || field.type == "object") {
+						if (!opts.nestedFieldSupport) {
+							if (Array.isArray(value) || _.isObject(value)) {
+								value = JSON.stringify(value);
+							}
+						}
+					}
+
 					// Set the value to the entity, it's valid.
 					_.set(entity, field.columnName, value);
 				}

@@ -45,22 +45,21 @@ if (process.env.GITHUB_ACTIONS_CI) {
 describe("Integration tests", () => {
 	for (const adapter of Adapters) {
 		const getAdapter = options => {
-			if (adapter.options && adapter.options.collection)
-				return _.defaultsDeep({}, { options }, adapter);
+			if (adapter.options) return _.defaultsDeep({}, { options }, adapter);
 
 			return adapter;
 		};
 
 		describe(`Adapter: ${adapter.type}`, () => {
-			describe("Test adapter", () => AdapterTests(getAdapter, adapter.type));
-			describe("Test methods", () => MethodTests(getAdapter, adapter.type));
-			describe("Test scopes", () => ScopeTests(getAdapter, adapter.type));
-			describe("Test actions", () => ActionsTests(getAdapter, adapter.type));
-			describe("Test transformations", () => TransformTests(getAdapter, adapter.type));
-			describe("Test populating", () => PopulateTests(getAdapter, adapter.type));
-			describe("Test Validations", () => ValidationTests(getAdapter, adapter.type));
+			//describe("Test adapter", () => AdapterTests(getAdapter, adapter.type));
+			//describe("Test methods", () => MethodTests(getAdapter, adapter.type));
+			//describe("Test scopes", () => ScopeTests(getAdapter, adapter.type));
+			//describe("Test actions", () => ActionsTests(getAdapter, adapter.type));
+			//describe("Test transformations", () => TransformTests(getAdapter, adapter.type));
+			//describe("Test populating", () => PopulateTests(getAdapter, adapter.type));
+			//describe("Test Validations", () => ValidationTests(getAdapter, adapter.type));
 			describe("Test REST", () => RESTTests(getAdapter, adapter.type));
-			describe("Test Tenants", () => TenantTests(getAdapter, adapter.type));
+			// describe("Test Tenants", () => TenantTests(getAdapter, adapter.type));
 		});
 	}
 });

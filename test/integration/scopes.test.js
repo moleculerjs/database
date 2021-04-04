@@ -38,7 +38,7 @@ const TEST_DOCS = {
 	}
 };
 
-module.exports = getAdapter => {
+module.exports = (getAdapter, adapterType) => {
 	describe("Test scopes", () => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
@@ -50,6 +50,18 @@ module.exports = getAdapter => {
 				})
 			],
 			settings: {
+				fields: {
+					id: { type: "string", primaryKey: true, columnName: "_id" },
+					name: { type: "string", trim: true, required: true },
+					age: { type: "number" },
+					dob: { type: "number" },
+					roles: { type: "array", items: "string" },
+					status: {
+						type: "boolean",
+						default: true,
+						get: adapterType == "Knex" ? v => !!v : undefined
+					}
+				},
 				scopes: {
 					onlyActive: {
 						status: true
@@ -66,6 +78,23 @@ module.exports = getAdapter => {
 					}
 				},
 				defaultScopes: ["onlyActive"]
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.client.schema.createTable("users", function (table) {
+						table.increments("_id");
+						table.string("name").index();
+						table.integer("age");
+						table.date("dob");
+						table.boolean("status");
+						table.string("roles").index();
+					});
+				}
+
+				await this.clearEntities();
 			}
 		});
 
@@ -78,8 +107,6 @@ module.exports = getAdapter => {
 
 		describe("Set up", () => {
 			it("should return empty array", async () => {
-				await svc.clearEntities();
-
 				const rows = await svc.findEntities(ctx);
 				expect(rows).toEqual([]);
 
@@ -201,12 +228,12 @@ module.exports = getAdapter => {
 				expect.assertions(2);
 				try {
 					await svc.updateEntity(ctx, {
-						_id: docs.janeDoe._id,
+						id: docs.janeDoe.id,
 						age: 99
 					});
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
-					expect(err.data).toEqual({ id: docs.janeDoe._id });
+					expect(err.data).toEqual({ id: docs.janeDoe.id });
 				}
 			});
 
@@ -214,12 +241,12 @@ module.exports = getAdapter => {
 				expect.assertions(2);
 				try {
 					await svc.replaceEntity(ctx, {
-						_id: docs.janeDoe._id,
+						id: docs.janeDoe.id,
 						age: 99
 					});
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
-					expect(err.data).toEqual({ id: docs.janeDoe._id });
+					expect(err.data).toEqual({ id: docs.janeDoe.id });
 				}
 			});
 
@@ -227,11 +254,11 @@ module.exports = getAdapter => {
 				expect.assertions(2);
 				try {
 					await svc.removeEntity(ctx, {
-						_id: docs.janeDoe._id
+						id: docs.janeDoe.id
 					});
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
-					expect(err.data).toEqual({ id: docs.janeDoe._id });
+					expect(err.data).toEqual({ id: docs.janeDoe.id });
 				}
 			});
 		});

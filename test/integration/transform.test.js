@@ -3,7 +3,14 @@
 const { ServiceBroker, Context } = require("moleculer");
 const DbService = require("../..").Service;
 
-module.exports = getAdapter => {
+module.exports = (getAdapter, adapterType) => {
+	let expectedID;
+	if (["Knex"].includes(adapterType)) {
+		expectedID = expect.any(Number);
+	} else {
+		expectedID = expect.any(String);
+	}
+
 	describe("Test transformations", () => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
@@ -27,6 +34,23 @@ module.exports = getAdapter => {
 					email: { type: "string", readPermission: "admin" },
 					phone: { type: "string", permission: "admin" }
 				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.client.schema.createTable("users", function (table) {
+						table.increments("_id");
+						table.string("name").index();
+						table.string("password").index();
+						table.string("token").index();
+						table.string("email").index();
+						table.string("phone").index();
+					});
+				}
+
+				await this.clearEntities();
 			}
 		});
 
@@ -61,7 +85,7 @@ module.exports = getAdapter => {
 				docs.johnDoe = res;
 
 				expect(res).toEqual({
-					myID: expect.any(String),
+					myID: expectedID,
 					name: "John Doe",
 					upperName: "JOHN DOE",
 					email: "john.doe@moleculer.services",
@@ -73,7 +97,7 @@ module.exports = getAdapter => {
 				svc.checkAuthority = jest.fn(async () => false);
 				const res = await svc.resolveEntities(ctx, { myID: docs.johnDoe.myID });
 				expect(res).toEqual({
-					myID: expect.any(String),
+					myID: expectedID,
 					name: "John Doe",
 					upperName: "JOHN DOE"
 				});

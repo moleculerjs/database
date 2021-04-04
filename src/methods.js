@@ -290,9 +290,8 @@ module.exports = function (mixinOpts) {
 			// Decode ID if need
 			id = id.map(id => this._sanitizeID(id, opts));
 
-			if (!params.query) params.query = {};
 			// Apply scopes & set ID filtering
-			params = this._applyScopes(Object.assign({}, params), ctx);
+			params = this._applyScopes(Object.assign({ query: {} }, params), ctx);
 
 			let idField = this.$primaryField.columnName;
 
@@ -308,7 +307,7 @@ module.exports = function (mixinOpts) {
 			let result = await adapter.find(params);
 			if (!result || result.length == 0) {
 				if (opts.throwIfNotExist) throw new EntityNotFoundError(origID);
-				return params.mapping === true ? {} : null;
+				return params.mapping === true ? {} : multi ? [] : null;
 			}
 
 			// For mapping
@@ -343,9 +342,13 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} opts
 		 */
 		async createEntity(ctx, params = ctx.params, opts = {}) {
-			params = await this.validateParams(ctx, params, { type: "create" });
-
 			const adapter = await this.getAdapter(ctx);
+
+			params = await this.validateParams(ctx, params, {
+				type: "create",
+				nestedFieldSupport: adapter.hasNestedFieldSupport
+			});
+
 			let result = await adapter.insert(params);
 			if (opts.transform !== false) {
 				result = await this.transformResult(adapter, result, {}, ctx);
@@ -363,13 +366,17 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} opts
 		 */
 		async createEntities(ctx, params = ctx.params, opts = {}) {
+			const adapter = await this.getAdapter(ctx);
 			const entities = await Promise.all(
 				params.map(
-					async entity => await this.validateParams(ctx, entity, { type: "create" })
+					async entity =>
+						await this.validateParams(ctx, entity, {
+							type: "create",
+							nestedFieldSupport: adapter.hasNestedFieldSupport
+						})
 				)
 			);
 
-			const adapter = await this.getAdapter(ctx);
 			let result = await adapter.insertMany(entities);
 			if (opts.transform !== false) {
 				result = await this.transformResult(adapter, result, {}, ctx);
@@ -387,28 +394,36 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} opts
 		 */
 		async updateEntity(ctx, params = ctx.params, opts = {}) {
+			const adapter = await this.getAdapter(ctx);
 			let id = this._getIDFromParams(params);
 
 			// Call because it throws error if entity is not exist
-			const oldEntity = await this.resolveEntities(ctx, params, {
-				transform: false,
-				throwIfNotExist: true
-			});
+			const oldEntity = await this.resolveEntities(
+				ctx,
+				{ [this.$primaryField.name]: id },
+				{
+					transform: false,
+					throwIfNotExist: true
+				}
+			);
 
 			const rawUpdate = params.$raw === true;
 			if (rawUpdate) delete params.$raw;
 
 			if (!rawUpdate) {
-				params = await this.validateParams(ctx, params, { type: "update", oldEntity });
+				params = await this.validateParams(ctx, params, {
+					type: "update",
+					oldEntity,
+					nestedFieldSupport: adapter.hasNestedFieldSupport
+				});
 			}
 
 			id = this._sanitizeID(id, opts);
 
 			delete params[this.$primaryField.columnName];
-			if (this.$primaryField.columnName != this.$primaryField.name)
-				delete params[this.$primaryField.name];
+			//if (this.$primaryField.columnName != this.$primaryField.name)
+			delete params[this.$primaryField.name];
 
-			const adapter = await this.getAdapter(ctx);
 			let result = await adapter.updateById(id, params, { raw: rawUpdate });
 
 			if (opts.transform !== false) {
@@ -430,13 +445,21 @@ module.exports = function (mixinOpts) {
 			let id = this._getIDFromParams(params);
 
 			// Call because it throws error if entity is not exist
-			const oldEntity = await this.resolveEntities(ctx, params, {
-				transform: false,
-				throwIfNotExist: true
-			});
+			const oldEntity = await this.resolveEntities(
+				ctx,
+				{ [this.$primaryField.name]: id },
+				{
+					transform: false,
+					throwIfNotExist: true
+				}
+			);
 			const adapter = await this.getAdapter(ctx);
 
-			params = await this.validateParams(ctx, params, { type: "replace", oldEntity });
+			params = await this.validateParams(ctx, params, {
+				type: "replace",
+				oldEntity,
+				nestedFieldSupport: adapter.hasNestedFieldSupport
+			});
 
 			id = this._sanitizeID(id, opts);
 
@@ -472,7 +495,10 @@ module.exports = function (mixinOpts) {
 
 			const adapter = await this.getAdapter(ctx);
 
-			params = await this.validateParams(ctx, params, { type: "remove" });
+			params = await this.validateParams(ctx, params, {
+				type: "remove",
+				nestedFieldSupport: adapter.hasNestedFieldSupport
+			});
 
 			id = this._sanitizeID(id, opts);
 

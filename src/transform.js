@@ -90,7 +90,23 @@ module.exports = function (mixinOpts) {
 					else if (field.hidden == "byDefault" && !customFieldList) return;
 
 					// Field values
-					let values;
+					let values = docs.map(doc => _.get(doc, field.columnName));
+
+					if (field.type == "array" || field.type == "object") {
+						const adapter = await this.getAdapter(ctx);
+						if (!adapter.hasNestedFieldSupport) {
+							values = values.map(v => {
+								if (typeof v === "string") {
+									try {
+										return JSON.parse(v);
+									} catch (e) {
+										this.logger.warn("Unable to parse the JSON value", v);
+									}
+								}
+								return v;
+							});
+						}
+					}
 
 					// Populating
 					if (
@@ -111,9 +127,6 @@ module.exports = function (mixinOpts) {
 							}
 
 							values = docs.map(doc => _.get(doc, keyField.columnName));
-						} else {
-							// Keys in the same field
-							values = docs.map(doc => _.get(doc, field.columnName));
 						}
 
 						const resolvedObj = await this._populateValues(field, values, docs, ctx);
@@ -121,8 +134,6 @@ module.exports = function (mixinOpts) {
 						if (Array.isArray(resolvedObj)) values = resolvedObj;
 						// Received the values from action resolving
 						else values = deepResolve(values, resolvedObj);
-					} else {
-						values = docs.map(doc => _.get(doc, field.columnName));
 					}
 
 					// Virtual or formatted field

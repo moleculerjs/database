@@ -1943,7 +1943,7 @@ module.exports = adapter => {
 						{ optional: true, type: "string" },
 						{ items: "string", optional: true, type: "array" }
 					],
-					key: { type: "string" },
+					key: { type: "string", convert: true },
 					populate: [
 						{ optional: true, type: "string" },
 						{ items: "string", optional: true, type: "array" }
@@ -1967,7 +1967,10 @@ module.exports = adapter => {
 						{ optional: true, type: "string" },
 						{ items: "string", optional: true, type: "array" }
 					],
-					key: [{ type: "string" }, { items: { type: "string" }, type: "array" }],
+					key: [
+						{ items: { type: "string", convert: true }, type: "array" },
+						{ type: "string", convert: true }
+					],
 					mapping: { optional: true, type: "boolean" },
 					populate: [
 						{ optional: true, type: "string" },

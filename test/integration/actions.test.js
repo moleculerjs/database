@@ -10,6 +10,8 @@ const DbService = require("../..").Service;
 const fakerator = new Fakerator();
 
 module.exports = (getAdapter, adapterType) => {
+	const expectedID = expect.any(String);
+
 	describe("Test a common flow", () => {
 		const entityChanged = jest.fn();
 
@@ -19,12 +21,21 @@ module.exports = (getAdapter, adapterType) => {
 			mixins: [DbService({ adapter: getAdapter({ collection: "posts" }) })],
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						get: adapterType == "Knex" ? v => String(v) : undefined
+					},
 					title: { type: "string", trim: true, required: true },
 					content: { type: "string" },
 					author: { type: "string" },
 					votes: { type: "number", default: 0 },
-					status: { type: "boolean", default: true },
+					status: {
+						type: "boolean",
+						default: true,
+						get: adapterType == "Knex" ? v => !!v : undefined
+					},
 					createdAt: { type: "number", onCreate: Date.now },
 					updatedAt: { type: "number", onUpdate: Date.now }
 				}
@@ -41,6 +52,21 @@ module.exports = (getAdapter, adapterType) => {
 			},
 
 			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.client.schema.createTable("posts", function (table) {
+						table.increments("_id");
+						table.string("title").index();
+						table.string("content").index();
+						table.string("author").index();
+						table.integer("votes");
+						table.boolean("status");
+						table.timestamp("createdAt");
+						table.timestamp("updatedAt");
+					});
+				}
+
 				await this.clearEntities();
 			}
 		});
@@ -79,13 +105,14 @@ module.exports = (getAdapter, adapterType) => {
 				docs.push(doc);
 
 				expect(doc).toEqual({
-					id: expect.any(String),
+					id: expectedID,
 					title: "First post",
 					content: "Content of first post",
 					author: "John Doe",
 					votes: 0,
 					status: true,
-					createdAt: expect.any(Number)
+					createdAt: expect.any(Number),
+					...(adapterType == "Knex" ? { updatedAt: null } : {})
 				});
 
 				expect(entityChanged).toBeCalledTimes(1);
@@ -143,56 +170,61 @@ module.exports = (getAdapter, adapterType) => {
 			});
 		});
 
-		describe("Update with modifiers", () => {
-			it("should update entity", async () => {
-				entityChanged.mockClear();
+		if (adapterType == "MongoDB" || adapterType == "NeDB") {
+			describe("Update with modifiers", () => {
+				it("should update entity", async () => {
+					entityChanged.mockClear();
 
-				const doc = await broker.call("posts.updateRaw", {
-					id: docs[0].id,
-					$raw: true,
-					$set: {
+					const doc = await broker.call("posts.updateRaw", {
+						id: docs[0].id,
+						$raw: true,
+						$set: {
+							title: "Updated title",
+							content: "Updated content of first title"
+						},
+						$inc: {
+							votes: 1
+						}
+					});
+					docs[0] = doc;
+
+					expect(doc).toEqual({
+						id: expectedID,
 						title: "Updated title",
-						content: "Updated content of first title"
-					},
-					$inc: {
-						votes: 1
-					}
-				});
-				docs[0] = doc;
+						content: "Updated content of first title",
+						author: "John Doe",
+						votes: 1,
+						status: true,
+						createdAt: expect.any(Number)
+						// updatedAt: expect.any(Number)
+					});
 
-				expect(doc).toEqual({
-					id: expect.any(String),
-					title: "Updated title",
-					content: "Updated content of first title",
-					author: "John Doe",
-					votes: 1,
-					status: true,
-					createdAt: expect.any(Number)
-					// updatedAt: expect.any(Number)
+					expect(entityChanged).toBeCalledTimes(1);
+					expect(entityChanged).toBeCalledWith("update", doc, expect.any(Context));
 				});
 
-				expect(entityChanged).toBeCalledTimes(1);
-				expect(entityChanged).toBeCalledWith("update", doc, expect.any(Context));
-			});
+				it("should get the newly created entity", async () => {
+					const doc = await broker.call("posts.get", { id: docs[0].id });
+					expect(doc).toEqual(docs[0]);
+				});
 
-			it("should get the newly created entity", async () => {
-				const doc = await broker.call("posts.get", { id: docs[0].id });
-				expect(doc).toEqual(docs[0]);
-			});
+				it("should resolve the newly created entity", async () => {
+					const doc = await broker.call("posts.resolve", {
+						id: docs[0].id,
+						mapping: true
+					});
+					expect(doc).toEqual({
+						[docs[0].id]: docs[0]
+					});
+				});
 
-			it("should resolve the newly created entity", async () => {
-				const doc = await broker.call("posts.resolve", { id: docs[0].id, mapping: true });
-				expect(doc).toEqual({
-					[docs[0].id]: docs[0]
+				it("should find the newly created entity", async () => {
+					const res = await broker.call("posts.find");
+
+					expect(res).toEqual(docs);
 				});
 			});
-
-			it("should find the newly created entity", async () => {
-				const res = await broker.call("posts.find");
-
-				expect(res).toEqual(docs);
-			});
-		});
+		}
 
 		describe("Update & remove entity", () => {
 			it("should update entity", async () => {
@@ -208,7 +240,7 @@ module.exports = (getAdapter, adapterType) => {
 				docs[0] = doc;
 
 				expect(doc).toEqual({
-					id: expect.any(String),
+					id: expectedID,
 					title: "Modified title",
 					content: "Modified content of first title",
 					author: "John Doe",
@@ -312,7 +344,11 @@ module.exports = (getAdapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "products",
-			mixins: [DbService({ adapter: getAdapter({ collection: "products" }) })],
+			mixins: [
+				DbService({
+					adapter: getAdapter({ collection: "products", tableName: "products" })
+				})
+			],
 			settings: {
 				fields: {
 					key: { type: "string", secure: true, primaryKey: true, columnName: "_id" },
@@ -331,6 +367,15 @@ module.exports = (getAdapter, adapterType) => {
 			},
 
 			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.client.schema.createTable("products", function (table) {
+						table.increments("_id");
+						table.string("name").index();
+					});
+				}
+
 				await svc.clearEntities();
 			}
 		});
@@ -478,7 +523,9 @@ module.exports = (getAdapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		broker.createService({
 			name: "users",
-			mixins: [DbService({ adapter: getAdapter({ collection: "users" }) })],
+			mixins: [
+				DbService({ adapter: getAdapter({ collection: "users", tableName: "users" }) })
+			],
 			settings: {
 				fields: {
 					id: { type: "string", primaryKey: true, columnName: "_id" },
@@ -494,13 +541,34 @@ module.exports = (getAdapter, adapterType) => {
 					password: { type: "string", hidden: true },
 					dob: { type: "string", trim: true, required: true },
 					age: { type: "number", required: true },
-					status: { type: "boolean", trim: true, default: true }
+					status: {
+						type: "boolean",
+						trim: true,
+						default: true,
+						get: adapterType == "Knex" ? v => !!v : undefined
+					}
 				}
 			},
 
 			methods: {},
 
 			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.client.schema.createTable("users", function (table) {
+						table.increments("_id");
+						table.string("firstName").index();
+						table.string("lastName").index();
+						table.string("userName").index();
+						table.string("email").index();
+						table.string("password").index();
+						table.string("dob").index();
+						table.integer("age");
+						table.boolean("status");
+					});
+				}
+
 				await this.clearEntities();
 				const users = fakerator.times(fakerator.entity.user, 20);
 				users.forEach(user => {
