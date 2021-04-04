@@ -398,14 +398,10 @@ module.exports = function (mixinOpts) {
 			let id = this._getIDFromParams(params);
 
 			// Call because it throws error if entity is not exist
-			const oldEntity = await this.resolveEntities(
-				ctx,
-				{ [this.$primaryField.name]: id },
-				{
-					transform: false,
-					throwIfNotExist: true
-				}
-			);
+			const oldEntity = await this.resolveEntities(ctx, params, {
+				transform: false,
+				throwIfNotExist: true
+			});
 
 			const rawUpdate = params.$raw === true;
 			if (rawUpdate) delete params.$raw;
@@ -445,14 +441,10 @@ module.exports = function (mixinOpts) {
 			let id = this._getIDFromParams(params);
 
 			// Call because it throws error if entity is not exist
-			const oldEntity = await this.resolveEntities(
-				ctx,
-				{ [this.$primaryField.name]: id },
-				{
-					transform: false,
-					throwIfNotExist: true
-				}
-			);
+			const oldEntity = await this.resolveEntities(ctx, params, {
+				transform: false,
+				throwIfNotExist: true
+			});
 			const adapter = await this.getAdapter(ctx);
 
 			params = await this.validateParams(ctx, params, {

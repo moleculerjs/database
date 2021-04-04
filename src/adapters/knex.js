@@ -346,9 +346,9 @@ class KnexAdapter extends BaseAdapter {
 						q = q.where(key, "=", value.$eq);
 					} else if (value.$ne) {
 						q = q.where(key, "=", value.$ne);
-					} else if (value.$exist === true) {
+					} else if (value.$exists === true) {
 						q = q.whereNotNull(key);
-					} else if (value.$exist === false) {
+					} else if (value.$exists === false) {
 						q = q.whereNull(key);
 					} else if (value.$raw) {
 						if (typeof value.$raw == "string") {

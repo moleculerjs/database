@@ -12,7 +12,7 @@ const { Stream, Readable } = require("stream");
 
 module.exports = (getAdapter, adapterType) => {
 	describe("Test REST API with populates", () => {
-		const env = createEnvironment(getAdapter);
+		const env = createEnvironment(getAdapter, adapterType);
 		const docs = [];
 
 		beforeAll(() => env.start());
@@ -74,7 +74,8 @@ module.exports = (getAdapter, adapterType) => {
 					},
 					votes: 0,
 					status: true,
-					createdAt: expect.any(Number)
+					createdAt: expect.any(Number),
+					...(adapterType == "Knex" ? { updatedAt: null } : {})
 				});
 
 				docs.push(
@@ -107,7 +108,8 @@ module.exports = (getAdapter, adapterType) => {
 					author: env.authors.bobSmith.id,
 					votes: 3,
 					status: true,
-					createdAt: expect.any(Number)
+					createdAt: expect.any(Number),
+					...(adapterType == "Knex" ? { updatedAt: null } : {})
 				});
 			});
 
@@ -239,7 +241,7 @@ module.exports = (getAdapter, adapterType) => {
 				});
 			});
 
-			it("should soft remove a author (DELETE)", async () => {
+			it("should soft remove an author (DELETE)", async () => {
 				const data = (
 					await axios.delete(`${env.baseURL}/authors/${env.authors.kevinJames.id}`)
 				).data;
@@ -296,7 +298,7 @@ module.exports = (getAdapter, adapterType) => {
 
 	/*if (["MongoDB"].indexOf(adapterType) !== -1) {
 		describe("Test REST API with streams", () => {
-			const env = createEnvironment(getAdapter);
+			const env = createEnvironment(getAdapter, adapterType);
 			let docs = [];
 
 			beforeAll(() => env.start());
@@ -345,7 +347,7 @@ module.exports = (getAdapter, adapterType) => {
 	}*/
 
 	describe("Test REST API with secure ID and 'key' ID field", () => {
-		const env = createEnvironment(getAdapter, {
+		const env = createEnvironment(getAdapter, adapterType, {
 			fields: {
 				key: { type: "string", primaryKey: true, secure: true, columnName: "_id" },
 				title: { type: "string", trim: true, required: true },
@@ -467,7 +469,7 @@ module.exports = (getAdapter, adapterType) => {
 	});
 };
 
-function createEnvironment(getAdapter, opts = {}) {
+function createEnvironment(getAdapter, adapterType, opts = {}) {
 	const env = {
 		brokers: [],
 		port: null,
@@ -515,12 +517,17 @@ function createEnvironment(getAdapter, opts = {}) {
 
 	postBroker.createService({
 		name: "posts",
-		mixins: [DbService({ adapter: getAdapter({ collection: "posts" }) })],
+		mixins: [DbService({ adapter: getAdapter({ collection: "posts", tableName: "posts" }) })],
 		settings: {
 			fields: opts.fields
 				? opts.fields
 				: {
-						id: { type: "string", primaryKey: true, columnName: "_id" },
+						id: {
+							type: "string",
+							primaryKey: true,
+							columnName: "_id",
+							get: adapterType == "Knex" ? v => String(v) : undefined
+						},
 						title: { type: "string", trim: true, required: true },
 						content: { type: "string" },
 						author: {
@@ -532,7 +539,11 @@ function createEnvironment(getAdapter, opts = {}) {
 							}
 						},
 						votes: { type: "number", default: 0 },
-						status: { type: "boolean", default: true },
+						status: {
+							type: "boolean",
+							default: true,
+							get: adapterType == "Knex" ? v => !!v : undefined
+						},
 						createdAt: { type: "number", onCreate: Date.now },
 						updatedAt: { type: "number", onUpdate: Date.now }
 				  },
@@ -554,6 +565,21 @@ function createEnvironment(getAdapter, opts = {}) {
 		},
 
 		async started() {
+			const adapter = await this.getAdapter();
+
+			if (adapterType == "Knex") {
+				await adapter.client.schema.createTable("posts", function (table) {
+					table.increments("_id");
+					table.string("title").index();
+					table.string("content").index();
+					table.string("author");
+					table.integer("votes");
+					table.boolean("status");
+					table.timestamp("createdAt");
+					table.timestamp("updatedAt");
+				});
+			}
+
 			await this.clearEntities();
 		}
 	});
@@ -568,13 +594,24 @@ function createEnvironment(getAdapter, opts = {}) {
 
 	authorBroker.createService({
 		name: "authors",
-		mixins: [DbService({ adapter: getAdapter({ collection: "authors" }) })],
+		mixins: [
+			DbService({ adapter: getAdapter({ collection: "authors", tableName: "authors" }) })
+		],
 		settings: {
 			fields: {
-				id: { type: "string", primaryKey: true, columnName: "_id" },
+				id: {
+					type: "string",
+					primaryKey: true,
+					columnName: "_id",
+					get: adapterType == "Knex" ? v => String(v) : undefined
+				},
 				name: { type: "string", trim: true, required: true },
 				age: { type: "number" },
-				status: { type: "boolean", default: true },
+				status: {
+					type: "boolean",
+					default: true,
+					get: adapterType == "Knex" ? v => !!v : undefined
+				},
 				postCount: {
 					type: "number",
 					readonly: true,
@@ -599,6 +636,21 @@ function createEnvironment(getAdapter, opts = {}) {
 		methods: {},
 
 		async started() {
+			const adapter = await this.getAdapter();
+
+			if (adapterType == "Knex") {
+				await adapter.client.schema.createTable("authors", function (table) {
+					table.increments("_id");
+					table.string("name").index();
+					table.integer("age");
+					table.boolean("status");
+					table.integer("postCount");
+					table.bigInteger("createdAt");
+					table.bigInteger("updatedAt");
+					table.bigInteger("deletedAt");
+				});
+			}
+
 			await this.clearEntities();
 
 			env.authors.johnDoe = await this.createEntity(null, {

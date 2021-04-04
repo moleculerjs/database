@@ -359,7 +359,9 @@ module.exports = function (opts) {
 		res.remove = {
 			visibility: opts.actionVisibility,
 			rest: opts.rest ? "DELETE /:id" : null,
-			// params: {}, generate from `fields` in the `merged`
+			params: {
+				// The "id" field get from `fields`
+			},
 			async handler(ctx) {
 				return this.removeEntity(ctx);
 			}

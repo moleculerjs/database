@@ -252,7 +252,7 @@ module.exports = function DatabaseMixin(mixinOpts) {
 				}
 
 				if (primaryKeyField) {
-					// Set `id` field name & type in `get` and `resolve` actions
+					// Set `id` field name & type in `get`, `resolve` and `remove` actions
 					if (schema.actions.get && schema.actions.get.params) {
 						schema.actions.get.params[primaryKeyField.name] = {
 							type: primaryKeyField.type,
@@ -264,6 +264,12 @@ module.exports = function DatabaseMixin(mixinOpts) {
 							{ type: "array", items: { type: primaryKeyField.type, convert: true } },
 							{ type: primaryKeyField.type, convert: true }
 						];
+					}
+					if (schema.actions.remove && schema.actions.remove.params) {
+						schema.actions.remove.params[primaryKeyField.name] = {
+							type: primaryKeyField.type,
+							convert: true
+						};
 					}
 
 					// Fix the ":id" variable name in the actions

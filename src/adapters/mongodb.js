@@ -19,7 +19,7 @@ class MongoDBAdapter extends BaseAdapter {
 	 *
 	 * @param  {Object?} opts
 	 * @param  {String} opts.dbName
-	 * @param  {String} opts.collection
+	 * @param  {String?} opts.collection
 	 * @param  {Object?} opts.mongoClientOptions More Info: https://docs.mongodb.com/drivers/node/current/fundamentals/connection/#connection-options
 	 * @param  {Object?} opts.dbOptions More Info: http://mongodb.github.io/node-mongodb-native/3.6/api/MongoClient.html#db
 	 */
@@ -51,7 +51,7 @@ class MongoDBAdapter extends BaseAdapter {
 			throw new ServiceSchemaError("Missing `dbName` in adapter options!");
 		}
 		if (!this.opts.collection) {
-			throw new ServiceSchemaError("Missing `collection` in adapter options!");
+			this.opts.collection = service.name;
 		}
 
 		try {

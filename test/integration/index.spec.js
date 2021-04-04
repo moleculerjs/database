@@ -26,11 +26,12 @@ if (process.env.GITHUB_ACTIONS_CI) {
 } else {
 	// Local development tests
 	Adapters = [
-		{ type: "NeDB" },
-		{ type: "MongoDB", options: { dbName: "db-int-test", collection: "users" } },
+		/*{ type: "NeDB" }
+		{ type: "MongoDB", options: { dbName: "db-int-test", collection: "users" } },*/
 		{
 			type: "Knex",
 			options: {
+				tableName: "users",
 				knex: {
 					client: "sqlite3",
 					connection: {
@@ -58,8 +59,8 @@ describe("Integration tests", () => {
 			//describe("Test transformations", () => TransformTests(getAdapter, adapter.type));
 			//describe("Test populating", () => PopulateTests(getAdapter, adapter.type));
 			//describe("Test Validations", () => ValidationTests(getAdapter, adapter.type));
-			describe("Test REST", () => RESTTests(getAdapter, adapter.type));
-			// describe("Test Tenants", () => TenantTests(getAdapter, adapter.type));
+			//describe("Test REST", () => RESTTests(getAdapter, adapter.type));
+			describe("Test Tenants", () => TenantTests(getAdapter, adapter.type));
 		});
 	}
 });
