@@ -17,16 +17,22 @@ module.exports = (getAdapter, adapterType) => {
 			name: "users",
 			mixins: [
 				DbService({
-					adapter: getAdapter({ collection: "users" })
+					adapter: getAdapter()
 				})
 			],
 			settings: {
 				fields: {
-					myID: { type: "string", primaryKey: true, columnName: "_id" },
+					myID: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: "integer"
+					},
 					name: { type: "string" },
 					upperName: {
 						type: "string",
 						readonly: true,
+						virtual: true,
 						get: (v, entity) => (entity.name ? entity.name.toUpperCase() : entity.name)
 					},
 					password: { type: "string", hidden: true },
@@ -40,14 +46,7 @@ module.exports = (getAdapter, adapterType) => {
 				const adapter = await this.getAdapter();
 
 				if (adapterType == "Knex") {
-					await adapter.client.schema.createTable("users", function (table) {
-						table.increments("_id");
-						table.string("name").index();
-						table.string("password").index();
-						table.string("token").index();
-						table.string("email").index();
-						table.string("phone").index();
-					});
+					await adapter.createTable();
 				}
 
 				await this.clearEntities();

@@ -291,7 +291,9 @@ module.exports = function (mixinOpts) {
 			id = id.map(id => this._sanitizeID(id, opts));
 
 			// Apply scopes & set ID filtering
-			params = this._applyScopes(Object.assign({ query: {} }, params), ctx);
+			params = Object.assign({}, params);
+			if (!params.query) params.query = {};
+			params = this._applyScopes(params, ctx);
 
 			let idField = this.$primaryField.columnName;
 

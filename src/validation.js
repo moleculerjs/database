@@ -360,7 +360,7 @@ module.exports = function (mixinOpts) {
 					}
 
 					// Readonly
-					if (field.readonly) return;
+					if (field.readonly || field.virtual) return;
 
 					if (["create", "replace"].includes(type)) {
 						// Default value

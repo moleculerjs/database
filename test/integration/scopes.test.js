@@ -45,17 +45,22 @@ module.exports = (getAdapter, adapterType) => {
 			name: "users",
 			mixins: [
 				DbService({
-					adapter: getAdapter({ collection: "users" }),
+					adapter: getAdapter(),
 					createActions: false
 				})
 			],
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: "integer"
+					},
 					name: { type: "string", trim: true, required: true },
-					age: { type: "number" },
-					dob: { type: "number" },
-					roles: { type: "array", items: "string" },
+					age: { type: "number", columnType: "integer" },
+					dob: { type: "number", columnType: "integer" },
+					roles: { type: "array", items: "string", columnType: "string" },
 					status: {
 						type: "boolean",
 						default: true,
@@ -84,14 +89,7 @@ module.exports = (getAdapter, adapterType) => {
 				const adapter = await this.getAdapter();
 
 				if (adapterType == "Knex") {
-					await adapter.client.schema.createTable("users", function (table) {
-						table.increments("_id");
-						table.string("name").index();
-						table.integer("age");
-						table.date("dob");
-						table.boolean("status");
-						table.string("roles").index();
-					});
+					await adapter.createTable();
 				}
 
 				await this.clearEntities();

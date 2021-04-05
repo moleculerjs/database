@@ -8,26 +8,30 @@ module.exports = (getAdapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		const postSvc = broker.createService({
 			name: "posts",
-			mixins: [
-				DbService({ adapter: getAdapter({ collection: "posts", tableName: "posts" }) })
-			],
+			mixins: [DbService({ adapter: getAdapter() })],
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: "integer"
+					},
 					title: { type: "string", required: true, min: 5 },
 					content: { type: "string", required: true },
 					authorID: { type: "string", required: true },
 					author: {
 						type: "object",
 						readonly: true,
+						virtual: true,
 						populate: {
 							action: "users.resolve",
 							keyField: "authorID",
 							fields: ["name", "postCount", "email"]
 						}
 					},
-					createdAt: { type: "number", onCreate: Date.now },
-					updatedAt: { type: "number", onUpdate: Date.now }
+					createdAt: { type: "number", onCreate: Date.now, columnType: "integer" },
+					updatedAt: { type: "number", onUpdate: Date.now, columnType: "integer" }
 				},
 				defaultPopulates: ["author"]
 			},
@@ -36,14 +40,7 @@ module.exports = (getAdapter, adapterType) => {
 				const adapter = await this.getAdapter();
 
 				if (adapterType == "Knex") {
-					await adapter.client.schema.createTable("posts", function (table) {
-						table.increments("_id");
-						table.string("title").index();
-						table.string("content").index();
-						table.string("authorID");
-						table.timestamp("createdAt");
-						table.timestamp("updatedAt");
-					});
+					await adapter.createTable();
 				}
 			}
 		});

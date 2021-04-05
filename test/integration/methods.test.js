@@ -53,9 +53,7 @@ module.exports = (getAdapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
-			mixins: [
-				DbService({ adapter: getAdapter({ collection: "users" }), createActions: false })
-			],
+			mixins: [DbService({ adapter: getAdapter(), createActions: false })],
 
 			settings: {
 				fields: {
@@ -347,9 +345,7 @@ module.exports = (getAdapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
-			mixins: [
-				DbService({ adapter: getAdapter({ collection: "users" }), createActions: false })
-			],
+			mixins: [DbService({ adapter: getAdapter(), createActions: false })],
 
 			settings: {
 				fields: {
@@ -514,9 +510,7 @@ module.exports = (getAdapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
-			mixins: [
-				DbService({ adapter: getAdapter({ collection: "users" }), createActions: false })
-			],
+			mixins: [DbService({ adapter: getAdapter(), createActions: false })],
 
 			settings: {
 				fields: {
@@ -702,9 +696,7 @@ module.exports = (getAdapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
-			mixins: [
-				DbService({ adapter: getAdapter({ collection: "users" }), createActions: false })
-			],
+			mixins: [DbService({ adapter: getAdapter(), createActions: false })],
 
 			settings: {
 				fields: {
@@ -817,9 +809,7 @@ module.exports = (getAdapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
-			mixins: [
-				DbService({ adapter: getAdapter({ collection: "users" }), createActions: false })
-			],
+			mixins: [DbService({ adapter: getAdapter(), createActions: false })],
 			settings: {
 				fields: {
 					id: {

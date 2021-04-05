@@ -177,7 +177,7 @@ class KnexAdapter extends BaseAdapter {
 			.into(this.opts.tableName);
 
 		if (res && res.length > 0) {
-			return await this.findById(res[0]);
+			return await this.findById(entity[this.idFieldName] || res[0]);
 		}
 		return res;
 	}

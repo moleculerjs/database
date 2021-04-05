@@ -2,9 +2,9 @@
 
 const { ServiceBroker, Context } = require("moleculer");
 const { ValidationError } = require("moleculer").Errors;
-const { EntityNotFoundError } = require("../../src/errors");
 const DbService = require("../..").Service;
 
+// TODO: adapter -> getAdapter
 module.exports = adapter => {
 	describe("Test field processing without fields", () => {
 		const broker = new ServiceBroker({ logger: false });
@@ -1106,6 +1106,7 @@ module.exports = adapter => {
 					{ firstName: "John", lastName: "Doe", name: "John Doe" },
 					{
 						columnName: "name",
+						columnType: "string",
 						name: "name",
 						required: false,
 						set: expect.any(Function),
@@ -1120,6 +1121,7 @@ module.exports = adapter => {
 					{ _id: entity.id, firstName: "John", lastName: "Doe" },
 					{
 						columnName: "fullName",
+						columnType: "string",
 						get: expect.any(Function),
 						name: "fullName",
 						required: false,
@@ -1990,7 +1992,13 @@ module.exports = adapter => {
 			expect(svc.schema.actions.remove).toEqual({
 				handler: expect.any(Function),
 				rest: "DELETE /:key",
-				visibility: "published"
+				visibility: "published",
+				params: {
+					key: {
+						type: "string",
+						convert: true
+					}
+				}
 			});
 		});
 

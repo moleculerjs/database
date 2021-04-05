@@ -517,7 +517,7 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 
 	postBroker.createService({
 		name: "posts",
-		mixins: [DbService({ adapter: getAdapter({ collection: "posts", tableName: "posts" }) })],
+		mixins: [DbService({ adapter: getAdapter() })],
 		settings: {
 			fields: opts.fields
 				? opts.fields
@@ -526,6 +526,7 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 							type: "string",
 							primaryKey: true,
 							columnName: "_id",
+							columnType: "integer",
 							get: adapterType == "Knex" ? v => String(v) : undefined
 						},
 						title: { type: "string", trim: true, required: true },
@@ -538,14 +539,14 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 								scope: "onlyActive"
 							}
 						},
-						votes: { type: "number", default: 0 },
+						votes: { type: "number", default: 0, columnType: "integer" },
 						status: {
 							type: "boolean",
 							default: true,
 							get: adapterType == "Knex" ? v => !!v : undefined
 						},
-						createdAt: { type: "number", onCreate: Date.now },
-						updatedAt: { type: "number", onUpdate: Date.now }
+						createdAt: { type: "number", onCreate: Date.now, columnType: "bigInteger" },
+						updatedAt: { type: "number", onUpdate: Date.now, columnType: "bigInteger" }
 				  },
 
 			defaultPopulates: ["author"]
@@ -568,16 +569,7 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 			const adapter = await this.getAdapter();
 
 			if (adapterType == "Knex") {
-				await adapter.client.schema.createTable("posts", function (table) {
-					table.increments("_id");
-					table.string("title").index();
-					table.string("content").index();
-					table.string("author");
-					table.integer("votes");
-					table.boolean("status");
-					table.timestamp("createdAt");
-					table.timestamp("updatedAt");
-				});
+				await adapter.createTable();
 			}
 
 			await this.clearEntities();
@@ -594,19 +586,18 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 
 	authorBroker.createService({
 		name: "authors",
-		mixins: [
-			DbService({ adapter: getAdapter({ collection: "authors", tableName: "authors" }) })
-		],
+		mixins: [DbService({ adapter: getAdapter() })],
 		settings: {
 			fields: {
 				id: {
 					type: "string",
 					primaryKey: true,
 					columnName: "_id",
+					columnType: "integer",
 					get: adapterType == "Knex" ? v => String(v) : undefined
 				},
 				name: { type: "string", trim: true, required: true },
-				age: { type: "number" },
+				age: { type: "number", columnType: "integer" },
 				status: {
 					type: "boolean",
 					default: true,
@@ -615,15 +606,16 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 				postCount: {
 					type: "number",
 					readonly: true,
+					virtual: true,
 					populate(ctx, values, docs) {
 						return Promise.all(
 							docs.map(doc => ctx.call("posts.count", { query: { author: doc._id } }))
 						);
 					}
 				},
-				createdAt: { type: "number", onCreate: Date.now },
-				updatedAt: { type: "number", onUpdate: Date.now },
-				deletedAt: { type: "number", onRemove: Date.now }
+				createdAt: { type: "number", onCreate: Date.now, columnType: "bigInteger" },
+				updatedAt: { type: "number", onUpdate: Date.now, columnType: "bigInteger" },
+				deletedAt: { type: "number", onRemove: Date.now, columnType: "bigInteger" }
 			},
 
 			scopes: {
@@ -639,16 +631,7 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 			const adapter = await this.getAdapter();
 
 			if (adapterType == "Knex") {
-				await adapter.client.schema.createTable("authors", function (table) {
-					table.increments("_id");
-					table.string("name").index();
-					table.integer("age");
-					table.boolean("status");
-					table.integer("postCount");
-					table.bigInteger("createdAt");
-					table.bigInteger("updatedAt");
-					table.bigInteger("deletedAt");
-				});
+				await adapter.createTable();
 			}
 
 			await this.clearEntities();

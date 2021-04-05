@@ -336,12 +336,18 @@ module.exports = (getAdapter, adapterType) => {
 			name: "products",
 			mixins: [
 				DbService({
-					adapter: getAdapter({ collection: "products", tableName: "products" })
+					adapter: getAdapter()
 				})
 			],
 			settings: {
 				fields: {
-					key: { type: "string", secure: true, primaryKey: true, columnName: "_id" },
+					key: {
+						type: "string",
+						secure: true,
+						primaryKey: true,
+						columnName: "_id",
+						columnType: "integer"
+					},
 					name: { type: "string", trim: true, required: true }
 				}
 			},
@@ -360,10 +366,7 @@ module.exports = (getAdapter, adapterType) => {
 				const adapter = await this.getAdapter();
 
 				if (adapterType == "Knex") {
-					await adapter.client.schema.createTable("products", function (table) {
-						table.increments("_id");
-						table.string("name").index();
-					});
+					await adapter.createTable();
 				}
 
 				await svc.clearEntities();
@@ -513,24 +516,27 @@ module.exports = (getAdapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		broker.createService({
 			name: "users",
-			mixins: [
-				DbService({ adapter: getAdapter({ collection: "users", tableName: "users" }) })
-			],
+			mixins: [DbService({ adapter: getAdapter() })],
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: "integer"
+					},
 					firstName: { type: "string", trim: true, required: true },
 					lastName: { type: "string", trim: true, required: true },
 					fullName: {
 						type: "string",
-						readonly: true,
+						virtual: true,
 						get: (v, entity) => entity.firstName + " " + entity.lastName
 					},
 					userName: { type: "string", trim: true, required: true },
 					email: { type: "string", trim: true, required: true },
 					password: { type: "string", hidden: true },
 					dob: { type: "string", trim: true, required: true },
-					age: { type: "number", required: true },
+					age: { type: "number", required: true, columnType: "integer" },
 					status: {
 						type: "boolean",
 						trim: true,
@@ -546,17 +552,7 @@ module.exports = (getAdapter, adapterType) => {
 				const adapter = await this.getAdapter();
 
 				if (adapterType == "Knex") {
-					await adapter.client.schema.createTable("users", function (table) {
-						table.increments("_id");
-						table.string("firstName").index();
-						table.string("lastName").index();
-						table.string("userName").index();
-						table.string("email").index();
-						table.string("password").index();
-						table.string("dob").index();
-						table.integer("age");
-						table.boolean("status");
-					});
+					await adapter.createTable();
 				}
 
 				await this.clearEntities();
@@ -642,6 +638,88 @@ module.exports = (getAdapter, adapterType) => {
 		});
 	});
 
+	describe("Test user-defined ID", () => {
+		const broker = new ServiceBroker({ logger: false });
+		broker.createService({
+			name: "posts",
+			mixins: [DbService({ adapter: getAdapter() })],
+			settings: {
+				fields: {
+					id: {
+						type: "string",
+						primaryKey: true,
+						generated: "user",
+						columnName: "_id"
+					},
+					title: { type: "string", trim: true, required: true },
+					content: { type: "string", trim: true }
+				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
+			}
+		});
+
+		beforeAll(() => broker.start());
+		afterAll(() => broker.stop());
+
+		it("should create entity with custom ID", async () => {
+			const row = await broker.call("posts.create", {
+				id: "ID-001",
+				title: "First post",
+				content: "First content"
+			});
+			expect(row).toEqual({
+				id: "ID-001",
+				title: "First post",
+				content: "First content"
+			});
+		});
+
+		it("should get entity with custom ID", async () => {
+			expect(await broker.call("posts.get", { id: "ID-001" })).toEqual({
+				id: "ID-001",
+				title: "First post",
+				content: "First content"
+			});
+
+			expect(await broker.call("posts.resolve", { id: "ID-001" })).toEqual({
+				id: "ID-001",
+				title: "First post",
+				content: "First content"
+			});
+
+			expect(await broker.call("posts.find")).toEqual([
+				{
+					id: "ID-001",
+					title: "First post",
+					content: "First content"
+				}
+			]);
+
+			expect(await broker.call("posts.list")).toEqual({
+				rows: [
+					{
+						id: "ID-001",
+						title: "First post",
+						content: "First content"
+					}
+				],
+				total: 1,
+				totalPages: 1,
+				page: 1,
+				pageSize: 10
+			});
+		});
+	});
+
 	if (["MongoDB"].indexOf(adapterType) !== -1) {
 		describe("Test streaming", () => {
 			let docs = [];
@@ -649,7 +727,7 @@ module.exports = (getAdapter, adapterType) => {
 			const broker = new ServiceBroker({ logger: false });
 			broker.createService({
 				name: "users",
-				mixins: [DbService({ adapter: getAdapter({ collection: "users" }) })],
+				mixins: [DbService({ adapter: getAdapter() })],
 				settings: {
 					fields: {
 						id: { type: "string", primaryKey: true, columnName: "_id" },

@@ -13,14 +13,14 @@ module.exports = (getAdapter, adapterType) => {
 
 	const baseServiceSchema = {
 		name: "posts",
-		mixins: [DbService({ adapter: getAdapter({ collection: "posts", tableName: "posts" }) })],
+		mixins: [DbService({ adapter: getAdapter() })],
 		settings: {
 			fields: {
 				id: {
 					type: "string",
 					primaryKey: true,
-					columnName: "_id",
-					get: adapterType == "Knex" ? v => String(v) : undefined
+					generated: "user",
+					columnName: "_id"
 				},
 				title: { type: "string", required: true, min: 5 },
 				content: { type: "string", required: true }
@@ -61,6 +61,7 @@ module.exports = (getAdapter, adapterType) => {
 				posts.post1 = await broker.call(
 					"posts.create",
 					{
+						id: "post-1",
 						title: "Post #1",
 						content: "Content of post #1"
 					},
@@ -69,6 +70,7 @@ module.exports = (getAdapter, adapterType) => {
 				posts.post2 = await broker.call(
 					"posts.create",
 					{
+						id: "post-2",
 						title: "Post #2",
 						content: "Content of post #2"
 					},
@@ -77,6 +79,7 @@ module.exports = (getAdapter, adapterType) => {
 				posts.post3 = await broker.call(
 					"posts.create",
 					{
+						id: "post-3",
 						title: "Post #3",
 						content: "Content of post #3"
 					},
@@ -85,6 +88,7 @@ module.exports = (getAdapter, adapterType) => {
 				posts.post4 = await broker.call(
 					"posts.create",
 					{
+						id: "post-4",
 						title: "Post #4",
 						content: "Content of post #4"
 					},
@@ -93,6 +97,7 @@ module.exports = (getAdapter, adapterType) => {
 				posts.post5 = await broker.call(
 					"posts.create",
 					{
+						id: "post-5",
 						title: "Post #5",
 						content: "Content of post #5"
 					},
@@ -101,6 +106,7 @@ module.exports = (getAdapter, adapterType) => {
 				posts.post6 = await broker.call(
 					"posts.create",
 					{
+						id: "post-6",
 						title: "Post #6",
 						content: "Content of post #6"
 					},
@@ -113,6 +119,7 @@ module.exports = (getAdapter, adapterType) => {
 					expect.assertions(4);
 					try {
 						await broker.call("posts.create", {
+							id: "post-7",
 							title: "Post #7",
 							content: "Content of post #7"
 						});
@@ -135,6 +142,7 @@ module.exports = (getAdapter, adapterType) => {
 					expect.assertions(1);
 					try {
 						await broker.call("posts.create", {
+							id: "post-7",
 							title: "Post #7",
 							content: "Content of post #7"
 						});
@@ -666,7 +674,7 @@ module.exports = (getAdapter, adapterType) => {
 
 		// TODO: test clearEntities by tenants
 	}
-	/*
+
 	describe("Test record-level tenancy", () => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService(baseServiceSchema, {
@@ -675,6 +683,7 @@ module.exports = (getAdapter, adapterType) => {
 					tenantId: {
 						type: "number",
 						required: true,
+						columnType: "integer",
 						set: (value, entity, field, ctx) => ctx.meta.tenantId
 					}
 				},
@@ -694,12 +703,7 @@ module.exports = (getAdapter, adapterType) => {
 				const adapter = await this.getAdapter(tenant0Meta);
 
 				if (adapterType == "Knex") {
-					await adapter.client.schema.createTable("posts", function (table) {
-						table.increments("_id");
-						table.string("title").index();
-						table.string("content").index();
-						table.integer("tenantId").index();
-					});
+					await adapter.createTable();
 				}
 			}
 		});
@@ -710,7 +714,7 @@ module.exports = (getAdapter, adapterType) => {
 		afterAll(() => broker.stop());
 
 		runTenantTestcases(broker, svc, "record");
-	});*/
+	});
 
 	describe("Test collection-level tenancy", () => {
 		const broker = new ServiceBroker({ logger: false });
@@ -738,25 +742,25 @@ module.exports = (getAdapter, adapterType) => {
 				if (adapterType == "Knex") {
 					adapter = await this.getAdapter(tenant0Meta);
 					await adapter.client.schema.createTable("posts-1000", table => {
-						table.increments("_id");
+						table.string("_id");
 						table.string("title").index();
 						table.string("content").index();
 					});
 					adapter = await this.getAdapter(tenant1Meta);
 					await adapter.client.schema.createTable("posts-1001", table => {
-						table.increments("_id");
+						table.string("_id");
 						table.string("title").index();
 						table.string("content").index();
 					});
 					adapter = await this.getAdapter(tenant2Meta);
 					await adapter.client.schema.createTable("posts-1002", table => {
-						table.increments("_id");
+						table.string("_id");
 						table.string("title").index();
 						table.string("content").index();
 					});
 					adapter = await this.getAdapter(tenant3Meta);
 					await adapter.client.schema.createTable("posts-1003", table => {
-						table.increments("_id");
+						table.string("_id");
 						table.string("title").index();
 						table.string("content").index();
 					});
@@ -769,7 +773,7 @@ module.exports = (getAdapter, adapterType) => {
 
 		runTenantTestcases(broker, svc, "collection");
 	});
-	/*
+
 	describe("Test database-level tenancy", () => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService(baseServiceSchema, {
@@ -784,11 +788,27 @@ module.exports = (getAdapter, adapterType) => {
 							type: adapterType,
 							options: {
 								...(adapterDef.options || {}),
-								dbName: `db-int-posts-${tenantId}`,
-								collection: `posts`
+								dbName: `db-int-posts-${tenantId}`
 							}
 						}
 					];
+				}
+			},
+
+			async started() {
+				let adapter;
+				if (adapterType == "Knex") {
+					adapter = await this.getAdapter(tenant0Meta);
+					await adapter.createTable();
+
+					adapter = await this.getAdapter(tenant1Meta);
+					await adapter.createTable();
+
+					adapter = await this.getAdapter(tenant2Meta);
+					await adapter.createTable();
+
+					adapter = await this.getAdapter(tenant3Meta);
+					await adapter.createTable();
 				}
 			}
 		});
@@ -797,5 +817,5 @@ module.exports = (getAdapter, adapterType) => {
 		afterAll(() => broker.stop());
 
 		runTenantTestcases(broker, svc, "database");
-	});*/
+	});
 };

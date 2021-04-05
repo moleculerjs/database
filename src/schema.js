@@ -89,11 +89,11 @@ function generateFieldValidatorSchema(field, opts) {
 	// Type
 	schema.type = field.type || "any";
 
-	// Readonly -> Forbidden
-	if (field.readonly == true) return null;
+	// Readonly or virtual field -> Forbidden
+	if (field.readonly || field.virtual) return null;
 
 	// Primary key forbidden on create
-	if (field.primaryKey && opts.type == "create") return null;
+	if (field.primaryKey && opts.type == "create" && field.generated != "user") return null;
 
 	// Required
 	// If there is `set` we can't set the required maybe the value will be set in the `set`
