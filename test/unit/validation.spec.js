@@ -45,11 +45,22 @@ describe("Test validation", () => {
 			mixins: [DbService()],
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: "number"
+					},
 					name: "string|min:3|max:100|no-required",
+					password: { type: "string", required: true, min: 8 },
 					age: true,
-					password: false,
-					createdAt: { type: "date", readonly: true, onCreate: () => new Date() },
+					token: false,
+					createdAt: {
+						type: "date",
+						readonly: true,
+						onCreate: () => new Date(),
+						columnType: "timestamp"
+					},
 					status: {
 						type: "string",
 						default: "A",
@@ -70,21 +81,38 @@ describe("Test validation", () => {
 					name: "id",
 					primaryKey: true,
 					type: "string",
+					columnType: "number",
 					required: false
 				},
 				{
 					columnName: "name",
+					columnType: "string",
 					name: "name",
 					type: "string",
 					required: false,
 					min: 3,
 					max: 100
 				},
-				{ columnName: "age", name: "age", type: "any", required: false },
+				{
+					columnName: "password",
+					columnType: "string",
+					min: 8,
+					name: "password",
+					required: true,
+					type: "string"
+				},
+				{
+					columnName: "age",
+					name: "age",
+					type: "any",
+					columnType: "any",
+					required: false
+				},
 				{
 					name: "createdAt",
 					type: "date",
 					columnName: "createdAt",
+					columnType: "timestamp",
 					onCreate: expect.any(Function),
 					readonly: true,
 					required: false
@@ -93,6 +121,7 @@ describe("Test validation", () => {
 					name: "status",
 					type: "string",
 					columnName: "status",
+					columnType: "string",
 					default: "A",
 					onRemove: "D",
 					required: false
@@ -101,6 +130,7 @@ describe("Test validation", () => {
 			expect(svc.$primaryField).toEqual({
 				name: "id",
 				columnName: "_id",
+				columnType: "number",
 				primaryKey: true,
 				type: "string",
 				required: false
@@ -111,9 +141,26 @@ describe("Test validation", () => {
 
 		describe("Test validateParams", () => {
 			it("should accept valid params", async () => {
-				const params = {};
+				const params = { password: "12345678" };
 				const res = await svc.validateParams(ctx, params);
 				expect(res).toBeDefined();
+			});
+
+			it("should throw error", async () => {
+				const params = {};
+				try {
+					await svc.validateParams(ctx, params);
+				} catch (err) {
+					expect(err.name).toBe("ValidationError");
+					expect(err.data).toEqual([
+						{
+							actual: undefined,
+							field: "password",
+							message: "The 'password' field is required.",
+							type: "required"
+						}
+					]);
+				}
 			});
 		});
 	});
@@ -139,13 +186,20 @@ describe("Test validation", () => {
 
 		it("check the process fields", async () => {
 			expect(svc.$fields).toEqual([
-				{ columnName: "name", name: "name", type: "string", required: false },
+				{
+					columnName: "name",
+					name: "name",
+					type: "string",
+					columnType: "string",
+					required: false
+				},
 				{
 					columnName: "password",
 					name: "password",
 					readPermission: "admin",
 					permission: "owner",
 					type: "string",
+					columnType: "string",
 					required: false
 				},
 				{
@@ -153,6 +207,7 @@ describe("Test validation", () => {
 					name: "email",
 					permission: "moderator",
 					type: "string",
+					columnType: "string",
 					required: false
 				},
 				{
@@ -160,6 +215,7 @@ describe("Test validation", () => {
 					name: "phone",
 					permission: ["admin", "moderator", "owner"],
 					type: "string",
+					columnType: "string",
 					required: false
 				}
 			]);
@@ -179,7 +235,13 @@ describe("Test validation", () => {
 				svc.checkAuthority = jest.fn(async () => false);
 				const res = await svc._authorizeFields(svc.$fields, ctx, { a: 5 });
 				expect(res).toEqual([
-					{ columnName: "name", name: "name", type: "string", required: false }
+					{
+						columnName: "name",
+						name: "name",
+						type: "string",
+						columnType: "string",
+						required: false
+					}
 				]);
 
 				expect(svc.checkAuthority).toBeCalledTimes(3);
@@ -202,7 +264,13 @@ describe("Test validation", () => {
 				svc.checkAuthority = jest.fn(async () => false);
 				const res = await svc._authorizeFields(svc.$fields, ctx, { a: 5 }, true);
 				expect(res).toEqual([
-					{ columnName: "name", name: "name", type: "string", required: false }
+					{
+						columnName: "name",
+						name: "name",
+						type: "string",
+						columnType: "string",
+						required: false
+					}
 				]);
 
 				expect(svc.checkAuthority).toBeCalledTimes(3);
@@ -1131,6 +1199,7 @@ describe("Test validation", () => {
 	});
 });
 
+// TODO: it's already not relevant
 function testTypeConversion(ctx, svc, type) {
 	describe("Test type checking", () => {
 		const date1 = new Date();

@@ -396,7 +396,7 @@ module.exports = function (mixinOpts) {
 					// Immutable (should check the previous value, if not set yet, we should enable)
 					if (["update", "replace"].includes(type) && field.immutable === true) {
 						const prevValue = _.get(oldEntity, field.columnName);
-						if (prevValue !== undefined) {
+						if (prevValue != null) {
 							if (type == "update") {
 								// Skip on update
 								return;

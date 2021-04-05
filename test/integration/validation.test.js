@@ -4,75 +4,83 @@ const { ServiceBroker, Context } = require("moleculer");
 const { ValidationError } = require("moleculer").Errors;
 const DbService = require("../..").Service;
 
-// TODO: adapter -> getAdapter
-module.exports = adapter => {
-	describe("Test field processing without fields", () => {
-		const broker = new ServiceBroker({ logger: false });
-		const svc = broker.createService({
-			name: "users",
-			mixins: [
-				DbService({
-					adapter,
-					createActions: true
-				})
-			],
-			settings: {}
-		});
+module.exports = (getAdapter, adapterType) => {
+	let expectedID;
+	if (getAdapter.IdColumnType == "integer") {
+		expectedID = expect.any(Number);
+	} else {
+		expectedID = expect.any(String);
+	}
 
-		beforeAll(async () => {
-			await broker.start();
-			await svc.clearEntities();
-		});
-		afterAll(() => broker.stop());
-
-		describe("Test create, update, replace", () => {
-			let entity = {
-				username: "John",
-				password: "john1234",
-				age: 42,
-				status: true
-			};
-			it("should save all fields", async () => {
-				const res = await broker.call("users.create", entity);
-				expect(res).toStrictEqual({
-					...entity,
-					_id: expect.any(String)
-				});
-				entity = res;
+	if (getAdapter.isNoSQL) {
+		describe("Test field processing without fields", () => {
+			const broker = new ServiceBroker({ logger: false });
+			const svc = broker.createService({
+				name: "users",
+				mixins: [
+					DbService({
+						adapter: getAdapter(),
+						createActions: true
+					})
+				],
+				settings: {}
 			});
 
-			it("should update fields", async () => {
-				const res = await broker.call("users.update", {
-					_id: entity._id,
-					username: 123,
-					password: true,
-					country: "USA"
-				});
-				expect(res).toStrictEqual({
-					_id: entity._id,
-					age: 42,
-					country: "USA",
-					password: true,
-					status: true,
-					username: 123
-				});
+			beforeAll(async () => {
+				await broker.start();
+				await svc.clearEntities();
 			});
+			afterAll(() => broker.stop());
 
-			it("should replace fields", async () => {
-				const res = await broker.call("users.replace", {
-					...entity,
-					_id: entity._id
-				});
-				expect(res).toStrictEqual({
-					_id: entity._id,
+			describe("Test create, update, replace", () => {
+				let entity = {
 					username: "John",
 					password: "john1234",
 					age: 42,
 					status: true
+				};
+				it("should save all fields", async () => {
+					const res = await broker.call("users.create", entity);
+					expect(res).toStrictEqual({
+						...entity,
+						_id: expectedID
+					});
+					entity = res;
+				});
+
+				it("should update fields", async () => {
+					const res = await broker.call("users.update", {
+						_id: entity._id,
+						username: 123,
+						password: true,
+						country: "USA"
+					});
+					expect(res).toStrictEqual({
+						_id: entity._id,
+						age: 42,
+						country: "USA",
+						password: true,
+						status: true,
+						username: 123
+					});
+				});
+
+				it("should replace fields", async () => {
+					const res = await broker.call("users.replace", {
+						...entity,
+						_id: entity._id
+					});
+					expect(res).toStrictEqual({
+						_id: entity._id,
+						username: "John",
+						password: "john1234",
+						age: 42,
+						status: true
+					});
 				});
 			});
 		});
-	});
+	}
 
 	describe("Test required", () => {
 		const broker = new ServiceBroker({ logger: false });
@@ -80,22 +88,32 @@ module.exports = adapter => {
 			name: "users",
 			mixins: [
 				DbService({
-					adapter,
+					adapter: getAdapter(),
 					createActions: true
 				})
 			],
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: getAdapter.IdColumnType
+					},
 					name: { type: "string", required: true }
 				}
+			},
+			async started() {
+				const adapter = await this.getAdapter();
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
 			}
 		});
 
-		beforeAll(async () => {
-			await broker.start();
-			await svc.clearEntities();
-		});
+		beforeAll(() => broker.start());
 		afterAll(() => broker.stop());
 
 		describe("Test create, update, replace", () => {
@@ -127,7 +145,7 @@ module.exports = adapter => {
 			it("should create entity", async () => {
 				const res = await broker.call("users.create", { name: "John" });
 				expect(res).toStrictEqual({
-					id: expect.any(String),
+					id: expectedID,
 					name: "John"
 				});
 				entity = res;
@@ -206,7 +224,10 @@ module.exports = adapter => {
 		it("should 'get' return fields with permission", async () => {
 			userPermission = perm;
 			const res = await broker.call("users.get", { id: docWithPerm.id });
-			expect(res).toStrictEqual(docWithPerm);
+			expect(res).toStrictEqual({
+				...(getAdapter.isSQL ? { password: null } : {}),
+				...docWithPerm
+			});
 		});
 
 		if (readPerm) {
@@ -226,7 +247,10 @@ module.exports = adapter => {
 		it("should 'resolve' return fields with permission", async () => {
 			userPermission = perm;
 			const res = await broker.call("users.resolve", { id: docWithPerm.id });
-			expect(res).toStrictEqual(docWithPerm);
+			expect(res).toStrictEqual({
+				...(getAdapter.isSQL ? { password: null } : {}),
+				...docWithPerm
+			});
 		});
 
 		if (readPerm) {
@@ -246,7 +270,12 @@ module.exports = adapter => {
 		it("should 'find' return fields with permission", async () => {
 			userPermission = perm;
 			const res = await broker.call("users.find");
-			expect(res).toStrictEqual([docWithPerm]);
+			expect(res).toStrictEqual([
+				{
+					...(getAdapter.isSQL ? { password: null } : {}),
+					...docWithPerm
+				}
+			]);
 		});
 
 		if (readPerm) {
@@ -273,7 +302,12 @@ module.exports = adapter => {
 			userPermission = perm;
 			const res = await broker.call("users.list");
 			expect(res).toStrictEqual({
-				rows: [docWithPerm],
+				rows: [
+					{
+						...(getAdapter.isSQL ? { password: null } : {}),
+						...docWithPerm
+					}
+				],
 				total: 1,
 				page: 1,
 				pageSize: 10,
@@ -302,13 +336,18 @@ module.exports = adapter => {
 			name: "users",
 			mixins: [
 				DbService({
-					adapter,
+					adapter: getAdapter(),
 					createActions: true
 				})
 			],
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: getAdapter.IdColumnType
+					},
 					name: "string",
 					password: { type: "string", permission: "admin" }
 				}
@@ -319,6 +358,15 @@ module.exports = adapter => {
 						return this.Promise.resolve(permission == userPermission);
 					return this.Promise.resolve(permission.includes(userPermission));
 				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
 			}
 		});
 
@@ -337,7 +385,7 @@ module.exports = adapter => {
 						password: "john1234"
 					});
 					expect(res).toStrictEqual({
-						id: expect.any(String),
+						id: expectedID,
 						name: "John"
 					});
 					docWithPerm = res;
@@ -356,7 +404,7 @@ module.exports = adapter => {
 						password: "john123456"
 					});
 					expect(res).toStrictEqual({
-						id: expect.any(String),
+						id: expectedID,
 						name: "John Doe"
 					});
 					docWithPerm = res;
@@ -374,7 +422,7 @@ module.exports = adapter => {
 						password: "john123456"
 					});
 					expect(res).toStrictEqual({
-						id: expect.any(String),
+						id: expectedID,
 						name: "Replaced"
 					});
 					docWithPerm = res;
@@ -397,7 +445,7 @@ module.exports = adapter => {
 						password: "john1234"
 					});
 					expect(res).toStrictEqual({
-						id: expect.any(String),
+						id: expectedID,
 						name: "John",
 						password: "john1234"
 					});
@@ -417,7 +465,7 @@ module.exports = adapter => {
 						password: "john123456"
 					});
 					expect(res).toStrictEqual({
-						id: expect.any(String),
+						id: expectedID,
 						name: "John Doe",
 						password: "john123456"
 					});
@@ -437,7 +485,7 @@ module.exports = adapter => {
 						password: "john123456"
 					});
 					expect(res).toStrictEqual({
-						id: expect.any(String),
+						id: expectedID,
 						name: "Replaced",
 						password: "john123456"
 					});
@@ -460,13 +508,18 @@ module.exports = adapter => {
 			name: "users",
 			mixins: [
 				DbService({
-					adapter,
+					adapter: getAdapter(),
 					createActions: true
 				})
 			],
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: getAdapter.IdColumnType
+					},
 					name: "string",
 					password: {
 						type: "string",
@@ -481,6 +534,15 @@ module.exports = adapter => {
 						return this.Promise.resolve(permission == userPermission);
 					return this.Promise.resolve(permission.includes(userPermission));
 				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
 			}
 		});
 
@@ -498,7 +560,7 @@ module.exports = adapter => {
 					password: "john1234"
 				});
 				expect(res).toStrictEqual({
-					id: expect.any(String),
+					id: expectedID,
 					name: "John",
 					password: "john1234"
 				});
@@ -519,7 +581,7 @@ module.exports = adapter => {
 					password: "john123456"
 				});
 				expect(res).toStrictEqual({
-					id: expect.any(String),
+					id: expectedID,
 					name: "John Doe",
 					password: "john123456"
 				});
@@ -540,7 +602,7 @@ module.exports = adapter => {
 					password: "john123456"
 				});
 				expect(res).toStrictEqual({
-					id: expect.any(String),
+					id: expectedID,
 					name: "Replaced",
 					password: "john123456"
 				});
@@ -563,16 +625,30 @@ module.exports = adapter => {
 			name: "users",
 			mixins: [
 				DbService({
-					adapter,
+					adapter: getAdapter(),
 					createActions: true
 				})
 			],
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: getAdapter.IdColumnType
+					},
 					name: "string",
 					role: { type: "string", readonly: true }
 				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
 			}
 		});
 
@@ -591,8 +667,9 @@ module.exports = adapter => {
 			it("should skip role field at create", async () => {
 				const res = await broker.call("users.create", entity);
 				expect(res).toStrictEqual({
-					id: expect.any(String),
-					name: "John"
+					id: expectedID,
+					name: "John",
+					...(getAdapter.isSQL ? { role: null } : {})
 				});
 				entity = res;
 
@@ -602,13 +679,14 @@ module.exports = adapter => {
 
 			it("should skip role field at update", async () => {
 				const res = await broker.call("users.update", {
-					id: entity.id,
+					id: "" + entity.id,
 					name: "John Doe",
 					role: "moderator"
 				});
 				expect(res).toStrictEqual({
-					id: expect.any(String),
-					name: "John Doe"
+					id: expectedID,
+					name: "John Doe",
+					...(getAdapter.isSQL ? { role: null } : {})
 				});
 				entity = res;
 
@@ -618,13 +696,14 @@ module.exports = adapter => {
 
 			it("should skip role field at replace", async () => {
 				const res = await broker.call("users.replace", {
-					id: entity.id,
+					id: "" + entity.id,
 					name: "Jane Doe",
 					role: "guest"
 				});
 				expect(res).toStrictEqual({
-					id: expect.any(String),
-					name: "Jane Doe"
+					id: expectedID,
+					name: "Jane Doe",
+					...(getAdapter.isSQL ? { role: null } : {})
 				});
 				entity = res;
 
@@ -640,16 +719,30 @@ module.exports = adapter => {
 			name: "users",
 			mixins: [
 				DbService({
-					adapter,
+					adapter: getAdapter(),
 					createActions: true
 				})
 			],
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: getAdapter.IdColumnType
+					},
 					name: "string",
 					role: { type: "string", immutable: true }
 				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
 			}
 		});
 
@@ -668,7 +761,7 @@ module.exports = adapter => {
 			it("should store role field at create", async () => {
 				const res = await broker.call("users.create", entity);
 				expect(res).toStrictEqual({
-					id: expect.any(String),
+					id: expectedID,
 					name: "John",
 					role: "administrator"
 				});
@@ -685,7 +778,7 @@ module.exports = adapter => {
 					role: "moderator"
 				});
 				expect(res).toStrictEqual({
-					id: expect.any(String),
+					id: expectedID,
 					name: "John Doe",
 					role: "administrator"
 				});
@@ -702,7 +795,7 @@ module.exports = adapter => {
 					role: "guest"
 				});
 				expect(res).toStrictEqual({
-					id: expect.any(String),
+					id: expectedID,
 					name: "Jane Doe",
 					role: "administrator"
 				});
@@ -721,8 +814,9 @@ module.exports = adapter => {
 			it("should store role field at create", async () => {
 				const res = await broker.call("users.create", entity);
 				expect(res).toStrictEqual({
-					id: expect.any(String),
-					name: "John"
+					id: expectedID,
+					name: "John",
+					...(getAdapter.isSQL ? { role: null } : {})
 				});
 				entity = res;
 
@@ -732,12 +826,12 @@ module.exports = adapter => {
 
 			it("should skip role field at update", async () => {
 				const res = await broker.call("users.update", {
-					id: entity.id,
+					id: "" + entity.id,
 					name: "John Doe",
 					role: "moderator"
 				});
 				expect(res).toStrictEqual({
-					id: expect.any(String),
+					id: expectedID,
 					name: "John Doe",
 					role: "moderator"
 				});
@@ -756,8 +850,9 @@ module.exports = adapter => {
 			it("should store role field at create", async () => {
 				const res = await broker.call("users.create", entity);
 				expect(res).toStrictEqual({
-					id: expect.any(String),
-					name: "John"
+					id: expectedID,
+					name: "John",
+					...(getAdapter.isSQL ? { role: null } : {})
 				});
 				entity = res;
 
@@ -767,12 +862,12 @@ module.exports = adapter => {
 
 			it("should set role field at replace because it not set yet", async () => {
 				const res = await broker.call("users.replace", {
-					id: entity.id,
+					id: "" + entity.id,
 					name: "Jane Doe",
 					role: "moderator"
 				});
 				expect(res).toStrictEqual({
-					id: expect.any(String),
+					id: expectedID,
 					name: "Jane Doe",
 					role: "moderator"
 				});
@@ -795,23 +890,37 @@ module.exports = adapter => {
 			name: "users",
 			mixins: [
 				DbService({
-					adapter,
+					adapter: getAdapter(),
 					createActions: true
 				})
 			],
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: getAdapter.IdColumnType
+					},
 					name: "string",
-					createdAt: { onCreate },
-					createdBy: { onCreate: "Creator" },
-					updatedAt: { onUpdate },
-					updatedBy: { onUpdate: "Updater" },
-					replacedAt: { onReplace },
-					replacedBy: { onReplace: "Replacer" },
-					removedAt: { onRemove },
-					removedBy: { onRemove: "Remover" }
+					createdAt: { onCreate, columnType: "string" },
+					createdBy: { onCreate: "Creator", columnType: "string" },
+					updatedAt: { onUpdate, columnType: "string" },
+					updatedBy: { onUpdate: "Updater", columnType: "string" },
+					replacedAt: { onReplace, columnType: "string" },
+					replacedBy: { onReplace: "Replacer", columnType: "string" },
+					removedAt: { onRemove, columnType: "string" },
+					removedBy: { onRemove: "Remover", columnType: "string" }
 				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
 			}
 		});
 
@@ -829,10 +938,20 @@ module.exports = adapter => {
 			it("should call onCreate hook", async () => {
 				const res = await broker.call("users.create", entity);
 				expect(res).toStrictEqual({
-					id: expect.any(String),
+					id: expectedID,
 					name: "John",
 					createdAt: "Created now",
-					createdBy: "Creator"
+					createdBy: "Creator",
+					...(getAdapter.isSQL
+						? {
+								updatedAt: null,
+								updatedBy: null,
+								replacedAt: null,
+								replacedBy: null,
+								removedAt: null,
+								removedBy: null
+						  }
+						: {})
 				});
 				entity = res;
 
@@ -855,14 +974,22 @@ module.exports = adapter => {
 					createdAt: "Created now",
 					createdBy: "Creator",
 					updatedAt: "Updated now",
-					updatedBy: "Updater"
+					updatedBy: "Updater",
+					...(getAdapter.isSQL
+						? {
+								replacedAt: null,
+								replacedBy: null,
+								removedAt: null,
+								removedBy: null
+						  }
+						: {})
 				});
 				entity = res;
 
 				expect(onUpdate).toBeCalledTimes(1);
 				expect(onUpdate).toBeCalledWith(
 					"Past",
-					{ id: entity.id, name: "John Doe", updatedAt: "Past" },
+					{ id: "" + entity.id, name: "John Doe", updatedAt: "Past" },
 					expect.any(Context)
 				);
 
@@ -883,20 +1010,36 @@ module.exports = adapter => {
 					updatedAt: "Updated now",
 					updatedBy: "Updater",
 					replacedAt: "Replaced now",
-					replacedBy: "Replacer"
+					replacedBy: "Replacer",
+					...(getAdapter.isSQL
+						? {
+								removedAt: null,
+								removedBy: null
+						  }
+						: {})
 				});
 				entity = res;
 
 				expect(onReplace).toBeCalledTimes(1);
 				expect(onReplace).toBeCalledWith(
-					undefined,
+					getAdapter.isSQL ? null : undefined,
 					{
-						id: entity.id,
+						id: "" + entity.id,
 						name: "Jane Doe",
 						createdAt: "Created now",
 						createdBy: "Creator",
 						updatedAt: "Updated now",
-						updatedBy: "Updater"
+						updatedBy: "Updater",
+						replacedAt: "Replaced now",
+						replacedBy: "Replacer",
+						...(getAdapter.isSQL
+							? {
+									replacedAt: null,
+									replacedBy: null,
+									removedAt: null,
+									removedBy: null
+							  }
+							: {})
 					},
 					expect.any(Context)
 				);
@@ -909,13 +1052,13 @@ module.exports = adapter => {
 				const res = await broker.call("users.remove", {
 					id: entity.id
 				});
-				expect(res).toBe(entity.id);
+				expect(res).toBe("" + entity.id);
 
 				expect(onRemove).toBeCalledTimes(1);
 				expect(onRemove).toBeCalledWith(
 					undefined,
 					{
-						id: entity.id
+						id: "" + entity.id
 					},
 					expect.any(Context)
 				);
@@ -945,15 +1088,29 @@ module.exports = adapter => {
 			name: "users",
 			mixins: [
 				DbService({
-					adapter,
+					adapter: getAdapter(),
 					createActions: true
 				})
 			],
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: getAdapter.IdColumnType
+					},
 					name: { type: "string", required: true, validate: customValidate }
 				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
 			}
 		});
 
@@ -986,7 +1143,7 @@ module.exports = adapter => {
 			it("should create entity", async () => {
 				const res = await broker.call("users.create", { name: "John" });
 				expect(res).toStrictEqual({
-					id: expect.any(String),
+					id: expectedID,
 					name: "John"
 				});
 				entity = res;
@@ -1059,6 +1216,7 @@ module.exports = adapter => {
 		const getter = jest.fn((value, entity) => `${entity.firstName} ${entity.lastName}`);
 		const setter = jest.fn((value, entity) => {
 			[entity.firstName, entity.lastName] = value.split(" ");
+			return null;
 		});
 
 		const broker = new ServiceBroker({ logger: false });
@@ -1066,18 +1224,32 @@ module.exports = adapter => {
 			name: "users",
 			mixins: [
 				DbService({
-					adapter,
+					adapter: getAdapter(),
 					createActions: true
 				})
 			],
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: getAdapter.IdColumnType
+					},
 					name: { type: "string", set: setter },
-					fullName: { type: "string", get: getter, readonly: true },
+					fullName: { type: "string", get: getter, virtual: true },
 					firstName: { type: "string" },
 					lastName: { type: "string" }
 				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
 			}
 		});
 
@@ -1093,10 +1265,11 @@ module.exports = adapter => {
 			it("should create entity", async () => {
 				const res = await broker.call("users.create", { name: "John Doe" });
 				expect(res).toStrictEqual({
-					id: expect.any(String),
+					id: expectedID,
 					fullName: "John Doe",
 					firstName: "John",
-					lastName: "Doe"
+					lastName: "Doe",
+					name: null
 				});
 				entity = res;
 
@@ -1118,7 +1291,7 @@ module.exports = adapter => {
 				expect(getter).toBeCalledTimes(1);
 				expect(getter).toBeCalledWith(
 					undefined,
-					{ _id: entity.id, firstName: "John", lastName: "Doe" },
+					{ _id: entity.id, firstName: "John", lastName: "Doe", name: null },
 					{
 						columnName: "fullName",
 						columnType: "string",
@@ -1126,7 +1299,7 @@ module.exports = adapter => {
 						name: "fullName",
 						required: false,
 						type: "string",
-						readonly: true
+						virtual: true
 					},
 					expect.any(Context)
 				);
@@ -1144,7 +1317,8 @@ module.exports = adapter => {
 					id: entity.id,
 					fullName: "Jane Doe",
 					firstName: "Jane",
-					lastName: "Doe"
+					lastName: "Doe",
+					name: null
 				});
 				entity = res;
 
@@ -1161,7 +1335,8 @@ module.exports = adapter => {
 					id: entity.id,
 					fullName: "Adam Smith",
 					firstName: "Adam",
-					lastName: "Smith"
+					lastName: "Smith",
+					name: null
 				});
 				entity = res;
 
@@ -1179,17 +1354,31 @@ module.exports = adapter => {
 			name: "users",
 			mixins: [
 				DbService({
-					adapter,
+					adapter: getAdapter(),
 					createActions: true
 				})
 			],
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: getAdapter.IdColumnType
+					},
 					name: { type: "string" },
 					role: { type: "string", default: getDefaultRole },
-					status: { type: "number", default: 5 }
+					status: { type: "number", default: 5, columnType: "integer" }
 				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
 			}
 		});
 
@@ -1208,7 +1397,7 @@ module.exports = adapter => {
 					status: 0
 				});
 				expect(res).toStrictEqual({
-					id: expect.any(String),
+					id: expectedID,
 					name: "John Doe",
 					role: "admin",
 					status: 0
@@ -1227,7 +1416,7 @@ module.exports = adapter => {
 					status: 2
 				});
 				expect(res).toStrictEqual({
-					id: expect.any(String),
+					id: expectedID,
 					name: "Jane Doe",
 					role: "guest",
 					status: 2
@@ -1243,7 +1432,7 @@ module.exports = adapter => {
 					name: "John Doe"
 				});
 				expect(res).toStrictEqual({
-					id: expect.any(String),
+					id: expectedID,
 					name: "John Doe",
 					role: "member",
 					status: 5
@@ -1260,7 +1449,7 @@ module.exports = adapter => {
 					name: "Jane Doe"
 				});
 				expect(res).toStrictEqual({
-					id: expect.any(String),
+					id: expectedID,
 					name: "Jane Doe",
 					role: "member",
 					status: 5
@@ -1272,19 +1461,26 @@ module.exports = adapter => {
 			});
 		});
 	});
+
 	describe("Test secure field", () => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
 			mixins: [
 				DbService({
-					adapter,
+					adapter: getAdapter(),
 					createActions: true
 				})
 			],
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, secure: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						secure: true,
+						columnName: "_id",
+						columnType: getAdapter.IdColumnType
+					},
 					name: { type: "string" }
 				}
 			},
@@ -1296,6 +1492,15 @@ module.exports = adapter => {
 					if (!id.startsWith("SECURE-")) throw new Error("No secured ID");
 					return id.substring(7);
 				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
 			}
 		});
 
@@ -1367,17 +1572,23 @@ module.exports = adapter => {
 			name: "users",
 			mixins: [
 				DbService({
-					adapter,
+					adapter: getAdapter(),
 					createActions: true
 				})
 			],
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: getAdapter.IdColumnType
+					},
 					name: { type: "string" },
 					email: { type: "string" },
 					address: {
 						type: "object",
+						columnType: "string",
 						properties: {
 							zip: { type: "number" },
 							street: { type: "string" },
@@ -1389,12 +1600,14 @@ module.exports = adapter => {
 					},
 					roles: {
 						type: "array",
+						columnType: "string",
 						max: 3,
 						items: { type: "string" }
 					},
 
 					phones: {
 						type: "array",
+						columnType: "string",
 						items: {
 							type: "object",
 							properties: {
@@ -1405,6 +1618,15 @@ module.exports = adapter => {
 						}
 					}
 				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
 			}
 		});
 
@@ -1506,7 +1728,7 @@ module.exports = adapter => {
 					]
 				});
 				expect(res).toStrictEqual({
-					id: expect.any(String),
+					id: expectedID,
 					name: "John Doe",
 					email: "john.doe@moleculer.services",
 					address: {
@@ -1528,37 +1750,39 @@ module.exports = adapter => {
 				expect(res2).toStrictEqual(entity);
 			});
 
-			it("update a nested property in the entity", async () => {
-				const res = await broker.call("users.update", {
-					id: entity.id,
-					name: "Dr. John Doe",
-					address: {
-						zip: "9999"
-					}
-				});
+			if (getAdapter.isNoSQL) {
+				it("update a nested property in the entity", async () => {
+					const res = await broker.call("users.update", {
+						id: entity.id,
+						name: "Dr. John Doe",
+						address: {
+							zip: "9999"
+						}
+					});
 
-				expect(res).toStrictEqual({
-					id: expect.any(String),
-					name: "Dr. John Doe",
-					email: "john.doe@moleculer.services",
-					address: {
-						zip: 9999,
-						street: "Main Street 15",
-						city: "London",
-						country: "England",
-						primary: true
-					},
-					roles: ["admin", "1234"],
-					phones: [
-						{ type: "home", number: "+1-555-1234", primary: true },
-						{ type: "mobile", number: "+1-555-9999", primary: false }
-					]
-				});
-				entity = res;
+					expect(res).toStrictEqual({
+						id: expectedID,
+						name: "Dr. John Doe",
+						email: "john.doe@moleculer.services",
+						address: {
+							zip: 9999,
+							street: "Main Street 15",
+							city: "London",
+							country: "England",
+							primary: true
+						},
+						roles: ["admin", "1234"],
+						phones: [
+							{ type: "home", number: "+1-555-1234", primary: true },
+							{ type: "mobile", number: "+1-555-9999", primary: false }
+						]
+					});
+					entity = res;
 
-				const res2 = await broker.call("users.get", { id: entity.id });
-				expect(res2).toStrictEqual(entity);
-			});
+					const res2 = await broker.call("users.get", { id: entity.id });
+					expect(res2).toStrictEqual(entity);
+				});
+			}
 		});
 	});
 
@@ -1568,17 +1792,31 @@ module.exports = adapter => {
 			name: "users",
 			mixins: [
 				DbService({
-					adapter,
+					adapter: getAdapter(),
 					createActions: true,
 					strict: true
 				})
 			],
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: getAdapter.IdColumnType
+					},
 					name: { type: "string" },
 					email: { type: "string" }
 				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
 			}
 		});
 
@@ -1620,7 +1858,7 @@ module.exports = adapter => {
 				email: "john.doe@moleculer.services"
 			});
 			expect(res).toStrictEqual({
-				id: expect.any(String),
+				id: expectedID,
 				name: "John Doe",
 				email: "john.doe@moleculer.services"
 			});
@@ -1661,7 +1899,7 @@ module.exports = adapter => {
 			});
 
 			expect(res).toStrictEqual({
-				id: expect.any(String),
+				id: expectedID,
 				name: "Dr. John Doe",
 				email: "john.doe@moleculer.services"
 			});
@@ -1704,7 +1942,7 @@ module.exports = adapter => {
 			});
 
 			expect(res).toStrictEqual({
-				id: expect.any(String),
+				id: expectedID,
 				name: "Mr. John Doe",
 				email: "john.doe@moleculer.services"
 			});
@@ -1721,17 +1959,23 @@ module.exports = adapter => {
 			name: "users",
 			mixins: [
 				DbService({
-					adapter,
+					adapter: getAdapter(),
 					createActions: true
 				})
 			],
 			settings: {
 				fields: {
-					key: { type: "string", primaryKey: true, columnName: "_id" },
+					key: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: getAdapter.IdColumnType
+					},
 					name: "string|required",
-					email: "email",
+					email: "email|columnType:string",
 					address: {
 						type: "object",
+						columnType: "string",
 						strict: true,
 						properties: {
 							zip: { type: "number" },
@@ -1744,12 +1988,14 @@ module.exports = adapter => {
 					},
 					roles: {
 						type: "array",
+						columnType: "string",
 						max: 3,
 						items: { type: "string" }
 					},
 
 					phones: {
 						type: "array",
+						columnType: "string",
 						items: {
 							type: "object",
 							properties: {
@@ -1762,6 +2008,15 @@ module.exports = adapter => {
 
 					status: { type: "boolean", default: true }
 				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
 			}
 		});
 
@@ -1779,9 +2034,10 @@ module.exports = adapter => {
 				params: {
 					$$strict: "remove",
 					name: { convert: true, type: "string" },
-					email: { optional: true, type: "email" },
+					email: { optional: true, type: "email", columnType: "string" },
 					address: {
 						optional: true,
+						columnType: "string",
 						properties: {
 							city: { convert: true, type: "string" },
 							country: { convert: true, optional: true, type: "string" },
@@ -1815,12 +2071,14 @@ module.exports = adapter => {
 							type: "object"
 						},
 						optional: true,
+						columnType: "string",
 						type: "array"
 					},
 					roles: {
 						items: { convert: true, optional: true, type: "string" },
 						max: 3,
 						optional: true,
+						columnType: "string",
 						type: "array"
 					},
 					status: { convert: true, default: true, optional: true, type: "boolean" }
@@ -1835,11 +2093,17 @@ module.exports = adapter => {
 				visibility: "published",
 				params: {
 					$$strict: "remove",
-					key: { convert: true, optional: false, type: "string" },
+					key: {
+						convert: true,
+						optional: false,
+						type: "string",
+						columnType: getAdapter.IdColumnType
+					},
 					name: { convert: true, optional: true, type: "string" },
-					email: { optional: true, type: "email" },
+					email: { optional: true, type: "email", columnType: "string" },
 					address: {
 						optional: true,
+						columnType: "string",
 						properties: {
 							city: { convert: true, optional: true, type: "string" },
 							country: { convert: true, optional: true, type: "string" },
@@ -1863,12 +2127,14 @@ module.exports = adapter => {
 							type: "object"
 						},
 						optional: true,
+						columnType: "string",
 						type: "array"
 					},
 					roles: {
 						items: { convert: true, optional: true, type: "string" },
 						max: 3,
 						optional: true,
+						columnType: "string",
 						type: "array"
 					},
 					status: { convert: true, optional: true, type: "boolean" }
@@ -1883,11 +2149,17 @@ module.exports = adapter => {
 				visibility: "published",
 				params: {
 					$$strict: "remove",
-					key: { convert: true, optional: false, type: "string" },
+					key: {
+						convert: true,
+						optional: false,
+						type: "string",
+						columnType: getAdapter.IdColumnType
+					},
 					name: { convert: true, type: "string" },
-					email: { optional: true, type: "email" },
+					email: { optional: true, type: "email", columnType: "string" },
 					address: {
 						optional: true,
+						columnType: "string",
 						properties: {
 							city: { convert: true, type: "string" },
 							country: { convert: true, optional: true, type: "string" },
@@ -1921,12 +2193,14 @@ module.exports = adapter => {
 							type: "object"
 						},
 						optional: true,
+						columnType: "string",
 						type: "array"
 					},
 					roles: {
 						items: { convert: true, optional: true, type: "string" },
 						max: 3,
 						optional: true,
+						columnType: "string",
 						type: "array"
 					},
 					status: { convert: true, default: true, optional: true, type: "boolean" }

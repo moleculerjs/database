@@ -422,13 +422,23 @@ module.exports = function (mixinOpts) {
 			//if (this.$primaryField.columnName != this.$primaryField.name)
 			delete params[this.$primaryField.name];
 
-			let result = await adapter.updateById(id, params, { raw: rawUpdate });
+			let result;
+			const hasChanges = Object.keys(params).length > 0;
+			if (hasChanges) {
+				result = await adapter.updateById(id, params, { raw: rawUpdate });
+			} else {
+				// Nothing to update
+				result = oldEntity;
+			}
 
 			if (opts.transform !== false) {
 				result = await this.transformResult(adapter, result, {}, ctx);
 			}
 
-			await this._entityChanged(result, ctx, { ...opts, type: "update" });
+			if (hasChanges) {
+				await this._entityChanged(result, ctx, { ...opts, type: "update" });
+			}
+
 			return result;
 		},
 
