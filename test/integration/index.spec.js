@@ -34,12 +34,22 @@ if (process.env.GITHUB_ACTIONS_CI) {
 					useNullAsDefault: true
 				}
 			}
+		},
+		{
+			name: "Knex-Postgresql",
+			type: "Knex",
+			options: {
+				knex: {
+					client: "pg",
+					connection: "postgres://postgres:moleculer@127.0.0.1:5432"
+				}
+			}
 		}
 	];
 } else {
 	// Local development tests
 	Adapters = [
-		{ type: "NeDB" },
+		/*{ type: "NeDB" },
 		{ type: "MongoDB", options: { dbName: "db-int-test" } },
 		{
 			name: "Knex-SQLite",
@@ -51,6 +61,16 @@ if (process.env.GITHUB_ACTIONS_CI) {
 						filename: ":memory:"
 					},
 					useNullAsDefault: true
+				}
+			}
+		},*/
+		{
+			name: "Knex-Postgresql",
+			type: "Knex",
+			options: {
+				knex: {
+					client: "pg",
+					connection: "postgres://postgres:moleculer@127.0.0.1:5432"
 				}
 			}
 		}

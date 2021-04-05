@@ -60,7 +60,11 @@ module.exports = (getAdapter, adapterType) => {
 					id: { type: "string", primaryKey: true, columnName: "_id" },
 					name: { type: "string", trim: true, required: true },
 					age: { type: "number", columnType: "integer" },
-					dob: { type: "number", columnType: "bigInteger" },
+					dob: {
+						type: "number",
+						columnType: "bigInteger",
+						get: v => (typeof v == "string" ? Number(v) : v)
+					},
 					roles: { type: "array", items: "string", columnType: "string" },
 					status: {
 						type: "boolean",
@@ -352,7 +356,11 @@ module.exports = (getAdapter, adapterType) => {
 					id: { type: "string", primaryKey: true, columnName: "_id" },
 					name: { type: "string", trim: true, required: true },
 					age: { type: "number", columnType: "integer" },
-					dob: { type: "number", columnType: "integer" },
+					dob: {
+						type: "number",
+						columnType: "bigInteger",
+						get: v => (typeof v == "string" ? Number(v) : v)
+					},
 					roles: { type: "array", items: "string", columnType: "string" },
 					status: {
 						type: "boolean",
@@ -463,11 +471,11 @@ module.exports = (getAdapter, adapterType) => {
 			});
 
 			it("should not throw EntityNotFound", async () => {
-				const res = await svc.resolveEntities(ctx, { id: "1234567890abcdef12345678" });
+				const res = await svc.resolveEntities(ctx, { id: "123456879" });
 				expect(res == null).toBeTruthy();
 
 				const res2 = await svc.resolveEntities(ctx, {
-					id: ["1234567890abcdef12345678", "234567890abcdef123456789"]
+					id: ["123456879", "234567890"]
 				});
 				expect(res2).toEqual([]);
 			});
@@ -475,14 +483,10 @@ module.exports = (getAdapter, adapterType) => {
 			it("throw EntityNotFound", async () => {
 				expect.assertions(2);
 				try {
-					await svc.resolveEntities(
-						ctx,
-						{ id: "1234567890abcdef12345678" },
-						{ throwIfNotExist: true }
-					);
+					await svc.resolveEntities(ctx, { id: "123456879" }, { throwIfNotExist: true });
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
-					expect(err.data).toEqual({ id: "1234567890abcdef12345678" });
+					expect(err.data).toEqual({ id: "123456879" });
 				}
 			});
 
@@ -492,14 +496,14 @@ module.exports = (getAdapter, adapterType) => {
 					await svc.resolveEntities(
 						ctx,
 						{
-							id: ["1234567890abcdef12345678", "234567890abcdef123456789"]
+							id: ["123456879", "234567890"]
 						},
 						{ throwIfNotExist: true }
 					);
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
 					expect(err.data).toEqual({
-						id: ["1234567890abcdef12345678", "234567890abcdef123456789"]
+						id: ["123456879", "234567890"]
 					});
 				}
 			});
@@ -522,7 +526,11 @@ module.exports = (getAdapter, adapterType) => {
 					},
 					name: { type: "string", trim: true, required: true },
 					age: { type: "number", columnType: "integer" },
-					dob: { type: "number", columnType: "integer" },
+					dob: {
+						type: "number",
+						columnType: "bigInteger",
+						get: v => (typeof v == "string" ? Number(v) : v)
+					},
 					height: { type: "number", columnType: "integer" },
 					roles: { type: "array", items: "string", columnType: "string" },
 					status: {
@@ -637,10 +645,10 @@ module.exports = (getAdapter, adapterType) => {
 			it("throw EntityNotFound", async () => {
 				expect.assertions(2);
 				try {
-					await svc.updateEntity(ctx, { id: "1234567890abcdef12345678" });
+					await svc.updateEntity(ctx, { id: "123456789" });
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
-					expect(err.data).toEqual({ id: "1234567890abcdef12345678" });
+					expect(err.data).toEqual({ id: "123456789" });
 				}
 			});
 		});
@@ -683,10 +691,10 @@ module.exports = (getAdapter, adapterType) => {
 			it("throw EntityNotFound", async () => {
 				expect.assertions(2);
 				try {
-					await svc.replaceEntity(ctx, { id: "1234567890abcdef12345678" });
+					await svc.replaceEntity(ctx, { id: "123456789" });
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
-					expect(err.data).toEqual({ id: "1234567890abcdef12345678" });
+					expect(err.data).toEqual({ id: "123456789" });
 				}
 			});
 		});
@@ -708,7 +716,11 @@ module.exports = (getAdapter, adapterType) => {
 					},
 					name: { type: "string", trim: true, required: true },
 					age: { type: "number", columnType: "integer" },
-					dob: { type: "number", columnType: "integer" },
+					dob: {
+						type: "number",
+						columnType: "bigInteger",
+						get: v => (typeof v == "string" ? Number(v) : v)
+					},
 					height: { type: "number", columnType: "integer" },
 					roles: { type: "array", items: "string", columnType: "string" },
 					status: {
@@ -796,10 +808,10 @@ module.exports = (getAdapter, adapterType) => {
 			it("throw EntityNotFound", async () => {
 				expect.assertions(2);
 				try {
-					await svc.removeEntity(ctx, { id: "1234567890abcdef12345678" });
+					await svc.removeEntity(ctx, { id: "123456789" });
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
-					expect(err.data).toEqual({ id: "1234567890abcdef12345678" });
+					expect(err.data).toEqual({ id: "123456789" });
 				}
 			});
 		});

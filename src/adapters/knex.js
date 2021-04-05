@@ -160,7 +160,9 @@ class KnexAdapter extends BaseAdapter {
 	 */
 	async count(params) {
 		const res = await this.createQuery(params, { counting: true });
-		return res && res.length > 0 ? res[0].count : 0;
+		const count = res && res.length > 0 ? res[0].count : 0;
+		// Pg returns `string` value
+		return typeof count == "string" ? Number(count) : count;
 	}
 
 	/**
@@ -177,7 +179,13 @@ class KnexAdapter extends BaseAdapter {
 			.into(this.opts.tableName);
 
 		if (res && res.length > 0) {
-			return await this.findById(entity[this.idFieldName] || res[0]);
+			// Sqlite returns only a single value which is the ID
+			// Postgres returns an object with only the ID field.
+			let id = entity[this.idFieldName] || res[0];
+			if (typeof id == "object") {
+				id = id[this.idFieldName];
+			}
+			return await this.findById(id);
 		}
 		return res;
 	}
@@ -370,7 +378,7 @@ class KnexAdapter extends BaseAdapter {
 			}
 
 			// Sort
-			if (params.sort) {
+			if (!opts.counting && params.sort) {
 				let pSort = params.sort;
 				if (typeof pSort == "string") pSort = [pSort];
 				pSort.forEach(field => {
@@ -380,10 +388,12 @@ class KnexAdapter extends BaseAdapter {
 			}
 
 			// Limit
-			if (_.isNumber(params.limit) && params.limit > 0) q.limit(params.limit);
+			if (!opts.counting && _.isNumber(params.limit) && params.limit > 0)
+				q.limit(params.limit);
 
 			// Offset
-			if (_.isNumber(params.offset) && params.offset > 0) q.offset(params.offset);
+			if (!opts.counting && _.isNumber(params.offset) && params.offset > 0)
+				q.offset(params.offset);
 		}
 
 		// If not params
@@ -407,6 +417,13 @@ class KnexAdapter extends BaseAdapter {
 	async createTable(fields) {
 		if (!fields) fields = this.service.$fields;
 
+		const exists = await this.client.schema.hasTable(this.opts.tableName);
+		if (exists) {
+			this.logger.info(`Dropping '${this.opts.tableName}' table...`);
+			await this.client.schema.dropTable(this.opts.tableName);
+		}
+
+		this.logger.info(`Creating '${this.opts.tableName}' table...`);
 		await this.client.schema.createTable(this.opts.tableName, table => {
 			for (const field of fields) {
 				if (field.virtual) continue;
@@ -429,6 +446,7 @@ class KnexAdapter extends BaseAdapter {
 				}
 			}
 		});
+		this.logger.info(`Table '${this.opts.tableName}' created.`);
 
 		// TODO indices!
 		// table.index(columns, [indexName], [indexType])
