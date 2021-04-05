@@ -1030,8 +1030,6 @@ module.exports = (getAdapter, adapterType) => {
 						createdBy: "Creator",
 						updatedAt: "Updated now",
 						updatedBy: "Updater",
-						replacedAt: "Replaced now",
-						replacedBy: "Replacer",
 						...(getAdapter.isSQL
 							? {
 									replacedAt: null,
