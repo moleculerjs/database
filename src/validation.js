@@ -75,8 +75,10 @@ module.exports = function (mixinOpts) {
 					field.name = name;
 
 					if (!field.columnName) field.columnName = field.name;
+					if (!field.columnType) field.columnType = field.type;
 
 					if (field.primaryKey === true) this.$primaryField = field;
+
 					if (field.onRemove) this.$softDelete = true;
 
 					if (field.permission || field.readPermission) {

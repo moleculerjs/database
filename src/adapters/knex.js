@@ -172,8 +172,8 @@ class KnexAdapter extends BaseAdapter {
 	 */
 	async insert(entity) {
 		const res = await this.client
-			.insert(entity)
-			.returning(this.idFieldName)
+			.insert(entity, [this.idFieldName])
+			//.returning(this.idFieldName)
 			.into(this.opts.tableName);
 
 		if (res && res.length > 0) {
@@ -402,6 +402,37 @@ class KnexAdapter extends BaseAdapter {
 	createIndex(def) {
 		//if (def.unique) return this.client.unique(def.fields, def.name);
 		//else return this.client.index(def.fields, def.name, def.type);
+	}
+
+	async createTable(fields) {
+		if (!fields) fields = this.service.$fields;
+
+		await this.client.schema.createTable(this.opts.tableName, table => {
+			for (const field of fields) {
+				if (field.virtual) continue;
+
+				let f;
+				if (!(field.columnType in table))
+					throw new Error(
+						`Field '${field.columnName}' columnType '${field.columnType}' is not a valid type.`
+					);
+
+				if (field.primaryKey) {
+					if (field.generated == "user") {
+						f = table[field.columnType](field.columnName);
+					} else {
+						f = table.increments(field.columnName);
+					}
+					f = f.primary();
+				} else {
+					f = table[field.columnType](field.columnName);
+				}
+			}
+		});
+
+		// TODO indices!
+		// table.index(columns, [indexName], [indexType])
+		// table.unique(columns, [indexName])
 	}
 }
 

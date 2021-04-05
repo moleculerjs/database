@@ -18,7 +18,7 @@ module.exports = (getAdapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "posts",
-			mixins: [DbService({ adapter: getAdapter({ collection: "posts" }) })],
+			mixins: [DbService({ adapter: getAdapter() })],
 			settings: {
 				fields: {
 					id: {
@@ -30,14 +30,14 @@ module.exports = (getAdapter, adapterType) => {
 					title: { type: "string", trim: true, required: true },
 					content: { type: "string" },
 					author: { type: "string" },
-					votes: { type: "number", default: 0 },
+					votes: { type: "number", default: 0, columnType: "integer" },
 					status: {
 						type: "boolean",
 						default: true,
 						get: adapterType == "Knex" ? v => !!v : undefined
 					},
-					createdAt: { type: "number", onCreate: Date.now },
-					updatedAt: { type: "number", onUpdate: Date.now }
+					createdAt: { type: "number", onCreate: Date.now, columnType: "bigInteger" },
+					updatedAt: { type: "number", onUpdate: Date.now, columnType: "bigInteger" }
 				}
 			},
 
@@ -53,18 +53,8 @@ module.exports = (getAdapter, adapterType) => {
 
 			async started() {
 				const adapter = await this.getAdapter();
-
 				if (adapterType == "Knex") {
-					await adapter.client.schema.createTable("posts", function (table) {
-						table.increments("_id");
-						table.string("title").index();
-						table.string("content").index();
-						table.string("author").index();
-						table.integer("votes");
-						table.boolean("status");
-						table.timestamp("createdAt");
-						table.timestamp("updatedAt");
-					});
+					await adapter.createTable();
 				}
 
 				await this.clearEntities();

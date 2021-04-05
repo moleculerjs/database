@@ -61,15 +61,15 @@ module.exports = (getAdapter, adapterType) => {
 				fields: {
 					id: { type: "string", primaryKey: true, columnName: "_id" },
 					name: { type: "string", trim: true, required: true },
-					age: { type: "number" },
-					dob: { type: "number" },
-					roles: { type: "array", items: "string" },
+					age: { type: "number", columnType: "integer" },
+					dob: { type: "number", columnType: "bigInteger" },
+					roles: { type: "array", items: "string", columnType: "string" },
 					status: {
 						type: "boolean",
 						default: true,
 						get: adapterType == "Knex" ? v => !!v : undefined
 					},
-					_score: { type: "number", readonly: true }
+					_score: { type: "number", readonly: true, virtual: true }
 				}
 			},
 
@@ -77,13 +77,10 @@ module.exports = (getAdapter, adapterType) => {
 				const adapter = await this.getAdapter();
 
 				if (adapterType == "Knex") {
-					await adapter.client.schema.createTable("users", function (table) {
-						table.increments("_id");
-						table.string("name").index();
-						table.integer("age");
-						table.date("dob");
-						table.boolean("status");
-						table.string("roles").index();
+					await adapter.createTable();
+				} else if (adapterType == "MongoDB") {
+					adapter.createIndex({
+						fields: { name: "text", age: "text", roles: "text" }
 					});
 				}
 
@@ -104,14 +101,6 @@ module.exports = (getAdapter, adapterType) => {
 
 				const count = await svc.countEntities(ctx);
 				expect(count).toEqual(0);
-			});
-
-			it("Adapter specific setups", async () => {
-				if (adapterType == "MongoDB") {
-					(await svc.getAdapter()).createIndex({
-						fields: { name: "text", age: "text", roles: "text" }
-					});
-				}
 			});
 
 			it("create test entities", async () => {
@@ -366,9 +355,9 @@ module.exports = (getAdapter, adapterType) => {
 				fields: {
 					id: { type: "string", primaryKey: true, columnName: "_id" },
 					name: { type: "string", trim: true, required: true },
-					age: { type: "number" },
-					dob: { type: "number" },
-					roles: { type: "array", items: "string" },
+					age: { type: "number", columnType: "integer" },
+					dob: { type: "number", columnType: "integer" },
+					roles: { type: "array", items: "string", columnType: "string" },
 					status: {
 						type: "boolean",
 						default: true,
@@ -381,14 +370,7 @@ module.exports = (getAdapter, adapterType) => {
 				const adapter = await this.getAdapter();
 
 				if (adapterType == "Knex") {
-					await adapter.client.schema.createTable("users", function (table) {
-						table.increments("_id");
-						table.string("name").index();
-						table.integer("age");
-						table.date("dob");
-						table.boolean("status");
-						table.string("roles").index();
-					});
+					await adapter.createTable();
 				}
 
 				await this.clearEntities();
@@ -538,12 +520,17 @@ module.exports = (getAdapter, adapterType) => {
 
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: "integer"
+					},
 					name: { type: "string", trim: true, required: true },
-					age: { type: "number" },
-					dob: { type: "number" },
-					height: { type: "number" },
-					roles: { type: "array", items: "string" },
+					age: { type: "number", columnType: "integer" },
+					dob: { type: "number", columnType: "integer" },
+					height: { type: "number", columnType: "integer" },
+					roles: { type: "array", items: "string", columnType: "string" },
 					status: {
 						type: "boolean",
 						default: true,
@@ -556,15 +543,7 @@ module.exports = (getAdapter, adapterType) => {
 				const adapter = await this.getAdapter();
 
 				if (adapterType == "Knex") {
-					await adapter.client.schema.createTable("users", function (table) {
-						table.increments("_id");
-						table.string("name").index();
-						table.integer("age");
-						table.integer("height");
-						table.date("dob");
-						table.boolean("status");
-						table.string("roles").index();
-					});
+					await adapter.createTable();
 				}
 
 				await this.clearEntities();
@@ -729,12 +708,17 @@ module.exports = (getAdapter, adapterType) => {
 
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: "integer"
+					},
 					name: { type: "string", trim: true, required: true },
-					age: { type: "number" },
-					dob: { type: "number" },
-					height: { type: "number" },
-					roles: { type: "array", items: "string" },
+					age: { type: "number", columnType: "integer" },
+					dob: { type: "number", columnType: "integer" },
+					height: { type: "number", columnType: "integer" },
+					roles: { type: "array", items: "string", columnType: "string" },
 					status: {
 						type: "boolean",
 						default: true,
@@ -747,14 +731,7 @@ module.exports = (getAdapter, adapterType) => {
 				const adapter = await this.getAdapter();
 
 				if (adapterType == "Knex") {
-					await adapter.client.schema.createTable("users", function (table) {
-						table.increments("_id");
-						table.string("name").index();
-						table.integer("age");
-						table.date("dob");
-						table.boolean("status");
-						table.string("roles").index();
-					});
+					await adapter.createTable();
 				}
 
 				await this.clearEntities();
@@ -845,22 +822,28 @@ module.exports = (getAdapter, adapterType) => {
 			],
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: "integer"
+					},
 					name: { type: "string", required: true },
 					email: { type: "string", required: true },
-					age: { type: "number", integer: true, positive: true, required: true }
+					age: {
+						type: "number",
+						integer: true,
+						positive: true,
+						required: true,
+						columnType: "integer"
+					}
 				}
 			},
 			async started() {
 				const adapter = await this.getAdapter();
 
 				if (adapterType == "Knex") {
-					await adapter.client.schema.createTable("users", function (table) {
-						table.increments("_id");
-						table.string("name");
-						table.string("email");
-						table.integer("age");
-					});
+					await adapter.createTable();
 				}
 
 				await this.clearEntities();

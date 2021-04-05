@@ -25,25 +25,31 @@ module.exports = (getAdapter, adapterType) => {
 			settings: {
 				createActions: false,
 				fields: {
-					id: { type: "number", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "number",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: "integer"
+					},
 					title: { type: "string", trim: true, required: true },
 					content: { type: "string" },
-					votes: { type: "number", default: 0 },
-					status: { type: "number", default: 1 }
+					votes: { type: "number", default: 0, columnType: "integer" },
+					status: { type: "number", default: 1, columnType: "integer" }
 				}
 			},
 
 			async started() {
 				adapter = await this.getAdapter();
 
-				if (adapterType == "Knex") {
-					await adapter.client.schema.createTable("posts", function (table) {
-						table.increments("_id");
-						table.string("title").index();
-						table.string("content").index();
-						table.integer("votes");
-						table.integer("status");
+				if (adapterType == "MongoDB") {
+					adapter.createIndex({
+						fields: { title: "text", content: "text" }
 					});
+				} else if (adapterType == "Knex") {
+					await adapter.createTable();
+				} else {
+					adapter.createIndex({ fields: "title" });
+					adapter.createIndex({ fields: "content" });
 				}
 
 				await this.clearEntities();
@@ -56,21 +62,6 @@ module.exports = (getAdapter, adapterType) => {
 		let docs = [];
 
 		describe("Set up", () => {
-			it("Adapter specific setups", async () => {
-				if (adapterType == "MongoDB") {
-					(await svc.getAdapter()).createIndex({
-						fields: { title: "text", content: "text" }
-					});
-				} else {
-					(await svc.getAdapter()).createIndex({
-						fields: "title"
-					});
-					(await svc.getAdapter()).createIndex({
-						fields: "content"
-					});
-				}
-			});
-
 			it("should return empty array", async () => {
 				const rows = await adapter.find();
 				expect(rows).toEqual([]);
@@ -350,4 +341,8 @@ module.exports = (getAdapter, adapterType) => {
 			});
 		});
 	});
+
+	// TODO Knex extra tests for
+	// - createQuery whereXY
+	// - createTable?
 };
