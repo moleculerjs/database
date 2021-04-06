@@ -16,7 +16,7 @@ describe("Moleculer Database memory leak test", () => {
 			DbService({
 				adapter: {
 					type: "MongoDB",
-					options: { dbName: "db-int-test", collection: "posts" }
+					options: { dbName: "db_int_test", collection: "posts" }
 				},
 				createActions: true
 			})

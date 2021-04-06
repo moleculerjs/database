@@ -36,8 +36,18 @@ module.exports = (getAdapter, adapterType) => {
 						default: true,
 						get: adapterType == "Knex" ? v => !!v : undefined
 					},
-					createdAt: { type: "number", onCreate: Date.now, columnType: "bigInteger" },
-					updatedAt: { type: "number", onUpdate: Date.now, columnType: "bigInteger" }
+					createdAt: {
+						type: "number",
+						onCreate: Date.now,
+						columnType: "bigInteger",
+						get: v => (v != null ? Number(v) : v)
+					},
+					updatedAt: {
+						type: "number",
+						onUpdate: Date.now,
+						columnType: "bigInteger",
+						get: v => (v != null ? Number(v) : v)
+					}
 				}
 			},
 

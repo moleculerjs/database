@@ -59,7 +59,7 @@ module.exports = (getAdapter, adapterType) => {
 					},
 					name: { type: "string", trim: true, required: true },
 					age: { type: "number", columnType: "integer" },
-					dob: { type: "number", columnType: "integer" },
+					dob: { type: "number", columnType: "bigInteger" },
 					roles: { type: "array", items: "string", columnType: "string" },
 					status: {
 						type: "boolean",

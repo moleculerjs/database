@@ -30,8 +30,18 @@ module.exports = (getAdapter, adapterType) => {
 							fields: ["name", "postCount", "email"]
 						}
 					},
-					createdAt: { type: "number", onCreate: Date.now, columnType: "integer" },
-					updatedAt: { type: "number", onUpdate: Date.now, columnType: "integer" }
+					createdAt: {
+						type: "number",
+						onCreate: Date.now,
+						columnType: "bigInteger",
+						get: v => (v != null ? Number(v) : v)
+					},
+					updatedAt: {
+						type: "number",
+						onUpdate: Date.now,
+						columnType: "bigInteger",
+						get: v => (v != null ? Number(v) : v)
+					}
 				},
 				defaultPopulates: ["author"]
 			},
@@ -56,10 +66,15 @@ module.exports = (getAdapter, adapterType) => {
 					name: { type: "string" },
 					email: { type: "string", readPermission: ["admin"] },
 					password: { type: "string", hidden: true },
-					favoritePosts: { type: "array", items: "string", populate: "posts.resolve" },
+					favoritePosts: {
+						type: "array",
+						items: "string",
+						populate: "posts.resolve",
+						columnType: "string"
+					},
 					postCount: {
 						type: "number",
-						readonly: true,
+						virtual: true,
 						populate: (ctx, values, docs) => {
 							return Promise.all(
 								docs.map(doc =>
@@ -76,13 +91,7 @@ module.exports = (getAdapter, adapterType) => {
 				const adapter = await this.getAdapter();
 
 				if (adapterType == "Knex") {
-					await adapter.client.schema.createTable("users", function (table) {
-						table.increments("_id");
-						table.string("name").index();
-						table.string("email").index();
-						table.string("password");
-						table.string("favoritePosts");
-					});
+					await adapter.createTable();
 				}
 			}
 		});

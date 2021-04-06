@@ -417,11 +417,7 @@ class KnexAdapter extends BaseAdapter {
 	async createTable(fields) {
 		if (!fields) fields = this.service.$fields;
 
-		const exists = await this.client.schema.hasTable(this.opts.tableName);
-		if (exists) {
-			this.logger.info(`Dropping '${this.opts.tableName}' table...`);
-			await this.client.schema.dropTable(this.opts.tableName);
-		}
+		await this.dropTable(this.opts.tableName);
 
 		this.logger.info(`Creating '${this.opts.tableName}' table...`);
 		await this.client.schema.createTable(this.opts.tableName, table => {
@@ -451,6 +447,14 @@ class KnexAdapter extends BaseAdapter {
 		// TODO indices!
 		// table.index(columns, [indexName], [indexType])
 		// table.unique(columns, [indexName])
+	}
+
+	async dropTable(tableName = this.opts.tableName) {
+		const exists = await this.client.schema.hasTable(tableName);
+		if (exists) {
+			this.logger.info(`Dropping '${tableName}' table...`);
+			await this.client.schema.dropTable(tableName);
+		}
 	}
 }
 

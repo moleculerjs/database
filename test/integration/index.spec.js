@@ -21,7 +21,7 @@ if (process.env.GITHUB_ACTIONS_CI) {
 	*/
 	Adapters = [
 		{ type: "NeDB" },
-		{ type: "MongoDB", options: { dbName: "db-int-test" } },
+		{ type: "MongoDB", options: { dbName: "db_int_test" } },
 		{
 			name: "Knex-SQLite",
 			type: "Knex",
@@ -41,7 +41,14 @@ if (process.env.GITHUB_ACTIONS_CI) {
 			options: {
 				knex: {
 					client: "pg",
-					connection: "postgres://postgres:moleculer@127.0.0.1:5432"
+					connection: {
+						//"postgres://postgres:moleculer@127.0.0.1:5432/db_int_test"
+						host: "127.0.0.1",
+						port: 5432,
+						user: "postgres",
+						password: "moleculer",
+						database: "db_int_test"
+					}
 				}
 			}
 		}
@@ -49,8 +56,8 @@ if (process.env.GITHUB_ACTIONS_CI) {
 } else {
 	// Local development tests
 	Adapters = [
-		/*{ type: "NeDB" },
-		{ type: "MongoDB", options: { dbName: "db-int-test" } },
+		{ type: "NeDB" },
+		{ type: "MongoDB", options: { dbName: "db_int_test" } },
 		{
 			name: "Knex-SQLite",
 			type: "Knex",
@@ -63,14 +70,20 @@ if (process.env.GITHUB_ACTIONS_CI) {
 					useNullAsDefault: true
 				}
 			}
-		},*/
+		},
 		{
 			name: "Knex-Postgresql",
 			type: "Knex",
 			options: {
 				knex: {
 					client: "pg",
-					connection: "postgres://postgres:moleculer@127.0.0.1:5432"
+					connection: {
+						host: "127.0.0.1",
+						port: 5432,
+						user: "postgres",
+						password: "moleculer",
+						database: "db_int_test"
+					}
 				}
 			}
 		}

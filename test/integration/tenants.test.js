@@ -1,5 +1,6 @@
 "use strict";
 
+const _ = require("lodash");
 const { ServiceBroker, Context } = require("moleculer");
 const DbService = require("../..").Service;
 const { ValidationError } = require("moleculer").Errors;
@@ -741,24 +742,28 @@ module.exports = (getAdapter, adapterType) => {
 				let adapter;
 				if (adapterType == "Knex") {
 					adapter = await this.getAdapter(tenant0Meta);
+					await adapter.dropTable("posts-1000");
 					await adapter.client.schema.createTable("posts-1000", table => {
 						table.string("_id");
 						table.string("title").index();
 						table.string("content").index();
 					});
 					adapter = await this.getAdapter(tenant1Meta);
+					await adapter.dropTable("posts-1001");
 					await adapter.client.schema.createTable("posts-1001", table => {
 						table.string("_id");
 						table.string("title").index();
 						table.string("content").index();
 					});
 					adapter = await this.getAdapter(tenant2Meta);
+					await adapter.dropTable("posts-1002");
 					await adapter.client.schema.createTable("posts-1002", table => {
 						table.string("_id");
 						table.string("title").index();
 						table.string("content").index();
 					});
 					adapter = await this.getAdapter(tenant3Meta);
+					await adapter.dropTable("posts-1003");
 					await adapter.client.schema.createTable("posts-1003", table => {
 						table.string("_id");
 						table.string("title").index();
@@ -786,10 +791,18 @@ module.exports = (getAdapter, adapterType) => {
 						tenantId,
 						{
 							type: adapterType,
-							options: {
-								...(adapterDef.options || {}),
-								dbName: `db-int-posts-${tenantId}`
-							}
+							options: _.defaultsDeep(
+								{
+									dbName: `db_int_posts_${tenantId}`, // For Mongo
+
+									knex: {
+										connection: {
+											database: `db_int_posts_${tenantId}` // for Pg
+										}
+									}
+								},
+								adapterDef.options
+							)
 						}
 					];
 				}
