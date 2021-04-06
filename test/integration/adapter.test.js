@@ -32,7 +32,7 @@ module.exports = (getAdapter, adapterType) => {
 						columnType: "integer"
 					},
 					title: { type: "string", trim: true, required: true },
-					content: { type: "string" },
+					content: { type: "string", max: 1000, columnType: "string" },
 					votes: { type: "number", default: 0, columnType: "integer" },
 					status: { type: "number", default: 1, columnType: "integer" }
 				}

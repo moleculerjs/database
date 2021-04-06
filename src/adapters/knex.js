@@ -438,7 +438,12 @@ class KnexAdapter extends BaseAdapter {
 					}
 					f = f.primary();
 				} else {
-					f = table[field.columnType](field.columnName);
+					if (field.columnType == "string") {
+						const len = field.columnLength || field.max || field.length;
+						f = table.string(field.columnName, len);
+					} else {
+						f = table[field.columnType](field.columnName);
+					}
 				}
 			}
 		});

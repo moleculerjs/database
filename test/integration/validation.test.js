@@ -1587,6 +1587,7 @@ module.exports = (getAdapter, adapterType) => {
 					address: {
 						type: "object",
 						columnType: "string",
+						columnLength: 1000,
 						properties: {
 							zip: { type: "number" },
 							street: { type: "string" },
@@ -1599,6 +1600,7 @@ module.exports = (getAdapter, adapterType) => {
 					roles: {
 						type: "array",
 						columnType: "string",
+						columnLength: 1000,
 						max: 3,
 						items: { type: "string" }
 					},
@@ -1606,6 +1608,7 @@ module.exports = (getAdapter, adapterType) => {
 					phones: {
 						type: "array",
 						columnType: "string",
+						columnLength: 1000,
 						items: {
 							type: "object",
 							properties: {
