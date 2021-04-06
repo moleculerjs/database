@@ -20,7 +20,7 @@ describe("Test scoping", () => {
 						status: true
 					},
 					public: {
-						visiblity: "public"
+						visibility: "public"
 					},
 					custom: scopeFn
 				},
@@ -34,44 +34,179 @@ describe("Test scoping", () => {
 
 		const ctx = Context.create(broker, null, {});
 
-		it("should add default scope", () => {
+		it("should add default scope", async () => {
 			const params = {};
 
-			const res = svc._applyScopes(params, ctx);
+			const res = await svc._applyScopes(params, ctx);
 			expect(res).toEqual({ query: { status: true } });
 		});
 
-		it("should add desired scope", () => {
+		it("should add desired scope", async () => {
 			const params = { scope: "public" };
 
-			const res = svc._applyScopes(params, ctx);
-			expect(res).toEqual({ query: { visiblity: "public" }, scope: "public" });
+			const res = await svc._applyScopes(params, ctx);
+			expect(res).toEqual({ query: { visibility: "public" }, scope: "public" });
 		});
 
-		it("should add nothing", () => {
+		it("should add nothing", async () => {
 			const params = { scope: false };
 
-			const res = svc._applyScopes(params, ctx);
+			const res = await svc._applyScopes(params, ctx);
 			expect(res).toEqual({ scope: false });
 		});
 
-		it("should add the custom scope", () => {
+		it("should add the custom scope", async () => {
 			const params = { scope: "custom" };
 
-			const res = svc._applyScopes(params, ctx);
+			const res = await svc._applyScopes(params, ctx);
 			expect(res).toEqual({ query: { a: 5, b: "Yes" }, scope: "custom" });
 
 			expect(scopeFn).toBeCalledTimes(1);
 			expect(scopeFn).toBeCalledWith({ a: 5, b: "Yes" }, ctx);
 		});
 
-		it("should add multiple scope", () => {
+		it("should add multiple scope", async () => {
 			const params = { scope: ["custom", "notExist", "public"] };
 
-			const res = svc._applyScopes(params, ctx);
+			const res = await svc._applyScopes(params, ctx);
 			expect(res).toEqual({
-				query: { a: 5, b: "Yes", visiblity: "public" },
+				query: { a: 5, b: "Yes", visibility: "public" },
 				scope: ["custom", "notExist", "public"]
+			});
+		});
+	});
+
+	describe("Test applyScopes method with authorization", () => {
+		const broker = new ServiceBroker({ logger: false });
+		const scopeFn = jest.fn(q => {
+			q.a = 5;
+			q.b = "Yes";
+			return q;
+		});
+
+		let checkScopeAuthorityReturnValue = () => true;
+		const checkScopeAuthority = jest.fn(async (ctx, name, scope) =>
+			checkScopeAuthorityReturnValue(name, scope)
+		);
+		const svc = broker.createService({
+			name: "posts",
+			mixins: [DbService({ createActions: false })],
+			settings: {
+				scopes: {
+					onlyActive: {
+						status: true
+					},
+					public: {
+						visibility: "public"
+					},
+					custom: scopeFn
+				},
+
+				defaultScopes: ["onlyActive"]
+			},
+
+			methods: {
+				checkScopeAuthority
+			}
+		});
+
+		beforeAll(() => broker.start());
+		afterAll(() => broker.stop());
+
+		const ctx = Context.create(broker, null, {});
+
+		it("should add default scope", async () => {
+			checkScopeAuthority.mockClear();
+			const params = {};
+
+			const res = await svc._applyScopes(params, ctx);
+			expect(res).toEqual({ query: { status: true } });
+
+			expect(checkScopeAuthority).toBeCalledTimes(1);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "onlyActive", {
+				status: true
+			});
+		});
+
+		it("should add desired scope", async () => {
+			checkScopeAuthority.mockClear();
+			const params = { scope: "public" };
+
+			const res = await svc._applyScopes(params, ctx);
+			expect(res).toEqual({ query: { visibility: "public" }, scope: "public" });
+
+			expect(checkScopeAuthority).toBeCalledTimes(1);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "public", {
+				visibility: "public"
+			});
+		});
+
+		it("should add nothing", async () => {
+			checkScopeAuthority.mockClear();
+			const params = { scope: false };
+
+			const res = await svc._applyScopes(params, ctx);
+			expect(res).toEqual({ scope: false });
+			expect(checkScopeAuthority).toBeCalledTimes(1);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), null, null);
+		});
+
+		it("should add the custom scope", async () => {
+			checkScopeAuthority.mockClear();
+			const params = { scope: "custom" };
+
+			const res = await svc._applyScopes(params, ctx);
+			expect(res).toEqual({ query: { a: 5, b: "Yes" }, scope: "custom" });
+
+			expect(scopeFn).toBeCalledTimes(1);
+			expect(scopeFn).toBeCalledWith({ a: 5, b: "Yes" }, ctx);
+
+			expect(checkScopeAuthority).toBeCalledTimes(1);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "custom", scopeFn);
+		});
+
+		it("should add multiple scope", async () => {
+			checkScopeAuthority.mockClear();
+			const params = { scope: ["custom", "notExist", "public"] };
+
+			const res = await svc._applyScopes(params, ctx);
+			expect(res).toEqual({
+				query: { a: 5, b: "Yes", visibility: "public" },
+				scope: ["custom", "notExist", "public"]
+			});
+
+			expect(checkScopeAuthority).toBeCalledTimes(2);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "custom", scopeFn);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "public", {
+				visibility: "public"
+			});
+		});
+
+		it("should not add desired scope if not permission", async () => {
+			checkScopeAuthorityReturnValue = () => false;
+			checkScopeAuthority.mockClear();
+			const params = { scope: "public" };
+
+			const res = await svc._applyScopes(params, ctx);
+			expect(res).toEqual({ query: {}, scope: "public" });
+
+			expect(checkScopeAuthority).toBeCalledTimes(1);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "public", {
+				visibility: "public"
+			});
+		});
+
+		it("should not disable the default scope", async () => {
+			checkScopeAuthorityReturnValue = scopeName => scopeName != null;
+			checkScopeAuthority.mockClear();
+			const params = { scope: false };
+
+			const res = await svc._applyScopes(params, ctx);
+			expect(res).toEqual({ query: { status: true }, scope: false });
+			expect(checkScopeAuthority).toBeCalledTimes(2);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), null, null);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "onlyActive", {
+				status: true
 			});
 		});
 	});

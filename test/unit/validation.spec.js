@@ -232,7 +232,7 @@ describe("Test validation", () => {
 			});
 
 			it("should return fields with read permission", async () => {
-				svc.checkAuthority = jest.fn(async () => false);
+				svc.checkFieldAuthority = jest.fn(async () => false);
 				const res = await svc._authorizeFields(svc.$fields, ctx, { a: 5 });
 				expect(res).toEqual([
 					{
@@ -244,15 +244,15 @@ describe("Test validation", () => {
 					}
 				]);
 
-				expect(svc.checkAuthority).toBeCalledTimes(3);
-				expect(svc.checkAuthority).toBeCalledWith(ctx, "admin", { a: 5 }, svc.$fields[1]);
-				expect(svc.checkAuthority).toBeCalledWith(
+				expect(svc.checkFieldAuthority).toBeCalledTimes(3);
+				expect(svc.checkFieldAuthority).toBeCalledWith(ctx, "admin", { a: 5 }, svc.$fields[1]);
+				expect(svc.checkFieldAuthority).toBeCalledWith(
 					ctx,
 					"moderator",
 					{ a: 5 },
 					svc.$fields[2]
 				);
-				expect(svc.checkAuthority).toBeCalledWith(
+				expect(svc.checkFieldAuthority).toBeCalledWith(
 					ctx,
 					["admin", "moderator", "owner"],
 					{ a: 5 },
@@ -261,7 +261,7 @@ describe("Test validation", () => {
 			});
 
 			it("should return fields with write permission", async () => {
-				svc.checkAuthority = jest.fn(async () => false);
+				svc.checkFieldAuthority = jest.fn(async () => false);
 				const res = await svc._authorizeFields(svc.$fields, ctx, { a: 5 }, true);
 				expect(res).toEqual([
 					{
@@ -273,15 +273,15 @@ describe("Test validation", () => {
 					}
 				]);
 
-				expect(svc.checkAuthority).toBeCalledTimes(3);
-				expect(svc.checkAuthority).toBeCalledWith(ctx, "owner", { a: 5 }, svc.$fields[1]);
-				expect(svc.checkAuthority).toBeCalledWith(
+				expect(svc.checkFieldAuthority).toBeCalledTimes(3);
+				expect(svc.checkFieldAuthority).toBeCalledWith(ctx, "owner", { a: 5 }, svc.$fields[1]);
+				expect(svc.checkFieldAuthority).toBeCalledWith(
 					ctx,
 					"moderator",
 					{ a: 5 },
 					svc.$fields[2]
 				);
-				expect(svc.checkAuthority).toBeCalledWith(
+				expect(svc.checkFieldAuthority).toBeCalledWith(
 					ctx,
 					["admin", "moderator", "owner"],
 					{ a: 5 },

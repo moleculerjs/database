@@ -93,7 +93,7 @@ module.exports = (getAdapter, adapterType) => {
 			});
 
 			it("should hide e-mail address", async () => {
-				svc.checkAuthority = jest.fn(async () => false);
+				svc.checkFieldAuthority = jest.fn(async () => false);
 				const res = await svc.resolveEntities(ctx, { myID: docs.johnDoe.myID });
 				expect(res).toEqual({
 					myID: expectedID,

@@ -96,15 +96,21 @@ module.exports = function (mixinOpts) {
 		 * @param {Object} params
 		 * @param {Context?} ctx
 		 */
-		_applyScopes(params, ctx) {
+		async _applyScopes(params, ctx) {
 			let scopes = null;
 			if (params.scope) {
 				scopes = Array.isArray(params.scope) ? params.scope : [params.scope];
-			} else if (params.scope !== false) {
+			} else if (params.scope === false) {
+				// Disable default scopes, check the permission for this
+				if (!(await this.checkScopeAuthority(ctx, null, null))) {
+					scopes = this.settings.defaultScopes;
+				}
+			} else {
 				scopes = this.settings.defaultScopes;
 			}
 
 			if (scopes && scopes.length > 0) {
+				scopes = await this._filterScopeNamesByPermission(ctx, scopes);
 				params.query = scopes.reduce((query, scopeName) => {
 					const scope = this.settings.scopes[scopeName];
 					if (!scope) return query;
@@ -115,6 +121,27 @@ module.exports = function (mixinOpts) {
 			}
 
 			return params;
+		},
+
+		/**
+		 * Filter the scopes according to permissions.
+		 *
+		 * @param {Context?} ctx
+		 * @param {Array<String>} scopeNames
+		 * @returns {Array<String>}
+		 */
+		async _filterScopeNamesByPermission(ctx, scopeNames) {
+			const res = [];
+			for (const scopeName of scopeNames) {
+				const scope = this.settings.scopes[scopeName];
+				if (!scope) continue;
+
+				const has = await this.checkScopeAuthority(ctx, scopeName, scope);
+				if (has) {
+					res.push(scopeName);
+				}
+			}
+			return res;
 		},
 
 		/**
@@ -180,7 +207,7 @@ module.exports = function (mixinOpts) {
 		 */
 		async findEntities(ctx, params = ctx.params, opts = {}) {
 			params = this.sanitizeParams(params);
-			params = this._applyScopes(params, ctx);
+			params = await this._applyScopes(params, ctx);
 
 			const adapter = await this.getAdapter(ctx);
 
@@ -201,7 +228,7 @@ module.exports = function (mixinOpts) {
 		 */
 		async streamEntities(ctx, params = ctx.params, opts = {}) {
 			params = this.sanitizeParams(params);
-			params = this._applyScopes(params, ctx);
+			params = await this._applyScopes(params, ctx);
 
 			const adapter = await this.getAdapter(ctx);
 			const stream = await adapter.findStream(params);
@@ -231,7 +258,7 @@ module.exports = function (mixinOpts) {
 		 */
 		async countEntities(ctx, params = ctx.params) {
 			params = this.sanitizeParams(params, { removeLimit: true });
-			params = this._applyScopes(params, ctx);
+			params = await this._applyScopes(params, ctx);
 
 			const adapter = await this.getAdapter(ctx);
 			const result = await adapter.count(params);
@@ -247,7 +274,7 @@ module.exports = function (mixinOpts) {
 		 */
 		async findEntity(ctx, params = ctx.params, opts = {}) {
 			params = this.sanitizeParams(params, { removeLimit: true });
-			params = this._applyScopes(params, ctx);
+			params = await this._applyScopes(params, ctx);
 			params.limit = 1;
 
 			const adapter = await this.getAdapter(ctx);
@@ -293,7 +320,7 @@ module.exports = function (mixinOpts) {
 			// Apply scopes & set ID filtering
 			params = Object.assign({}, params);
 			if (!params.query) params.query = {};
-			params = this._applyScopes(params, ctx);
+			params = await this._applyScopes(params, ctx);
 
 			let idField = this.$primaryField.columnName;
 

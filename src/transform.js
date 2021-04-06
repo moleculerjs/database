@@ -82,8 +82,6 @@ module.exports = function (mixinOpts) {
 
 			let needPopulates = this.settings.defaultPopulates;
 			if (params.populate === false) needPopulates = null;
-			else if (_.isString(params.populate)) needPopulates = [params.populate];
-			else if (Array.isArray(params.populate)) needPopulates = params.populate;
 
 			await Promise.all(
 				authorizedFields.map(async field => {

@@ -138,7 +138,21 @@ module.exports = function (mixinOpts) {
 		 * @param {Object} params
 		 * @param {Object} field
 		 */
-		async checkAuthority(/*ctx, permission, params, field*/) {
+		async checkFieldAuthority(/*ctx, permission, params, field*/) {
+			return true;
+		},
+
+		/**
+		 * Check the scope authority. Should be implemented in the service.
+		 * If `name and `scope` are null, it means you should check the permissions
+		 * when somebody wants turning off the default scopes (e.g. list
+		 * deleted records, as well).
+		 *
+		 * @param {Context} ctx
+		 * @param {String?} name
+		 * @param {Object?} scope
+		 */
+		async checkScopeAuthority(/*ctx, name, scope*/) {
 			return true;
 		},
 
@@ -159,14 +173,14 @@ module.exports = function (mixinOpts) {
 				_.compact(
 					fields.map(field => {
 						if (!write && field.readPermission) {
-							return this.checkAuthority(
+							return this.checkFieldAuthority(
 								ctx,
 								field.readPermission,
 								params,
 								field
 							).then(has => (has ? res.push(field) : null));
 						} else if (field.permission) {
-							return this.checkAuthority(
+							return this.checkFieldAuthority(
 								ctx,
 								field.permission,
 								params,

@@ -72,25 +72,20 @@ const pkg = require("../package.json");
 	- [x] Soft delete
 	- [x] create validation from field definitions
 	- [x] nested objects in fields.
-	- [ ] change optional -> required like in fastest-validator
 	- [x] Multi model/tenant solutions
 		- [x] get connection/model dynamically
+		- [ ] scope-based for integration tests
 	- [ ] `aggregate` action with params: `type: "sum", "avg", "count", "min", "max"` & `field: "price"`
 	- [ ] permissions for scopes
-	- [ ] permissions for populates
 	- [ ] ad-hoc populate in find/list actions `populate: ["author", { key: "createdBy", action: "users.resolve", fields: ["name", "avatar"] }]` { }
-	- [ ] nested-et nem támogató adapter-ek warning-oljanak és flat-eljék az Object-t|Array-t JSON string-é és úgy tárolják le
-	- [x] TEST: metódusok hívása `ctx` nélkül is mennie kell
-	- [x] `strict: false|true|"remove"` mode in the mixinOptions. Using it in the validator schemas.
-	- [x] convert the `$set` to flatten when it's needed
-			https://github.com/moleculerjs/moleculer-db/blob/720d04160e5acdc5598437adb7b2b39b31462842/packages/moleculer-db/src/index.js#L893-L893
 	- [ ] `bulkCreate` action without REST
+
 
 	- [ ] Adapters
 		- [ ] Cassandra
 		- [ ] Couchbase
 		- [ ] CouchDB
-		- [ ] Knex (!)
+		- [x] Knex
 		- [x] MongoDB
 		- [ ] Mongoose
 		- [x] NeDB

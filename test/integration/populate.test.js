@@ -480,7 +480,7 @@ module.exports = (getAdapter, adapterType) => {
 			});
 
 			it("should get user with populates and without permission (no email also in populated data)", async () => {
-				userSvc.checkAuthority = jest.fn(async () => false);
+				userSvc.checkFieldAuthority = jest.fn(async () => false);
 
 				const res = await userSvc.resolveEntities(ctx, {
 					id: users.bobSmith.id,

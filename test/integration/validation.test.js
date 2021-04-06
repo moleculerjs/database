@@ -353,7 +353,7 @@ module.exports = (getAdapter, adapterType) => {
 				}
 			},
 			methods: {
-				checkAuthority(ctx, permission, params, field) {
+				checkFieldAuthority(ctx, permission, params, field) {
 					if (typeof permission == "string")
 						return this.Promise.resolve(permission == userPermission);
 					return this.Promise.resolve(permission.includes(userPermission));
@@ -529,7 +529,7 @@ module.exports = (getAdapter, adapterType) => {
 				}
 			},
 			methods: {
-				checkAuthority(ctx, permission, params, field) {
+				checkFieldAuthority(ctx, permission, params, field) {
 					if (typeof permission == "string")
 						return this.Promise.resolve(permission == userPermission);
 					return this.Promise.resolve(permission.includes(userPermission));
