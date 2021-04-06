@@ -569,6 +569,7 @@ module.exports = (getAdapter, adapterType) => {
 				const users = fakerator.times(fakerator.entity.user, 20);
 				users.forEach(user => {
 					user.age = fakerator.random.number(18, 90);
+					user.email = user.email.replace(/\./g, ""); // the dot in email adddress can cause different sorting
 				});
 
 				docs = await this.createEntities(null, users);
