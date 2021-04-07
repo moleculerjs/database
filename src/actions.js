@@ -35,7 +35,7 @@ const PARAMS_QUERY = [
 module.exports = function (opts) {
 	const res = {};
 
-	const cacheOpts = opts.cache && opts.cache.enable ? opts.cache : null;
+	const cacheOpts = opts.cache && opts.cache.enabled ? opts.cache : null;
 	const maxLimit = opts.maxLimit > 0 ? opts.maxLimit : null;
 
 	/**

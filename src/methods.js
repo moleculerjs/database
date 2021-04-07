@@ -82,7 +82,7 @@ module.exports = function (mixinOpts) {
 		/**
 		 * Disconnect all adapters
 		 */
-		disconnectAll() {
+		_disconnectAll() {
 			const adapters = Array.from(this.adapters.values()).map(item => item.adapter);
 			this.adapters.clear();
 
@@ -563,11 +563,17 @@ module.exports = function (mixinOpts) {
 		async clearEntities(ctx, params) {
 			const adapter = await this.getAdapter(ctx);
 			const result = await adapter.clear(params);
+
+			if (cacheOpts && cacheOpts.eventName) {
+				// Cache cleaning event
+				(ctx || this.broker).broadcast(cacheOpts.eventName);
+			}
+
 			return result;
 		},
 
 		/**
-		 * Create an index.
+		 * Create an index. TODO: rewrite it
 		 *
 		 * @param {Object} def
 		 */

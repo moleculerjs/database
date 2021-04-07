@@ -40,13 +40,14 @@ const pkg = require("../package.json");
 		- [x] `id` field with `secure` option: { id: true, type: "string", readonly: true, secure: true, columnName: "_id" }
 		- [x] `columnName` support: { id: true, type: "string", columnName: "_id" }
 		- [x] Sanitizers
-			- [x] trim title: { type: "string", trim: true, maxlength: 50, required: true },
+			- [x] trim title: { type: "string", trim: true, max: 50, required: true },
 		- [x] set: custom set formatter: { set: (value, entity, field, ctx) => slug(entity.title) }
 		- [x] get: custom get formatter: { get: (value, entity, field, ctx) => entity.firstName + ' ' + entity.lastName }
 		- [x] default value: status: { type: "number", default: 1 } // Optional field with default value
 		- [x] required: validation
 		- [x] validate the type field with converting
 		- [x] readonly: { type: "string", readonly: true } // Can't be set and modified
+		- [x] virtual: { type: "string", virtual: true, get: () => ... } // Can't be set and modified and always should have the `get` method or `populate` defined
 		- [x] hidden (password): password: { type: "string", hidden: true,
 		  - [x] { hidden: "byDefault" | "always" == true } hide if it's not requested in `fields`.
 		- [x] custom validator: { type: "string", validate: (value, entity, field, ctx) => value.length > 6 },	// Custom validator
@@ -58,7 +59,7 @@ const pkg = require("../package.json");
 		- [x] onCreate: createdAt: { type: "number", readonly: true, onCreate: () => Date.now() }, // Set value when entity is created
 		- [x] onUpdate: updatedAt: { type: "number", readonly: true, onUpdate: () => Date.now() }, // Set value when entity is updated
 		- [x] onRemove: deletedAt: { type: "number", readonly: true, onRemove: () => Date.now() }, // Set value when entity is deleted
-		- [ ] nested types
+		- [x] nested types
 
 	- [x] Methods (internal with _ prefix)
 		- [x] create indexes (execute the adapter)
@@ -79,6 +80,7 @@ const pkg = require("../package.json");
 	- [ ] permissions for scopes
 	- [ ] ad-hoc populate in find/list actions `populate: ["author", { key: "createdBy", action: "users.resolve", fields: ["name", "avatar"] }]` { }
 	- [ ] `bulkCreate` action without REST
+	- [ ] `settings.indexes` implementation common form and `createIndex` in the adapter process it.
 
 
 	- [ ] Adapters
@@ -110,7 +112,7 @@ module.exports = function DatabaseMixin(mixinOpts) {
 		/** @type {Object} Caching settings */
 		cache: {
 			/** @type {Boolean} Enable caching of actions */
-			enable: true,
+			enabled: true,
 			/** @type {String} Name of event for clearing cache */
 			eventName: null
 		},
@@ -159,7 +161,7 @@ module.exports = function DatabaseMixin(mixinOpts) {
 			/** @type {Array<String>?} Default scopes which applies to `find` & `list` actions */
 			defaultScopes: null,
 
-			/** @type {Object?} Adapter-specific index definitions */
+			/** @type {Object?} Index definitions */
 			indexes: null
 		},
 
@@ -197,7 +199,7 @@ module.exports = function DatabaseMixin(mixinOpts) {
 		 * Stop lifecycle hook of service
 		 */
 		async stopped() {
-			return this.disconnectAll();
+			return this._disconnectAll();
 		},
 
 		/**

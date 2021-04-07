@@ -194,6 +194,19 @@ class BaseAdapter {
 	}
 
 	/**
+	 * Replace an entity by ID
+	 *
+	 * @param {String} id
+	 * @param {Object} entity
+	 * @returns {Promise<Object>} Return with the updated document.
+	 *
+	 */
+	replaceById(/*id, entity*/) {
+		/* istanbul ignore next */
+		throw new Error("This method is not implemented.");
+	}
+
+	/**
 	 * Remove an entity by ID
 	 *
 	 * @param {String} id
