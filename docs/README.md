@@ -8,7 +8,7 @@ The options of the Mixin.
 | `createActions` | `Boolean` | `true` | Generate CRUD actions. |
 | `actionVisibility` | `String` | `published` | Default visibility of generated actions |
 | `generateActionParams` | `Boolean` | `true` | Generate `params` schema for generated actions based on the `fields` |
-| `strict` | `Boolean|String` | `remove` | Strict mode in validation schema for objects. Values: `true`, `false`, `"remove"` |
+| `strict` | `Boolean\|String` | `remove` | Strict mode in validation schema for objects. Values: `true`, `false`, `"remove"` |
 | `cache` | `Object` | | Action caching settings |
 | `cache.enabled` | `Boolean` | `true` | Enable caching on actions |
 | `cache.eventName` | `String` | `null` | Name of the broadcasted event for clearing cache at modifications (update, replace, remove) |
@@ -297,7 +297,7 @@ TODO
 [Knex adapter documentation](/docs/adapters/Knex.md)
 
 ## MongoDB
-[MongodB adapter documentation](/docs/adapters/MongodB.md)
+[MongoDB adapter documentation](/docs/adapters/MongoDB.md)
 
 ## Mongoose
 TODO
