@@ -217,17 +217,8 @@ class KnexAdapter extends BaseAdapter {
 	 * @returns {Promise<Object>} Return with the updated document.
 	 *
 	 */
-	async updateById(id, changes, opts) {
-		const raw = opts && opts.raw ? true : false;
-		/*if (!raw) {
-			// Flatten the changes to dot notation
-			changes = flatten(changes, { safe: true });
-		}*/
-
-		await this.client
-			.table(this.opts.tableName)
-			.update(changes)
-			.where({ [this.idFieldName]: id });
+	async updateById(id, changes /*, opts*/) {
+		await this.client.table(this.opts.tableName).update(changes).where(this.idFieldName, id);
 
 		return this.findById(id);
 	}
@@ -241,13 +232,7 @@ class KnexAdapter extends BaseAdapter {
 	 * @returns {Promise<Number>} Return with the count of modified documents.
 	 *
 	 */
-	async updateMany(query, changes, opts) {
-		const raw = opts && opts.raw ? true : false;
-		/*if (!raw) {
-			// Flatten the changes to dot notation
-			changes = flatten(changes, { safe: true });
-		}*/
-
+	async updateMany(query, changes /*, opts*/) {
 		return await this.client.table(this.opts.tableName).update(changes).where(query);
 	}
 
@@ -271,10 +256,7 @@ class KnexAdapter extends BaseAdapter {
 	 *
 	 */
 	async removeById(id) {
-		await this.client
-			.table(this.opts.tableName)
-			.where({ [this.idFieldName]: id })
-			.del();
+		await this.client.table(this.opts.tableName).where(this.idFieldName, id).del();
 		return id;
 	}
 
@@ -298,7 +280,7 @@ class KnexAdapter extends BaseAdapter {
 	 */
 	async clear() {
 		const count = await this.count();
-		const res = await this.client.table(this.opts.tableName).truncate();
+		await this.client.table(this.opts.tableName).truncate();
 		return count;
 	}
 
@@ -401,23 +383,21 @@ class KnexAdapter extends BaseAdapter {
 	}
 
 	/**
-	 * Create an index. The `def` is adapter specific.
-	 *
-	 * @param {Object} def
-	 * @param {Object|String} def.fields
-	 * @param {Boolean?} def.unique
-	 * @param {String?} def.name
-	 * @param {String?} def.type
+	 * Create a table based on field definitions
+	 * @param {Array<Object>} fields
+	 * @param {Object?} opts
+	 * @param {Boolean?} opts.dropTableIfExists
+	 * @param {Boolean?} opts.createIndexes
 	 */
-	createIndex(def) {
-		//if (def.unique) return this.client.unique(def.fields, def.name);
-		//else return this.client.index(def.fields, def.name, def.type);
-	}
-
-	async createTable(fields) {
+	async createTable(fields, opts = {}) {
 		if (!fields) fields = this.service.$fields;
 
-		await this.dropTable(this.opts.tableName);
+		if (opts && opts.dropTableIfExists !== false) {
+			const exists = await this.client.schema.hasTable(this.opts.tableName);
+			if (exists) {
+				await this.dropTable(this.opts.tableName);
+			}
+		}
 
 		this.logger.info(`Creating '${this.opts.tableName}' table...`);
 		await this.client.schema.createTable(this.opts.tableName, table => {
@@ -446,20 +426,77 @@ class KnexAdapter extends BaseAdapter {
 					}
 				}
 			}
+
+			if (
+				opts &&
+				opts.createIndexes &&
+				this.service.settings &&
+				this.service.settings.indexes
+			) {
+				this.service.settings.indexes.forEach(def => this.createTableIndex(table, def));
+			}
 		});
 		this.logger.info(`Table '${this.opts.tableName}' created.`);
-
-		// TODO indices!
-		// table.index(columns, [indexName], [indexType])
-		// table.unique(columns, [indexName])
 	}
 
+	/**
+	 * Drop the given table.
+	 * @param {String?} tableName
+	 */
 	async dropTable(tableName = this.opts.tableName) {
-		const exists = await this.client.schema.hasTable(tableName);
-		if (exists) {
-			this.logger.info(`Dropping '${tableName}' table...`);
-			await this.client.schema.dropTable(tableName);
+		this.logger.info(`Dropping '${tableName}' table...`);
+		await this.client.schema.dropTable(tableName);
+	}
+
+	/**
+	 * Create an index.
+	 *
+	 * @param {Object} def
+	 * @param {String|Array<String>|Object} def.fields
+	 * @param {String?} def.name
+	 * @param {String?} def.type The type can be optionally specified for PostgreSQL and MySQL
+	 * @param {Boolean?} def.unique
+	 * @returns {Promise<void>}
+	 */
+	async createIndex(def) {
+		await this.client.schema.alterTable(this.opts.tableName, table =>
+			this.createTableIndex(table, def)
+		);
+	}
+
+	/**
+	 * Create index on the given table
+	 * @param {KnexTable} table
+	 * @param {Object} def
+	 * @returns
+	 */
+	createTableIndex(table, def) {
+		let fields = def.fields;
+		if (_.isPlainObject(fields)) {
+			fields = Object.keys(fields);
 		}
+
+		if (def.unique) return table.unique(fields, def.name);
+		else return table.index(fields, def.name, def.type);
+	}
+
+	/**
+	 * Remove an index.
+	 *
+	 * @param {Object} def
+	 * @param {String|Array<String>|Object} def.fields
+	 * @param {String?} def.name
+	 * @returns {Promise<void>}
+	 */
+	async removeIndex(def) {
+		let fields = def.fields;
+		if (_.isPlainObject(fields)) {
+			fields = Object.keys(fields);
+		}
+
+		await this.client.schema.alterTable(this.opts.tableName, function (table) {
+			return table.dropIndex(fields, def.name);
+		});
 	}
 }
 

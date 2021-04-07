@@ -348,11 +348,12 @@ class NeDBAdapter extends BaseAdapter {
 	}
 
 	/**
-	 * Create an index. The `def` is adapter specific.
+	 * Create an index.
 	 * More info: https://github.com/louischatriot/nedb#indexing
 	 *
 	 * @param {Object} def
-	 * @param {String|Array<String>} def.fields
+	 * @param {String?} def.fields
+	 * @param {String?} def.fieldName
 	 * @param {Boolean?} def.unique
 	 * @param {Boolean?} def.sparse
 	 * @param {Number?} def.expireAfterSeconds
@@ -360,18 +361,37 @@ class NeDBAdapter extends BaseAdapter {
 	 */
 	createIndex(def) {
 		return new this.Promise((resolve, reject) => {
+			let fieldName = def.fieldName || def.fields;
+			if (_.isPlainObject(fieldName)) {
+				fieldName = Object.keys(fieldName);
+			}
 			this.db.ensureIndex(
 				{
-					fieldName: def.fieldName || def.fields,
-					unique: def.unique,
-					sparse: def.sparse,
-					expireAfterSeconds: def.expireAfterSeconds
+					fieldName: fieldName,
+					..._.omit(def, ["fieldName", "fields"])
 				},
 				err => {
 					if (err) return reject(err);
 					resolve();
 				}
 			);
+		});
+	}
+
+	/**
+	 * Remove an index.
+	 *
+	 * @param {Object} def
+	 * @param {String|Array<String>|Object} def.fields
+	 * @param {String?} def.name
+	 * @returns {Promise<void>}
+	 */
+	removeIndex(def) {
+		return new this.Promise((resolve, reject) => {
+			this.db.removeIndex({ fieldName: def.fieldName || def.fields }, err => {
+				if (err) return reject(err);
+				resolve();
+			});
 		});
 	}
 }

@@ -736,39 +736,25 @@ module.exports = (getAdapter, adapterType) => {
 							}
 						}
 					];
+				},
+
+				async createTenantTable(ctx, tableName) {
+					const adapter = await this.getAdapter(ctx);
+					if (await adapter.client.schema.hasTable(tableName))
+						await adapter.dropTable(tableName);
+					await adapter.client.schema.createTable(tableName, table => {
+						table.string("_id");
+						table.string("title").index();
+						table.string("content").index();
+					});
 				}
 			},
 			async started() {
-				let adapter;
 				if (adapterType == "Knex") {
-					adapter = await this.getAdapter(tenant0Meta);
-					await adapter.dropTable("posts-1000");
-					await adapter.client.schema.createTable("posts-1000", table => {
-						table.string("_id");
-						table.string("title").index();
-						table.string("content").index();
-					});
-					adapter = await this.getAdapter(tenant1Meta);
-					await adapter.dropTable("posts-1001");
-					await adapter.client.schema.createTable("posts-1001", table => {
-						table.string("_id");
-						table.string("title").index();
-						table.string("content").index();
-					});
-					adapter = await this.getAdapter(tenant2Meta);
-					await adapter.dropTable("posts-1002");
-					await adapter.client.schema.createTable("posts-1002", table => {
-						table.string("_id");
-						table.string("title").index();
-						table.string("content").index();
-					});
-					adapter = await this.getAdapter(tenant3Meta);
-					await adapter.dropTable("posts-1003");
-					await adapter.client.schema.createTable("posts-1003", table => {
-						table.string("_id");
-						table.string("title").index();
-						table.string("content").index();
-					});
+					await this.createTenantTable(tenant0Meta, "posts-1000");
+					await this.createTenantTable(tenant1Meta, "posts-1001");
+					await this.createTenantTable(tenant2Meta, "posts-1002");
+					await this.createTenantTable(tenant3Meta, "posts-1003");
 				}
 			}
 		});

@@ -450,20 +450,40 @@ class MongoDBAdapter extends BaseAdapter {
 	}
 
 	/**
-	 * Create an index. The `def` is adapter specific.
+	 * Create an index.
 	 *
 	 * @param {Object} def
-	 * @param {Object|String} def.fields
+	 * @param {String|Array<String>|Object} def.fields
+	 * @param {String?} def.name
 	 * @param {Boolean?} def.unique
 	 * @param {Boolean?} def.sparse
-	 * @param {String?} def.name
+	 * @param {Number?} def.expireAfterSeconds
 	 */
 	createIndex(def) {
-		return this.collection.createIndex(def.fields, {
-			unique: def.unique,
-			sparse: def.sparse,
-			name: def.name
-		});
+		let fields;
+		if (typeof def.fields == "string") fields = { [def.fields]: 1 };
+		else if (Array.isArray(def.fields)) {
+			fields = def.fields.reduce((a, b) => {
+				a[b] = 1;
+				return a;
+			}, {});
+		} else {
+			fields = def.fields;
+		}
+		return this.collection.createIndex(fields, def);
+	}
+
+	/**
+	 * Remove an index by name or fields.
+	 *
+	 * @param {Object} def
+	 * @param {String|Array<String>|Object} def.fields
+	 * @param {String?} def.name
+	 * @returns {Promise<void>}
+	 */
+	removeIndex(def) {
+		if (def.name) return this.collection.dropIndex(def.name);
+		else return this.collection.dropIndex(def.fields);
 	}
 }
 

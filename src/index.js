@@ -75,12 +75,13 @@ const pkg = require("../package.json");
 	- [x] nested objects in fields.
 	- [x] Multi model/tenant solutions
 		- [x] get connection/model dynamically
-		- [ ] scope-based for integration tests
+		- [ ] schema-based for integration tests
 	- [ ] `aggregate` action with params: `type: "sum", "avg", "count", "min", "max"` & `field: "price"`
 	- [ ] permissions for scopes
 	- [ ] ad-hoc populate in find/list actions `populate: ["author", { key: "createdBy", action: "users.resolve", fields: ["name", "avatar"] }]` { }
 	- [ ] `bulkCreate` action without REST
-	- [ ] `settings.indexes` implementation common form and `createIndex` in the adapter process it.
+	- [ ] create methods for `updateMany` and `removeMany`
+	- [x] `settings.indexes` implementation common form and `createIndex` in the adapter process it.
 
 
 	- [ ] Adapters

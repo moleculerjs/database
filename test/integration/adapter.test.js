@@ -32,24 +32,20 @@ module.exports = (getAdapter, adapterType) => {
 						columnType: "integer"
 					},
 					title: { type: "string", trim: true, required: true },
-					content: { type: "string", max: 1000, columnType: "string" },
+					content: { type: "string", max: 200, columnType: "string" },
 					votes: { type: "number", default: 0, columnType: "integer" },
 					status: { type: "number", default: 1, columnType: "integer" }
-				}
+				},
+				indexes: [{ fields: { title: "text", content: "text" } }]
 			},
 
 			async started() {
 				adapter = await this.getAdapter();
 
-				if (adapterType == "MongoDB") {
-					adapter.createIndex({
-						fields: { title: "text", content: "text" }
-					});
-				} else if (adapterType == "Knex") {
-					await adapter.createTable();
+				if (adapterType == "Knex") {
+					await adapter.createTable(null, { createIndexes: true });
 				} else {
-					adapter.createIndex({ fields: "title" });
-					adapter.createIndex({ fields: "content" });
+					await this.createIndexes(adapter);
 				}
 
 				await this.clearEntities();

@@ -569,7 +569,20 @@ module.exports = function (mixinOpts) {
 		},
 
 		/**
-		 * Create an index. TODO: rewrite it
+		 * Create indexes.
+		 * @param {Adapter?} adapter If null, it gets adapter with `getAdapter()`
+		 * @param {Array<Object>?} indexes If null, it uses the `settings.indexes`
+		 */
+		async createIndexes(adapter, indexes) {
+			adapter = await (adapter || this.getAdapter());
+			if (!indexes) indexes = this.settings.indexes;
+			if (Array.isArray(indexes)) {
+				await Promise.all(indexes.map(def => this.createIndex(adapter, def)));
+			}
+		},
+
+		/**
+		 * Create an index.
 		 *
 		 * @param {Object} def
 		 */

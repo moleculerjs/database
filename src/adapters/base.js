@@ -251,12 +251,31 @@ class BaseAdapter {
 	}
 
 	/**
-	 * Create an index. The `def` is adapter specific.
+	 * Create an index.
 	 *
-	 * @param {any} def
+	 * @param {Object} def
+	 * @param {String|Array<String>|Object} def.fields
+	 * @param {String?} def.name
+	 * @param {String?} def.type The type can be optionally specified for PostgreSQL and MySQL
+	 * @param {Boolean?} def.unique
+	 * @param {Boolean?} def.sparse The `sparse` can be optionally specified for MongoDB and NeDB
+	 * @param {Number?} def.expireAfterSeconds The `expireAfterSeconds` can be optionally specified for MongoDB and NeDB
 	 * @returns {Promise<void>}
 	 */
 	createIndex(/*def*/) {
+		/* istanbul ignore next */
+		throw new Error("This method is not implemented.");
+	}
+
+	/**
+	 * Remove an index.
+	 *
+	 * @param {Object} def
+	 * @param {String|Array<String>|Object} def.fields
+	 * @param {String?} def.name
+	 * @returns {Promise<void>}
+	 */
+	removeIndex(/*def*/) {
 		/* istanbul ignore next */
 		throw new Error("This method is not implemented.");
 	}

@@ -11,14 +11,8 @@ const ValidationTests = require("./validation.test");
 const RESTTests = require("./rest.test");
 const TenantTests = require("./tenants.test");
 
-// console.log(process.env);
-
 let Adapters;
 if (process.env.GITHUB_ACTIONS_CI) {
-	/*const Adapters = Object.keys(require("../../").Adapters).filter(
-		s => ["resolve", "register", "Base"].indexOf(s) == -1
-	);
-	*/
 	Adapters = [
 		{ type: "NeDB" },
 		{ type: "MongoDB", options: { dbName: "db_int_test" } },
@@ -86,8 +80,8 @@ if (process.env.GITHUB_ACTIONS_CI) {
 } else {
 	// Local development tests
 	Adapters = [
-		//{ type: "NeDB" }
-		/*{ type: "MongoDB", options: { dbName: "db_int_test" } },
+		{ type: "NeDB" },
+		{ type: "MongoDB", options: { dbName: "db_int_test" } },
 		{
 			name: "Knex-SQLite",
 			type: "Knex",
@@ -163,7 +157,7 @@ if (process.env.GITHUB_ACTIONS_CI) {
 					}
 				}
 			}
-		}*/
+		}
 	];
 }
 

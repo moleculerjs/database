@@ -11,12 +11,11 @@ The options of the Mixin.
 | `strict` | `Boolean\|String` | `remove` | Strict mode in validation schema for objects. Values: `true`, `false`, `"remove"` |
 | `cache` | `Object` | | Action caching settings |
 | `cache.enabled` | `Boolean` | `true` | Enable caching on actions |
-| `cache.eventName` | `String` | `null` | Name of the broadcasted event for clearing cache at modifications (update, replace, remove). If `false` disable event broadcasting & subscription |
+| `cache.eventName` | `String` | `null` | Name of the broadcasted event for clearing cache at modifications (update, replace, remove). If `false`, it disables event broadcasting & subscription |
 | `rest` | `Boolean` | `true` | Set the API Gateway auto-aliasing REST properties in the service & actions |
 | `autoReconnect` | `Boolean` | `true` | Auto reconnect if the DB server is not available at first connecting |
 | `maxLimit` | `Number` | `-1` | Maximum value of `limit` in `find` action and `pageSize` in `list` action. Default: `-1` (no limit) |
 | `defaultPageSize` | `Number` | `10` | Default page size in `list` action. |
-
 
 
 # Settings
@@ -264,7 +263,8 @@ TODO
 TODO
 
 # Indexes
-TODO
+You can define the indexes in the service `settings.indixes` property. It has a common format and every adapter will process and creates the indexes.
+Other option, if you call the adapter.createIndex` method directly. [More info](#createindexdef-any)
 
 # Populating
 TODO
