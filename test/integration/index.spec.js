@@ -86,7 +86,7 @@ if (process.env.GITHUB_ACTIONS_CI) {
 } else {
 	// Local development tests
 	Adapters = [
-		{ type: "NeDB" }
+		//{ type: "NeDB" }
 		/*{ type: "MongoDB", options: { dbName: "db_int_test" } },
 		{
 			name: "Knex-SQLite",
@@ -145,6 +145,21 @@ if (process.env.GITHUB_ACTIONS_CI) {
 						password: "Moleculer@Pass1234",
 						database: "db_int_test",
 						encrypt: false
+					}
+				}
+			}
+		},
+		{
+			name: "Knex-MySQL2",
+			type: "Knex",
+			options: {
+				knex: {
+					client: "mysql2",
+					connection: {
+						host: "127.0.0.1",
+						user: "root",
+						password: "moleculer",
+						database: "db_int_test"
 					}
 				}
 			}

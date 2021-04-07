@@ -805,7 +805,12 @@ module.exports = (getAdapter, adapterType) => {
 			mixins: [DbService({ adapter: getAdapter() })],
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: "integer"
+					},
 					title: { type: "string", trim: true, required: true },
 					content: { type: "string", trim: true }
 				}
@@ -864,7 +869,7 @@ module.exports = (getAdapter, adapterType) => {
 			expect(svc.resolveEntities).toBeCalledTimes(1);
 			expect(svc.resolveEntities).toBeCalledWith(
 				expect.any(Context),
-				{ id: row.id },
+				{ id: "" + row.id },
 				{ throwIfNotExist: true }
 			);
 		});
@@ -887,7 +892,7 @@ module.exports = (getAdapter, adapterType) => {
 			expect(svc.resolveEntities).toBeCalledTimes(1);
 			expect(svc.resolveEntities).toBeCalledWith(
 				expect.any(Context),
-				{ id: row.id },
+				{ id: "" + row.id },
 				{ throwIfNotExist: undefined }
 			);
 		});
@@ -1006,7 +1011,7 @@ module.exports = (getAdapter, adapterType) => {
 			expect(svc.resolveEntities).toBeCalledTimes(1);
 			expect(svc.resolveEntities).toBeCalledWith(
 				expect.any(Context),
-				{ id: row.id },
+				{ id: "" + row.id },
 				{ throwIfNotExist: true }
 			);
 		});
@@ -1036,7 +1041,12 @@ module.exports = (getAdapter, adapterType) => {
 			],
 			settings: {
 				fields: {
-					id: { type: "string", primaryKey: true, columnName: "_id" },
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: "integer"
+					},
 					title: { type: "string", trim: true, required: true },
 					content: { type: "string", trim: true }
 				}
@@ -1084,7 +1094,7 @@ module.exports = (getAdapter, adapterType) => {
 			expect(svc.resolveEntities).toBeCalledTimes(1);
 			expect(svc.resolveEntities).toBeCalledWith(
 				expect.any(Context),
-				{ id: row.id },
+				{ id: "" + row.id },
 				{ throwIfNotExist: true }
 			);
 		});
