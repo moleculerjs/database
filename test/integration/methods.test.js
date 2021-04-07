@@ -403,7 +403,7 @@ module.exports = (getAdapter, adapterType) => {
 			expect(docs.johnDoe).toEqual({ ...TEST_DOCS.johnDoe, id: expectedID });
 
 			expect(svc.entityChanged).toBeCalledTimes(1);
-			expect(svc.entityChanged).toBeCalledWith("create", docs.johnDoe, ctx);
+			expect(svc.entityChanged).toBeCalledWith("create", docs.johnDoe, ctx, {});
 		});
 
 		it("create multiple entities", async () => {
@@ -427,7 +427,7 @@ module.exports = (getAdapter, adapterType) => {
 			});
 
 			expect(svc.entityChanged).toBeCalledTimes(1);
-			expect(svc.entityChanged).toBeCalledWith("create", res, ctx);
+			expect(svc.entityChanged).toBeCalledWith("create", res, ctx, { batch: true });
 		});
 
 		describe("Test resolveEntities method", () => {
@@ -595,7 +595,7 @@ module.exports = (getAdapter, adapterType) => {
 				});
 
 				expect(svc.entityChanged).toBeCalledTimes(1);
-				expect(svc.entityChanged).toBeCalledWith("update", row, ctx);
+				expect(svc.entityChanged).toBeCalledWith("update", row, ctx, {});
 			});
 
 			if (adapterType == "MongoDB" || adapterType == "NeDB") {
@@ -626,7 +626,7 @@ module.exports = (getAdapter, adapterType) => {
 					});
 
 					expect(svc.entityChanged).toBeCalledTimes(1);
-					expect(svc.entityChanged).toBeCalledWith("update", row, ctx);
+					expect(svc.entityChanged).toBeCalledWith("update", row, ctx, {});
 				});
 			}
 
@@ -672,7 +672,7 @@ module.exports = (getAdapter, adapterType) => {
 					});
 
 					expect(svc.entityChanged).toBeCalledTimes(1);
-					expect(svc.entityChanged).toBeCalledWith("replace", row, ctx);
+					expect(svc.entityChanged).toBeCalledWith("replace", row, ctx, {});
 				});
 			}
 
@@ -790,7 +790,9 @@ module.exports = (getAdapter, adapterType) => {
 				expect(count).toEqual(3);
 
 				expect(svc.entityChanged).toBeCalledTimes(1);
-				expect(svc.entityChanged).toBeCalledWith("remove", docs.janeDoe, ctx);
+				expect(svc.entityChanged).toBeCalledWith("remove", docs.janeDoe, ctx, {
+					softDelete: false
+				});
 			});
 
 			it("throw Missing ID", async () => {

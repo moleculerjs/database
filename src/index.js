@@ -280,25 +280,24 @@ module.exports = function DatabaseMixin(mixinOpts) {
 					fixIDInCacheKeys(schema.actions.resolve, primaryKeyField);
 				}
 			}
-		}
-	};
 
-	if (mixinOpts.cache && mixinOpts.cache.enabled) {
-		const eventName = mixinOpts.cache.eventName || `cache.clean.${this.name}`;
-		schema.events = {
-			/**
-			 * Subscribe to the cache clean event. If it's triggered
-			 * clean the cache entries for this service.
-			 *
-			 * @param {Context} ctx
-			 */
-			async [eventName]() {
-				if (this.broker.cacher) {
-					await this.broker.cacher.clean(`${this.fullName}.**`);
+			if (mixinOpts.cache && mixinOpts.cache.enabled) {
+				if (mixinOpts.cache.eventName !== false) {
+					const eventName = mixinOpts.cache.eventName || `cache.clean.${schema.name}`;
+					if (!schema.events) schema.events = {};
+					/**
+					 * Subscribe to the cache clean event. If it's triggered
+					 * clean the cache entries for this service.
+					 */
+					schema.events[eventName] = async function () {
+						if (this.broker.cacher) {
+							await this.broker.cacher.clean(`${this.fullName}.**`);
+						}
+					};
 				}
 			}
-		};
-	}
+		}
+	};
 
 	return schema;
 };

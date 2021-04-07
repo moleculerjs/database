@@ -383,7 +383,7 @@ module.exports = function (mixinOpts) {
 				result = await this.transformResult(adapter, result, {}, ctx);
 			}
 
-			await this._entityChanged(result, ctx, { ...opts, type: "create" });
+			await this._entityChanged("create", result, ctx, opts);
 			return result;
 		},
 
@@ -411,7 +411,7 @@ module.exports = function (mixinOpts) {
 				result = await this.transformResult(adapter, result, {}, ctx);
 			}
 
-			await this._entityChanged(result, ctx, { ...opts, type: "create", batch: true });
+			await this._entityChanged("create", result, ctx, { ...opts, batch: true });
 			return result;
 		},
 
@@ -463,7 +463,7 @@ module.exports = function (mixinOpts) {
 			}
 
 			if (hasChanges) {
-				await this._entityChanged(result, ctx, { ...opts, type: "update" });
+				await this._entityChanged("update", result, ctx, opts);
 			}
 
 			return result;
@@ -504,7 +504,7 @@ module.exports = function (mixinOpts) {
 				result = await this.transformResult(adapter, result, {}, ctx);
 			}
 
-			await this._entityChanged(result, ctx, { ...opts, type: "replace" });
+			await this._entityChanged("replace", result, ctx, opts);
 			return result;
 		},
 
@@ -545,9 +545,8 @@ module.exports = function (mixinOpts) {
 				entity = await this.transformResult(adapter, entity, params, ctx);
 			}
 
-			await this._entityChanged(entity, ctx, {
+			await this._entityChanged("remove", entity, ctx, {
 				...opts,
-				type: "remove",
 				softDelete: !!this.$softDelete
 			});
 
@@ -564,10 +563,7 @@ module.exports = function (mixinOpts) {
 			const adapter = await this.getAdapter(ctx);
 			const result = await adapter.clear(params);
 
-			if (cacheOpts && cacheOpts.eventName) {
-				// Cache cleaning event
-				(ctx || this.broker).broadcast(cacheOpts.eventName);
-			}
+			await this._entityChanged("clear", null, ctx);
 
 			return result;
 		},
@@ -583,17 +579,25 @@ module.exports = function (mixinOpts) {
 
 		/**
 		 * Called when an entity changed.
+		 * @param {String} type
 		 * @param {any} data
 		 * @param {Context?} ctx
 		 * @param {Object?} opts
 		 */
-		async _entityChanged(data, ctx, opts = {}) {
-			if (cacheOpts && cacheOpts.eventName) {
-				// Cache cleaning event
-				(ctx || this.broker).broadcast(cacheOpts.eventName);
+		async _entityChanged(type, data, ctx, opts = {}) {
+			if (cacheOpts.eventName !== false) {
+				const eventName = cacheOpts.eventName || `cache.clean.${this.name}`;
+				if (cacheOpts && eventName) {
+					// Cache cleaning event
+					(ctx || this.broker).broadcast(eventName, {
+						type,
+						data,
+						opts
+					});
+				}
 			}
 
-			this.entityChanged(opts.type, data, ctx);
+			await this.entityChanged(type, data, ctx, opts);
 		},
 
 		/**
@@ -601,8 +605,9 @@ module.exports = function (mixinOpts) {
 		 * @param {String} type
 		 * @param {any} data
 		 * @param {Context?} ctx
+		 * @param {Object?} opts
 		 */
-		entityChanged(type, data, ctx) {
+		async entityChanged(type, data, ctx, opts) {
 			// Abstract method
 		},
 

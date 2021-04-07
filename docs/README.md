@@ -11,7 +11,7 @@ The options of the Mixin.
 | `strict` | `Boolean\|String` | `remove` | Strict mode in validation schema for objects. Values: `true`, `false`, `"remove"` |
 | `cache` | `Object` | | Action caching settings |
 | `cache.enabled` | `Boolean` | `true` | Enable caching on actions |
-| `cache.eventName` | `String` | `null` | Name of the broadcasted event for clearing cache at modifications (update, replace, remove) |
+| `cache.eventName` | `String` | `null` | Name of the broadcasted event for clearing cache at modifications (update, replace, remove). If `false` disable event broadcasting & subscription |
 | `rest` | `Boolean` | `true` | Set the API Gateway auto-aliasing REST properties in the service & actions |
 | `autoReconnect` | `Boolean` | `true` | Auto reconnect if the DB server is not available at first connecting |
 | `maxLimit` | `Number` | `-1` | Maximum value of `limit` in `find` action and `pageSize` in `list` action. Default: `-1` (no limit) |
@@ -244,7 +244,7 @@ TODO
 ## `getAdapterByContext(ctx?: Context, adapterDef?: object)`
 TODO
 
-## `entityChanged(type: String, data: any, ctx: Context)`
+## `entityChanged(type: String, data?: any, ctx?: Context, opts?: object)`
 TODO
 
 ## `encodeID(id: any)`

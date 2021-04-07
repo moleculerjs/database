@@ -97,6 +97,8 @@ module.exports = (getAdapter, adapterType) => {
 
 		describe("Create & get entity", () => {
 			it("should create a new entity", async () => {
+				entityChanged.mockClear();
+
 				const doc = await broker.call("posts.create", {
 					title: "First post",
 					content: "Content of first post",
@@ -116,7 +118,7 @@ module.exports = (getAdapter, adapterType) => {
 				});
 
 				expect(entityChanged).toBeCalledTimes(1);
-				expect(entityChanged).toBeCalledWith("create", doc, expect.any(Context));
+				expect(entityChanged).toBeCalledWith("create", doc, expect.any(Context), {});
 			});
 
 			it("should get the newly created entity", async () => {
@@ -200,7 +202,7 @@ module.exports = (getAdapter, adapterType) => {
 					});
 
 					expect(entityChanged).toBeCalledTimes(1);
-					expect(entityChanged).toBeCalledWith("update", doc, expect.any(Context));
+					expect(entityChanged).toBeCalledWith("update", doc, expect.any(Context), {});
 				});
 
 				it("should get the newly created entity", async () => {
@@ -251,7 +253,7 @@ module.exports = (getAdapter, adapterType) => {
 				});
 
 				expect(entityChanged).toBeCalledTimes(1);
-				expect(entityChanged).toBeCalledWith("update", doc, expect.any(Context));
+				expect(entityChanged).toBeCalledWith("update", doc, expect.any(Context), {});
 			});
 
 			it("should get the newly created entity", async () => {
@@ -282,7 +284,9 @@ module.exports = (getAdapter, adapterType) => {
 				expect(res).toEqual(docs[0].id);
 
 				expect(entityChanged).toBeCalledTimes(1);
-				expect(entityChanged).toBeCalledWith("remove", docs[0], expect.any(Context));
+				expect(entityChanged).toBeCalledWith("remove", docs[0], expect.any(Context), {
+					softDelete: false
+				});
 			});
 
 			it("should throw EntityNotFound error", async () => {
@@ -793,4 +797,330 @@ module.exports = (getAdapter, adapterType) => {
 			});
 		});
 	}
+
+	describe("Test caching with eventName", () => {
+		const broker = new ServiceBroker({ logger: false, cacher: "Memory" });
+		const svc = broker.createService({
+			name: "posts",
+			mixins: [DbService({ adapter: getAdapter() })],
+			settings: {
+				fields: {
+					id: { type: "string", primaryKey: true, columnName: "_id" },
+					title: { type: "string", trim: true, required: true },
+					content: { type: "string", trim: true }
+				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
+
+				jest.spyOn(broker, "broadcast");
+				jest.spyOn(broker.cacher, "clean");
+				jest.spyOn(svc, "resolveEntities");
+				jest.spyOn(svc, "findEntities");
+				jest.spyOn(svc, "countEntities");
+			}
+		});
+
+		beforeAll(() => broker.start());
+		afterAll(() => broker.stop());
+
+		let row;
+		it("should create entity", async () => {
+			broker.broadcast.mockClear();
+			broker.cacher.clean.mockClear();
+
+			row = await broker.call("posts.create", {
+				title: "First post",
+				content: "First content"
+			});
+
+			expect(broker.broadcast).toBeCalledTimes(1);
+			expect(broker.broadcast).toBeCalledWith(
+				"cache.clean.posts",
+				{
+					type: "create",
+					data: row,
+					opts: {}
+				},
+				{
+					parentCtx: expect.any(Context)
+				}
+			);
+		});
+
+		it("should get the entity from the DB", async () => {
+			svc.resolveEntities.mockClear();
+
+			const res = await broker.call("posts.get", { id: row.id });
+			expect(res).toEqual(row);
+
+			expect(svc.resolveEntities).toBeCalledTimes(1);
+			expect(svc.resolveEntities).toBeCalledWith(
+				expect.any(Context),
+				{ id: row.id },
+				{ throwIfNotExist: true }
+			);
+		});
+
+		it("should get the entity from the cache", async () => {
+			svc.resolveEntities.mockClear();
+
+			const res = await broker.call("posts.get", { id: row.id });
+			expect(res).toEqual(row);
+
+			expect(svc.resolveEntities).toBeCalledTimes(0);
+		});
+
+		it("should resolve the entity from the DB", async () => {
+			svc.resolveEntities.mockClear();
+
+			const res = await broker.call("posts.resolve", { id: row.id });
+			expect(res).toEqual(row);
+
+			expect(svc.resolveEntities).toBeCalledTimes(1);
+			expect(svc.resolveEntities).toBeCalledWith(
+				expect.any(Context),
+				{ id: row.id },
+				{ throwIfNotExist: undefined }
+			);
+		});
+
+		it("should resolve the entity from the cache", async () => {
+			svc.resolveEntities.mockClear();
+
+			const res = await broker.call("posts.resolve", { id: row.id });
+			expect(res).toEqual(row);
+
+			expect(svc.resolveEntities).toBeCalledTimes(0);
+		});
+
+		it("should find entities from the DB", async () => {
+			svc.findEntities.mockClear();
+
+			const res = await broker.call("posts.find");
+			expect(res).toEqual([row]);
+
+			expect(svc.findEntities).toBeCalledTimes(1);
+			expect(svc.findEntities).toBeCalledWith(expect.any(Context));
+		});
+
+		it("should find entities from the cache", async () => {
+			svc.findEntities.mockClear();
+
+			const res = await broker.call("posts.find");
+			expect(res).toEqual([row]);
+
+			expect(svc.findEntities).toBeCalledTimes(0);
+		});
+
+		it("should count entities from the DB", async () => {
+			svc.countEntities.mockClear();
+
+			const res = await broker.call("posts.count");
+			expect(res).toEqual(1);
+
+			expect(svc.countEntities).toBeCalledTimes(1);
+			expect(svc.countEntities).toBeCalledWith(expect.any(Context));
+		});
+
+		it("should count entities from the cache", async () => {
+			svc.countEntities.mockClear();
+
+			const res = await broker.call("posts.count");
+			expect(res).toEqual(1);
+
+			expect(svc.countEntities).toBeCalledTimes(0);
+		});
+
+		it("should list entities from the DB", async () => {
+			svc.findEntities.mockClear();
+			svc.countEntities.mockClear();
+
+			const res = await broker.call("posts.list");
+			expect(res).toEqual({ page: 1, pageSize: 10, rows: [row], total: 1, totalPages: 1 });
+
+			expect(svc.findEntities).toBeCalledTimes(1);
+			expect(svc.findEntities).toBeCalledWith(expect.any(Context), {
+				limit: 10,
+				offset: 0,
+				page: 1,
+				pageSize: 10
+			});
+
+			expect(svc.countEntities).toBeCalledTimes(1);
+			expect(svc.countEntities).toBeCalledWith(expect.any(Context), {
+				limit: 10,
+				offset: 0,
+				page: 1,
+				pageSize: 10
+			});
+		});
+
+		it("should list entities from the cache", async () => {
+			svc.findEntities.mockClear();
+			svc.countEntities.mockClear();
+
+			const res = await broker.call("posts.list");
+			expect(res).toEqual({ page: 1, pageSize: 10, rows: [row], total: 1, totalPages: 1 });
+
+			expect(svc.findEntities).toBeCalledTimes(0);
+			expect(svc.countEntities).toBeCalledTimes(0);
+		});
+
+		it("should clear cache after update", async () => {
+			broker.broadcast.mockClear();
+			broker.cacher.clean.mockClear();
+
+			row = await broker.call("posts.update", {
+				id: row.id,
+				title: "Update post"
+			});
+
+			expect(broker.broadcast).toBeCalledTimes(1);
+			expect(broker.broadcast).toBeCalledWith(
+				"cache.clean.posts",
+				{
+					type: "update",
+					data: row,
+					opts: {}
+				},
+				{
+					parentCtx: expect.any(Context)
+				}
+			);
+		});
+
+		it("should get the entity from the DB (again)", async () => {
+			svc.resolveEntities.mockClear();
+
+			const res = await broker.call("posts.get", { id: row.id });
+			expect(res).toEqual(row);
+
+			expect(svc.resolveEntities).toBeCalledTimes(1);
+			expect(svc.resolveEntities).toBeCalledWith(
+				expect.any(Context),
+				{ id: row.id },
+				{ throwIfNotExist: true }
+			);
+		});
+
+		it("should get the entity from the cache (again)", async () => {
+			svc.resolveEntities.mockClear();
+
+			const res = await broker.call("posts.get", { id: row.id });
+			expect(res).toEqual(row);
+
+			expect(svc.resolveEntities).toBeCalledTimes(0);
+		});
+	});
+
+	describe("Test caching without eventName", () => {
+		const broker = new ServiceBroker({ logger: false, cacher: "Memory" });
+		const svc = broker.createService({
+			name: "posts",
+			mixins: [
+				DbService({
+					adapter: getAdapter(),
+					cache: {
+						// In this case no cache cleaner event broadcasting
+						eventName: false
+					}
+				})
+			],
+			settings: {
+				fields: {
+					id: { type: "string", primaryKey: true, columnName: "_id" },
+					title: { type: "string", trim: true, required: true },
+					content: { type: "string", trim: true }
+				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
+
+				jest.spyOn(broker, "broadcast");
+				jest.spyOn(broker.cacher, "clean");
+				jest.spyOn(svc, "resolveEntities");
+				jest.spyOn(svc, "findEntities");
+				jest.spyOn(svc, "countEntities");
+			}
+		});
+
+		beforeAll(() => broker.start());
+		afterAll(() => broker.stop());
+
+		let row;
+		it("should create entity", async () => {
+			broker.broadcast.mockClear();
+			broker.cacher.clean.mockClear();
+
+			row = await broker.call("posts.create", {
+				title: "First post",
+				content: "First content"
+			});
+
+			expect(broker.broadcast).toBeCalledTimes(0);
+		});
+
+		it("should get the entity from the DB", async () => {
+			svc.resolveEntities.mockClear();
+
+			const res = await broker.call("posts.get", { id: row.id });
+			expect(res).toEqual(row);
+
+			expect(svc.resolveEntities).toBeCalledTimes(1);
+			expect(svc.resolveEntities).toBeCalledWith(
+				expect.any(Context),
+				{ id: row.id },
+				{ throwIfNotExist: true }
+			);
+		});
+
+		it("should get the entity from the cache", async () => {
+			svc.resolveEntities.mockClear();
+
+			const res = await broker.call("posts.get", { id: row.id });
+			expect(res).toEqual(row);
+
+			expect(svc.resolveEntities).toBeCalledTimes(0);
+		});
+
+		it("should not clear cache after update", async () => {
+			broker.broadcast.mockClear();
+			broker.cacher.clean.mockClear();
+
+			row = await broker.call("posts.update", {
+				id: row.id,
+				title: "Update post"
+			});
+
+			expect(broker.broadcast).toBeCalledTimes(0);
+		});
+
+		it("should get the old entity from the cache (again)", async () => {
+			svc.resolveEntities.mockClear();
+
+			const res = await broker.call("posts.get", { id: row.id });
+			expect(res).toEqual({
+				id: row.id,
+				title: "First post",
+				content: "First content"
+			});
+
+			expect(svc.resolveEntities).toBeCalledTimes(0);
+		});
+	});
 };
