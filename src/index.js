@@ -85,6 +85,7 @@ const pkg = require("../package.json");
 	- [ ] add default `entitiyChanged` method which generates events.
 	- [ ] add option to disable auto value conversion in validator schema.
 	- [ ] `validate` somehow should return the error message text if not valid. E.g. it's `true` or `"The value is not valid"`
+	- [ ] `sort` param in find & list should be also `Array<String>` not just `String`
 
 	- [ ] Adapters
 		- [ ] Cassandra

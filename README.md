@@ -33,6 +33,7 @@ npm i @moleculer/database
 
 ## Usage
 
+**Define the service**
 ```js
 // posts.service.js
 
@@ -60,6 +61,7 @@ module.exports = {
 }
 ```
 
+**Call the actions**
 ```js
 // sample.js
 

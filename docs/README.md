@@ -421,20 +421,396 @@ You can use any additional properties for validation & sanitization from the Fas
 
 # Actions
 
+The service generates common CRUD actions if the `createActions` mixin option is not `false`.
+You can fine control which actions should be created.
+
+**Example to disable all action creation**
+```js
+module.exports = {
+    mixins: [DbService({
+        createActions: false
+    })]
+}
+```
+
+**Example to disable specified action creation**
+```js
+module.exports = {
+    mixins: [DbService({
+        createActions: {
+            find: false,
+            replace: false
+        }
+    })]
+}
+```
+
 ## `find` Find entities
-TODO
+Find entitites by query.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `limit` | `Number` | `null` | Max count of rows. |
+| `offset` | `Number` | `null` | Count of skipped rows. |
+| `fields` | `String|Array<String>` | `null` | Fields to return. |
+| `sort` | `String` | `null` | Sorted fields. |
+| `search` | `String` | `null` | Search text. |
+| `searchFields` | `String|Array<String>` | `null` | Fields for searching. |
+| `collation` | `Object` | `null` | Collaction settings. Passed for adapter directly. |
+| `scope` | `String|Array<String>|Boolean` | `null` | Scopes for query. If `false`, disables the default scopes. |
+| `populate` | `String|Array<String>` | `null` | Populated fields. |
+| `query` | `String|Object` | `null` | Query object. If `String`, it's converted with `JSON.parse` |
+
+### REST endpoint
+```js
+GET /{serviceName}/all
+```
+
+### Results
+
+```js
+[
+    {
+        id: "akTRSKTKzGCg9EMz",
+        title: "Third post",
+        content: "Content of my 3rd post...",
+        votes: 0,
+        status: false,
+        createdAt: 1618077045354,
+    },
+    {
+        id: "0YZQR0oqyjKILaRn",
+        title: "My second post",
+        content: "Content of my second post...",
+        votes: 3,
+        status: true,
+        createdAt: 1618077045352,
+    }
+]
+```
+
+
+### Examples
+
+#### Limit & offset
+```js
+const posts = await broker.call("posts.find", { limit: 10, offset: 50 });
+```
+
+#### Fields
+```js
+const posts = await broker.call("posts.find", { fields: ["id", "title", "votes"] });
+```
+
+#### Sorting (one field)
+```js
+const posts = await broker.call("posts.find", { sort: "createdAt" });
+```
+
+#### Sorting (multiple fields)
+_The `-` negative sign prefix means descendant sorting._
+```js
+const posts = await broker.call("posts.find", { sort: ["-votes", "title"] });
+```
+
+#### Searching
+```js
+const posts = await broker.call("posts.find", {
+    search: "content",
+    searchText: ["title", "content"]
+});
+```
+> MongoDB supports full-text search, so the `searchText` is not used because MongoDB searches the documents according to the defined `text` indexes.
+
+#### Scope
+```js
+const posts = await broker.call("posts.find", { scope: "onlyActive" });
+```
+
+#### Multiple scopes
+```js
+const posts = await broker.call("posts.find", { scope: ["onlyActive", "hasVotes"] });
+```
+
+#### Disable all default scopes
+```js
+const posts = await broker.call("posts.find", { scope: false });
+```
+
+#### Populate
+```js
+const posts = await broker.call("posts.find", { populate: "author" });
+```
+
+#### Multiple populates
+```js
+const posts = await broker.call("posts.find", { populate: ["author", "voters"] });
+```
+
+#### Using query
+```js
+const posts = await broker.call("posts.find", {
+    query: {
+        status: false
+    }
+});
+```
+
+```js
+const posts = await broker.call("posts.find", {
+    query: {
+        status: true,
+        votes: {
+            $gt: 5
+        }
+    }
+});
+```
+
+#### 
 
 ## `list` List entities
-TODO
+List entitites with pagination. It returns with the total number of rows, as well.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `page` | `Number` | `null` | Page number. |
+| `pageSize` | `Number` | `null` | Size of a page. |
+| `fields` | `String|Array<String>` | `null` | Fields to return. |
+| `sort` | `String` | `null` | Sorted fields. |
+| `search` | `String` | `null` | Search text. |
+| `searchFields` | `String|Array<String>` | `null` | Fields for searching. |
+| `collation` | `Object` | `null` | Collaction settings. Passed for adapter directly. |
+| `scope` | `String|Array<String>|Boolean` | `null` | Scopes for query. If `false`, disables the default scopes. |
+| `populate` | `String|Array<String>` | `null` | Populated fields. |
+| `query` | `String|Object` | `null` | Query object. If `String`, it's converted with `JSON.parse` |
+
+### REST endpoint
+```js
+GET /{serviceName}/
+```
+
+### Results
+
+```js
+{
+    rows: [
+        {
+            id: "2bUwg4Driim3wRhg",
+            title: "Third post",
+            content: "Content of my 3rd post...",
+            votes: 0,
+            status: false,
+            createdAt: 1618077609105,
+        },
+        {
+            id: "Di5T8svHC9nT6MTj",
+            title: "My second post",
+            content: "Content of my second post...",
+            votes: 3,
+            status: true,
+            createdAt: 1618077609103,
+        },
+        {
+            id: "YVdnh5oQCyEIRja0",
+            title: "My first post",
+            content: "Content of my first post...",
+            votes: 0,
+            status: true,
+            createdAt: 1618077608593,
+        },
+    ],
+    total: 3,
+    page: 1,
+    pageSize: 10,
+    totalPages: 1,
+}
+```
+
+### Examples
+
+#### Pagination
+```js
+const posts = await broker.call("posts.list", { page: 3, pageSize: 10 });
+```
+
+------
+The other parameter examples are same as [`find`](#find-find-entities) action.
 
 ## `count` Count entities
-TODO
+Get count of entities by query.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `search` | `String` | `null` | Search text. |
+| `searchFields` | `String|Array<String>` | `null` | Fields for searching. |
+| `scope` | `String|Array<String>|Boolean` | `null` | Scopes for query. If `false`, disables the default scopes. |
+| `query` | `String|Object` | `null` | Query object. If `String`, it's converted with `JSON.parse` |
+
+### REST endpoint
+```js
+GET /{serviceName}/count
+```
+
+### Results
+
+```js
+15
+```
+
+### Examples
+
+The parameter examples are same as [`find`](#find-find-entities) action.
+
 
 ## `get` Get an entity by ID
-TODO
+Get an entity by ID.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `<id>` | `any` | `null` | ID of entity. The name of property comes from the primaryKey field. |
+| `fields` | `String|Array<String>` | `null` | Fields to return. |
+| `scope` | `String|Array<String>|Boolean` | `null` | Scopes for query. If `false`, disables the default scopes. |
+| `populate` | `String|Array<String>` | `null` | Populated fields. |
+
+### REST endpoint
+```js
+GET /{serviceName}/all
+```
+
+### Results
+
+```js
+{
+    id: "YVdnh5oQCyEIRja0",
+    title: "My first post",
+    content: "Content of my first post...",
+    votes: 0,
+    status: true,
+    createdAt: 1618077608593,
+}
+```
+
+### Examples
+
+```js
+const post = await broker.call("posts.get", { id: "YVdnh5oQCyEIRja0" });
+```
+
+#### Different ID field
+If you can use different primary key field name instead of `id`, you should use it in the action params, as well.
+
+**Primary key definition in `fields`**
+```js
+{
+    key: { type: "string", primaryKey: true, columnName: "_id" }
+}
+```
+
+**Call the action**
+```js
+const post = await broker.call("posts.get", { key: "YVdnh5oQCyEIRja0" });
+```
+
+------
+The other parameter examples are same as [`find`](#find-find-entities) action.
+
 
 ## `resolve` Get entit(ies) by ID(s)
-TODO
+Resolve an entity by one or multiple IDs.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `<id>` | `any|Array<any>` | `null` | ID of entity(ies). The name of property comes from the primaryKey field. |
+| `fields` | `String|Array<String>` | `null` | Fields to return. |
+| `scope` | `String|Array<String>|Boolean` | `null` | Scopes for query. If `false`, disables the default scopes. |
+| `populate` | `String|Array<String>` | `null` | Populated fields. |
+| `mapping` | `boolean` | `false` | Convert the result to `Object` where the key is the ID. |
+| `throwIfNotExist` | `boolean` | `false` | If `true`, throw `EntityNotFound` error if the entity is not exist. |
+
+
+### REST endpoint
+No endpoint.
+
+### Examples
+
+#### Call with a single ID
+```js
+const post = await broker.call("posts.resolve", { id: "YVdnh5oQCyEIRja0" });
+```
+
+**Result**
+```js
+{
+    id: "YVdnh5oQCyEIRja0",
+    title: "My first post",
+    content: "Content of my first post...",
+    votes: 0,
+    status: true,
+    createdAt: 1618077608593,
+}
+```
+
+#### Call with a multiple ID
+```js
+const post = await broker.call("posts.resolve", { id: ["YVdnh5oQCyEIRja0", "Di5T8svHC9nT6MTj"] });
+```
+
+**Result**
+```js
+{
+    id: "YVdnh5oQCyEIRja0",
+    title: "My first post",
+    content: "Content of my first post...",
+    votes: 0,
+    status: true,
+    createdAt: 1618077608593,
+},
+{
+    id: 'Di5T8svHC9nT6MTj',
+    title: 'My second post',
+    content: 'Content of my second post...',
+    votes: 3,
+    status: true,
+    createdAt: 1618077609103
+},
+```
+
+### Call with mapping
+```js
+const post = await broker.call("posts.resolve", { id: ["YVdnh5oQCyEIRja0", "Di5T8svHC9nT6MTj"], mapping: true });
+```
+
+**Result**
+```js
+{
+    aJpbex55yO6qvpbL: {
+        id: 'aJpbex55yO6qvpbL',
+        title: 'Third post',
+        content: 'Content of my 3rd post...',
+        votes: 0,
+        status: false,
+        createdAt: 1618079528329
+    },
+    FbuK1O5tcmUIRrQL: {
+        id: 'FbuK1O5tcmUIRrQL',
+        title: 'My second post',
+        content: 'Content of my second post...',
+        votes: 3,
+        status: true,
+        createdAt: 1618079528327
+    }
+}
+```
+
+------
+The other parameter examples are same as [`find`](#find-find-entities) action.
+
 
 ## `create` Create an entity
 TODO
