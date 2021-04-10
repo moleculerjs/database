@@ -6,18 +6,24 @@
 [![NPM version](https://badgen.net/npm/v/@moleculer/database)](https://www.npmjs.com/package/@moleculer/database)
 
 # @moleculer/database 
-Advanced Database Access Service for Moleculer microservices framework.
+Advanced Database Access Service for Moleculer microservices framework. Use it to persist your data in a database.
+
+>Moleculer follows the *one database per service* pattern. To learn more about this design pattern and its implications check this [article](https://microservices.io/patterns/data/database-per-service.html). For *multiple entities/tables per service* approach check [FAQ](faq.html#DB-Adapters-moleculer-db).
 
 ## Features
-- common CRUD actions for RESTful API
-- multiple pluggable adapters (NeDB (memory), MongoDB)
+- multiple pluggable adapters (NeDB, MongoDB, Knex)
+- common CRUD actions for RESTful API with caching
+- pagination, field filtering support
 - field sanitizations, validations
+- readonly, immutable, virtual fields
+- field permissions (read/write)
+- ID field encoding
 - data transformation
 - populating between Moleculer services
-- field permissions (read/write)
-- onCcreate/Update/Remove hooks in fields
+- create/update/remove hooks
 - soft delete mode
 - scopes support
+- entity lifecycle events
 - Multi-tenancy (record-based, collection/table-based, schema-based, db-based, server-based)
 
 ## Install
@@ -27,6 +33,79 @@ npm i @moleculer/database
 
 ## Usage
 
+```js
+// posts.service.js
+
+const DbService = require("@moleculer/database").Service;
+
+module.exports = {
+    name: "posts",
+    mixins: [
+        DbService({
+            adapter: "NeDB"
+        })
+    ],
+
+    settings: {
+        fields: {
+            id: { type: "string", primaryKey: true, columnName: "_id" },
+            title: { type: "string", max: 255, trim: true, required: true },
+            content: { type: "string" },
+            votes: { type: "number", integer: true, min: 0, default: 0 },
+            status: { type: "boolean", default: true },
+            createdAt: { type: "number", readonly: true, onCreate: () => Date.now() },
+            updateAt: { type: "number", readonly: true, onUpdate: () => Date.now() }
+        }
+    }
+}
+```
+
+```js
+// sample.js
+
+// Create a new post
+let post = await broker.call("posts.create", {
+    title: "My first post",
+    content: "Content of my first post..."    
+});
+console.log("New post:", post);
+/* It prints:
+
+New post: {
+  id: 'Zrpjq8B1XTSywUgT',
+  title: 'My first post',
+  content: 'Content of my first post...',
+  votes: 0,
+  status: true,
+  createdAt: 1618065551990
+}
+*/
+
+// Get all posts
+let posts = await broker.call("posts.find", { sort: "-createdAt" });
+console.log("Find:", posts);
+
+// List posts with pagination
+posts = await broker.call("posts.list", { page: 1, pageSize: 10 });
+console.log("List:", posts);
+
+// Get a post by ID
+post = await broker.call("posts.get", { id: post.id });
+console.log("Get:", post);
+
+// Update the post
+post = await broker.call("posts.update", { id: post.id, title: "Modified post" });
+console.log("Updated:", post);
+
+// Delete a user
+const res = await broker.call("posts.remove", { id: post.id });
+console.log("Deleted:", res);
+```
+
+>TODO add repl.it example with this code
+
+## Documentation
+You can find [here the documentation](docs/README.md).
 
 ## License
 The project is available under the [MIT license](https://tldrlegal.com/license/mit-license).
