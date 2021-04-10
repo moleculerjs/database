@@ -100,7 +100,7 @@ The `type` defines the type of the field value. It can be any primitive types (`
 
 >Please note, if the value type and the defined type mismatches, the service will try to convert the value to the defined type. In the above example, if you set `age: "34"`, the service won't throw `ValidationError`, instead convert it to `Number`.
 
-### `required`: \<boolean\> <small>(Default: `false`)</small>
+### `required`: \<boolean\> _(Default: `false`)_
 Every field is optional by default. To make it mandatory, set `required: true` in the field properties. If this fields is nullish, the service throws a `ValidationError` in the `create` & `replace` actions.
 
 **Example**
@@ -663,6 +663,10 @@ GET /{serviceName}/count
 
 ### Examples
 
+```js
+const postCount = await broker.call("posts.count");
+```
+
 The parameter examples are same as [`find`](#find-find-entities) action.
 
 
@@ -726,7 +730,7 @@ Resolve an entity by one or multiple IDs.
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
-| `<id>` | `any\|Array<any>` | `null` | ID of entity(ies). The name of property comes from the primaryKey field. |
+| `<id>` | `any\|Array<any>` | `null` | ID of entity(ies). The name of property comes from the primary key field. |
 | `fields` | `String\|Array<String>` | `null` | Fields to return. |
 | `scope` | `String\|Array<String>\|Boolean` | `null` | Scopes for query. If `false`, disables the default scopes. |
 | `populate` | `String\|Array<String>` | `null` | Populated fields. |
@@ -823,7 +827,7 @@ No any special parameters. All fields will be used for entity after validation.
 
 ### REST endpoint
 ```js
-POST /{serviceName}/
+POST /{serviceName}
 ```
 
 ### Results
@@ -1007,13 +1011,15 @@ TODO
 ## `removeEntity(ctx?: Context, params: object, opts?: object)`
 TODO
 
-## `clearEntity(ctx?: Context, params: object, opts?: object)`
+## `clearEntities(ctx?: Context, params: object, opts?: object)`
 TODO
 
 ## `validateParams(ctx?: Context, params: object, opts?: object)`
 TODO
 
-## `transformResult(adapter: Adapter, docs: object|Array<object>, params?: object, ctx?: Context)`
+## `transformResult`
+Signature: `transformResult(adapter: Adapter, docs: object|Array<object>, params?: object, ctx?: Context)`
+
 TODO
 
 # Implementable methods
