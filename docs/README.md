@@ -975,71 +975,111 @@ TODO
 
 # Methods
 
-## `getAdapter(ctx?: Context)`
+## `getAdapter`
+`getAdapter(ctx?: Context)`
+
 TODO
 
-## `sanitizeParams(params: object, opts?: object)`
+## `sanitizeParams`
+`sanitizeParams(params: object, opts?: object)`
+
 TODO
 
-## `findEntities(ctx?: Context, params: object, opts?: object)`
+## `findEntities`
+`findEntities(ctx?: Context, params: object, opts?: object)`
+
 TODO
 
-## `streamEntities(ctx?: Context, params: object, opts?: object)`
+## `streamEntities`
+`streamEntities(ctx?: Context, params: object, opts?: object)`
+
 TODO
 
-## `countEntities(ctx?: Context, params: object)`
+## `countEntities`
+`countEntities(ctx?: Context, params: object)`
+
 TODO
 
-## `findEntity(ctx?: Context, params: object, opts?: object)`
+## `findEntity`
+`findEntity(ctx?: Context, params: object, opts?: object)`
+
 TODO
 
-## `resolveEntities(ctx?: Context, params: object, opts?: object)`
+## `resolveEntities`
+`resolveEntities(ctx?: Context, params: object, opts?: object)`
+
 TODO
 
-## `createEntity(ctx?: Context, params: object, opts?: object)`
+## `createEntity`
+`createEntity(ctx?: Context, params: object, opts?: object)`
+
 TODO
 
-## `createEntities(ctx?: Context, params: Array<object>, opts?: object)`
+## `createEntities`
+`createEntities(ctx?: Context, params: Array<object>, opts?: object)`
+
 TODO
 
-## `updateEntity(ctx?: Context, params: object, opts?: object)`
+## `updateEntity`
+`updateEntity(ctx?: Context, params: object, opts?: object)`
+
 TODO
 
-## `replaceEntity(ctx?: Context, params: object, opts?: object)`
+## `replaceEntity`
+`replaceEntity(ctx?: Context, params: object, opts?: object)`
+
 TODO
 
-## `removeEntity(ctx?: Context, params: object, opts?: object)`
+## `removeEntity`
+`removeEntity(ctx?: Context, params: object, opts?: object)`
+
 TODO
 
-## `clearEntities(ctx?: Context, params: object, opts?: object)`
+## `clearEntities`
+`clearEntities(ctx?: Context, params: object, opts?: object)`
+
 TODO
 
-## `validateParams(ctx?: Context, params: object, opts?: object)`
+## `validateParams`
+`validateParams(ctx?: Context, params: object, opts?: object)`
+
 TODO
 
 ## `transformResult`
-Signature: `transformResult(adapter: Adapter, docs: object|Array<object>, params?: object, ctx?: Context)`
+`transformResult(adapter: Adapter, docs: object|Array<object>, params?: object, ctx?: Context)`
 
 TODO
 
 # Implementable methods
 
-## `getAdapterByContext(ctx?: Context, adapterDef?: object)`
+## `getAdapterByContext`
+`getAdapterByContext(ctx?: Context, adapterDef?: object)`
+
 TODO
 
-## `entityChanged(type: String, data?: any, ctx?: Context, opts?: object)`
+## `entityChanged`
+`entityChanged(type: String, data?: any, ctx?: Context, opts?: object)`
+
 TODO
 
-## `encodeID(id: any)`
+## `encodeID`
+`encodeID(id: any)`
+
 TODO
 
-## `decodeID(id: any)`
+## `decodeID`
+`decodeID(id: any)`
+
 TODO
 
-## `checkFieldAuthority(ctx?: Context, permission: any, params: object, field: object)`
+## `checkFieldAuthority`
+`checkFieldAuthority(ctx?: Context, permission: any, params: object, field: object)`
+
 TODO
 
-## `checkScopeAuthority(ctx?: Context, name: string, scope: object|Function)`
+## `checkScopeAuthority`
+`checkScopeAuthority(ctx?: Context, name: string, scope: object|Function)`
+
 TODO
 
 
