@@ -1137,58 +1137,94 @@ TODO
 
 ## Adapter common methods
 
-## `connect()`
+## `connect`
+`connect()`
+
 TODO
 
-## `disconnect()`
+## `disconnect`
+`disconnect()`
+
 TODO
 
-## `find(params: object)`
+## `find`
+`find(params: object)`
+
 TODO
 
-## `findOne(query: object)`
+## `findOne`
+`findOne(query: object)`
+
 TODO
 
-## `findById(id: any)`
+## `findById`
+`findById(id: any)`
+
 TODO
 
-## `findByIds(id: Array<any>)`
+## `findByIds`
+`findByIds(id: Array<any>)`
+
 TODO
 
-## `findStream(params: object)`
+## `findStream`
+`findStream(params: object)`
+
 TODO
 
-## `count(params: object)`
+## `count`
+`count(params: object)`
+
 TODO
 
-## `insert(entity: object)`
+## `insert`
+`insert(entity: object)`
+
 TODO
 
-## `insertMany(entities: Array<object>)`
+## `insertMany`
+`insertMany(entities: Array<object>)`
+
 TODO
 
-## `updateById(id: any, changes: object)`
+## `updateById`
+`updateById(id: any, changes: object)`
+
 TODO
 
-## `updateMany(query: object, changes: object)`
+## `updateMany`
+`updateMany(query: object, changes: object)`
+
 TODO
 
-## `replaceById(id: any, changes: object)`
+## `replaceById`
+`replaceById(id: any, changes: object)`
+
 TODO
 
-## `removeById(id: any, changes: object)`
+## `removeById`
+`removeById(id: any, changes: object)`
+
 TODO
 
-## `removeMany(query: object, changes: object)`
+## `removeMany`
+`removeMany(query: object, changes: object)`
+
 TODO
 
-## `clear()`
+## `clear`
+`clear()`
+
 TODO
 
-## `entityToJSON(entity: object)`
+## `entityToJSON`
+`entityToJSON(entity: object)`
+
 TODO
 
-## `createIndex(def: any)`
+## `createIndex`
+`createIndex(def: any)`
+
 TODO
 
 
