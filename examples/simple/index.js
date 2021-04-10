@@ -79,7 +79,7 @@ broker
 		console.log("Find:", posts);
 
 		// List posts with pagination
-		post = await broker.call("posts.list", { page: 1, pageSize: 10 });
+		posts = await broker.call("posts.list", { page: 1, pageSize: 10 });
 		console.log("List:", posts);
 
 		// Get a post by ID

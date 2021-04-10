@@ -453,14 +453,14 @@ Find entitites by query.
 | -------- | ---- | ------- | ----------- |
 | `limit` | `Number` | `null` | Max count of rows. |
 | `offset` | `Number` | `null` | Count of skipped rows. |
-| `fields` | `String|Array<String>` | `null` | Fields to return. |
+| `fields` | `String\|Array<String>` | `null` | Fields to return. |
 | `sort` | `String` | `null` | Sorted fields. |
 | `search` | `String` | `null` | Search text. |
-| `searchFields` | `String|Array<String>` | `null` | Fields for searching. |
+| `searchFields` | `String\|Array<String>` | `null` | Fields for searching. |
 | `collation` | `Object` | `null` | Collaction settings. Passed for adapter directly. |
-| `scope` | `String|Array<String>|Boolean` | `null` | Scopes for query. If `false`, disables the default scopes. |
-| `populate` | `String|Array<String>` | `null` | Populated fields. |
-| `query` | `String|Object` | `null` | Query object. If `String`, it's converted with `JSON.parse` |
+| `scope` | `String\|Array<String>\|Boolean` | `null` | Scopes for query. If `false`, disables the default scopes. |
+| `populate` | `String\|Array<String>` | `null` | Populated fields. |
+| `query` | `String\|Object` | `null` | Query object. If `String`, it's converted with `JSON.parse` |
 
 ### REST endpoint
 ```js
@@ -578,14 +578,14 @@ List entitites with pagination. It returns with the total number of rows, as wel
 | -------- | ---- | ------- | ----------- |
 | `page` | `Number` | `null` | Page number. |
 | `pageSize` | `Number` | `null` | Size of a page. |
-| `fields` | `String|Array<String>` | `null` | Fields to return. |
+| `fields` | `String\|Array<String>` | `null` | Fields to return. |
 | `sort` | `String` | `null` | Sorted fields. |
 | `search` | `String` | `null` | Search text. |
-| `searchFields` | `String|Array<String>` | `null` | Fields for searching. |
+| `searchFields` | `String\|Array<String>` | `null` | Fields for searching. |
 | `collation` | `Object` | `null` | Collaction settings. Passed for adapter directly. |
-| `scope` | `String|Array<String>|Boolean` | `null` | Scopes for query. If `false`, disables the default scopes. |
-| `populate` | `String|Array<String>` | `null` | Populated fields. |
-| `query` | `String|Object` | `null` | Query object. If `String`, it's converted with `JSON.parse` |
+| `scope` | `String\|Array<String>\|Boolean` | `null` | Scopes for query. If `false`, disables the default scopes. |
+| `populate` | `String\|Array<String>` | `null` | Populated fields. |
+| `query` | `String\|Object` | `null` | Query object. If `String`, it's converted with `JSON.parse` |
 
 ### REST endpoint
 ```js
@@ -646,9 +646,9 @@ Get count of entities by query.
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `search` | `String` | `null` | Search text. |
-| `searchFields` | `String|Array<String>` | `null` | Fields for searching. |
-| `scope` | `String|Array<String>|Boolean` | `null` | Scopes for query. If `false`, disables the default scopes. |
-| `query` | `String|Object` | `null` | Query object. If `String`, it's converted with `JSON.parse` |
+| `searchFields` | `String\|Array<String>` | `null` | Fields for searching. |
+| `scope` | `String\|Array<String>\|Boolean` | `null` | Scopes for query. If `false`, disables the default scopes. |
+| `query` | `String\|Object` | `null` | Query object. If `String`, it's converted with `JSON.parse` |
 
 ### REST endpoint
 ```js
@@ -673,13 +673,13 @@ Get an entity by ID.
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `<id>` | `any` | `null` | ID of entity. The name of property comes from the primaryKey field. |
-| `fields` | `String|Array<String>` | `null` | Fields to return. |
-| `scope` | `String|Array<String>|Boolean` | `null` | Scopes for query. If `false`, disables the default scopes. |
-| `populate` | `String|Array<String>` | `null` | Populated fields. |
+| `fields` | `String\|Array<String>` | `null` | Fields to return. |
+| `scope` | `String\|Array<String>\|Boolean` | `null` | Scopes for query. If `false`, disables the default scopes. |
+| `populate` | `String\|Array<String>` | `null` | Populated fields. |
 
 ### REST endpoint
 ```js
-GET /{serviceName}/all
+GET /{serviceName}/{id}
 ```
 
 ### Results
@@ -726,10 +726,10 @@ Resolve an entity by one or multiple IDs.
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
-| `<id>` | `any|Array<any>` | `null` | ID of entity(ies). The name of property comes from the primaryKey field. |
-| `fields` | `String|Array<String>` | `null` | Fields to return. |
-| `scope` | `String|Array<String>|Boolean` | `null` | Scopes for query. If `false`, disables the default scopes. |
-| `populate` | `String|Array<String>` | `null` | Populated fields. |
+| `<id>` | `any\|Array<any>` | `null` | ID of entity(ies). The name of property comes from the primaryKey field. |
+| `fields` | `String\|Array<String>` | `null` | Fields to return. |
+| `scope` | `String\|Array<String>\|Boolean` | `null` | Scopes for query. If `false`, disables the default scopes. |
+| `populate` | `String\|Array<String>` | `null` | Populated fields. |
 | `mapping` | `boolean` | `false` | Convert the result to `Object` where the key is the ID. |
 | `throwIfNotExist` | `boolean` | `false` | If `true`, throw `EntityNotFound` error if the entity is not exist. |
 
@@ -756,7 +756,7 @@ const post = await broker.call("posts.resolve", { id: "YVdnh5oQCyEIRja0" });
 }
 ```
 
-#### Call with a multiple ID
+#### Call with multiple IDs
 ```js
 const post = await broker.call("posts.resolve", { id: ["YVdnh5oQCyEIRja0", "Di5T8svHC9nT6MTj"] });
 ```
@@ -778,12 +778,15 @@ const post = await broker.call("posts.resolve", { id: ["YVdnh5oQCyEIRja0", "Di5T
     votes: 3,
     status: true,
     createdAt: 1618077609103
-},
+}
 ```
 
 ### Call with mapping
 ```js
-const post = await broker.call("posts.resolve", { id: ["YVdnh5oQCyEIRja0", "Di5T8svHC9nT6MTj"], mapping: true });
+const post = await broker.call("posts.resolve", { 
+    id: ["YVdnh5oQCyEIRja0", "Di5T8svHC9nT6MTj"], 
+    mapping: true 
+});
 ```
 
 **Result**
@@ -813,16 +816,155 @@ The other parameter examples are same as [`find`](#find-find-entities) action.
 
 
 ## `create` Create an entity
-TODO
+Create an entity.
+
+### Parameters
+No any special parameters. All fields will be used for entity after validation.
+
+### REST endpoint
+```js
+POST /{serviceName}/
+```
+
+### Results
+Return with the new entity.
+
+### Examples
+
+```js
+const post = await broker.call("posts.create", {
+    title: "My first post",
+    content: "Content of my first post..."
+});
+```
+
+**Result**
+```js
+{
+    id: "YVdnh5oQCyEIRja0",
+    title: "My first post",
+    content: "Content of my first post...",
+    votes: 0,
+    status: true,
+    createdAt: 1618077608593,
+}
+```
+
 
 ## `update` Update an entity
-TODO
+Update an existing entity. Only the provided fields will be updated.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `<id>` | `any` | `null` | ID of entity. The name of property comes from the primary key field. |
+
+No any special parameters. All fields will be used for entity after validation.
+
+### REST endpoint
+```js
+PATCH /{serviceName}/{id}
+```
+
+### Results
+Return with the updated entity.
+
+### Examples
+
+```js
+const post = await broker.call("posts.update", {
+    id: "YVdnh5oQCyEIRja0",
+    title: "Modified title",
+    votes: 3
+});
+```
+
+**Result**
+```js
+{
+    id: "YVdnh5oQCyEIRja0",
+    title: "Modified title",
+    content: "Content of my first post...",
+    votes: 3,
+    status: true,
+    createdAt: 1618077608593,
+    updatedAt: 1618082167005
+}
+```
+
 
 ## `replace` Replace an entity
-TODO
+Replace an existing entity. The difference between replace and update that replace will replace the entiry entity. It means you should provide all required entity fields. This function doesn't merge the new and old entity.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `<id>` | `any` | `null` | ID of entity. The name of property comes from the primary key field. |
+
+No any special parameters. All fields will be used for entity after validation.
+
+### REST endpoint
+```js
+PUT /{serviceName}/{id}
+```
+
+### Results
+Return with the replaced entity.
+
+### Examples
+
+```js
+const post = await broker.call("posts.update", {
+    id: "YVdnh5oQCyEIRja0",
+    title: "Replaced title",
+    content: "Content of my first post...",
+    votes: 10,
+    status: true,
+    createdAt: 1618077608593,
+    updatedAt: 1618082167005
+});
+```
+
+**Result**
+```js
+{
+    id: "YVdnh5oQCyEIRja0",
+    title: "Replaced title",
+    content: "Content of my first post...",
+    votes: 10,
+    status: true,
+    createdAt: 1618077608593,
+    updatedAt: 1618082167005
+}
+```
 
 ## `remove` Delete an entity
-TODO
+Delete an entity by ID.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `<id>` | `any` | `null` | ID of entity. The name of property comes from the primary key field. |
+
+### REST endpoint
+```js
+DELETE /{serviceName}/{id}
+```
+
+### Results
+Return with the deleted entity ID.
+
+### Examples
+
+```js
+const post = await broker.call("posts.delete", { id: "YVdnh5oQCyEIRja0" });
+```
+
+**Result**
+```js
+"YVdnh5oQCyEIRja0"
+```
+
 
 ## Add a custom action
 TODO
