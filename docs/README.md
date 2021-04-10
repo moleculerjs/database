@@ -5,6 +5,7 @@ The options of the Mixin.
 
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
+| `adapter` | `Object` | `NeDB` | Configure the adapter. |
 | `createActions` | `Boolean` | `true` | Generate CRUD actions. |
 | `actionVisibility` | `String` | `published` | Default visibility of generated actions |
 | `generateActionParams` | `Boolean` | `true` | Generate `params` schema for generated actions based on the `fields` |
@@ -319,13 +320,13 @@ The `set` function called at entity creating or updating. You can modify the inp
 ```
 
 ### `permission`: \<string\> _(Default: `null`)_
-With `permission` property, you can control who can view & modify the value of the field. [Read more here.](TODO)
+With `permission` property, you can control who can view & modify the value of the field. [Read more here.](#permissions)
 
 ### `readPermission`: \<string\> _(Default: `null`)_
-With `readPermission` property, you can control who can view the value of the field. [Read more here.](TODO)
+With `readPermission` property, you can control who can view the value of the field. [Read more here.](#permissions)
 
 ### `populate`: \<string|Object|Function\> _(Default: `null`)_
-The populate is similar as reference in SQL-based database engines, or populate in Mongoose ORM. [Read more here.](TODO)
+The populate is similar as reference in SQL-based database engines, or populate in Mongoose ORM. [Read more here.](#populating)
 
 ### `onCreate`: \<Function\> _(Default: `null`)_
 This is an operation hook which is called at new entity creating (`create` action, `createEntity` and `createEntities` methods). You can use it to set `createdAt` timestamp for entity.
@@ -392,7 +393,7 @@ _It can be asynchronous._
 
 ### `onRemove`: \<Function\> _(Default: `null`)_
 This is an operation hook which is called at entity removing (`remove` action, `removeEntity`).
-If you define it, the service switch to **soft delete mode**. It means, the record won't be deleted in the table/collection. [Read more about soft delete feature.](TODO)
+If you define it, the service switch to **soft delete mode**. It means, the record won't be deleted in the table/collection. [Read more about soft delete feature.](#soft-delete)
 
 _It can be asynchronous._
 

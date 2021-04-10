@@ -345,28 +345,28 @@ module.exports = function (mixinOpts) {
 					// Handlers
 					if (type == "create" && field.onCreate) {
 						if (_.isFunction(field.onCreate)) {
-							value = await field.onCreate.call(this, value, params, ctx);
+							value = await field.onCreate.call(this, value, params, field, ctx);
 						} else {
 							value = field.onCreate;
 						}
 						return setValue(field, value);
 					} else if (type == "update" && field.onUpdate) {
 						if (_.isFunction(field.onUpdate)) {
-							value = await field.onUpdate.call(this, value, params, ctx);
+							value = await field.onUpdate.call(this, value, params, field, ctx);
 						} else {
 							value = field.onUpdate;
 						}
 						return setValue(field, value);
 					} else if (type == "replace" && field.onReplace) {
 						if (_.isFunction(field.onReplace)) {
-							value = await field.onReplace.call(this, value, params, ctx);
+							value = await field.onReplace.call(this, value, params, field, ctx);
 						} else {
 							value = field.onReplace;
 						}
 						return setValue(field, value);
 					} else if (type == "remove" && field.onRemove) {
 						if (_.isFunction(field.onRemove)) {
-							value = await field.onRemove.call(this, value, params, ctx);
+							value = await field.onRemove.call(this, value, params, field, ctx);
 						} else {
 							value = field.onRemove;
 						}
@@ -381,7 +381,7 @@ module.exports = function (mixinOpts) {
 						if (value === undefined) {
 							if (field.default !== undefined) {
 								if (_.isFunction(field.default)) {
-									value = await field.default.call(this, value, params, ctx);
+									value = await field.default.call(this, params, field, ctx);
 								} else {
 									value = field.default;
 								}

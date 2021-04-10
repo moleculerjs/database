@@ -82,7 +82,9 @@ const pkg = require("../package.json");
 	- [ ] `bulkCreate` action without REST
 	- [ ] create methods for `updateMany` and `removeMany`
 	- [x] `settings.indexes` implementation common form and `createIndex` in the adapter process it.
-
+	- [ ] add default `entitiyChanged` method which generates events.
+	- [ ] add option to disable auto value conversion in validator schema.
+	- [ ] `validate` somehow should return the error message text if not valid. E.g. it's `true` or `"The value is not valid"`
 
 	- [ ] Adapters
 		- [ ] Cassandra

@@ -24,42 +24,61 @@ broker.createService({
 	name: "posts",
 	mixins: [
 		DbService({
-			adapter: {
-				type: "Knex",
-				options: {
-					knex: {
-						client: "sqlite3",
-						debug: true,
-						connection: {
-							//filename: "./test.db"
-							filename: ":memory:"
-						}
-					}
-				}
-			}
+			adapter: "NeDB"
 		})
 	],
+
 	settings: {
 		fields: {
-			id: { type: "number", primaryKey: true, columnName: "id" },
-			title: { type: "string", required: true },
-			content: { type: "string", required: false }
+			id: { type: "string", primaryKey: true, columnName: "_id" },
+			title: {
+				type: "string",
+				max: 255,
+				trim: true,
+				required: true
+			},
+			content: { type: "string" },
+			votes: { type: "number", integer: true, min: 0, default: 0 },
+			status: { type: "boolean", default: true },
+			createdAt: { type: "number", readonly: true, onCreate: () => Date.now() },
+			updateAt: { type: "number", readonly: true, onUpdate: () => Date.now() }
 		}
-	},
-
-	async started() {
-		const adapter = await this.getAdapter();
-		await adapter.client.schema.createTable("posts", function (table) {
-			table.increments("id");
-			table.string("title");
-			table.string("content");
-			//table.timestamps();
-		});
 	}
 });
 
 // Start server
-broker.start().then(async () => {
+broker
+	.start()
+	.then(async () => {
+		// Create a new post
+		let post = await broker.call("posts.create", {
+			title: "My first post",
+			content: "Content of my first post...",
+			creditCardNumber: "4321-5678-9012-3456"
+		});
+		console.log("New post:", post);
+
+		// Get all posts
+		let posts = await broker.call("posts.find", { sort: "-createdAt" });
+		console.log("Find:", posts);
+
+		// List posts with pagination
+		posts = await broker.call("posts.list", { page: 1, pageSize: 10 });
+		console.log("List:", posts);
+
+		// Get a post by ID
+		post = await broker.call("posts.get", { id: post.id });
+		console.log("Get:", post);
+
+		// Update the post
+		post = await broker.call("posts.update", { id: post.id, title: "Modified post" });
+		console.log("Updated:", post);
+
+		// Delete a user
+		const res = await broker.call("posts.remove", { id: post.id });
+		console.log("Deleted:", res);
+
+		/*
 	broker.logger.info(
 		"Create 1: ",
 		await broker.call("posts.create", { title: "First post", content: "First content" })
@@ -112,4 +131,6 @@ broker.start().then(async () => {
 	broker.logger.info("Remove 4: ", await broker.call("posts.remove", { id: 4 }));
 
 	broker.logger.info("List: ", await broker.call("posts.list"));
-});
+	*/
+	})
+	.catch(err => broker.logger.error(err));

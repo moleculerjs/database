@@ -956,7 +956,12 @@ module.exports = (getAdapter, adapterType) => {
 				entity = res;
 
 				expect(onCreate).toBeCalledTimes(1);
-				expect(onCreate).toBeCalledWith(undefined, { name: "John" }, expect.any(Context));
+				expect(onCreate).toBeCalledWith(
+					undefined,
+					{ name: "John" },
+					svc.$fields[2],
+					expect.any(Context)
+				);
 
 				const res2 = await broker.call("users.get", { id: entity.id });
 				expect(res2).toStrictEqual(entity);
@@ -990,6 +995,7 @@ module.exports = (getAdapter, adapterType) => {
 				expect(onUpdate).toBeCalledWith(
 					"Past",
 					{ id: "" + entity.id, name: "John Doe", updatedAt: "Past" },
+					svc.$fields[4],
 					expect.any(Context)
 				);
 
@@ -1039,6 +1045,7 @@ module.exports = (getAdapter, adapterType) => {
 							  }
 							: {})
 					},
+					svc.$fields[6],
 					expect.any(Context)
 				);
 
@@ -1058,6 +1065,7 @@ module.exports = (getAdapter, adapterType) => {
 					{
 						id: "" + entity.id
 					},
+					svc.$fields[8],
 					expect.any(Context)
 				);
 
@@ -1404,6 +1412,8 @@ module.exports = (getAdapter, adapterType) => {
 
 				const res2 = await broker.call("users.get", { id: entity.id });
 				expect(res2).toStrictEqual(entity);
+
+				expect(getDefaultRole).toBeCalledTimes(0);
 			});
 
 			it("should replace entity without default fields", async () => {
@@ -1423,6 +1433,8 @@ module.exports = (getAdapter, adapterType) => {
 
 				const res2 = await broker.call("users.get", { id: entity.id });
 				expect(res2).toStrictEqual(entity);
+
+				expect(getDefaultRole).toBeCalledTimes(0);
 			});
 
 			it("should create entity with default fields", async () => {
@@ -1439,9 +1451,20 @@ module.exports = (getAdapter, adapterType) => {
 
 				const res2 = await broker.call("users.get", { id: entity.id });
 				expect(res2).toStrictEqual(entity);
+
+				expect(getDefaultRole).toBeCalledTimes(1);
+				expect(getDefaultRole).toBeCalledWith(
+					{
+						name: "John Doe",
+						status: 5
+					},
+					svc.$fields[2],
+					expect.any(Context)
+				);
 			});
 
 			it("should replace entity with default fields", async () => {
+				getDefaultRole.mockClear();
 				const res = await broker.call("users.replace", {
 					id: entity.id,
 					name: "Jane Doe"
@@ -1456,6 +1479,17 @@ module.exports = (getAdapter, adapterType) => {
 
 				const res2 = await broker.call("users.get", { id: entity.id });
 				expect(res2).toStrictEqual(entity);
+
+				expect(getDefaultRole).toBeCalledTimes(1);
+				expect(getDefaultRole).toBeCalledWith(
+					{
+						id: "" + entity.id,
+						name: "Jane Doe",
+						status: 5
+					},
+					svc.$fields[2],
+					expect.any(Context)
+				);
 			});
 		});
 	});
