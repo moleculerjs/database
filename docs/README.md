@@ -12,7 +12,7 @@ The options of the Mixin.
 | `strict` | `Boolean\|String` | `remove` | Strict mode in validation schema for objects. Values: `true`, `false`, `"remove"` |
 | `cache` | `Object` | | Action caching settings |
 | `cache.enabled` | `Boolean` | `true` | Enable caching on actions |
-| `cache.eventName` | `String` | `null` | Name of the broadcasted event for clearing cache at modifications (update, replace, remove). If `false`, it disables event broadcasting & subscription |
+| `cache.eventName` | `String` | `cache.clean.{serviceName}` | Name of the broadcasted event for clearing cache at modifications (update, replace, remove). If `false`, it disables event broadcasting & subscription |
 | `rest` | `Boolean` | `true` | Set the API Gateway auto-aliasing REST properties in the service & actions |
 | `autoReconnect` | `Boolean` | `true` | Auto reconnect if the DB server is not available at first connecting |
 | `maxLimit` | `Number` | `-1` | Maximum value of `limit` in `find` action and `pageSize` in `list` action. Default: `-1` (no limit) |
@@ -48,7 +48,7 @@ module.exports = {
             content: { type: "string", columnType: "text" },
             votes: "number|integer", // Shorthand format
             status: { type: "boolean", default: true },
-            createdAt: { type: "number", readonly: true, onCreate: () => Date.now() }
+            createdAt: { type: "number", readonly: true, onCreate: () => Date.now() },
             updatedAt: { type: "number", readonly: true, onUpdate: () => Date.now() }
         }
     }
@@ -100,7 +100,7 @@ The `type` defines the type of the field value. It can be any primitive types (`
 
 >Please note, if the value type and the defined type mismatches, the service will try to convert the value to the defined type. In the above example, if you set `age: "34"`, the service won't throw `ValidationError`, instead convert it to `Number`.
 
-### `required`: \<boolean\> _(Default: `false`)_
+### `required`: \<boolean\> <small>(Default: `false`)</small>
 Every field is optional by default. To make it mandatory, set `required: true` in the field properties. If this fields is nullish, the service throws a `ValidationError` in the `create` & `replace` actions.
 
 **Example**
