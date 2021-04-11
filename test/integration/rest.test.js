@@ -279,6 +279,18 @@ module.exports = (getAdapter, adapterType) => {
 				});
 			});
 
+			it("should return only active & not deleted authors", async () => {
+				const data = (await axios.get(`${env.baseURL}/authors?scope=onlyActive,notDeleted`))
+					.data;
+				expect(data).toEqual({
+					rows: expect.arrayContaining([env.authors.johnDoe, env.authors.janeDoe]),
+					page: 1,
+					pageSize: 10,
+					total: 2,
+					totalPages: 1
+				});
+			});
+
 			it("should throw error accessing deleted author", async () => {
 				expect.assertions(6);
 				try {
@@ -535,8 +547,10 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 							type: "string",
 							populate: {
 								action: "authors.resolve",
-								fields: ["name", "age"],
-								scope: "onlyActive"
+								params: {
+									fields: ["name", "age"],
+									scope: "onlyActive"
+								}
 							}
 						},
 						votes: { type: "number", default: 0, columnType: "integer" },

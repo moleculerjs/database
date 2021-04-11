@@ -177,20 +177,14 @@ module.exports = function (mixinOpts) {
 
 			if (values.length == 0) return {};
 
-			const params = Object.assign(
-				{
-					id: values,
-					mapping: true,
-					fields: rule.fields,
-					populate: rule.populate,
-					scope: rule.scope,
-					query: rule.query,
-					throwIfNotExist: false
-				},
-				rule.params || {}
-			);
+			const params = {
+				...(rule.params || {}),
+				id: values,
+				mapping: true,
+				throwIfNotExist: false
+			};
 
-			return await (ctx || this.broker).call(rule.action, params, rule.callingOptions);
+			return await (ctx || this.broker).call(rule.action, params, rule.callOptions);
 		}
 	};
 };

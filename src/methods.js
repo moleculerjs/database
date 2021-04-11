@@ -166,6 +166,7 @@ module.exports = function (mixinOpts) {
 				p.populate = p.populate.replace(/,/g, " ").split(" ");
 			if (typeof p.searchFields === "string")
 				p.searchFields = p.searchFields.replace(/,/g, " ").split(" ");
+			if (typeof p.scope === "string") p.scope = p.scope.replace(/,/g, " ").split(" ");
 
 			if (opts && opts.removeLimit) {
 				if (p.limit) delete p.limit;

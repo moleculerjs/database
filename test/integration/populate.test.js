@@ -27,7 +27,9 @@ module.exports = (getAdapter, adapterType) => {
 						populate: {
 							action: "users.resolve",
 							keyField: "authorID",
-							fields: ["name", "postCount", "email"]
+							params: {
+								fields: ["name", "postCount", "email"]
+							}
 						}
 					},
 					createdAt: {

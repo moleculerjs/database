@@ -1020,6 +1020,7 @@ It returns an adapter instance based on the `Context`. If not found adapter, the
 
 ## `sanitizeParams`
 `sanitizeParams(params: object, opts?: object)`
+
 Sanitize the input parameters for `find`, `list` and `count` actions.
 
 ### Options
@@ -1031,6 +1032,7 @@ Sanitize the input parameters for `find`, `list` and `count` actions.
 
 ## `findEntities`
 `findEntities(ctx?: Context, params: object, opts?: object)`
+
 Find entities by query. 
 
 ### Parameters
@@ -1044,6 +1046,7 @@ Find entities by query.
 
 ## `streamEntities`
 `streamEntities(ctx?: Context, params: object, opts?: object)`
+
 Find entitites by query like the `findEntities` but it returns a `Stream` 
 
 | Property | Type | Default | Description |
@@ -1056,6 +1059,7 @@ Find entitites by query like the `findEntities` but it returns a `Stream`
 
 ## `countEntities`
 `countEntities(ctx?: Context, params: object)`
+
 Get count of entities by query.
 
 | Property | Type | Default | Description |
@@ -1066,6 +1070,7 @@ Get count of entities by query.
 
 ## `findEntity`
 `findEntity(ctx?: Context, params: object, opts?: object)`
+
 Find an entityby query. It returns only the first row of the result.
 
 ### Parameters
@@ -1079,6 +1084,7 @@ Find an entityby query. It returns only the first row of the result.
 
 ## `resolveEntities`
 `resolveEntities(ctx?: Context, params: object, opts?: object)`
+
 Get entity(ies) by ID(s).
 
 ### Parameters
@@ -1093,6 +1099,7 @@ Get entity(ies) by ID(s).
 
 ## `createEntity`
 `createEntity(ctx?: Context, params: object, opts?: object)`
+
 Create an entity.
 
 ### Parameters
@@ -1106,6 +1113,7 @@ Create an entity.
 
 ## `createEntities`
 `createEntities(ctx?: Context, params: Array<object>, opts?: object)`
+
 Create multiple entities.
 
 ### Parameters
@@ -1119,6 +1127,7 @@ Create multiple entities.
 
 ## `updateEntity`
 `updateEntity(ctx?: Context, params: object, opts?: object)`
+
 Update an existing entity. Only the provided fields will be updated.
 
 ### Parameters
@@ -1132,6 +1141,7 @@ Update an existing entity. Only the provided fields will be updated.
 
 ## `replaceEntity`
 `replaceEntity(ctx?: Context, params: object, opts?: object)`
+
 Replace an existing entity.
 
 ### Parameters
@@ -1145,6 +1155,7 @@ Replace an existing entity.
 
 ## `removeEntity`
 `removeEntity(ctx?: Context, params: object, opts?: object)`
+
 Delete an entity by ID.
 
 ### Parameters
@@ -1159,6 +1170,7 @@ The method returns the deleted entity ID only.
 
 ## `clearEntities`
 `clearEntities(ctx?: Context, params: object)`
+
 Clear all entities in the table/collection.
 
 ### Parameters
@@ -1170,6 +1182,7 @@ Clear all entities in the table/collection.
 
 ## `validateParams`
 `validateParams(ctx?: Context, params: object, opts?: object)`
+
 It validates & sanitizes the input data in `params` against the `fields` definition. It's called in `createEntity`, `createEntities`, `updateEntity` and `replaceEntity` methods.
 
 ### Parameters
@@ -1183,13 +1196,14 @@ It validates & sanitizes the input data in `params` against the `fields` definit
 
 ## `transformResult`
 `transformResult(adapter: Adapter, docs: object|Array<object>, params?: object, ctx?: Context)`
+
 It transforms the entities which comes from the database according to `fields` definitions.
 
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `adapter` | `Adapter` | **required** | Adapter instance. |
-| `docs` | `Object|Array<Object>` | **required** | Entity or entities. |
+| `docs` | `Object\|Array<Object>` | **required** | Entity or entities. |
 | `params` | `Object` | `null` | Entitiy field values. |
 | `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
 
@@ -1197,69 +1211,417 @@ It transforms the entities which comes from the database according to `fields` d
 ## `createIndexes`
 `createIndexes(adapter: Adapter, indexes: Array<object>)`
 
-TODO
+Create indexes by definitions. [Read more here](#indexes).
 
 ## `createIndex`
 `createIndex(adapter: Adapter, index: object)`
 
-TODO
+Create an index by definition. [Read more here](#indexes).
 
 # Implementable methods
 
 ## `getAdapterByContext`
 `getAdapterByContext(ctx?: Context, adapterDef?: object)`
 
-TODO
+For multi-tenancy, you should define this method which creates an Adapter definition by the `Context`. 
+
+It should return an `Array` with two values. First is a cache key, the second is the adapter definition.
+The service uses the cache key to store the created adapter. Therefore in the next time, if the cache key is exist in the cache, the service won't create a new Adapter instance, instead using the previous one.
+
+[About multi-tenant configuration, read more here](#multi-tenancy).
 
 ## `entityChanged`
 `entityChanged(type: String, data?: any, ctx?: Context, opts?: object)`
 
-TODO
+It's a method which is called when an entity created, updated, replaced or removed. You can use it to clear the cache or send an event.
+
+There is a default implementation which sends an entity changed event, e.g: `posts.created`, `posts.updated`, `posts.removed`.
+
+### Parameters
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `type` | `String` | Type of changes. Available values: `create`, `update`, `replace`, `remove`, `clear`. |
+| `data` | `Object\|Array<Object>` | Changed entity or entities. |
+| `ctx` | `Context` | Moleculer `Context` instance. It can be `null`. |
+| `opts` | `Object` | Additional options. |
+| `opts.batch` | `Boolean` | It's true if the operation affected multiple entities. |
+| `opts.softDelete` | `Boolean` | It's true in case of soft deleting. |
+
 
 ## `encodeID`
 `encodeID(id: any)`
 
-TODO
+You should define it, if you use secure primary key to encode the IDs before returning.
 
 ## `decodeID`
 `decodeID(id: any)`
 
-TODO
+You should define it, if you use secure primary key to decode the received IDs.
 
 ## `checkFieldAuthority`
 `checkFieldAuthority(ctx?: Context, permission: any, params: object, field: object)`
 
-TODO
+If you use `permission` and `readPermission` in field definitions, you should define this method and write the permission checking logic. 
+
+_It can be asynchronous._
+
+### Parameters
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `ctx` | `Context` | Moleculer `Context` instance. It can be `null`. |
+| `permission` | `any` | The configured `permission` or `readPermission` value of field. |
+| `params` | `Object` | Incoming data. |
+| `field` | `Object` | Field definition. |
+
 
 ## `checkScopeAuthority`
 `checkScopeAuthority(ctx?: Context, name: string, scope: object|Function)`
 
-TODO
+You should implement it, if you want to check the permission of scopes.
+
+_It can be asynchronous._
+
+### Parameters
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `ctx` | `Context` | Moleculer `Context` instance. It can be `null`. |
+| `name` | `String` | Name of the scope. |
+| `scope` | `Object` | Scope definition. |
 
 
 # Scopes
-TODO
+The scopes allow you to add constraints for all query methods, like `find`, `list` or `count`. You can use it with soft-delete feature when you want to list only non-deleted entities, by default.
+
+You can define your scopes in the service settings and define the default scopes.
+
+## Example
+In this example we create some scopes and show how you can use it at action calling.
+
+**Define the service with scopes**
+```js
+// posts.service.js
+{
+    name: "posts",
+    mixins: [DbService(/*...*/)],
+    settings: {
+        scopes: {
+            // Define a scope which lists only the active status posts
+            onlyActive: {
+                status: true
+            },
+            // Define a scope which lists only the public posts 
+            // where the `visibility` field of entity is "public"
+            public: {
+                visibility: "public"
+            },
+            // It's a custom Function to modify the query object directly.
+            topVotes: q => {
+                q.votes = {
+                    $gt: 100
+                };
+                return q;
+            }
+        },
+
+        // Define the default scopes which will be used for every 
+        // listing methods if the `scope` is not defined in the `params`
+        // In this case we want to always lists the "active" posts.
+        defaultScopes: ["onlyActive"]
+    }
+}
+```
+
+**List the active posts without defining the scope**
+```js
+const activePosts = await broker.call("posts.find");
+```
+
+**List all public posts**
+```js
+const activePublicPosts = await broker.call("posts.find", { scope: "public" });
+```
+
+**List the active & public posts**
+```js
+const activePublicPosts = await broker.call("posts.find", { scope: ["onlyActive", "public"] });
+```
+
+**List all posts disabling the default scope(s)**
+```js
+const activePosts = await broker.call("posts.find", { scope: false });
+```
+
+You can do the same in REST calls:
+```
+GET /posts?scope=public
+GET /posts?scope=onlyActive,public
+```
 
 # Indexes
-You can define the indexes in the service `settings.indixes` property. It has a common format and every adapter will process and creates the indexes.
-Other option, if you call the adapter.createIndex` method directly. [More info](#createindexdef-any)
+You can define the indexes in the service `settings.indexes` property. It has a common format and every adapter will process and creates the indexes. Other option, if you call the `this.createIndex` method directly. [More info](#createindex)
+
+## Index definition
+
+### Properties
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `fields` | `String\|Array<String>\|Object` | **required** | Fields of the index. |
+| `name` | `String` | `null` | Name of the index. _Optional._ |
+| `unique` | `Boolean` | `false` | Unique index. |
+| `sparse` | `Boolean` | `false` | Sparse index. _Not supported by all adapters._ |
+| `type` | `String` | `null` | Type of index. _Not supported by all adapters._ |
+| `expireAfterSeconds` | `Number` | `null` | Expiration. _Not supported by all adapters._ |
+
+### Example
+
+### Define a normal index for one field
+
+```js
+{
+    fields: "title"
+}
+```
+
+### Define a normal index for multiple fields
+
+```js
+{
+    fields: ["title", "content"]
+}
+```
+
+### Define a unique & sparse index
+
+```js
+{
+    fields: "username",
+    unique: true,
+    sparse: true
+}
+```
+
+### Define a MongoDB full-text search index
+
+```js
+{
+    fields: { 
+        title: "text",
+        content: "text",
+        tags: "text"
+    }
+}
+```
 
 # Streaming
-TODO
+The service has a `streamEntities` method which similar to the `findEntities` which returns the entities by query. But this method returns a `Stream` instance instead of the all rows. 
+
+There is no pre-defined action for the method, by default. But you can create one easily:
+
+## Create action for streaming
+```js
+module.exports = {
+    name: "posts",
+    // ...
+    actions: {
+        findStream: {
+            rest: "/stream",
+            handler(ctx) {
+                return this.streamEntities(ctx, ctx.params);
+            }
+        }
+    }
+}
+```
+
+**Handle the response `Stream`**
+```js
+const rows = [];
+
+const ss = await broker.call("posts.findStream");
+
+ss.on("data", row => rows.push(row));
+ss.on("end", () => {
+    console.log("Received all entities via stream:", rows)
+});
+```
 
 # Populating
-TODO
+The service allows you to easily populate fields from other services. For example: If you have an `author` field in `posts` entity, you can populate it with `users` service by ID of the author. If the field is an Array of IDs, it will populate all entities via only one request
+
+## Example of populate fields
+```js
+module.exports = {
+    // ...
+    settings: {
+        fields: {
+            // Shorthand populate, only set the action name.
+            voters: {
+                type: "array", 
+                items: "string",
+                populate: "users.resolve" 
+            },
+
+            // Define the action name and the params. It will resolve the `username` and `fullName` of the author.
+            author: {
+                type: "string",
+                populate: {
+                    action: "users.resolve",
+                    params: {
+                        fields: "username fullName"
+                    }
+                }
+            },
+
+            // In this case the ID is in the `reviewerID` field.
+            // But we create a `reviewer` virtual field which contains the populated reviewer entity.
+            reviewer: {
+                type: "object",
+                virtual: true,
+                populate: {
+                    action: "users.resolve",
+                    keyField: "reviewerID",
+                    params: {
+                        fields: ["name", "email", "avatar"]
+                    },
+                    callOptions: {
+                        timeout: 3000
+                    }
+                }
+            },            
+
+            // Custom populate handler function for a virtual field
+            postCount: {
+                type: "number",
+                virtual: true,
+                populate: (ctx, values, entities, field) => {
+                    return Promise.all(
+                        entities.map(entity =>
+                            ctx.call("posts.count", { query: { authorID: entity.id } })
+                        )
+                    );
+                }
+            }
+        }
+    }
+    // ...
+}
+```
 
 # Permissions
-TODO
+You can configure the readable & writable fields in the field definitions. It can useful when you want to return more fields if the logged in user is an administrator but less fields for the regular users.
+
+## Example field definitions
+```js
+// users.service.js
+module.exports = {
+    name: "users",
+    mixins: [DbService(/*...*/)],
+    settings: {
+        fields: {
+            id: { type: "string", primaryKey: true, columnName: "_id" },
+            name: { type: "string" },
+            // Only the administrators can receives this field in responses.
+            email: { type: "email", readPermission: "admin" },
+            // Only the administrators can read & write this field.
+            verified: { type: "boolean", permission: "admin" }
+        }
+    },
+
+    methods: {
+        // If we defined the necessary permissions in the fields, we should write 
+        // the permission checking logic into the `checkFieldAuthority` method.
+        async checkFieldAuthority(ctx, permission, params, field) {
+            const roles = ctx.meta.user.roles || [];
+
+            // Returns `true` if the logged in user's role field contains the required role.
+            return roles.includes(permission);
+		}
+    }
+}
+```
 
 # Soft delete
-TODO
+For using the soft-delete feature, you should just define the `onRemove` property for a field. The service detects it at the initialization and turn on this feature. Then, you can call the `remove` action or `removeEntity` methods, they won't remove the entities physically, just set the value of the defined field.
+
+Please note, you should configure scopes, as well in order to skip the deleted entities in the listing methods.
+
+## Example
+```js
+// posts.service.js
+module.exports = {
+    name: "posts",
+    mixins: [DbService(/*...*/)],
+    settings: {
+        fields: {
+            id: { type: "string", primaryKey: true, columnName: "_id" },
+            title: { type: "string" },
+            content: { type: "string" },
+            // The `onRemove` will turn on the soft-deleting feature
+            deletedAt: { type: "number", readonly: true, onRemove: () => Date.now() }
+        },
+
+        scopes: {
+            notDeleted: { 
+                deletedAt: { $exists: false } 
+            },
+        },
+
+        // Configure the scope as default scope
+        defaultScopes: ["notDeleted"]
+    }
+};
+```
+
+**List all available posts (excluding deleted entities)**
+```js
+const posts = await broker.call("posts.find");
+```
+
+**List all posts (including deleted entities, as well)**
+```js
+const allPosts = await broker.call("posts.find", { scope: false });
+```
+
+As you see, it can cause security issue if the user in the browser is able to requests the deleted posts, as well. To avoid it, you can control the authority of scopes, and default scopes disabling with the `checkScopeAuthority` method.
+
+## Example with authority
+```js
+// posts.service.js
+module.exports = {
+    name: "posts",
+    mixins: [DbService(/*...*/)],
+    settings: {
+        /* ... */
+    },
+
+    methods: {
+        /**
+         * Check the scope authority. Should be implemented in the service.
+         * If `name and `scope` are null, it means you should check the permissions
+         * when somebody wants turning off the default scopes (e.g. list
+         * deleted records, as well).
+         *
+         * @param {Context} ctx
+         * @param {String?} name
+         * @param {Object?} scope
+         */        
+        async checkScopeAuthority(ctx, name, scope) {
+            // We enable default scope disabling only for administrators.
+            if (scope == null) {
+                return ctx.meta.user.roles.includes("admin");
+            }
+
+            // Enable all other scopes for everybody.
+            return true;
+        },  
+    }
+};
+```
 
 # Cascade delete
 TODO (with events)
 
-# Tenants
+# Multi-tenancy
 TODO
 
 # Events
