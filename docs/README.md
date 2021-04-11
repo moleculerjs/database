@@ -1275,7 +1275,7 @@ _It can be asynchronous._
 
 
 ## `checkScopeAuthority`
-`checkScopeAuthority(ctx?: Context, name: string, scope: object|Function)`
+`checkScopeAuthority(ctx?: Context, name?: string, scope?: any)`
 
 You should implement it, if you want to check the permission of scopes.
 
@@ -1285,9 +1285,10 @@ _It can be asynchronous._
 | Property | Type | Description |
 | -------- | ---- | ----------- |
 | `ctx` | `Context` | Moleculer `Context` instance. It can be `null`. |
-| `name` | `String` | Name of the scope. |
-| `scope` | `Object` | Scope definition. |
+| `name` | `String?` | Name of the scope. |
+| `scope` | `any?` | Scope definition. |
 
+_If `name` and `scope` are `null`, it means you should check the authority of default scope disabling._
 
 # Scopes
 The scopes allow you to add constraints for all query methods, like `find`, `list` or `count`. You can use it with soft-delete feature when you want to list only non-deleted entities, by default.
@@ -1413,7 +1414,7 @@ You can define the indexes in the service `settings.indexes` property. It has a 
 ```
 
 # Streaming
-The service has a `streamEntities` method which similar to the `findEntities` which returns the entities by query. But this method returns a `Stream` instance instead of the all rows. 
+The service has a [`streamEntities`](#streamentities) method which similar to the `findEntities` which returns the entities by query. But this method returns a `Stream` instance instead of the all rows. 
 
 There is no pre-defined action for the method, by default. But you can create one easily:
 
@@ -1433,7 +1434,7 @@ module.exports = {
 }
 ```
 
-**Handle the response `Stream`**
+**Handle the `Stream` response**
 ```js
 const rows = [];
 
@@ -1467,7 +1468,7 @@ module.exports = {
                 populate: {
                     action: "users.resolve",
                     params: {
-                        fields: "username fullName"
+                        fields: ["username", "fullName"]
                     }
                 }
             },
@@ -1509,6 +1510,7 @@ module.exports = {
 
 # Permissions
 You can configure the readable & writable fields in the field definitions. It can useful when you want to return more fields if the logged in user is an administrator but less fields for the regular users.
+To check the authority, you should define the [`checkFieldAuthority`](#checkfieldauthority) method.
 
 ## Example field definitions
 ```js
@@ -1541,7 +1543,7 @@ module.exports = {
 ```
 
 # Soft delete
-For using the soft-delete feature, you should just define the `onRemove` property for a field. The service detects it at the initialization and turn on this feature. Then, you can call the `remove` action or `removeEntity` methods, they won't remove the entities physically, just set the value of the defined field.
+For using the soft-delete feature, you should just define the [`onRemove`](#onremove-function-default-null) property for a field. The service detects it at the initialization and turn on this feature. Then, you can call the `remove` action or `removeEntity` method, they won't remove the entities physically, just set the value of the defined field.
 
 Please note, you should configure scopes, as well in order to skip the deleted entities in the listing methods.
 
@@ -1582,7 +1584,7 @@ const posts = await broker.call("posts.find");
 const allPosts = await broker.call("posts.find", { scope: false });
 ```
 
-As you see, it can cause security issue if the user in the browser is able to requests the deleted posts, as well. To avoid it, you can control the authority of scopes, and default scopes disabling with the `checkScopeAuthority` method.
+As you see, it can cause security issue if the user in the browser is able to requests the deleted posts, as well. To avoid it, you can control the authority of scopes, and default scopes disabling with the [`checkScopeAuthority`](#checkscopeauthority) method.
 
 ## Example with authority
 ```js
