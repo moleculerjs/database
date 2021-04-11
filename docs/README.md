@@ -970,83 +970,237 @@ const post = await broker.call("posts.delete", { id: "YVdnh5oQCyEIRja0" });
 ```
 
 
-## Add a custom action
-TODO
+## Custom actions
+To add custom actions, just create them under `actions` and call the built-in methods.
+
+**Example**
+```js
+// posts.service.js
+module.exports = {
+    // ...
+    actions: {
+        voteUp: {
+            rest: "POST /:id/vote-up",
+            params: {
+                id: "string|required"
+            },
+            handler(ctx) {
+                const entity = this.resolveEntity(ctx, params);
+                return this.updateEntity(ctx, {
+                    id: ctx.params.id,
+                    votes: entity.votes + 1
+                });
+            }
+        },
+
+        voteDown: {
+            rest: "POST /:id/vote-down",
+            params: {
+                id: "string|required"
+            },
+            handler(ctx) {
+                const entity = this.resolveEntity(ctx, params);
+                return this.updateEntity(ctx, {
+                    id: ctx.params.id,
+                    votes: entity.votes - 1
+                });
+            }
+        }
+    }
+    // ...
+}
+```
 
 # Methods
 
 ## `getAdapter`
 `getAdapter(ctx?: Context)`
 
-TODO
+It returns an adapter instance based on the `Context`. If not found adapter, then it creates a new one. _It's important only in multi-tenant mode if custom `getAdapterByContext` method is implemented._
 
 ## `sanitizeParams`
 `sanitizeParams(params: object, opts?: object)`
+Sanitize the input parameters for `find`, `list` and `count` actions.
 
-TODO
+### Options
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `removeLimit` | `Boolean` | `false` | Remove the limit & offset properties (for `count` action). |
+| `list` | `Boolean` | `false` | If `true`, it sanitize the `page` and `pageSize` parameters (for `list` action). |
+
 
 ## `findEntities`
 `findEntities(ctx?: Context, params: object, opts?: object)`
+Find entities by query. 
 
-TODO
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
+| `params` | `Object` | `null` | Parameters for finding. It's same as [`find` action parameters](#parameters) |
+| `opts` | `Object` | `{}` | Other options for internal methods. |
+| `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
+
 
 ## `streamEntities`
 `streamEntities(ctx?: Context, params: object, opts?: object)`
+Find entitites by query like the `findEntities` but it returns a `Stream` 
 
-TODO
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
+| `params` | `Object` | `null` | Parameters for finding. It's same as [`find` action parameters](#parameters) |
+| `opts` | `Object` | `{}` | Other options for internal methods. |
+| `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
+
 
 ## `countEntities`
 `countEntities(ctx?: Context, params: object)`
+Get count of entities by query.
 
-TODO
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
+| `params` | `Object` | `null` | Parameters for finding. It's same as [`count` action parameters](#parameters-2) |
+
 
 ## `findEntity`
 `findEntity(ctx?: Context, params: object, opts?: object)`
+Find an entityby query. It returns only the first row of the result.
 
-TODO
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
+| `params` | `Object` | `null` | Parameters for finding. It's same as [`find` action parameters](#parameters) |
+| `opts` | `Object` | `{}` | Other options for internal methods. |
+| `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
+
 
 ## `resolveEntities`
 `resolveEntities(ctx?: Context, params: object, opts?: object)`
+Get entity(ies) by ID(s).
 
-TODO
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
+| `params` | `Object` | `null` | Parameters for finding. It's same as [`resolve` action parameters](#parameters-4) |
+| `opts` | `Object` | `{}` | Other options for internal methods. |
+| `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
+| `opts.throwIfNotExist` | `boolean` | `false` | If `true`, throw `EntityNotFound` error if the entity is not exist. |
+
 
 ## `createEntity`
 `createEntity(ctx?: Context, params: object, opts?: object)`
+Create an entity.
 
-TODO
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
+| `params` | `Object` | `null` | Entity fields. |
+| `opts` | `Object` | `{}` | Other options for internal methods. |
+| `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
+
 
 ## `createEntities`
 `createEntities(ctx?: Context, params: Array<object>, opts?: object)`
+Create multiple entities.
 
-TODO
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
+| `params` | `Array<Object>` | `null` | Array of entities. |
+| `opts` | `Object` | `{}` | Other options for internal methods. |
+| `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
+
 
 ## `updateEntity`
 `updateEntity(ctx?: Context, params: object, opts?: object)`
+Update an existing entity. Only the provided fields will be updated.
 
-TODO
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
+| `params` | `Object` | `null` | It contains the ID of the entity and the changed field values. |
+| `opts` | `Object` | `{}` | Other options for internal methods. |
+| `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
+
 
 ## `replaceEntity`
 `replaceEntity(ctx?: Context, params: object, opts?: object)`
+Replace an existing entity.
 
-TODO
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
+| `params` | `Object` | `null` | It contains the entire entity, which will be replaced. |
+| `opts` | `Object` | `{}` | Other options for internal methods. |
+| `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
+
 
 ## `removeEntity`
 `removeEntity(ctx?: Context, params: object, opts?: object)`
+Delete an entity by ID.
 
-TODO
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
+| `params` | `Object` | `null` | It contains the entity ID. |
+| `opts` | `Object` | `{}` | Other options for internal methods. |
+| `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
+
+The method returns the deleted entity ID only.
 
 ## `clearEntities`
-`clearEntities(ctx?: Context, params: object, opts?: object)`
+`clearEntities(ctx?: Context, params: object)`
+Clear all entities in the table/collection.
 
-TODO
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
+| `params` | `Object` | `null` | It contains the entity ID. |
+
 
 ## `validateParams`
 `validateParams(ctx?: Context, params: object, opts?: object)`
+It validates & sanitizes the input data in `params` against the `fields` definition. It's called in `createEntity`, `createEntities`, `updateEntity` and `replaceEntity` methods.
 
-TODO
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
+| `params` | `Object` | `null` | Entitiy field values. |
+| `opts` | `Object` | `{}` | Other options for internal methods. |
+| `opts.type` | `String` | `"create"` | Type of method. |
+
 
 ## `transformResult`
 `transformResult(adapter: Adapter, docs: object|Array<object>, params?: object, ctx?: Context)`
+It transforms the entities which comes from the database according to `fields` definitions.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `adapter` | `Adapter` | **required** | Adapter instance. |
+| `docs` | `Object|Array<Object>` | **required** | Entity or entities. |
+| `params` | `Object` | `null` | Entitiy field values. |
+| `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
+
+
+## `createIndexes`
+`createIndexes(adapter: Adapter, indexes: Array<object>)`
+
+TODO
+
+## `createIndex`
+`createIndex(adapter: Adapter, index: object)`
 
 TODO
 
@@ -1089,6 +1243,9 @@ TODO
 # Indexes
 You can define the indexes in the service `settings.indixes` property. It has a common format and every adapter will process and creates the indexes.
 Other option, if you call the adapter.createIndex` method directly. [More info](#createindexdef-any)
+
+# Streaming
+TODO
 
 # Populating
 TODO
