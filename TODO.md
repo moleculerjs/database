@@ -1,0 +1,74 @@
+# TODO
+
+- [x] Actions
+    - [x] `find`
+    - [x] `count`
+    - [x] `list`
+    - [x] `get` - receive only one entity
+    - [x] `resolve` - receive one or multiple entities (with mapping)
+    - [x] `create`
+    - [x] `update`
+    - [x] `replace`
+    - [x] `remove`
+
+- [x] Field handlers
+    - [x] `id` field with `secure` option: { id: true, type: "string", readonly: true, secure: true, columnName: "_id" }
+    - [x] `columnName` support: { id: true, type: "string", columnName: "_id" }
+    - [x] Sanitizers
+        - [x] trim title: { type: "string", trim: true, max: 50, required: true },
+    - [x] set: custom set formatter: { set: (value, entity, field, ctx) => slug(entity.title) }
+    - [x] get: custom get formatter: { get: (value, entity, field, ctx) => entity.firstName + ' ' + entity.lastName }
+    - [x] default value: status: { type: "number", default: 1 } // Optional field with default value
+    - [x] required: validation
+    - [x] validate the type field with converting
+    - [x] readonly: { type: "string", readonly: true } // Can't be set and modified
+    - [x] virtual: { type: "string", virtual: true, get: () => ... } // Can't be set and modified and always should have the `get` method or `populate` defined
+    - [x] hidden (password): password: { type: "string", hidden: true,
+        - [x] { hidden: "byDefault" | "always" == true } hide if it's not requested in `fields`.
+    - [x] custom validator: { type: "string", validate: (value, entity, field, ctx) => value.length > 6 },	// Custom validator
+    - [x] populate: { populate: { action: "v1.accounts.resolve", fields: ["id", "name", "avatar"] }
+        - [x] using different field name
+    - [x] immutable: { author: { type: "string", immutable: true } }
+    - [x] permission: roles: { type: "array", permission: "administrator" } // Access control by permissions
+    - [x] readPermission: { type: "array", populate: "v1.accounts.resolve", readPermission: ["$owner"] }
+    - [x] onCreate: createdAt: { type: "number", readonly: true, onCreate: () => Date.now() }, // Set value when entity is created
+    - [x] onUpdate: updatedAt: { type: "number", readonly: true, onUpdate: () => Date.now() }, // Set value when entity is updated
+    - [x] onRemove: deletedAt: { type: "number", readonly: true, onRemove: () => Date.now() }, // Set value when entity is deleted
+    - [x] nested types
+
+- [x] Methods (internal with _ prefix)
+    - [x] create indexes (execute the adapter)
+    - [x] methods for actions (findEntities, getEntity, countEntities, createEntity, updateEntity, removeEntity)
+    - [x] sanitizator
+    - [x] transformer
+    - [x] populate (default populates)
+    - [x] scopes
+    - [x] `find` with stream option  http://mongodb.github.io/node-mongodb-native/3.5/api/Cursor.html#stream
+
+- [x] Soft delete
+- [x] create validation from field definitions
+- [x] nested objects in fields.
+- [x] Multi model/tenant solutions
+    - [x] get connection/model dynamically
+    - [ ] schema-based for integration tests
+- [ ] `aggregate` action with params: `type: "sum", "avg", "count", "min", "max"` & `field: "price"`
+- [ ] permissions for scopes
+- [ ] ad-hoc populate in find/list actions `populate: ["author", { key: "createdBy", action: "users.resolve", fields: ["name", "avatar"] }]` { }
+- [ ] `bulkCreate` action without REST
+- [ ] create methods for `updateMany` and `removeMany`
+- [x] `settings.indexes` implementation common form and `createIndex` in the adapter process it.
+- [ ] add default `entitiyChanged` method which generates events.
+- [ ] add option to disable auto value conversion in validator schema.
+- [ ] `validate` somehow should return the error message text if not valid. E.g. it's `true` or `"The value is not valid"`
+- [ ] `sort` param in find & list should be also `Array<String>` not just `String`
+- [ ] option to add other service cache cleaning events in the Mixin options
+
+- [ ] Adapters
+    - [ ] Cassandra
+    - [ ] Couchbase
+    - [ ] CouchDB
+    - [x] Knex
+    - [x] MongoDB
+    - [ ] Mongoose
+    - [x] NeDB
+    - [ ] Sequelize

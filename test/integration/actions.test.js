@@ -846,7 +846,7 @@ module.exports = (getAdapter, adapterType) => {
 				content: "First content"
 			});
 
-			expect(broker.broadcast).toBeCalledTimes(1);
+			expect(broker.broadcast).toBeCalledTimes(2);
 			expect(broker.broadcast).toBeCalledWith(
 				"cache.clean.posts",
 				{
@@ -857,6 +857,15 @@ module.exports = (getAdapter, adapterType) => {
 				{
 					parentCtx: expect.any(Context)
 				}
+			);
+			expect(broker.broadcast).toBeCalledWith(
+				"posts.created",
+				{
+					type: "create",
+					data: row,
+					opts: {}
+				},
+				{ parentCtx: expect.any(Context) }
 			);
 		});
 
@@ -988,7 +997,7 @@ module.exports = (getAdapter, adapterType) => {
 				title: "Update post"
 			});
 
-			expect(broker.broadcast).toBeCalledTimes(1);
+			expect(broker.broadcast).toBeCalledTimes(2);
 			expect(broker.broadcast).toBeCalledWith(
 				"cache.clean.posts",
 				{
@@ -999,6 +1008,15 @@ module.exports = (getAdapter, adapterType) => {
 				{
 					parentCtx: expect.any(Context)
 				}
+			);
+			expect(broker.broadcast).toBeCalledWith(
+				"posts.updated",
+				{
+					type: "update",
+					data: row,
+					opts: {}
+				},
+				{ parentCtx: expect.any(Context) }
 			);
 		});
 
@@ -1035,7 +1053,7 @@ module.exports = (getAdapter, adapterType) => {
 					adapter: getAdapter(),
 					cache: {
 						// In this case no cache cleaner event broadcasting
-						eventName: false
+						eventType: false
 					}
 				})
 			],
@@ -1082,7 +1100,16 @@ module.exports = (getAdapter, adapterType) => {
 				content: "First content"
 			});
 
-			expect(broker.broadcast).toBeCalledTimes(0);
+			expect(broker.broadcast).toBeCalledTimes(1);
+			expect(broker.broadcast).toBeCalledWith(
+				"posts.created",
+				{
+					type: "create",
+					data: row,
+					opts: {}
+				},
+				{ parentCtx: expect.any(Context) }
+			);
 		});
 
 		it("should get the entity from the DB", async () => {
@@ -1117,7 +1144,16 @@ module.exports = (getAdapter, adapterType) => {
 				title: "Update post"
 			});
 
-			expect(broker.broadcast).toBeCalledTimes(0);
+			expect(broker.broadcast).toBeCalledTimes(1);
+			expect(broker.broadcast).toBeCalledWith(
+				"posts.updated",
+				{
+					type: "update",
+					data: row,
+					opts: {}
+				},
+				{ parentCtx: expect.any(Context) }
+			);
 		});
 
 		it("should get the old entity from the cache (again)", async () => {

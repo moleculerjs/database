@@ -5,14 +5,15 @@ The options of the Mixin.
 
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
-| `adapter` | `Object` | `NeDB` | Configure the adapter. |
+| `adapter` | `Object` | `NeDB` | Configure the adapter. [Read more](#adapters) |
 | `createActions` | `Boolean` | `true` | Generate CRUD actions. |
 | `actionVisibility` | `String` | `published` | Default visibility of generated actions |
 | `generateActionParams` | `Boolean` | `true` | Generate `params` schema for generated actions based on the `fields` |
 | `strict` | `Boolean\|String` | `remove` | Strict mode in validation schema for objects. Values: `true`, `false`, `"remove"` |
 | `cache` | `Object` | | Action caching settings |
 | `cache.enabled` | `Boolean` | `true` | Enable caching on actions |
-| `cache.eventName` | `String` | `cache.clean.{serviceName}` | Name of the broadcasted event for clearing cache at modifications (update, replace, remove). If `false`, it disables event broadcasting & subscription |
+| `cache.eventName` | `String` | `cache.clean.{serviceName}` | Name of the broadcasted event for clearing cache at modifications (update, replace, remove). |
+| `cache.eventType` | `String` | `"broadcast"` | Type of the broadcasted event. It can be `"broadcast"`, or `"emit"`. If `null`, it disabled the event sending. |
 | `rest` | `Boolean` | `true` | Set the API Gateway auto-aliasing REST properties in the service & actions |
 | `entityChangedEventMode` | `String` | `"broadcast"` | Entity changed lifecycle event mode. Values: `null`, `"broadcast"`, `"emit"`. The `null` disables event sending. |
 | `autoReconnect` | `Boolean` | `true` | Auto reconnect if the DB server is not available at first connecting |
@@ -1622,7 +1623,62 @@ module.exports = {
 ```
 
 # Caching
-TODO
+The service has a built-in caching mechanism. If a cacher is configured in the ServiceBroker, the service stores the responses of `find`, `list`, `get` and `resolve` actions and clear the cache if any entities have been changed.
+
+The caching is enabled by default and uses the `cache.clean.{serviceName}` (e.g. `cache.clean.posts`) event name for clearing the cached entries. To disable it, set `cache.enabled = false` in [Mixin options](#mixin-options).
+
+## Under the hood
+To store the responses in the case, service uses the ServiceBroker built-in action caching mechanism. The cache clearing is a little bit complicated because if you are running multiple instances of the service with a local Memory cache, you should notify the other instances if an entity changed. To cover it, the service broadcasts a cache clearing event (e.g. `cache.clean.posts`) and also subscribes to this event. In the subscription handler, it calls the `broker.cacher.clean` method.
+
+So if you have multiple instances of the service, and the first instance updates an entity, then it broadcasts the cache clearing event. Both instances receives the event and both will clear the cache entries. It's simple but works any number of instances.
+
+## Clear cached populated data
+When you use populated data in your service, it means that the service will store data from other services in the cache.
+
+Let's say, you have two services, `posts` and `users`. Every post entity has an `author` which points to a `user` entity. You configure `populate` for the `author` field in `posts` service which resolves the author from the `users` service. So if you get a post with author, the cache will store the user entity inside the post entity. For example:
+```js
+// GET /api/posts/12345?populate=author
+{
+    id: "12345",
+    title: "My post",
+    author: {
+        name: "John Doe"
+    }
+}
+```
+Imagine that, the author updates his name to "Mr. John Doe" in the `users` service. But if he gets the post response, he will see still his old name because the response comes from the `posts` service cache. The changes happened in the `users` service, but the `posts` doesn't know about it.
+
+To avoid it, you should subscribe to the cache cleaning events of the dependent services.
+
+### Example
+```js
+module.exports = {
+    name: "posts",
+    mixins: [DbService(/*...*/)],
+    settings: {
+        fields: {
+            id: { type: "string", primaryKey: true, columnName: "_id" },
+            title: { type: "string" },
+            content: { type: "string" },
+            author: { 
+                type: "string", 
+                required: true,
+                populate: "users.resolve"
+            }
+        }
+    },
+
+    events: {
+        async "cache.clean.users"() {
+            if (this.broker.cacher) {
+                // Clear the local cache entries
+				await this.broker.cacher.clean(`${this.fullName}.**`);
+		    }
+        }
+    }
+};
+```
+
 
 # Events
 The [`entityChanged`](#entitychanged) method has a default implementation which sends entity lifecycle events. You can use it to subscribe them in other dependent services.
@@ -1638,14 +1694,193 @@ The [`entityChanged`](#entitychanged) method has a default implementation which 
 
 If you want to change it, just simply overwrite the [`entityChanged`](#entitychanged) method and implement your own logic.
 
-# Multi-tenancy
-TODO
-
 # Cascade delete
-TODO (with events)
+In DBMS, you can configure `CASCADE DELETE` function for relations between tables. It means, if a record is deleted from the parent table, the database engine will delete the related child records, as well. In microservices projects and in this database services you can't define relations because it's a common case that some services use different database engines.
+
+But you can use this cascade delete feature with a simple event subscription. If an entity changed in the parent table/collection, the service broadcasts entity lifecycle events. So you can subscribe to this event in your child services and remove the relevant entities.
+
+## Example
+Let's say, you have a `users` service and a `posts` service. If a user is deleted, we should delete the user's posts, as well.
+
+**users.service.js**
+
+It's just a simple service, no need to set any special.
+```js
+module.exports = {
+    name: "users",
+    mixins: [DbService(/*...*/)],
+    settings: {
+        fields: {
+            id: { type: "string", primaryKey: true, columnName: "_id" },
+            name: { type: "string" },
+            email: { type: "email" }
+        }
+    }
+};
+```
+
+**posts.service.js**
+
+Subscribe to the `users.removed` event and remove posts by `adapter.removeMany`.
+```js
+module.exports = {
+    name: "posts",
+    mixins: [DbService(/*...*/)],
+    settings: {
+        fields: {
+            id: { type: "string", primaryKey: true, columnName: "_id" },
+            title: { type: "string" },
+            content: { type: "string" },
+            author: { type: "string", required: true }
+        }
+    },
+
+    events: {
+        async "users.removed"(ctx) {
+            const user = ctx.params.data;
+            const adapter = await this.getAdapter(ctx);
+            await adapter.removeMany({ author: user.id });
+            this.logger.info(`The ${user.name} user's posts removed.`);
+        }
+    }
+};
+```
+
+# Multi-tenancy
+The service supports many multi-tenancy methods. But every method has different configuration.
+For every method it's mandatory that you store the tenant ID in the `ctx.meta`. The best practice is to resolve the logged in user in the API gateway `authenticate` or `authorize` method and set the resolved user into the `ctx.meta.user`.
+
+## Record-based tenancy
+This mode uses the same database server, same database and same collection/table. But there is a tenant ID field in the collection/table for filtering.
+
+### Steps for configuration
+1. Create a tenant ID field in the `fields` and create a `set` method which reads the tenant ID from the `ctx.meta`.
+2. Create a custom scope which filtering the entities by tenant ID.
+3. Set this scope as default scope.
+
+### Example
+```js
+// posts.service.js
+module.exports = {
+    name: "posts",
+    mixins: [DbService({ adapter: "MongoDB" })],
+    settings: {
+        fields: {
+            id: { type: "string", primaryKey: true, columnName: "_id" },
+            title: { type: "string", required: true, min: 5 },
+            content: { type: "string", required: true },
+            tenantId: {
+                type: "string",
+                required: true,
+                set: (value, entity, field, ctx) => ctx.meta.user.tenantId
+            }
+        },
+        scopes: {
+            tenant(q, ctx) {
+                const tenantId = ctx.meta.user.tenantId;
+                if (!tenantId) throw new Error("Missing tenantId!");
+
+                q.tenantId = tenantId;
+                return q;
+            }
+        },
+        defaultScopes: ["tenant"]
+    }
+};
+```
+
+## Table/Collection-based tenancy
+This mode uses the same database server, same database but different collection/table. It means every tenant has an individual table/collection.
+
+### Steps for configuration
+1. Define the `getAdapterByContext` method to generate adapter options for every tenant.
+
+### Example
+```js
+// posts.service.js
+module.exports = {
+    name: "posts",
+    mixins: [DbService({ adapter: "MongoDB" })],
+    settings: {
+        fields: {
+            id: { type: "string", primaryKey: true, columnName: "_id" },
+            title: { type: "string", required: true, min: 5 },
+            content: { type: "string", required: true }
+        }
+    },
+
+    methods: {
+        getAdapterByContext(ctx, adapterDef) {
+            const tenantId = ctx && ctx.meta.user.tenantId;
+            if (!tenantId) throw new Error("Missing tenantId!");
+
+            return [
+                // cache key
+                tenantId, 
+
+                // Adapter options
+                {
+                    type: "MongoDB",
+                    options: {
+                        uri: "mongodb://localhost:27017/moleculer-demo",
+                        collection: `posts-${tenantId}`
+                    }
+                }
+            ];
+        }      
+    }
+};
+```
+
+## Database/Server-based tenancy
+This mode uses different connection string. It means every tenant has an individual database or server.
+
+### Steps for configuration
+1. Define the `getAdapterByContext` method to generate adapter options for every tenant.
+
+### Example
+```js
+// posts.service.js
+module.exports = {
+    name: "posts",
+    mixins: [DbService({ adapter: "MongoDB" })],
+    settings: {
+        fields: {
+            id: { type: "string", primaryKey: true, columnName: "_id" },
+            title: { type: "string", required: true, min: 5 },
+            content: { type: "string", required: true }
+        }
+    },
+
+    methods: {
+        getAdapterByContext(ctx, adapterDef) {
+            const tenantId = ctx && ctx.meta.user.tenantId;
+            if (!tenantId) throw new Error("Missing tenantId!");
+
+            return [
+                // cache key
+                tenantId, 
+
+                // Adapter options
+                {
+                    type: "MongoDB",
+                    options: {
+                        uri: `mongodb://localhost:27017/moleculer-demo--${tenantId}`,
+                        collection: `posts`
+                    }
+                }
+            ];
+        }      
+    }
+};
+```
 
 # Adapters
-TODO
+The adapter is a class which executes the database operations with a given libraries. This project contains many built-in adapters. 
+
+If adapter is not defined in the Mixin options, the service will use the NeDB adapter with memory database. It can be enough for testing & prototyping. It has the same API as MongoDB client library.
+
+>Note: The adapter connects to the database only at the first request. It means your service will start properly even if the database server is not available. The reason is that in multi-tenancy mode, the service can't establish a connection without tenant ID.
 
 ## Cassandra
 TODO
