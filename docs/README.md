@@ -14,6 +14,7 @@ The options of the Mixin.
 | `cache.enabled` | `Boolean` | `true` | Enable caching on actions |
 | `cache.eventName` | `String` | `cache.clean.{serviceName}` | Name of the broadcasted event for clearing cache at modifications (update, replace, remove). If `false`, it disables event broadcasting & subscription |
 | `rest` | `Boolean` | `true` | Set the API Gateway auto-aliasing REST properties in the service & actions |
+| `entityChangedEventMode` | `String` | `"broadcast"` | Entity changed lifecycle event mode. Values: `null`, `"broadcast"`, `"emit"`. The `null` disables event sending. |
 | `autoReconnect` | `Boolean` | `true` | Auto reconnect if the DB server is not available at first connecting |
 | `maxLimit` | `Number` | `-1` | Maximum value of `limit` in `find` action and `pageSize` in `list` action. Default: `-1` (no limit) |
 | `defaultPageSize` | `Number` | `10` | Default page size in `list` action. |
@@ -1235,7 +1236,7 @@ The service uses the cache key to store the created adapter. Therefore in the ne
 
 It's a method which is called when an entity created, updated, replaced or removed. You can use it to clear the cache or send an event.
 
-There is a default implementation which sends an entity changed event, e.g: `posts.created`, `posts.updated`, `posts.removed`.
+There is a default implementation which sends an entity changed events. [Read more about it here](#events).
 
 ### Parameters
 | Property | Type | Description |
@@ -1620,14 +1621,28 @@ module.exports = {
 };
 ```
 
-# Cascade delete
-TODO (with events)
+# Caching
+TODO
+
+# Events
+The [`entityChanged`](#entitychanged) method has a default implementation which sends entity lifecycle events. You can use it to subscribe them in other dependent services.
+
+| Action | Method | Event | Description |
+| -------- | ---- | ------- | ----------- |
+| `create` | `createEntity` | `{serviceName}.created` | Sent after a new entity created and saved to the database. |
+| - | `createEntities` | `{serviceName}.created` | Sent after multiple entities created and saved to the database. In this case the `opts.batch == true` |
+| `update` | `updateEntity` | `{serviceName}.updated` | Sent after an entity updated. |
+| `replace` | `replaceEntity` | `{serviceName}.replaced` | Sent after an entity replaced. |
+| `remove` | `removeEntity` | `{serviceName}.removed` | Sent after an entity deleted. |
+| - | `clearEntities` | `{serviceName}.cleared` | Sent after the table/collection cleared (deleted all entities). |
+
+If you want to change it, just simply overwrite the [`entityChanged`](#entitychanged) method and implement your own logic.
 
 # Multi-tenancy
 TODO
 
-# Events
-TODO
+# Cascade delete
+TODO (with events)
 
 # Adapters
 TODO

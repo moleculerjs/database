@@ -380,13 +380,12 @@ module.exports = (getAdapter, adapterType) => {
 				await this.clearEntities();
 			}
 		});
-		svc.entityChanged = jest.fn();
-
 		beforeAll(() => broker.start());
 		afterAll(() => broker.stop());
 
 		const ctx = Context.create(broker, null, {});
 		let docs = {};
+		jest.spyOn(ctx, "broadcast");
 
 		it("should return empty array", async () => {
 			const rows = await svc.findEntities(ctx);
@@ -397,17 +396,26 @@ module.exports = (getAdapter, adapterType) => {
 		});
 
 		it("create an entity", async () => {
-			svc.entityChanged.mockClear();
+			ctx.broadcast.mockClear();
 			docs.johnDoe = await svc.createEntity(ctx, TEST_DOCS.johnDoe);
 
 			expect(docs.johnDoe).toEqual({ ...TEST_DOCS.johnDoe, id: expectedID });
 
-			expect(svc.entityChanged).toBeCalledTimes(1);
-			expect(svc.entityChanged).toBeCalledWith("create", docs.johnDoe, ctx, {});
+			expect(ctx.broadcast).toBeCalledTimes(2);
+			expect(ctx.broadcast).toBeCalledWith("cache.clean.users", {
+				type: "create",
+				data: docs.johnDoe,
+				opts: {}
+			});
+			expect(ctx.broadcast).toBeCalledWith("users.created", {
+				type: "create",
+				data: docs.johnDoe,
+				opts: {}
+			});
 		});
 
 		it("create multiple entities", async () => {
-			svc.entityChanged.mockClear();
+			ctx.broadcast.mockClear();
 			const res = await svc.createEntities(ctx, [
 				TEST_DOCS.janeDoe,
 				TEST_DOCS.bobSmith,
@@ -426,8 +434,17 @@ module.exports = (getAdapter, adapterType) => {
 				id: expectedID
 			});
 
-			expect(svc.entityChanged).toBeCalledTimes(1);
-			expect(svc.entityChanged).toBeCalledWith("create", res, ctx, { batch: true });
+			expect(ctx.broadcast).toBeCalledTimes(2);
+			expect(ctx.broadcast).toBeCalledWith("cache.clean.users", {
+				type: "create",
+				data: res,
+				opts: { batch: true }
+			});
+			expect(ctx.broadcast).toBeCalledWith("users.created", {
+				type: "create",
+				data: res,
+				opts: { batch: true }
+			});
 		});
 
 		describe("Test resolveEntities method", () => {
@@ -551,13 +568,13 @@ module.exports = (getAdapter, adapterType) => {
 				await this.clearEntities();
 			}
 		});
-		svc.entityChanged = jest.fn();
 
 		beforeAll(() => broker.start());
 		afterAll(() => broker.stop());
 
 		const ctx = Context.create(broker, null, {});
 		let docs = {};
+		jest.spyOn(ctx, "broadcast");
 
 		describe("Set up", () => {
 			it("should return empty array", async () => {
@@ -577,7 +594,7 @@ module.exports = (getAdapter, adapterType) => {
 
 		describe("Test updateEntity method", () => {
 			it("should update an entity", async () => {
-				svc.entityChanged.mockClear();
+				ctx.broadcast.mockClear();
 				const row = await svc.updateEntity(ctx, {
 					id: docs.janeDoe.id,
 					status: true,
@@ -594,13 +611,22 @@ module.exports = (getAdapter, adapterType) => {
 					status: true
 				});
 
-				expect(svc.entityChanged).toBeCalledTimes(1);
-				expect(svc.entityChanged).toBeCalledWith("update", row, ctx, {});
+				expect(ctx.broadcast).toBeCalledTimes(2);
+				expect(ctx.broadcast).toBeCalledWith("cache.clean.users", {
+					type: "update",
+					data: row,
+					opts: {}
+				});
+				expect(ctx.broadcast).toBeCalledWith("users.updated", {
+					type: "update",
+					data: row,
+					opts: {}
+				});
 			});
 
 			if (adapterType == "MongoDB" || adapterType == "NeDB") {
 				it("should raw update an entity", async () => {
-					svc.entityChanged.mockClear();
+					ctx.broadcast.mockClear();
 					const row = await svc.updateEntity(ctx, {
 						id: docs.johnDoe.id,
 						$raw: true,
@@ -625,8 +651,17 @@ module.exports = (getAdapter, adapterType) => {
 						status: false
 					});
 
-					expect(svc.entityChanged).toBeCalledTimes(1);
-					expect(svc.entityChanged).toBeCalledWith("update", row, ctx, {});
+					expect(ctx.broadcast).toBeCalledTimes(2);
+					expect(ctx.broadcast).toBeCalledWith("cache.clean.users", {
+						type: "update",
+						data: row,
+						opts: {}
+					});
+					expect(ctx.broadcast).toBeCalledWith("users.updated", {
+						type: "update",
+						data: row,
+						opts: {}
+					});
 				});
 			}
 
@@ -656,7 +691,7 @@ module.exports = (getAdapter, adapterType) => {
 		describe("Test replaceEntity method", () => {
 			if (adapterType == "MongoDB" || adapterType == "NeDB") {
 				it("should replace an entity", async () => {
-					svc.entityChanged.mockClear();
+					ctx.broadcast.mockClear();
 					const row = await svc.replaceEntity(ctx, {
 						id: docs.kevinJames.id,
 						name: "Kevin",
@@ -671,8 +706,17 @@ module.exports = (getAdapter, adapterType) => {
 						status: true
 					});
 
-					expect(svc.entityChanged).toBeCalledTimes(1);
-					expect(svc.entityChanged).toBeCalledWith("replace", row, ctx, {});
+					expect(ctx.broadcast).toBeCalledTimes(2);
+					expect(ctx.broadcast).toBeCalledWith("cache.clean.users", {
+						type: "replace",
+						data: row,
+						opts: {}
+					});
+					expect(ctx.broadcast).toBeCalledWith("users.replaced", {
+						type: "replace",
+						data: row,
+						opts: {}
+					});
 				});
 			}
 
@@ -742,13 +786,12 @@ module.exports = (getAdapter, adapterType) => {
 			}
 		});
 
-		svc.entityChanged = jest.fn();
-
 		beforeAll(() => broker.start());
 		afterAll(() => broker.stop());
 
 		const ctx = Context.create(broker, null, {});
 		let docs = {};
+		jest.spyOn(ctx, "broadcast");
 
 		describe("Set up", () => {
 			it("should return empty array", async () => {
@@ -776,7 +819,7 @@ module.exports = (getAdapter, adapterType) => {
 			});
 
 			it("should return the remaining rows", async () => {
-				svc.entityChanged.mockClear();
+				ctx.broadcast.mockClear();
 
 				const res = await svc.removeEntity(ctx, { id: docs.janeDoe.id });
 				expect(res).toBe(docs.janeDoe.id);
@@ -789,9 +832,16 @@ module.exports = (getAdapter, adapterType) => {
 				const count = await svc.countEntities(ctx, {});
 				expect(count).toEqual(3);
 
-				expect(svc.entityChanged).toBeCalledTimes(1);
-				expect(svc.entityChanged).toBeCalledWith("remove", docs.janeDoe, ctx, {
-					softDelete: false
+				expect(ctx.broadcast).toBeCalledTimes(2);
+				expect(ctx.broadcast).toBeCalledWith("cache.clean.users", {
+					type: "remove",
+					data: docs.janeDoe,
+					opts: { softDelete: false }
+				});
+				expect(ctx.broadcast).toBeCalledWith("users.removed", {
+					type: "remove",
+					data: docs.janeDoe,
+					opts: { softDelete: false }
 				});
 			});
 
@@ -823,7 +873,13 @@ module.exports = (getAdapter, adapterType) => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
-			mixins: [DbService({ adapter: getAdapter(), createActions: false })],
+			mixins: [
+				DbService({
+					adapter: getAdapter(),
+					createActions: false,
+					entityChangedEventMode: "emit"
+				})
+			],
 			settings: {
 				fields: {
 					id: {
@@ -857,6 +913,8 @@ module.exports = (getAdapter, adapterType) => {
 		beforeAll(() => broker.start());
 		afterAll(() => broker.stop());
 
+		jest.spyOn(broker, "emit");
+
 		let entity;
 
 		it("setup", async () => {
@@ -888,6 +946,8 @@ module.exports = (getAdapter, adapterType) => {
 		});
 
 		it("should create entity", async () => {
+			broker.emit.mockClear();
+
 			entity = await svc.createEntity(null, {
 				name: "John Doe",
 				email: "john.doe@moleculer.services",
@@ -900,9 +960,18 @@ module.exports = (getAdapter, adapterType) => {
 				email: "john.doe@moleculer.services",
 				age: 30
 			});
+
+			expect(broker.emit).toBeCalledTimes(1);
+			expect(broker.emit).toBeCalledWith("users.created", {
+				type: "create",
+				data: entity,
+				opts: {}
+			});
 		});
 
 		it("should update entity", async () => {
+			broker.emit.mockClear();
+
 			const res = await svc.updateEntity(null, {
 				id: entity.id,
 				name: "Dr. John Doe",
@@ -914,6 +983,13 @@ module.exports = (getAdapter, adapterType) => {
 				name: "Dr. John Doe",
 				email: "john.doe@moleculer.services",
 				age: 33
+			});
+
+			expect(broker.emit).toBeCalledTimes(1);
+			expect(broker.emit).toBeCalledWith("users.updated", {
+				type: "update",
+				data: res,
+				opts: {}
 			});
 
 			entity = res;
@@ -937,6 +1013,8 @@ module.exports = (getAdapter, adapterType) => {
 		});
 
 		it("should replace entity", async () => {
+			broker.emit.mockClear();
+
 			const res = await svc.replaceEntity(null, {
 				id: entity.id,
 				name: "Mr. John Doe",
@@ -951,13 +1029,44 @@ module.exports = (getAdapter, adapterType) => {
 				age: 44
 			});
 
+			expect(broker.emit).toBeCalledTimes(1);
+			expect(broker.emit).toBeCalledWith("users.replaced", {
+				type: "replace",
+				data: res,
+				opts: {}
+			});
+
 			entity = res;
 		});
 
 		it("should remove entity", async () => {
+			broker.emit.mockClear();
+
 			const res = await svc.removeEntity(null, { id: entity.id });
 
 			expect(res).toEqual(entity.id);
+
+			expect(broker.emit).toBeCalledTimes(1);
+			expect(broker.emit).toBeCalledWith("users.removed", {
+				type: "remove",
+				data: entity,
+				opts: { softDelete: false }
+			});
+		});
+
+		it("should clear entities", async () => {
+			broker.emit.mockClear();
+
+			const res = await svc.clearEntities();
+
+			expect(res).toEqual(0);
+
+			expect(broker.emit).toBeCalledTimes(1);
+			expect(broker.emit).toBeCalledWith("users.cleared", {
+				type: "clear",
+				data: null,
+				opts: {}
+			});
 		});
 	});
 };

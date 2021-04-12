@@ -123,6 +123,9 @@ module.exports = function DatabaseMixin(mixinOpts) {
 		/** @type {Boolean} Set auto-aliasing fields */
 		rest: true,
 
+		// Entity changed lifecycle event mode. Values: null, "broadcast", "emit". The `null` disables event sending.
+		entityChangedEventMode: "broadcast",
+
 		/** @type {Number} Auto reconnect if the DB server is not available at first connecting */
 		autoReconnect: true,
 

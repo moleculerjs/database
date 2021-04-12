@@ -615,14 +615,23 @@ module.exports = function (mixinOpts) {
 		},
 
 		/**
-		 * Can be user-defined which is called when an entity changed.
+		 * Send entity lifecycle events
 		 * @param {String} type
 		 * @param {any} data
 		 * @param {Context?} ctx
 		 * @param {Object?} opts
 		 */
 		async entityChanged(type, data, ctx, opts) {
-			// Abstract method
+			if (mixinOpts.entityChangedEventMode) {
+				const op = type + (type == "clear" ? "ed" : "d");
+				const eventName = `${this.name}.${op}`;
+
+				(ctx || this.broker)[mixinOpts.entityChangedEventMode](eventName, {
+					type,
+					data,
+					opts
+				});
+			}
 		},
 
 		/**
