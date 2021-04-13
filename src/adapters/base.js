@@ -52,7 +52,7 @@ class BaseAdapter {
 			return true;
 		} else {
 			this.logger.warn(
-				`The installed ${library} library is not supported officially. Functionality is not guaranteed. Supported versions:`,
+				`The installed ${library} library is not supported officially. Proper functionality cannot be guaranteed. Supported versions:`,
 				requiredVersions
 			);
 			return false;

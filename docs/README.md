@@ -1448,8 +1448,93 @@ ss.on("end", () => {
 });
 ```
 
+# Nested objects & arrays
+The document-based database engines handles nested objects & arrays generally. You can use them in the field definitions, as well.
+The definition is similar to [Fastest Validator nested object schema](https://github.com/icebob/fastest-validator#object).
+
+## Example for nested object field
+```js
+module.exports = {
+    // ...
+    settings: {
+        fields: {
+            address: {
+                type: "object",
+                properties: {
+                    zip: { type: "number" },
+                    street: { type: "string" },
+                    state: { type: "string" },
+                    city: { type: "string", required: true },
+                    country: { type: "string" },
+                    primary: { type: "boolean", default: true }
+                }
+            }
+        }
+    }
+};
+```
+
+## Example for string array
+```js
+module.exports = {
+    // ...
+    settings: {
+        fields: {
+            roles: {
+                type: "array",
+                max: 3,
+                items: { type: "string" }
+            }
+        }
+    }
+};
+```
+
+## Example for array with objects
+```js
+module.exports = {
+    // ...
+    settings: {
+        fields: {
+            phones: {
+                type: "array",
+                items: {
+                    type: "object",
+                    properties: {
+                        type: { type: "string" },
+                        number: { type: "string", required: true },
+                        primary: { type: "boolean", default: false }
+                    }
+                }
+            }
+        }
+    }
+};
+```
+
+Mostly, the SQL-based adapters (Knex, Sequelize) can't handle them, so that they convert the `object` and `array` to a JSON string and store them as a `String`. But when you receives the entity, the adapter converts back to `object` and `array`. So you won't notice that it stores in different type. The only disadvantage is that you can't filter to properties of nested objects. 
+
+## Example for nested object field as stored as a `String`
+```js
+module.exports = {
+    // ...
+    settings: {
+        fields: {
+            address: {
+                type: "object",
+                columnType: "string",
+                properties: {
+                    // ...
+                }
+            }
+        }
+    }
+};
+```
+
+
 # Populating
-The service allows you to easily populate fields from other services. For example: If you have an `author` field in `posts` entity, you can populate it with `users` service by ID of the author. If the field is an Array of IDs, it will populate all entities via only one request
+The service allows you to easily populate fields from other services. For example: If you have an `author` field in the `posts` entity, you can populate it with `users` service by ID of the author. If the field is an `Array` of IDs, it will populate all entities via only one request
 
 ## Example of populate fields
 ```js
@@ -1511,7 +1596,7 @@ module.exports = {
 ```
 
 # Permissions
-You can configure the readable & writable fields in the field definitions. It can useful when you want to return more fields if the logged in user is an administrator but less fields for the regular users.
+You can configure the readable & writable fields in the field definitions. It's useful when you want to return more fields if the logged in user is an administrator but less fields for the regular users.
 To check the authority, you should define the [`checkFieldAuthority`](#checkfieldauthority) method.
 
 ## Example field definitions
@@ -1586,7 +1671,7 @@ const posts = await broker.call("posts.find");
 const allPosts = await broker.call("posts.find", { scope: false });
 ```
 
-As you see, it can cause security issue if the user in the browser is able to requests the deleted posts, as well. To avoid it, you can control the authority of scopes, and default scopes disabling with the [`checkScopeAuthority`](#checkscopeauthority) method.
+As you see, it can cause a security issue if the user in the browser can request the deleted posts, as well. To avoid it, you can control the authority of scopes and default scopes disabling with the [`checkScopeAuthority`](#checkscopeauthority) method.
 
 ## Example with authority
 ```js
@@ -1602,7 +1687,7 @@ module.exports = {
         /**
          * Check the scope authority. Should be implemented in the service.
          * If `name and `scope` are null, it means you should check the permissions
-         * when somebody wants turning off the default scopes (e.g. list
+         * when somebody wants to turn off the default scopes (e.g. list
          * deleted records, as well).
          *
          * @param {Context} ctx
@@ -1628,7 +1713,7 @@ The service has a built-in caching mechanism. If a cacher is configured in the S
 The caching is enabled by default and uses the `cache.clean.{serviceName}` (e.g. `cache.clean.posts`) event name for clearing the cached entries. To disable it, set `cache.enabled = false` in [Mixin options](#mixin-options).
 
 ## Under the hood
-To store the responses in the case, service uses the ServiceBroker built-in action caching mechanism. The cache clearing is a little bit complicated because if you are running multiple instances of the service with a local Memory cache, you should notify the other instances if an entity changed. To cover it, the service broadcasts a cache clearing event (e.g. `cache.clean.posts`) and also subscribes to this event. In the subscription handler, it calls the `broker.cacher.clean` method.
+To store the responses in the cache, service uses the ServiceBroker built-in action caching mechanism. The cache clearing is a little bit complicated because if you are running multiple instances of the service with a local Memory cache, you should notify the other instances if an entity changed. To cover it, the service broadcasts a cache clearing event (e.g. `cache.clean.posts`) and also subscribes to this event. In the subscription handler, it calls the `broker.cacher.clean` method.
 
 So if you have multiple instances of the service, and the first instance updates an entity, then it broadcasts the cache clearing event. Both instances receives the event and both will clear the cache entries. It's simple but works any number of instances.
 
@@ -1646,7 +1731,7 @@ Let's say, you have two services, `posts` and `users`. Every post entity has an 
     }
 }
 ```
-Imagine that, the author updates his name to "Mr. John Doe" in the `users` service. But if he gets the post response, he will see still his old name because the response comes from the `posts` service cache. The changes happened in the `users` service, but the `posts` doesn't know about it.
+Imagine that, the author updates his name to "Mr. John Doe" in the `users` service. But if he gets the post response, he will see still his old name because the response comes from the `posts` service cache. The changes happened in the `users` service, but the `posts` service doesn't know about it.
 
 To avoid it, you should subscribe to the cache cleaning events of the dependent services.
 
@@ -1876,20 +1961,20 @@ module.exports = {
 ```
 
 # Adapters
-The adapter is a class which executes the database operations with a given libraries. This project contains many built-in adapters. 
+The adapter is a class that executes the database operations with NPM libraries. This project contains many built-in adapters. 
 
-If adapter is not defined in the Mixin options, the service will use the NeDB adapter with memory database. It can be enough for testing & prototyping. It has the same API as MongoDB client library.
+If the `adapter` is not defined in the Mixin options, the service will use the NeDB adapter with memory database. It can be enough for testing & prototyping. It has the same API as MongoDB client library.
 
 >Note: The adapter connects to the database only at the first request. It means your service will start properly even if the database server is not available. The reason is that in multi-tenancy mode, the service can't establish a connection without tenant ID.
 
 ## Cassandra
-TODO
+*Not implemented yet.*
 
 ## Couchbase
-TODO
+*Not implemented yet.*
 
 ## CouchDB
-TODO
+*Not implemented yet.*
 
 ## Knex
 [Knex adapter documentation](/docs/adapters/Knex.md)
@@ -1898,105 +1983,127 @@ TODO
 [MongoDB adapter documentation](/docs/adapters/MongoDB.md)
 
 ## Mongoose
-TODO
+*Not implemented yet.*
 
 ## NeDB
 [NeDB adapter documentation](/docs/adapters/NeDB.md)
 
 ## Sequelize
-TODO
+*Not implemented yet.*
 
 ## Adapter common methods
+
+## Constructor
+`constructor(opts?: object)`
+
+The constructor has an optional `opts` parameter which is adapter-specific. Every adapter has custom options.
+
+## `hasNestedFieldSupport`
+`get hasNestedFieldSupport`
+
+It's a getter that returns whether the adapter can handle nested objects & arrays or not.
 
 ## `connect`
 `connect()`
 
-TODO
+Connect to the database. Don't call directly!
 
 ## `disconnect`
 `disconnect()`
 
-TODO
+Disconnect from the database. Don't call directly!
 
 ## `find`
 `find(params: object)`
 
-TODO
+Find entities by `params`. The `params` contains the same properties as [`find` action](#find-find-entities).
 
 ## `findOne`
 `findOne(query: object)`
 
-TODO
+Find only first entity by `query`.
 
 ## `findById`
 `findById(id: any)`
 
-TODO
+Find an entity by primary key.
 
 ## `findByIds`
 `findByIds(id: Array<any>)`
 
-TODO
+Find multiple entities by primary keys.
 
 ## `findStream`
 `findStream(params: object)`
 
-TODO
+Find entities by `params`. The `params` contains the same properties as [`find` action](#find-find-entities).
+The response is a `Stream`.
+
+>Please note, not every adapter support it.
 
 ## `count`
 `count(params: object)`
 
-TODO
+Count entities by `params`. The `params` contains the same properties as [`count` action](#count-count-entities).
 
 ## `insert`
 `insert(entity: object)`
 
-TODO
+Insert an entity. It returns the saved entity.
 
 ## `insertMany`
 `insertMany(entities: Array<object>)`
 
-TODO
+Insert multiple entities. It returns the saved entities.
 
 ## `updateById`
-`updateById(id: any, changes: object)`
+`updateById(id: any, changes: object, opts: object)`
 
-TODO
+Update an entity by ID. The `changes` contains the changed properties of entity. It returns the updated entity.
+
+> If the adapter supports the raw changes, you can enable it with `opts.raw = true`. In this case, the changes is not manipulated, instead passed directly to the database client.
 
 ## `updateMany`
-`updateMany(query: object, changes: object)`
+`updateMany(query: object, changes: object, opts: object)`
 
-TODO
+Update multiple entities by query. The `changes` contains the changed properties of entity. It returns the number of updated entities.
+
+> If the adapter supports the raw changes, you can enable it with `opts.raw = true`. In this case, the changes is not manipulated, instead passed directly to the database client.
 
 ## `replaceById`
-`replaceById(id: any, changes: object)`
+`replaceById(id: any, entity: object)`
 
-TODO
+Replace an entity by ID. It returns the updated entity.
 
 ## `removeById`
-`removeById(id: any, changes: object)`
+`removeById(id: any)`
 
-TODO
+Remove an entity by ID. It returns the removed entity ID.
 
 ## `removeMany`
-`removeMany(query: object, changes: object)`
+`removeMany(query: object)`
 
-TODO
+Remove multiple entity by `query`. It returns the number of removed entities.
 
 ## `clear`
 `clear()`
 
-TODO
+Clear (truncate) the whole table/collection. It returns the number of removed entities.
 
 ## `entityToJSON`
 `entityToJSON(entity: object)`
 
-TODO
+Convert the received data from database client to [POJO](https://masteringjs.io/tutorials/fundamentals/pojo).
 
 ## `createIndex`
 `createIndex(def: any)`
 
-TODO
+Create an index on the table/collection. [Read more about the `def` parameter](#index-definition).
+
+## `removeIndex`
+`removeIndex(def: any)`
+
+Remove an index from the table/collection. [Read more about the `def` parameter](#index-definition).
 
 
 
