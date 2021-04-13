@@ -433,9 +433,7 @@ module.exports = function (mixinOpts) {
 				throwIfNotExist: true
 			});
 
-			const rawUpdate = params.$raw === true;
-			if (rawUpdate) delete params.$raw;
-
+			const rawUpdate = opts.raw === true;
 			if (!rawUpdate) {
 				params = await this.validateParams(ctx, params, {
 					type: "update",

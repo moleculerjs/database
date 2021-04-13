@@ -53,7 +53,7 @@ module.exports = (getAdapter, adapterType) => {
 
 			actions: {
 				updateRaw(ctx) {
-					return this.updateEntity(ctx);
+					return this.updateEntity(ctx, ctx.params, { raw: true });
 				}
 			},
 
@@ -179,7 +179,6 @@ module.exports = (getAdapter, adapterType) => {
 
 					const doc = await broker.call("posts.updateRaw", {
 						id: docs[0].id,
-						$raw: true,
 						$set: {
 							title: "Updated title",
 							content: "Updated content of first title"
@@ -202,7 +201,9 @@ module.exports = (getAdapter, adapterType) => {
 					});
 
 					expect(entityChanged).toBeCalledTimes(1);
-					expect(entityChanged).toBeCalledWith("update", doc, expect.any(Context), {});
+					expect(entityChanged).toBeCalledWith("update", doc, expect.any(Context), {
+						raw: true
+					});
 				});
 
 				it("should get the newly created entity", async () => {

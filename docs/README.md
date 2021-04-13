@@ -818,14 +818,14 @@ const post = await broker.call("posts.resolve", {
 ```
 
 ------
-The other parameter examples are same as [`find`](#find-find-entities) action.
+The other parameter examples are the same as [`find`](#find-find-entities) action.
 
 
 ## `create` Create an entity
 Create an entity.
 
 ### Parameters
-No any special parameters. All fields will be used for entity after validation.
+There are no any special parameters. All fields will be used for the entity after validation.
 
 ### REST endpoint
 ```js
@@ -865,7 +865,7 @@ Update an existing entity. Only the provided fields will be updated.
 | -------- | ---- | ------- | ----------- |
 | `<id>` | `any` | `null` | ID of entity. The name of property comes from the primary key field. |
 
-No any special parameters. All fields will be used for entity after validation.
+There are no any special parameters. All fields will be used for entity after validation.
 
 ### REST endpoint
 ```js
@@ -907,7 +907,7 @@ Replace an existing entity. The difference between replace and update that repla
 | -------- | ---- | ------- | ----------- |
 | `<id>` | `any` | `null` | ID of entity. The name of property comes from the primary key field. |
 
-No any special parameters. All fields will be used for entity after validation.
+There are no any special parameters. All fields will be used for entity after validation.
 
 ### REST endpoint
 ```js
@@ -1138,6 +1138,7 @@ Update an existing entity. Only the provided fields will be updated.
 | `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
 | `params` | `Object` | `null` | It contains the ID of the entity and the changed field values. |
 | `opts` | `Object` | `{}` | Other options for internal methods. |
+| `opts.raw` | `Boolean` | `false` | If `true`, the `params` is passed directly to the database client. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
 
 
@@ -1416,11 +1417,11 @@ You can define the indexes in the service `settings.indexes` property. It has a 
 ```
 
 # Streaming
-The service has a [`streamEntities`](#streamentities) method which similar to the `findEntities` which returns the entities by query. But this method returns a `Stream` instance instead of the all rows. 
+The service has a [`streamEntities`](#streamentities) method which similar to the `findEntities` which returns the entities by the query. But this method returns a `Stream` instance instead of all rows. 
 
+## Action for streaming
 There is no pre-defined action for the method, by default. But you can create one easily:
 
-## Create action for streaming
 ```js
 module.exports = {
     name: "posts",
@@ -1707,6 +1708,45 @@ module.exports = {
 };
 ```
 
+# Raw updating
+The raw update is available via `updateEntity()` method with the `raw: true` option. In this case, the params is passed directly to the database client. E.g. in case of MongoDB, you can use the `$inc`, `$push`...etc modifiers.
+
+## Example
+```js
+const row = await this.updateEntity(ctx, {
+    id: docs.johnDoe.id,
+
+    $set: {
+        status: false,
+        height: 192
+    },
+    $inc: {
+        age: 1
+    },
+    $unset: {
+        dob: true
+    }
+}, { raw: true });
+```
+
+## Expose as an action
+The raw updating is not available via the default `update` action, because it can cause security issues. But if you are know what you are doing, you can expose it as a new `action`
+
+### Example
+```js
+// posts.service.js
+module.exports = {
+    name: "posts",
+    mixins: [DbService(/*...*/)],
+
+    actions: {
+        updateRaw(ctx) {
+            return this.updateEntity(ctx, ctx.params, { raw: true });
+        }        
+    }
+};
+```
+
 # Caching
 The service has a built-in caching mechanism. If a cacher is configured in the ServiceBroker, the service stores the responses of `find`, `list`, `get` and `resolve` actions and clear the cache if any entities have been changed.
 
@@ -1918,7 +1958,7 @@ module.exports = {
 ```
 
 ## Database/Server-based tenancy
-This mode uses different connection string. It means every tenant has an individual database or server.
+This mode uses different connection strings. It means every tenant has an individual database or server.
 
 ### Steps for configuration
 1. Define the `getAdapterByContext` method to generate adapter options for every tenant.

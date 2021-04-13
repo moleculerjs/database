@@ -627,21 +627,24 @@ module.exports = (getAdapter, adapterType) => {
 			if (adapterType == "MongoDB" || adapterType == "NeDB") {
 				it("should raw update an entity", async () => {
 					ctx.broadcast.mockClear();
-					const row = await svc.updateEntity(ctx, {
-						id: docs.johnDoe.id,
-						$raw: true,
+					const row = await svc.updateEntity(
+						ctx,
+						{
+							id: docs.johnDoe.id,
 
-						$set: {
-							status: false,
-							height: 192
+							$set: {
+								status: false,
+								height: 192
+							},
+							$inc: {
+								age: 1
+							},
+							$unset: {
+								dob: true
+							}
 						},
-						$inc: {
-							age: 1
-						},
-						$unset: {
-							dob: true
-						}
-					});
+						{ raw: true }
+					);
 					expect(row).toEqual({
 						id: docs.johnDoe.id,
 						name: "John Doe",
@@ -655,12 +658,12 @@ module.exports = (getAdapter, adapterType) => {
 					expect(ctx.broadcast).toBeCalledWith("cache.clean.users", {
 						type: "update",
 						data: row,
-						opts: {}
+						opts: { raw: true }
 					});
 					expect(ctx.broadcast).toBeCalledWith("users.updated", {
 						type: "update",
 						data: row,
-						opts: {}
+						opts: { raw: true }
 					});
 				});
 			}
