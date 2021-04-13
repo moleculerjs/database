@@ -27,7 +27,6 @@
 - [ ] Couchbase
 - [ ] CouchDB
 - [x] Knex
-  - [ ] Add `$inc`, `$dec` handling in `updateById` and `updateMany`
 - [x] MongoDB
 - [ ] Mongoose
 - [x] NeDB

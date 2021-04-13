@@ -56,7 +56,7 @@ module.exports = function (opts) {
 	 *
 	 * @returns {Array<Object>} List of found entities.
 	 */
-	if (opts.createActions === true || opts.createActions.find === true) {
+	if (opts.createActions && opts.createActions.find === true) {
 		res.find = {
 			visibility: opts.actionVisibility,
 			rest: opts.rest ? "GET /all" : null,
@@ -113,7 +113,7 @@ module.exports = function (opts) {
 	 *
 	 * @returns {Number} Count of found entities.
 	 */
-	if (opts.createActions === true || opts.createActions.count === true) {
+	if (opts.createActions && opts.createActions.count === true) {
 		res.count = {
 			visibility: opts.actionVisibility,
 			rest: opts.rest ? "GET /count" : null,
@@ -152,7 +152,7 @@ module.exports = function (opts) {
 	 *
 	 * @returns {Object} List of found entities and total count.
 	 */
-	if (opts.createActions === true || opts.createActions.list === true) {
+	if (opts.createActions && opts.createActions.list === true) {
 		res.list = {
 			visibility: opts.actionVisibility,
 			rest: opts.rest ? "GET /" : null,
@@ -226,7 +226,7 @@ module.exports = function (opts) {
 	 *
 	 * @throws {EntityNotFoundError} - 404 Entity not found
 	 */
-	if (opts.createActions === true || opts.createActions.get === true) {
+	if (opts.createActions && opts.createActions.get === true) {
 		res.get = {
 			visibility: opts.actionVisibility,
 			rest: opts.rest ? "GET /:id" : null,
@@ -263,7 +263,7 @@ module.exports = function (opts) {
 	 *
 	 * @throws {EntityNotFoundError} - 404 Entity not found
 	 */
-	if (opts.createActions === true || opts.createActions.resolve === true) {
+	if (opts.createActions && opts.createActions.resolve === true) {
 		res.resolve = {
 			visibility: opts.actionVisibility,
 			cache: cacheOpts
@@ -294,7 +294,7 @@ module.exports = function (opts) {
 	 *
 	 * @returns {Object} Saved entity.
 	 */
-	if (opts.createActions === true || opts.createActions.create === true) {
+	if (opts.createActions && opts.createActions.create === true) {
 		res.create = {
 			visibility: opts.actionVisibility,
 			rest: opts.rest ? "POST /" : null,
@@ -314,7 +314,7 @@ module.exports = function (opts) {
 	 *
 	 * @throws {EntityNotFoundError} - 404 Entity not found
 	 */
-	if (opts.createActions === true || opts.createActions.update === true) {
+	if (opts.createActions && opts.createActions.update === true) {
 		res.update = {
 			visibility: opts.actionVisibility,
 			rest: opts.rest ? "PATCH /:id" : null,
@@ -334,7 +334,7 @@ module.exports = function (opts) {
 	 *
 	 * @throws {EntityNotFoundError} - 404 Entity not found
 	 */
-	if (opts.createActions === true || opts.createActions.replace === true) {
+	if (opts.createActions && opts.createActions.replace === true) {
 		res.replace = {
 			visibility: opts.actionVisibility,
 			rest: opts.rest ? "PUT /:id" : null,
@@ -355,7 +355,7 @@ module.exports = function (opts) {
 	 *
 	 * @throws {EntityNotFoundError} - 404 Entity not found
 	 */
-	if (opts.createActions === true || opts.createActions.remove === true) {
+	if (opts.createActions && opts.createActions.remove === true) {
 		res.remove = {
 			visibility: opts.actionVisibility,
 			rest: opts.rest ? "DELETE /:id" : null,
