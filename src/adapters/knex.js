@@ -315,7 +315,6 @@ class KnexAdapter extends BaseAdapter {
 		let q = this.client.table(this.opts.tableName);
 		if (opts.counting) q = q.count({ count: "*" });
 		if (params) {
-			// Text search
 			const query = params.query ? Object.assign({}, params.query) : {};
 
 			Object.entries(query).forEach(([key, value]) => {
@@ -352,6 +351,7 @@ class KnexAdapter extends BaseAdapter {
 				}
 			});
 
+			// Text search
 			if (_.isString(params.search) && params.search !== "" && params.searchFields) {
 				params.searchFields.forEach((field, i) => {
 					const fn = i == 0 ? "where" : "orWhere";

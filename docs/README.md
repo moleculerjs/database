@@ -36,7 +36,7 @@ The settings of the service.
 
 The field definition is similar to [Fastest Validator](https://github.com/icebob/fastest-validator) schemas. You can define it in the same format and the service uses the Fastest Validator to validate & sanitize the input data.
 
->The difference between this schema and FV schema is that here every defined fields are optional (same as fields in Database engines). You should set the `required: true` property for fields what are mandatory.
+>The difference between this schema and FV schema is that here all defined fields are optional (same the fields in the Database engines). You should set the `required: true` property for mandatory fields.
 
 **Example**
 ```js
@@ -143,9 +143,9 @@ For ID fields set the `primaryKey` to true. The service know the name of the ID 
 
 
 ### `secure`: \<boolean\> _(Default: `false`)_
-With the `secure` property you can encode the value of the ID field. It can be useful to avoid that the users find out the IDs of other documents when the database uses incremental ID values.
+With the `secure` property you can encrypt the value of the ID field. This can be useful to prevent users from finding out the IDs of other documents when the database uses incremental ID values.
 
-To utilize it, you should define `encodeID(id)` and `decodeID(id)` methods in the service which handles the encoding/decoding operations. 
+To use it, you should define `encodeID(id)` and `decodeID(id)` methods in the service that performs the encoding/decoding operations.
 
 > The [`hashids`](https://hashids.org/javascript/) lib can generate Youtube-like alphanumerical IDs from number(s) or from Mongo's `ObjectID`.
 
@@ -207,7 +207,7 @@ With the `columnName` property, you can use a different field type in the databa
 
 
 ### `default`: \<string|Function\> _(Default: `null`)_
-For the non-required fields, you can set default values. If the field value is nullish in the `create` and `replace`actions, the service will set the defined default value. If the `default` is a Function, the service will call it to get the default value. _The function can be asynchronous._
+For the non-required fields, you can set default values. If the field value is nullish in the `create` and `replace` actions, the service will set the defined default value. If the `default` is a Function, the service will call it to get the default value. _The function may be asynchronous._
 
 **Example**
 ```js
@@ -276,7 +276,7 @@ The response contains the `name` and `createdAt` fields.
 
 
 ### `validate`: \<Function\> _(Default: `null`)_
-With `validate`, you can configure a custom validator function. _It can be asynchronous._
+With `validate`, you can configure a custom validator function. _It may be asynchronous._
 
 **Example**
 ```js
@@ -305,7 +305,7 @@ The `get` function is called at transformation of entities. With this function, 
 
 
 ### `set`: \<Function\> _(Default: `null`)_
-The `set` function called at entity creating or updating. You can modify the input value or compute a new one from other values of the entity. _It can be asynchronous._
+The `set` function is called at entity creating or updating. You can modify the input value or compute a new one from other values of the entity. _It may be asynchronous._
 
 **Example**
 ```js
@@ -333,7 +333,7 @@ The populate is similar as reference in SQL-based database engines, or populate 
 ### `onCreate`: \<Function\> _(Default: `null`)_
 This is an operation hook which is called at new entity creating (`create` action, `createEntity` and `createEntities` methods). You can use it to set `createdAt` timestamp for entity.
 
-_It can be asynchronous._
+_It may be asynchronous._
 
 **Example**
 ```js
@@ -354,7 +354,7 @@ _It can be asynchronous._
 ### `onUpdate`: \<Function\> _(Default: `null`)_
 This is an operation hook which is called at entity updating (`update` action, `updateEntity`). You can use it to set `updatedAt` timestamp for entity.
 
-_It can be asynchronous._
+_It may be asynchronous._
 
 **Example**
 ```js
@@ -375,7 +375,7 @@ _It can be asynchronous._
 ### `onReplace`: \<Function\> _(Default: `null`)_
 This is an operation hook which is called at entity replacing (`replace` action, `replaceEntity`).
 
-_It can be asynchronous._
+_It may be asynchronous._
 
 **Example**
 ```js
@@ -397,7 +397,7 @@ _It can be asynchronous._
 This is an operation hook which is called at entity removing (`remove` action, `removeEntity`).
 If you define it, the service switch to **soft delete mode**. It means, the record won't be deleted in the table/collection. [Read more about soft delete feature.](#soft-delete)
 
-_It can be asynchronous._
+_It may be asynchronous._
 
 **Example**
 ```js
@@ -1266,7 +1266,7 @@ You should define it, if you use secure primary key to decode the received IDs.
 
 If you use `permission` and `readPermission` in field definitions, you should define this method and write the permission checking logic. 
 
-_It can be asynchronous._
+_It may be asynchronous._
 
 ### Parameters
 | Property | Type | Description |
@@ -1282,7 +1282,7 @@ _It can be asynchronous._
 
 You should implement it, if you want to check the permission of scopes.
 
-_It can be asynchronous._
+_It may be asynchronous._
 
 ### Parameters
 | Property | Type | Description |
@@ -1362,7 +1362,7 @@ GET /posts?scope=onlyActive,public
 ```
 
 # Indexes
-You can define the indexes in the service `settings.indexes` property. It has a common format and every adapter will process and creates the indexes. Other option, if you call the `this.createIndex` method directly. [More info](#createindex)
+You can define the indexes in the service `settings.indexes` property. It has a common format and every adapter will process and creates the indexes. Another option, if you call the `this.createIndex` method directly. [More info](#createindex)
 
 ## Index definition
 
@@ -1450,7 +1450,7 @@ ss.on("end", () => {
 ```
 
 # Nested objects & arrays
-The document-based database engines handles nested objects & arrays generally. You can use them in the field definitions, as well.
+The document-based database engines handle nested objects & arrays generally. You can use them in the field definitions, as well.
 The definition is similar to [Fastest Validator nested object schema](https://github.com/icebob/fastest-validator#object).
 
 ## Example for nested object field
@@ -1491,7 +1491,7 @@ module.exports = {
 };
 ```
 
-## Example for array with objects
+## Example for an array with objects
 ```js
 module.exports = {
     // ...
@@ -1513,9 +1513,10 @@ module.exports = {
 };
 ```
 
-Mostly, the SQL-based adapters (Knex, Sequelize) can't handle them, so that they convert the `object` and `array` to a JSON string and store them as a `String`. But when you receives the entity, the adapter converts back to `object` and `array`. So you won't notice that it stores in different type. The only disadvantage is that you can't filter to properties of nested objects. 
+## Storing with non-supported adapters
+Mostly, the SQL-based adapters (Knex, Sequelize) can't handle them, so that they convert the `object` and `array` to a JSON string and store them as a `String`. But when you receive the entity, the adapter converts back to `object` and `array`. So you won't notice that it stores in different types. The only disadvantage is that you can't filter by properties of nested objects. 
 
-## Example for nested object field as stored as a `String`
+### Example
 ```js
 module.exports = {
     // ...
@@ -1523,6 +1524,7 @@ module.exports = {
         fields: {
             address: {
                 type: "object",
+                // Set columnType to string because it will be converted to JSON string.
                 columnType: "string",
                 properties: {
                     // ...
@@ -1820,7 +1822,7 @@ The [`entityChanged`](#entitychanged) method has a default implementation which 
 If you want to change it, just simply overwrite the [`entityChanged`](#entitychanged) method and implement your own logic.
 
 # Cascade delete
-In DBMS, you can configure `CASCADE DELETE` function for relations between tables. It means, if a record is deleted from the parent table, the database engine will delete the related child records, as well. In microservices projects and in this database services you can't define relations because it's a common case that some services use different database engines.
+In DBMS, you can configure `CASCADE DELETE` feature for relationships between tables. It means, if a record is deleted from the parent table, the database engine will delete the related child records, as well. In microservices projects and in this database services you can't define relations because it's a common case that some services use different database engines.
 
 But you can use this cascade delete feature with a simple event subscription. If an entity changed in the parent table/collection, the service broadcasts entity lifecycle events. So you can subscribe to this event in your child services and remove the relevant entities.
 
@@ -1872,8 +1874,8 @@ module.exports = {
 ```
 
 # Multi-tenancy
-The service supports many multi-tenancy methods. But every method has different configuration.
-For every method it's mandatory that you store the tenant ID in the `ctx.meta`. The best practice is to resolve the logged in user in the API gateway `authenticate` or `authorize` method and set the resolved user into the `ctx.meta.user`.
+The service supports many multi-tenancy methods. But each method has a different configuration.
+For each method it's mandatory that you store the tenant ID in the `ctx.meta`. The best practice is to resolve the logged in user in the API gateway `authenticate` or `authorize` method and set the resolved user into the `ctx.meta.user`.
 
 ## Record-based tenancy
 This mode uses the same database server, same database and same collection/table. But there is a tenant ID field in the collection/table for filtering.

@@ -157,7 +157,7 @@ module.exports = (getAdapter, adapterType) => {
 			});
 
 			it("should multiple sort the rows (reverse)", async () => {
-				const rows = await svc.findEntities(ctx, { sort: ["-status", "age"] });
+				const rows = await svc.findEntities(ctx, { sort: "-status,age" });
 				expect(rows).toEqual([docs.johnDoe, docs.bobSmith, docs.janeDoe, docs.kevinJames]);
 			});
 		});
