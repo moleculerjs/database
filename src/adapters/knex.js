@@ -217,8 +217,24 @@ class KnexAdapter extends BaseAdapter {
 	 * @returns {Promise<Object>} Return with the updated document.
 	 *
 	 */
-	async updateById(id, changes /*, opts*/) {
-		await this.client.table(this.opts.tableName).update(changes).where(this.idFieldName, id);
+	async updateById(id, changes, opts) {
+		const raw = opts && opts.raw ? true : false;
+		let p = this.client.table(this.opts.tableName).where(this.idFieldName, id);
+		if (raw) {
+			// Handle $set, $inc, $dec
+			if (changes.$set) {
+				p = p.update(changes.$set);
+			}
+			if (changes.$inc) {
+				p = p.increment(changes.$inc);
+			}
+			if (changes.$dec) {
+				p = p.decrement(changes.$dec);
+			}
+		} else {
+			p = p.update(changes);
+		}
+		await p;
 
 		return this.findById(id);
 	}
@@ -232,8 +248,24 @@ class KnexAdapter extends BaseAdapter {
 	 * @returns {Promise<Number>} Return with the count of modified documents.
 	 *
 	 */
-	async updateMany(query, changes /*, opts*/) {
-		return await this.client.table(this.opts.tableName).update(changes).where(query);
+	async updateMany(query, changes, opts) {
+		const raw = opts && opts.raw ? true : false;
+		let p = this.client.table(this.opts.tableName).where(query);
+		if (raw) {
+			// Handle $set, $inc, $dec
+			if (changes.$set) {
+				p = p.update(changes.$set);
+			}
+			if (changes.$inc) {
+				p = p.increment(changes.$inc);
+			}
+			if (changes.$dec) {
+				p = p.decrement(changes.$dec);
+			}
+		} else {
+			p = p.update(changes);
+		}
+		return p;
 	}
 
 	/**

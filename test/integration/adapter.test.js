@@ -34,6 +34,7 @@ module.exports = (getAdapter, adapterType) => {
 					title: { type: "string", trim: true, required: true },
 					content: { type: "string", max: 200, columnType: "string" },
 					votes: { type: "number", default: 0, columnType: "integer" },
+					comments: { type: "number", default: 0, columnType: "integer" },
 					status: { type: "number", default: 1, columnType: "integer" }
 				},
 				indexes: [{ fields: { title: "text", content: "text" } }]
@@ -73,6 +74,7 @@ module.exports = (getAdapter, adapterType) => {
 					title: "First post",
 					content: "Content of 1rd post",
 					votes: 5,
+					comments: 0,
 					status: 1
 				});
 				expect(res).toEqual({
@@ -80,6 +82,7 @@ module.exports = (getAdapter, adapterType) => {
 					title: "First post",
 					content: "Content of 1rd post",
 					votes: 5,
+					comments: 0,
 					status: 1
 				});
 				docs.push(res);
@@ -87,10 +90,34 @@ module.exports = (getAdapter, adapterType) => {
 
 			it("should create more entities", async () => {
 				const res = await adapter.insertMany([
-					{ title: "Second post", content: "Content of 2nd post", votes: 0, status: 0 },
-					{ title: "Third post", content: "Content of 3rd post", votes: 10, status: 1 },
-					{ title: "Forth post", content: "Content of 4th post", votes: 3, status: 1 },
-					{ title: "Fifth post", content: "Content of 5th post", votes: 7, status: 0 }
+					{
+						title: "Second post",
+						content: "Content of 2nd post",
+						votes: 0,
+						comments: 5,
+						status: 0
+					},
+					{
+						title: "Third post",
+						content: "Content of 3rd post",
+						votes: 10,
+						comments: 2,
+						status: 1
+					},
+					{
+						title: "Forth post",
+						content: "Content of 4th post",
+						votes: 3,
+						comments: 13,
+						status: 1
+					},
+					{
+						title: "Fifth post",
+						content: "Content of 5th post",
+						votes: 7,
+						comments: 3,
+						status: 0
+					}
 				]);
 
 				expect(res).toEqual([
@@ -99,6 +126,7 @@ module.exports = (getAdapter, adapterType) => {
 						title: "Second post",
 						content: "Content of 2nd post",
 						votes: 0,
+						comments: 5,
 						status: 0
 					},
 					{
@@ -106,6 +134,7 @@ module.exports = (getAdapter, adapterType) => {
 						title: "Third post",
 						content: "Content of 3rd post",
 						votes: 10,
+						comments: 2,
 						status: 1
 					},
 					{
@@ -113,6 +142,7 @@ module.exports = (getAdapter, adapterType) => {
 						title: "Forth post",
 						content: "Content of 4th post",
 						votes: 3,
+						comments: 13,
 						status: 1
 					},
 					{
@@ -120,6 +150,7 @@ module.exports = (getAdapter, adapterType) => {
 						title: "Fifth post",
 						content: "Content of 5th post",
 						votes: 7,
+						comments: 3,
 						status: 0
 					}
 				]);
@@ -190,13 +221,15 @@ module.exports = (getAdapter, adapterType) => {
 			it("should update by ID", async () => {
 				const row = await adapter.updateById(docs[1]._id, {
 					title: "Modified second post",
-					votes: 1
+					votes: 1,
+					comments: 9
 				});
 				expect(row).toEqual({
 					_id: docs[1]._id,
 					title: "Modified second post",
 					content: "Content of 2nd post",
 					votes: 1,
+					comments: 9,
 					status: 0
 				});
 				docs[1] = row;
@@ -218,57 +251,65 @@ module.exports = (getAdapter, adapterType) => {
 				expect(res2).toEqual({
 					_id: docs[1]._id,
 					content: "Content of 2nd post",
-					status: 0,
 					title: "Modified second post",
-					votes: 3
+					votes: 3,
+					comments: 9,
+					status: 0
 				});
 			});
 
-			if (adapterType == "MongoDB") {
-				it("should raw update by ID", async () => {
-					const row = await adapter.updateById(
-						docs[1]._id,
-						{
-							$set: {
-								title: "Raw modified second post"
-							},
-							$inc: { votes: 1 }
+			//if (adapterType == "MongoDB") {
+			it("should raw update by ID", async () => {
+				const row = await adapter.updateById(
+					docs[1]._id,
+					{
+						$set: {
+							title: "Raw modified second post"
 						},
-						{ raw: true }
-					);
-					expect(row).toEqual({
-						_id: docs[1]._id,
-						title: "Raw modified second post",
-						content: "Content of 2nd post",
-						votes: 4,
-						status: 0
-					});
-					docs[1] = row;
-
-					const res = await adapter.findById(docs[1]._id);
-					expect(res).toEqual(row);
+						$inc: { votes: 1 },
+						$dec: { comments: 2 }
+					},
+					{ raw: true }
+				);
+				expect(row).toEqual({
+					_id: docs[1]._id,
+					title: "Raw modified second post",
+					content: "Content of 2nd post",
+					votes: 4,
+					comments: 7,
+					status: 0
 				});
+				docs[1] = row;
 
-				it("should raw update many", async () => {
-					const res = await adapter.updateMany(
-						{ status: 0 },
-						{
-							$inc: { votes: 2 }
+				const res = await adapter.findById(docs[1]._id);
+				expect(res).toEqual(row);
+			});
+
+			it("should raw update many", async () => {
+				const res = await adapter.updateMany(
+					{ status: 0 },
+					{
+						$set: {
+							title: "Raw many modified second post"
 						},
-						{ raw: true }
-					);
-					expect(res).toBe(2);
+						$inc: { votes: 2 },
+						$dec: { comments: 1 }
+					},
+					{ raw: true }
+				);
+				expect(res).toBe(2);
 
-					const res2 = await adapter.findById(docs[1]._id);
-					expect(res2).toEqual({
-						_id: docs[1]._id,
-						content: "Content of 2nd post",
-						status: 0,
-						title: "Raw modified second post",
-						votes: 6
-					});
+				const res2 = await adapter.findById(docs[1]._id);
+				expect(res2).toEqual({
+					_id: docs[1]._id,
+					content: "Content of 2nd post",
+					status: 0,
+					title: "Raw many modified second post",
+					votes: 6,
+					comments: 6
 				});
-			}
+			});
+			//}
 
 			it("Update docs in local store", async () => {
 				docs[0] = await adapter.findById(docs[0]._id);
@@ -288,6 +329,7 @@ module.exports = (getAdapter, adapterType) => {
 					title: "Modified forth post",
 					content: "Content of modified 4th post",
 					votes: 99,
+					comments: 66,
 					status: 0
 				});
 				expect(row).toEqual({
@@ -295,6 +337,7 @@ module.exports = (getAdapter, adapterType) => {
 					title: "Modified forth post",
 					content: "Content of modified 4th post",
 					votes: 99,
+					comments: 66,
 					status: 0
 				});
 				docs[3] = row;
@@ -318,7 +361,7 @@ module.exports = (getAdapter, adapterType) => {
 				let res = await adapter.removeMany({ status: 1 });
 				expect(res).toBe(2);
 
-				res = await adapter.find({ sort: "title" });
+				res = await adapter.find({ sort: "comments" });
 				expect(res).toEqual([docs[4], docs[1]]);
 
 				res = await adapter.count();
