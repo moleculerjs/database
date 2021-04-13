@@ -221,15 +221,12 @@ class KnexAdapter extends BaseAdapter {
 		const raw = opts && opts.raw ? true : false;
 		let p = this.client.table(this.opts.tableName).where(this.idFieldName, id);
 		if (raw) {
-			// Handle $set, $inc, $dec
+			// Handle $set, $inc
 			if (changes.$set) {
 				p = p.update(changes.$set);
 			}
 			if (changes.$inc) {
 				p = p.increment(changes.$inc);
-			}
-			if (changes.$dec) {
-				p = p.decrement(changes.$dec);
 			}
 		} else {
 			p = p.update(changes);
@@ -252,15 +249,12 @@ class KnexAdapter extends BaseAdapter {
 		const raw = opts && opts.raw ? true : false;
 		let p = this.client.table(this.opts.tableName).where(query);
 		if (raw) {
-			// Handle $set, $inc, $dec
+			// Handle $set, $inc
 			if (changes.$set) {
 				p = p.update(changes.$set);
 			}
 			if (changes.$inc) {
 				p = p.increment(changes.$inc);
-			}
-			if (changes.$dec) {
-				p = p.decrement(changes.$dec);
 			}
 		} else {
 			p = p.update(changes);

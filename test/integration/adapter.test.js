@@ -266,8 +266,7 @@ module.exports = (getAdapter, adapterType) => {
 						$set: {
 							title: "Raw modified second post"
 						},
-						$inc: { votes: 1 },
-						$dec: { comments: 2 }
+						$inc: { votes: 1, comments: -2 }
 					},
 					{ raw: true }
 				);
@@ -292,8 +291,7 @@ module.exports = (getAdapter, adapterType) => {
 						$set: {
 							title: "Raw many modified second post"
 						},
-						$inc: { votes: 2 },
-						$dec: { comments: 1 }
+						$inc: { votes: 2, comments: -1 }
 					},
 					{ raw: true }
 				);

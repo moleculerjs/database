@@ -164,21 +164,6 @@ class NeDBAdapter extends BaseAdapter {
 	}
 
 	/**
-	 * NeDB doesn't support $dec in changes. It converts the $dec to $inc.
-	 *
-	 * @param {Object} changes
-	 * @returns {Object}
-	 */
-	handleDecrementInChanges(changes) {
-		if (changes.$dec) {
-			if (!changes.$inc) changes.$inc = {};
-			Object.keys(changes.$dec).forEach(key => (changes.$inc[key] = -changes.$dec[key]));
-			delete changes.$dec;
-		}
-		return changes;
-	}
-
-	/**
 	 * Update an entity by ID
 	 *
 	 * @param {String} id
@@ -192,8 +177,6 @@ class NeDBAdapter extends BaseAdapter {
 		if (!raw) {
 			// Flatten the changes to dot notation
 			changes = flatten(changes, { safe: true });
-		} else {
-			this.handleDecrementInChanges(changes);
 		}
 
 		return new this.Promise((resolve, reject) => {
@@ -223,8 +206,6 @@ class NeDBAdapter extends BaseAdapter {
 		if (!raw) {
 			// Flatten the changes to dot notation
 			changes = flatten(changes, { safe: true });
-		} else {
-			this.handleDecrementInChanges(changes);
 		}
 
 		return new this.Promise((resolve, reject) => {
