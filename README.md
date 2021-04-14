@@ -15,7 +15,7 @@ Advanced Database Access Service for Moleculer microservices framework. Use it t
 - common CRUD actions for RESTful API with caching
 - pagination, field filtering support
 - field sanitizations, validations
-- readonly, immutable, virtual fields
+- read-only, immutable, virtual fields
 - field permissions (read/write)
 - ID field encoding
 - data transformation
@@ -24,11 +24,11 @@ Advanced Database Access Service for Moleculer microservices framework. Use it t
 - soft delete mode
 - scopes support
 - entity lifecycle events
-- Multi-tenancy (record-based, collection/table-based, schema-based, db-based, server-based)
+- Multi-tenancy
 
 ## Install
 ```
-npm i @moleculer/database
+npm i @moleculer/database nedb
 ```
 
 ## Usage
@@ -71,8 +71,7 @@ let post = await broker.call("posts.create", {
     content: "Content of my first post..."    
 });
 console.log("New post:", post);
-/* It prints:
-
+/* Results:
 New post: {
   id: 'Zrpjq8B1XTSywUgT',
   title: 'My first post',

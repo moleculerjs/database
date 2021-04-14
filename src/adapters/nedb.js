@@ -14,12 +14,13 @@ const BaseAdapter = require("./base");
 class NeDBAdapter extends BaseAdapter {
 	/**
 	 * Constructor of adapter
-	 * More info about options:
-	 * 	https://github.com/louischatriot/nedb#creatingloading-a-database
 	 *
-	 * @param  {Object?} opts
+	 * @param  {String|Object?} opts
+	 * @param  {Object?} opts.neDB More info: https://github.com/louischatriot/nedb#creatingloading-a-database
 	 */
 	constructor(opts) {
+		if (_.isString(opts)) opts = { neDB: { filename: opts } };
+
 		super(opts);
 
 		this.db = null;
@@ -36,7 +37,8 @@ class NeDBAdapter extends BaseAdapter {
 	 * Connect adapter to database
 	 */
 	async connect() {
-		this.db = new Datastore(this.opts); // in-memory
+		if (this.opts.neDB instanceof Datastore) this.db = this.opts.neDB;
+		else this.db = new Datastore(this.opts.neDB);
 
 		return new this.Promise((resolve, reject) => {
 			this.db.loadDatabase(err => {

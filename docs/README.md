@@ -2125,7 +2125,7 @@ Remove an entity by ID. It returns the removed entity ID.
 ## `removeMany`
 `removeMany(query: object)`
 
-Remove multiple entity by `query`. It returns the number of removed entities.
+Remove multiple entities by `query`. It returns the number of removed entities.
 
 ## `clear`
 `clear()`
@@ -2135,7 +2135,7 @@ Clear (truncate) the whole table/collection. It returns the number of removed en
 ## `entityToJSON`
 `entityToJSON(entity: object)`
 
-Convert the received data from database client to [POJO](https://masteringjs.io/tutorials/fundamentals/pojo).
+Convert data from the database client to [POJO](https://masteringjs.io/tutorials/fundamentals/pojo).
 
 ## `createIndex`
 `createIndex(def: any)`

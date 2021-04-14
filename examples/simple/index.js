@@ -24,7 +24,9 @@ broker.createService({
 	name: "posts",
 	mixins: [
 		DbService({
-			adapter: "NeDB"
+			adapter: {
+				type: "NeDB"
+			}
 		})
 	],
 
