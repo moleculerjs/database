@@ -32,11 +32,18 @@ const PARAMS_QUERY = [
 	{ type: "string", optional: true }
 ];
 
-module.exports = function (opts) {
+module.exports = function (mixinOpts) {
 	const res = {};
 
-	const cacheOpts = opts.cache && opts.cache.enabled ? opts.cache : null;
-	const maxLimit = opts.maxLimit > 0 ? opts.maxLimit : null;
+	const cacheOpts = mixinOpts.cache && mixinOpts.cache.enabled ? mixinOpts.cache : null;
+	const maxLimit = mixinOpts.maxLimit > 0 ? mixinOpts.maxLimit : null;
+
+	const actionEnabled = name => {
+		return (
+			mixinOpts.createActions ||
+			(typeof mixinOpts.createActions == "object" && mixinOpts.createActions[name] === true)
+		);
+	};
 
 	/**
 	 * Find entities by query.
@@ -56,10 +63,10 @@ module.exports = function (opts) {
 	 *
 	 * @returns {Array<Object>} List of found entities.
 	 */
-	if (opts.createActions && opts.createActions.find === true) {
+	if (actionEnabled("find")) {
 		res.find = {
-			visibility: opts.actionVisibility,
-			rest: opts.rest ? "GET /all" : null,
+			visibility: mixinOpts.actionVisibility,
+			rest: mixinOpts.rest ? "GET /all" : null,
 			cache: cacheOpts
 				? {
 						keys: [
@@ -113,10 +120,10 @@ module.exports = function (opts) {
 	 *
 	 * @returns {Number} Count of found entities.
 	 */
-	if (opts.createActions && opts.createActions.count === true) {
+	if (actionEnabled("count")) {
 		res.count = {
-			visibility: opts.actionVisibility,
-			rest: opts.rest ? "GET /count" : null,
+			visibility: mixinOpts.actionVisibility,
+			rest: mixinOpts.rest ? "GET /count" : null,
 			cache: cacheOpts
 				? {
 						keys: ["search", "searchFields", "scope", "query"]
@@ -152,10 +159,10 @@ module.exports = function (opts) {
 	 *
 	 * @returns {Object} List of found entities and total count.
 	 */
-	if (opts.createActions && opts.createActions.list === true) {
+	if (actionEnabled("list")) {
 		res.list = {
-			visibility: opts.actionVisibility,
-			rest: opts.rest ? "GET /" : null,
+			visibility: mixinOpts.actionVisibility,
+			rest: mixinOpts.rest ? "GET /" : null,
 			cache: cacheOpts
 				? {
 						keys: [
@@ -226,10 +233,10 @@ module.exports = function (opts) {
 	 *
 	 * @throws {EntityNotFoundError} - 404 Entity not found
 	 */
-	if (opts.createActions && opts.createActions.get === true) {
+	if (actionEnabled("get")) {
 		res.get = {
-			visibility: opts.actionVisibility,
-			rest: opts.rest ? "GET /:id" : null,
+			visibility: mixinOpts.actionVisibility,
+			rest: mixinOpts.rest ? "GET /:id" : null,
 			cache: cacheOpts
 				? {
 						keys: ["id", "populate", "fields"]
@@ -263,9 +270,9 @@ module.exports = function (opts) {
 	 *
 	 * @throws {EntityNotFoundError} - 404 Entity not found
 	 */
-	if (opts.createActions && opts.createActions.resolve === true) {
+	if (actionEnabled("resolve")) {
 		res.resolve = {
-			visibility: opts.actionVisibility,
+			visibility: mixinOpts.actionVisibility,
 			cache: cacheOpts
 				? {
 						keys: ["id", "populate", "fields", "mapping"]
@@ -294,10 +301,10 @@ module.exports = function (opts) {
 	 *
 	 * @returns {Object} Saved entity.
 	 */
-	if (opts.createActions && opts.createActions.create === true) {
+	if (actionEnabled("create")) {
 		res.create = {
-			visibility: opts.actionVisibility,
-			rest: opts.rest ? "POST /" : null,
+			visibility: mixinOpts.actionVisibility,
+			rest: mixinOpts.rest ? "POST /" : null,
 			// params: {}, generate from `fields` in the `merged`
 			async handler(ctx) {
 				return this.createEntity(ctx);
@@ -314,10 +321,10 @@ module.exports = function (opts) {
 	 *
 	 * @throws {EntityNotFoundError} - 404 Entity not found
 	 */
-	if (opts.createActions && opts.createActions.update === true) {
+	if (actionEnabled("update")) {
 		res.update = {
-			visibility: opts.actionVisibility,
-			rest: opts.rest ? "PATCH /:id" : null,
+			visibility: mixinOpts.actionVisibility,
+			rest: mixinOpts.rest ? "PATCH /:id" : null,
 			// params: {}, generate from `fields` in the `merged`
 			async handler(ctx) {
 				return this.updateEntity(ctx);
@@ -334,10 +341,10 @@ module.exports = function (opts) {
 	 *
 	 * @throws {EntityNotFoundError} - 404 Entity not found
 	 */
-	if (opts.createActions && opts.createActions.replace === true) {
+	if (actionEnabled("replace")) {
 		res.replace = {
-			visibility: opts.actionVisibility,
-			rest: opts.rest ? "PUT /:id" : null,
+			visibility: mixinOpts.actionVisibility,
+			rest: mixinOpts.rest ? "PUT /:id" : null,
 			// params: {}, generate from `fields` in the `merged`
 			async handler(ctx) {
 				return this.replaceEntity(ctx);
@@ -355,10 +362,10 @@ module.exports = function (opts) {
 	 *
 	 * @throws {EntityNotFoundError} - 404 Entity not found
 	 */
-	if (opts.createActions && opts.createActions.remove === true) {
+	if (actionEnabled("remove")) {
 		res.remove = {
-			visibility: opts.actionVisibility,
-			rest: opts.rest ? "DELETE /:id" : null,
+			visibility: mixinOpts.actionVisibility,
+			rest: mixinOpts.rest ? "DELETE /:id" : null,
 			params: {
 				// The "id" field get from `fields`
 			},
