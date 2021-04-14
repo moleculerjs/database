@@ -61,7 +61,7 @@ If you want to update entity and using raw changes, use the [`updateEntity`](../
 ### Example
 ```js
 const row = await this.updateEntity(ctx, {
-    id: docs.johnDoe.id,
+    id: "YVdnh5oQCyEIRja0",
 
     $set: {
         status: false,

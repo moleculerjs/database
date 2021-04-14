@@ -75,6 +75,23 @@ if (process.env.GITHUB_ACTIONS_CI) {
 					}
 				}
 			}
+		},
+		{
+			name: "Knex-MSSQL",
+			type: "Knex",
+			options: {
+				knex: {
+					client: "mssql",
+					connection: {
+						host: "127.0.0.1",
+						port: 1433,
+						user: "sa",
+						password: "Moleculer@Pass1234",
+						database: "db_int_test",
+						encrypt: false
+					}
+				}
+			}
 		}
 	];
 } else {
