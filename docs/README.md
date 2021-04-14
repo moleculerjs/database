@@ -1627,7 +1627,7 @@ module.exports = {
 
             // Returns `true` if the logged in user's role field contains the required role.
             return roles.includes(permission);
-		}
+        }
     }
 }
 ```
@@ -1799,8 +1799,8 @@ module.exports = {
         async "cache.clean.users"() {
             if (this.broker.cacher) {
                 // Clear the local cache entries
-				await this.broker.cacher.clean(`${this.fullName}.**`);
-		    }
+                await this.broker.cacher.clean(`${this.fullName}.**`);
+            }
         }
     }
 };

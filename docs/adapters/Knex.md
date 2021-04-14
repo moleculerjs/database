@@ -23,16 +23,16 @@ module.exports = {
     name: "posts",
     mixins: [DbService({ 
         adapter: { 
-            type: "Knex" ,
+            type: "Knex",
             options: {
-				knex: {
-					client: "sqlite3",
-					connection: {
-						filename: ":memory:"
-					},
-					useNullAsDefault: true
-				}
-			}
+                knex: {
+                    client: "sqlite3",
+                    connection: {
+                        filename: ":memory:"
+                    },
+                    useNullAsDefault: true
+                }
+            }
         }
     })]
 }
@@ -49,13 +49,13 @@ module.exports = {
     name: "posts",
     mixins: [DbService({ 
         adapter: { 
-            type: "Knex" ,
+            type: "Knex",
             options: {
-				knex: {
-					client: "pg",
-					connection: "postgres://postgres@localhost:5432/moleculer"
-				}
-			}
+                knex: {
+                    client: "pg",
+                    connection: "postgres://postgres@localhost:5432/moleculer"
+                }
+            }
         }
     })]
 }
@@ -72,18 +72,18 @@ module.exports = {
     name: "posts",
     mixins: [DbService({ 
         adapter: { 
-            type: "Knex" ,
+            type: "Knex",
             options: {
-				knex: {
-					client: "pg",
-					connection: {
-						host: "127.0.0.1",
-						user: "root",
-						password: "pass1234",
-						database: "moleculer"
-					}
-				}
-			}
+                knex: {
+                    client: "pg",
+                    connection: {
+                        host: "127.0.0.1",
+                        user: "root",
+                        password: "pass1234",
+                        database: "moleculer"
+                    }
+                }
+            }
         }
     })]
 }
@@ -100,20 +100,20 @@ module.exports = {
     name: "posts",
     mixins: [DbService({ 
         adapter: { 
-            type: "Knex" ,
+            type: "Knex",
             options: {
-				knex: {
-					client: "mssql",
-					connection: {
-						host: "127.0.0.1",
-						port: 1433,
-						user: "sa",
-						password: "Moleculer@Pass1234",
-						database: "moleculer",
-						encrypt: false
-					}
-				}
-			}
+                knex: {
+                    client: "mssql",
+                    connection: {
+                        host: "127.0.0.1",
+                        port: 1433,
+                        user: "sa",
+                        password: "Moleculer@Pass1234",
+                        database: "moleculer",
+                        encrypt: false
+                    }
+                }
+            }
         }
     })]
 }
@@ -169,20 +169,20 @@ module.exports = {
     name: "posts",
     mixins: [DbService({ 
         adapter: { 
-            type: "Knex" ,
+            type: "Knex",
             options: {
-				knex: {
-					client: "mssql",
-					connection: {
-						host: "127.0.0.1",
-						port: 1433,
-						user: "sa",
-						password: "Moleculer@Pass1234",
-						database: "moleculer",
-						encrypt: false
-					}
-				}
-			}
+                knex: {
+                    client: "mssql",
+                    connection: {
+                        host: "127.0.0.1",
+                        port: 1433,
+                        user: "sa",
+                        password: "Moleculer@Pass1234",
+                        database: "moleculer",
+                        encrypt: false
+                    }
+                }
+            }
         }
     })],
 
