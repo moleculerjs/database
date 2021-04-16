@@ -867,7 +867,7 @@ module.exports = (getAdapter, adapterType) => {
 						if (await adapter.client.schema.hasTable(tableName))
 							await adapter.dropTable(tableName);
 						await adapter.client.schema.createTable(tableName, table => {
-							table.increments("_id");
+							table.increments("_id").primary();
 							table.string("title").index();
 							table.string("content").index();
 						});
