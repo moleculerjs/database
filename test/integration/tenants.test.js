@@ -743,7 +743,7 @@ module.exports = (getAdapter, adapterType) => {
 					if (await adapter.client.schema.hasTable(tableName))
 						await adapter.dropTable(tableName);
 					await adapter.client.schema.createTable(tableName, table => {
-						table.string("_id").increment();
+						table.string("_id");
 						table.string("title").index();
 						table.string("content").index();
 					});
@@ -835,7 +835,8 @@ module.exports = (getAdapter, adapterType) => {
 						id: {
 							type: "string",
 							primaryKey: true,
-							columnName: "_id"
+							columnName: "_id",
+							columnType: "integer"
 						},
 						title: { type: "string", required: true, min: 5 },
 						content: { type: "string", required: true }
@@ -866,7 +867,7 @@ module.exports = (getAdapter, adapterType) => {
 						if (await adapter.client.schema.hasTable(tableName))
 							await adapter.dropTable(tableName);
 						await adapter.client.schema.createTable(tableName, table => {
-							table.string("_id");
+							table.integer("_id").increment();
 							table.string("title").index();
 							table.string("content").index();
 						});
