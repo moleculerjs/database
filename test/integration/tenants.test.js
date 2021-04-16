@@ -856,7 +856,8 @@ module.exports = (getAdapter, adapterType) => {
 								type: adapterType,
 								options: {
 									...(adapterDef.options || {}),
-									collection: tableName
+									collection: tableName,
+									tableName
 								}
 							}
 						];
