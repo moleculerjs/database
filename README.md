@@ -8,7 +8,9 @@
 # @moleculer/database 
 Advanced Database Access Service for Moleculer microservices framework. Use it to persist your data in a database.
 
->Moleculer follows the *one database per service* pattern. To learn more about this design pattern and its implications check this [article](https://microservices.io/patterns/data/database-per-service.html). For *multiple entities/tables per service* approach check [FAQ](faq.html#DB-Adapters-moleculer-db).
+**This project is in work-in-progress. Don't use it in production.**
+
+>this module follows the *one database per service* pattern. To learn more about this design pattern and its implications check this [article](https://microservices.io/patterns/data/database-per-service.html). For *multiple entities/tables per service* approach check [FAQ](faq.html#DB-Adapters-moleculer-db).
 
 ## Features
 - multiple pluggable adapters (NeDB, MongoDB, Knex)
