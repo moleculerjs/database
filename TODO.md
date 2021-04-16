@@ -14,6 +14,7 @@
 - [ ] create methods for `updateMany` and `removeMany` (clear cache, send notify event without entities)
   - [ ] or find with query validate every entity, clear cache, send notify (batch)
 - [x] limiting the maximum opened adapters (in case of multi-tenancy)
+  - [ ] add an `onAdapterConnected` and `onAdapterDisconnected` hooks in mixin options, if string it's a method name.
 
 
 ## Features

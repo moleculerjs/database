@@ -22,7 +22,7 @@ module.exports = function (mixinOpts) {
 		 * @param {Context?} ctx
 		 */
 		async getAdapter(ctx) {
-			const [hash, adapterOpts] = this.getAdapterByContext(ctx, mixinOpts.adapter);
+			const [hash, adapterOpts] = await this.getAdapterByContext(ctx, mixinOpts.adapter);
 			const item = this.adapters.get(hash);
 			if (item) {
 				item.touched = Date.now();

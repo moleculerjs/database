@@ -1237,6 +1237,8 @@ The service uses the cache key to store the created adapter. Therefore in the ne
 
 Please note that if you have many tenants, the service will open many connections to the database. This is not optimal and can lead to resource problems. To limit the number of connected adapters, use the `maximumAdapters` mixin options. When the number of adapters reaches this number, the service will close the oldest used adapter.
 
+_It can be asynchronous._
+
 ## `entityChanged`
 `entityChanged(type: String, data?: any, ctx?: Context, opts?: object)`
 

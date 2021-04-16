@@ -99,7 +99,22 @@ if (process.env.GITHUB_ACTIONS_CI) {
 	Adapters = [
 		{
 			type: "NeDB"
-		} /*
+		},
+		{ type: "MongoDB", options: { dbName: "db_int_test" } },
+		{
+			name: "Knex-SQLite",
+			type: "Knex",
+			options: {
+				knex: {
+					client: "sqlite3",
+					connection: {
+						filename: ":memory:"
+					},
+					useNullAsDefault: true
+				}
+			}
+		}
+		/*
 		{
 			name: "Knex-Postgresql",
 			type: "Knex",
@@ -163,20 +178,6 @@ if (process.env.GITHUB_ACTIONS_CI) {
 				}
 			}
 		}*/
-		/*{ type: "MongoDB", options: { dbName: "db_int_test" } },
-		{
-			name: "Knex-SQLite",
-			type: "Knex",
-			options: {
-				knex: {
-					client: "sqlite3",
-					connection: {
-						filename: ":memory:"
-					},
-					useNullAsDefault: true
-				}
-			}
-		} */
 	];
 }
 
@@ -188,6 +189,7 @@ describe("Integration tests", () => {
 			return adapter;
 		};
 
+		getAdapter.adapterName = adapter.name;
 		getAdapter.isNoSQL = ["NeDB", "MongoDB", "Mongoose"].includes(adapter.type);
 		getAdapter.isSQL = ["Knex"].includes(adapter.type);
 		getAdapter.IdColumnType = ["Knex"].includes(adapter.type) ? "integer" : "string";
