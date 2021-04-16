@@ -80,17 +80,6 @@ class KnexAdapter extends BaseAdapter {
 	async connect() {
 		this.logger.debug(`Knex connecting...`);
 		this.client = new Knex(this.opts.knex);
-
-		/*this.client.on("open", () =>
-			this.logger.info(
-				`MongoDB adapter has connected. Database: '${this.opts.dbName}', Collection: '${this.opts.collection}'`
-			)
-		);
-		this.client.on("close", () => this.logger.warn("MongoDB adapter has disconnected."));
-		this.client.on("error", err => this.logger.error("MongoDB error.", err));
-
-		// Connect the client to the server
-		await this.client.connect();*/
 	}
 
 	/**

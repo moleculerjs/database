@@ -1087,7 +1087,7 @@ module.exports = (getAdapter, adapterType) => {
 	});
 
 	describe("Test custom validator", () => {
-		const customValidate = jest.fn(value => (value.length < 3 ? "Too short" : true));
+		const customValidate = jest.fn(value => value.length > 2 || "Too short");
 
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({

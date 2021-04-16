@@ -54,7 +54,11 @@ describe("Test validator schema generation", () => {
 
 	it("generate validator schema for 'create'", async () => {
 		expect(
-			generateValidatorSchemaFromFields(fields, { type: "create", strict: "remove" })
+			generateValidatorSchemaFromFields(fields, {
+				type: "create",
+				strict: "remove",
+				enableParamsConversion: true
+			})
 		).toEqual({
 			$$strict: "remove",
 			name: { type: "string", convert: true },
@@ -120,77 +124,83 @@ describe("Test validator schema generation", () => {
 		});
 	});
 
-	it("generate validator schema for 'create' with strict", async () => {
-		expect(generateValidatorSchemaFromFields(fields, { type: "create", strict: true })).toEqual(
-			{
-				$$strict: true,
-				name: { type: "string", convert: true },
-				username: { type: "string", max: 100, min: 3, convert: true },
-				email: { type: "email", optional: true },
-				password: { type: "string", min: 6, optional: true, convert: true },
-				age: {
-					type: "number",
-					positive: true,
-					integer: true,
-					optional: true,
-					convert: true
-				},
-				address: {
+	it("generate validator schema for 'create' with strict && disable convert", async () => {
+		expect(
+			generateValidatorSchemaFromFields(fields, {
+				type: "create",
+				strict: true,
+				enableParamsConversion: false
+			})
+		).toEqual({
+			$$strict: true,
+			name: { type: "string" },
+			username: { type: "string", max: 100, min: 3 },
+			email: { type: "email", optional: true },
+			password: { type: "string", min: 6, optional: true },
+			age: {
+				type: "number",
+				positive: true,
+				integer: true,
+				optional: true
+			},
+			address: {
+				type: "object",
+				optional: true,
+				strict: true,
+				properties: {
+					zip: { type: "number", optional: true },
+					street: { type: "string", optional: true },
+					state: { type: "string", optional: true },
+					city: { type: "string" },
+					country: { type: "string", optional: true },
+					primary: { type: "boolean", optional: true, default: true }
+				}
+			},
+			roles: {
+				type: "array",
+				max: 3,
+				optional: true,
+				items: {
+					type: "string",
+					optional: true
+				}
+			},
+			phones: {
+				type: "array",
+				optional: true,
+				items: {
 					type: "object",
 					optional: true,
 					strict: true,
 					properties: {
-						zip: { type: "number", optional: true, convert: true },
-						street: { type: "string", optional: true, convert: true },
-						state: { type: "string", optional: true, convert: true },
-						city: { type: "string", convert: true },
-						country: { type: "string", optional: true, convert: true },
-						primary: { type: "boolean", convert: true, optional: true, default: true }
-					}
-				},
-				roles: {
-					type: "array",
-					max: 3,
-					optional: true,
-					items: {
-						type: "string",
-						optional: true,
-						convert: true
-					}
-				},
-				phones: {
-					type: "array",
-					optional: true,
-					items: {
-						type: "object",
-						optional: true,
-						strict: true,
-						properties: {
-							type: { type: "string", optional: true, convert: true },
-							number: { type: "string", convert: true },
-							primary: {
-								type: "boolean",
-								convert: true,
-								optional: true,
-								default: false
-							}
+						type: { type: "string", optional: true },
+						number: { type: "string" },
+						primary: {
+							type: "boolean",
+
+							optional: true,
+							default: false
 						}
 					}
-				},
-				settings: {
-					type: "object",
-					optional: true,
-					default: {}
-				},
-				bio: { type: "any", optional: true },
-				status: { type: "string", default: "A", optional: true, convert: true }
-			}
-		);
+				}
+			},
+			settings: {
+				type: "object",
+				optional: true,
+				default: {}
+			},
+			bio: { type: "any", optional: true },
+			status: { type: "string", default: "A", optional: true }
+		});
 	});
 
 	it("generate validator schema for 'update'", async () => {
 		expect(
-			generateValidatorSchemaFromFields(fields, { type: "update", strict: "remove" })
+			generateValidatorSchemaFromFields(fields, {
+				type: "update",
+				strict: "remove",
+				enableParamsConversion: true
+			})
 		).toEqual({
 			$$strict: "remove",
 			id: { type: "string", optional: false, convert: true },
@@ -257,7 +267,11 @@ describe("Test validator schema generation", () => {
 
 	it("generate validator schema for 'replace'", async () => {
 		expect(
-			generateValidatorSchemaFromFields(fields, { type: "replace", strict: "remove" })
+			generateValidatorSchemaFromFields(fields, {
+				type: "replace",
+				strict: "remove",
+				enableParamsConversion: true
+			})
 		).toEqual({
 			$$strict: "remove",
 			id: { type: "string", optional: false, convert: true },

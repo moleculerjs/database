@@ -106,7 +106,7 @@ function generateFieldValidatorSchema(field, opts) {
 	if (opts.type == "replace" && field.primaryKey) schema.optional = false;
 
 	// Type conversion (enable by default)
-	if (["string", "number", "date", "boolean"].includes(field.type))
+	if (opts.enableParamsConversion && ["string", "number", "date", "boolean"].includes(field.type))
 		schema.convert = field.convert != null ? field.convert : true;
 
 	// Default value (if not "update"), Function default value is not supported by FV

@@ -17,6 +17,7 @@ The options of the Mixin.
 | `rest` | `Boolean` | `true` | Set the API Gateway auto-aliasing REST properties in the service & actions. |
 | `entityChangedEventType` | `String` | `"broadcast"` | Type of the entity changed event. Values: `null`, `"broadcast"`, `"emit"`. The value `null` disables the sending of events. |
 | `autoReconnect` | `Boolean` | `true` | Automatic reconnect if the DB server is not available when connecting for the first time. |
+| `maximumAdapters` | `Number` | `null` | Maximum number of connected adapters. In case of multi-tenancy. |
 | `maxLimit` | `Number` | `-1` | Maximum value of `limit` in `find` action and `pageSize` in `list` action. Default: `-1` (no limit) |
 | `defaultPageSize` | `Number` | `10` | Default page size in the `list` action. |
 
@@ -284,7 +285,7 @@ With `validate`, you can configure your validation function. _It can be asynchro
 {
     username: { 
         type: "string", 
-        validate: (value, entity, field, ctx) => value && /^[a-zA-Z0-9]+$/.test(value) 
+        validate: (value, entity, field, ctx) => /^[a-zA-Z0-9]+$/.test(value) || "Wrong input value"
     }
 }
 ```
@@ -1233,6 +1234,8 @@ It should return an `Array` with two values. The first is a cache key, the secon
 The service uses the cache key to store the created adapter. Therefore in the next time, if the cache key is present in the cache, the service won't create a new adapter instance but will use the previous one.
 
 [About multi-tenant configuration, read more here](#multi-tenancy).
+
+Please note that if you have many tenants, the service will open many connections to the database. This is not optimal and can lead to resource problems. To limit the number of connected adapters, use the `maximumAdapters` mixin options. When the number of adapters reaches this number, the service will close the oldest used adapter.
 
 ## `entityChanged`
 `entityChanged(type: String, data?: any, ctx?: Context, opts?: object)`

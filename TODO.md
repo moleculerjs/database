@@ -1,18 +1,19 @@
 # TODO
 
+- [ ] add more debug log messages
+
 ## Actions
 - [ ] `aggregate` action with params: `type: "sum", "avg", "count", "min", "max"` & `field: "price"`
 
 ## Fields
-- [ ] add option to disable auto value conversion in validator schema.
-- [ ] `validate` somehow should return the error message text if not valid. E.g. it's `true` or `"The value is not valid"`
+- [x] add option to disable auto value conversion in validator schema.
+- [x] `validate` somehow should return the error message text if not valid. E.g. it's `true` or `"The value is not valid"`
 
 
 ## Methods
 - [ ] create methods for `updateMany` and `removeMany` (clear cache, send notify event without entities)
   - [ ] or find with query validate every entity, clear cache, send notify (batch)
-- [ ] ad-hoc populate in find/list actions `populate: ["author", { key: "createdBy", action: "users.resolve", fields: ["name", "avatar"] }]` { }
-- [ ] limiting the maximum opened adapters (multi-tenancy)
+- [x] limiting the maximum opened adapters (in case of multi-tenancy)
 
 
 ## Features
@@ -37,9 +38,10 @@
 
 ## Just if I bored to death
 - [ ] generate OpenAPI schema
-- [ ] Generate sample data based on fields with Fakerator. `username: { type: "string", fake: "entity.user.userName" }`
-- [ ] client-side (Vue) module which can communicate with service via REST or GraphQL.
-- [ ] auto revision handling (`_rev: 1`). Auto increment on every update/replace and always checks the rev value to avoid concurrent updating.
 - [ ] `introspect: true`
   - [ ] create REST API to get the field definitions, and actions with params
+- [ ] Generate sample data based on fields with Fakerator. `username: { type: "string", fake: "entity.user.userName" }`
+- [ ] client-side (Vue) module which can communicate with service via REST or GraphQL.
+- [ ] ad-hoc populate in find/list actions `populate: ["author", { key: "createdBy", action: "users.resolve", fields: ["name", "avatar"] }]` { }
+- [ ] auto revision handling (`_rev: 1`). Auto increment on every update/replace and always checks the rev value to avoid concurrent updating.
 - [ ] 

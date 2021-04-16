@@ -32,6 +32,9 @@ module.exports = function DatabaseMixin(mixinOpts) {
 		/** @type {Boolean} Generate `params` schema for generated actions based on the `fields` */
 		generateActionParams: true,
 
+		/** @type {Boolean} Enable to convert input params to the specified type */
+		enableParamsConversion: true,
+
 		/** @type {Boolean|String} Strict mode in validation schema for objects. Values: true|false|"remove" */
 		strict: "remove",
 
@@ -52,6 +55,9 @@ module.exports = function DatabaseMixin(mixinOpts) {
 
 		/** @type {Number} Auto reconnect if the DB server is not available at first connecting */
 		autoReconnect: true,
+
+		/** @type {Number} Maximum number of connected adapters. In case of multi-tenancy */
+		maximumAdapters: null,
 
 		/** @type {Number} Maximum value of limit in `find` action. Default: `-1` (no limit) */
 		maxLimit: -1,
@@ -152,7 +158,8 @@ module.exports = function DatabaseMixin(mixinOpts) {
 								fields,
 								{
 									type: "create",
-									strict: mixinOpts.strict
+									strict: mixinOpts.strict,
+									enableParamsConversion: mixinOpts.enableParamsConversion
 								}
 							);
 						}
@@ -162,7 +169,8 @@ module.exports = function DatabaseMixin(mixinOpts) {
 								fields,
 								{
 									type: "update",
-									strict: mixinOpts.strict
+									strict: mixinOpts.strict,
+									enableParamsConversion: mixinOpts.enableParamsConversion
 								}
 							);
 						}
@@ -172,7 +180,8 @@ module.exports = function DatabaseMixin(mixinOpts) {
 								fields,
 								{
 									type: "replace",
-									strict: mixinOpts.strict
+									strict: mixinOpts.strict,
+									enableParamsConversion: mixinOpts.enableParamsConversion
 								}
 							);
 						}

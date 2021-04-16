@@ -36,17 +36,20 @@ module.exports = function (mixinOpts) {
 				this.$validators = {
 					create: validator.compile(
 						generateValidatorSchemaFromFields(this.settings.fields, {
-							type: "create"
+							type: "create",
+							enableParamsConversion: mixinOpts.enableParamsConversion
 						})
 					),
 					update: validator.compile(
 						generateValidatorSchemaFromFields(this.settings.fields, {
-							type: "update"
+							type: "update",
+							enableParamsConversion: mixinOpts.enableParamsConversion
 						})
 					),
 					replace: validator.compile(
 						generateValidatorSchemaFromFields(this.settings.fields, {
-							type: "replace"
+							type: "replace",
+							enableParamsConversion: mixinOpts.enableParamsConversion
 						})
 					)
 				};
@@ -256,7 +259,7 @@ module.exports = function (mixinOpts) {
 			const sanitizeValue = async (field, value) => {
 				if (value !== undefined) {
 					// Custom validator
-					// Syntax: `validate: (value, entity, field, ctx) => value.length > 6`
+					// Syntax: `validate: (value, entity, field, ctx) => value.length > 6 || "Too short"`
 					if (field.validate) {
 						const res = field.validate.call(this, value, params, field, ctx);
 						if (res !== true) {

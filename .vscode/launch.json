@@ -18,6 +18,13 @@
 		{
 			"type": "node",
 			"request": "launch",
+			"name": "Launch selected demo",
+			"program": "${file}",
+			"cwd": "${workspaceRoot}"
+		},
+		{
+			"type": "node",
+			"request": "launch",
 			"name": "Jest",
 			"program": "${workspaceRoot}/node_modules/jest-cli/bin/jest.js",
 			"args": ["--testMatch", "\"**/integration/**/*.spec.js\"", "--runInBand"],

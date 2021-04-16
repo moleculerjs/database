@@ -24,12 +24,20 @@ module.exports = function (mixinOpts) {
 		async getAdapter(ctx) {
 			const [hash, adapterOpts] = this.getAdapterByContext(ctx, mixinOpts.adapter);
 			const item = this.adapters.get(hash);
-			if (item) return item.adapter;
+			if (item) {
+				item.touched = Date.now();
+				return item.adapter;
+			}
 
 			const adapter = Adapters.resolve(adapterOpts);
 			adapter.init(this);
-			this.adapters.set(hash, { hash, adapter });
+			this.adapters.set(hash, { hash, adapter, touched: Date.now() });
+			await this.maintenanceAdapters();
 			await this._connect(adapter);
+			this.logger.info(
+				`Adapter '${hash}' connected. Number of adapters:`,
+				this.adapters.size
+			);
 
 			return adapter;
 		},
@@ -44,6 +52,23 @@ module.exports = function (mixinOpts) {
 		 */
 		getAdapterByContext(ctx, adapterDef) {
 			return ["default", adapterDef];
+		},
+
+		async maintenanceAdapters() {
+			if (mixinOpts.maximumAdapters == null || mixinOpts.maximumAdapters < 1) return;
+
+			const surplus = this.adapters.size - mixinOpts.maximumAdapters;
+			if (surplus > 0) {
+				let adapters = Array.from(this.adapters.values());
+				adapters.sort((a, b) => a.touched - b.touched);
+				const closeable = adapters.slice(0, surplus);
+				this.logger.info(
+					`Close ${closeable.length} old adapter(s). Limit: ${mixinOpts.maximumAdapters}, Current: ${this.adapters.size}`
+				);
+				for (const { adapter } of closeable) {
+					await this._disconnect(adapter);
+				}
+			}
 		},
 
 		/**
@@ -74,9 +99,19 @@ module.exports = function (mixinOpts) {
 		/**
 		 * Disconnect an adapter
 		 */
-		_disconnect(adapter) {
-			if (_.isFunction(adapter.disconnect)) return adapter.disconnect();
-			return this.Promise.resolve();
+		async _disconnect(adapter) {
+			// Remove from cache
+			const item = Array.from(this.adapters.values()).find(item => item.adapter == adapter);
+			if (item) {
+				this.adapters.delete(item.hash);
+			}
+
+			// Close the connection
+			if (_.isFunction(adapter.disconnect)) await adapter.disconnect();
+			this.logger.info(
+				`Adapter '${item ? item.hash : "unknown"}' diconnected. Number of adapters:`,
+				this.adapters.size
+			);
 		},
 
 		/**
