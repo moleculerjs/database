@@ -620,11 +620,11 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} opts
 		 */
 		async entityChanged(type, data, ctx, opts) {
-			if (mixinOpts.entityChangedEventMode) {
+			if (mixinOpts.entityChangedEventType) {
 				const op = type + (type == "clear" ? "ed" : "d");
 				const eventName = `${this.name}.${op}`;
 
-				(ctx || this.broker)[mixinOpts.entityChangedEventMode](eventName, {
+				(ctx || this.broker)[mixinOpts.entityChangedEventType](eventName, {
 					type,
 					data,
 					opts

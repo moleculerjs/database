@@ -6,24 +6,25 @@ The options of the Mixin.
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `adapter` | `Object` | `NeDB` | Configure the adapter. [Read more](#adapters) |
-| `createActions` | `Boolean` | `true` | Generate CRUD actions. |
-| `actionVisibility` | `String` | `published` | Default visibility of generated actions |
-| `generateActionParams` | `Boolean` | `true` | Generate `params` schema for generated actions based on the `fields` |
-| `strict` | `Boolean\|String` | `remove` | Strict mode in validation schema for objects. Values: `true`, `false`, `"remove"` |
-| `cache` | `Object` | | Action caching settings |
-| `cache.enabled` | `Boolean` | `true` | Enable caching on actions |
-| `cache.eventName` | `String` | `cache.clean.{serviceName}` | Name of the broadcasted event for clearing cache at modifications (update, replace, remove). |
-| `cache.eventType` | `String` | `"broadcast"` | Type of the broadcasted event. It can be `"broadcast"`, or `"emit"`. If `null`, it disabled the event sending. |
-| `rest` | `Boolean` | `true` | Set the API Gateway auto-aliasing REST properties in the service & actions |
-| `entityChangedEventMode` | `String` | `"broadcast"` | Entity changed lifecycle event mode. Values: `null`, `"broadcast"`, `"emit"`. The `null` disables event sending. |
-| `autoReconnect` | `Boolean` | `true` | Auto reconnect if the DB server is not available at first connecting |
+| `createActions` | `Boolean` | `true` | Create CRUD actions. |
+| `actionVisibility` | `String` | `published` | Default visibility of generated actions. |
+| `generateActionParams` | `Boolean` | `true` | Create `params` schema for generated actions based on the `fields`. |
+| `strict` | `Boolean\|String` | `remove` | Strict mode in the validation schema for objects. Values: `true`, `false`, `"remove"`. |
+| `cache` | `Object` | | Action caching settings. |
+| `cache.enabled` | `Boolean` | `true` | Enable caching for actions. |
+| `cache.eventName` | `String` | `cache.clean.{serviceName}` | Name of the broadcasted event for clearing the cache in case of changes (update, replace, remove). |
+| `cache.eventType` | `String` | `"broadcast"` | Type of the broadcasted event. It can be `"broadcast"`, or `"emit"`. If `null`, the sending of the event is disabled. |
+| `rest` | `Boolean` | `true` | Set the API Gateway auto-aliasing REST properties in the service & actions. |
+| `entityChangedEventType` | `String` | `"broadcast"` | Type of the entity changed event. Values: `null`, `"broadcast"`, `"emit"`. The value `null` disables the sending of events. |
+| `autoReconnect` | `Boolean` | `true` | Automatic reconnect if the DB server is not available when connecting for the first time. |
 | `maxLimit` | `Number` | `-1` | Maximum value of `limit` in `find` action and `pageSize` in `list` action. Default: `-1` (no limit) |
-| `defaultPageSize` | `Number` | `10` | Default page size in `list` action. |
+| `defaultPageSize` | `Number` | `10` | Default page size in the `list` action. |
 
 
 # Settings
 
 The settings of the service.
+
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `fields` | `Object` | `null` | Field definitions. [More info](#fields) |
@@ -34,9 +35,9 @@ The settings of the service.
 
 # Fields
 
-The field definition is similar to [Fastest Validator](https://github.com/icebob/fastest-validator) schemas. You can define it in the same format and the service uses the Fastest Validator to validate & sanitize the input data.
+The field definition is similar to [Fastest Validator](https://github.com/icebob/fastest-validator) schemas. You can define them in the same format and the service uses the Fastest Validator to validate and sanitize the input data.
 
->The difference between this schema and FV schema is that here all defined fields are optional (same the fields in the Database engines). You should set the `required: true` property for mandatory fields.
+>The difference between this schema and FV schema is that here all defined fields are optional (just like the fields in the Database Engines). You should set the property `required: true` for mandatory fields.
 
 **Example**
 ```js
@@ -58,13 +59,13 @@ module.exports = {
 }
 ```
 
->You can find more info about shorthand format in the [Fastest Validator documentation](https://github.com/icebob/fastest-validator#shorthand-definitions).
+>You can find more information about shorthand format in the [Fastest Validator documentation](https://github.com/icebob/fastest-validator#shorthand-definitions).
 
 
 ## Field properties
 
 ### `type`: \<string\> _(no default value, it's a required property)_
-The `type` defines the type of the field value. It can be any primitive types (`boolean`, `number`, `string`, `object`, `array`) or any types from Fastest Validator types. If the type is not a valid database type, you should define the `columnType` property as well with a valid database field type.
+The `type` defines the type of the field value. It can be any primitive type (`boolean`, `number`, `string`, `object`, `array`) or any type from Fastest Validator types. If the type is not a valid database type, you should define the `columnType` property with a valid database field type as well.
 
 **Example schema**
 ```js
@@ -100,10 +101,10 @@ The `type` defines the type of the field value. It can be any primitive types (`
 }
 ```
 
->Please note, if the value type and the defined type mismatches, the service will try to convert the value to the defined type. In the above example, if you set `age: "34"`, the service won't throw `ValidationError`, instead convert it to `Number`.
+>Please note, if the value type and the defined type do not match, the service will try to convert the value to the defined type. In the above example, if you set `age: "34"`, the service will not throw a `ValidationError`, but will convert it to `Number`.
 
 ### `required`: \<boolean\> _(Default: `false`)_
-Every field is optional by default. To make it mandatory, set `required: true` in the field properties. If this fields is nullish, the service throws a `ValidationError` in the `create` & `replace` actions.
+Each field is optional by default. To make it mandatory, set `required: true` in the field properties. If this field is `null` or `undefined`, the service throws a `ValidationError` in the `create` & `replace` actions.
 
 **Example**
 ```js
@@ -130,9 +131,9 @@ Every field is optional by default. To make it mandatory, set `required: true` i
 ```
 
 ### `primaryKey`: \<boolean\> _(Default: `false`)_
-For ID fields set the `primaryKey` to true. The service know the name of the ID field and type according to this property.
+For ID fields set the `primaryKey` to true. The service knows the name of the ID field and the type according to this property.
 
->Please note, the service doesn't support composite primary keys.
+>Please note that the service does not support composite primary keys.
 
 **Example**
 ```js
@@ -147,7 +148,7 @@ With the `secure` property you can encrypt the value of the ID field. This can b
 
 To use it, you should define `encodeID(id)` and `decodeID(id)` methods in the service that performs the encoding/decoding operations.
 
-> The [`hashids`](https://hashids.org/javascript/) lib can generate Youtube-like alphanumerical IDs from number(s) or from Mongo's `ObjectID`.
+> The [`hashids`](https://hashids.org/javascript/) lib can generate Youtube-like alphanumeric IDs from number(s) or from Mongo's `ObjectID`.
 
 
 **Example secure ID using `hashids` lib`**
@@ -177,10 +178,10 @@ module.exports = {
     }
 }
 ```
->Please note, the methods should be synchronous.
+>Please note that the methods should be synchronous.
 
 ### `columnName`: \<string\> _(Default: name of field)_
-With the `columnName` property, you can use a different field name in the database collection/table. 
+With the `columnName` property you can use another field name in the database collection/table. 
 
 **Example**
 ```js
@@ -192,7 +193,7 @@ With the `columnName` property, you can use a different field name in the databa
 
 
 ### `columnType`: \<string\> _(Default: value of the `type` property)_
-With the `columnName` property, you can use a different field type in the database collection/table. It should be set in SQL databases because e.g. `number` is not a valid database field type.
+With the `columnType` property you can use another field type in the database collection/table. It should be set in SQL databases because e.g. `number` is not a valid database field type.
 
 **Example**
 ```js
@@ -207,7 +208,7 @@ With the `columnName` property, you can use a different field type in the databa
 
 
 ### `default`: \<string|Function\> _(Default: `null`)_
-For the non-required fields, you can set default values. If the field value is nullish in the `create` and `replace` actions, the service will set the defined default value. If the `default` is a Function, the service will call it to get the default value. _The function may be asynchronous._
+For the non-required fields, you can set default values. If the field value is `null` or `undefined` in the `create` and `replace` actions, the service will set the defined default value. If the `default` is a Function, the service will call it to get the default value. _The function may be asynchronous._
 
 **Example**
 ```js
@@ -219,10 +220,10 @@ For the non-required fields, you can set default values. If the field value is n
 ```
 
 ### `readonly`: \<boolean\> _(Default: `false`)_
-You can make a field read-only with the `readonly: true`. In this case, the property can't be set by the user, only the service can do it. It means, for read-only fields, you should define `default` or `set` or any operation hooks.
+You can make a field read-only with the `readonly: true`. In this case, the property can't be set by the user, only the service can do that. This means that you should define `default` or `set` or other operation hooks for read-only fields.
 
 ### `immutable`: \<boolean\> _(Default: `false`)_
-The immutable field means you can set the value once. It cannot be changed in the future.
+The immutable field means that you can set the value once. It cannot be changed in the future.
 
 **Example**
 ```js
@@ -232,7 +233,7 @@ The immutable field means you can set the value once. It cannot be changed in th
 ```
 
 ### `virtual`: \<boolean\> _(Default: `false`)_
-The virtual field returns value which is not exist in the database. It's mandatory to define the `get` method which returns the value of the field.
+The virtual field returns a value that does not exist in the database. It's mandatory to define the `get` method that returns the value of the field.
 
 **Example**
 ```js
@@ -246,7 +247,7 @@ The virtual field returns value which is not exist in the database. It's mandato
 ```
 
 ### `hidden`: \<boolean|String\> _(Default: `false`)_
-The hidden fields are skipped from the response during the transformation.
+The hidden fields are skipped from the response during transformation.
 The field can be marked as hidden only by default. But if the `fields` of the request `params` contains it, it will be placed.
 
 **Example**
@@ -276,7 +277,7 @@ The response contains the `name` and `createdAt` fields.
 
 
 ### `validate`: \<Function\> _(Default: `null`)_
-With `validate`, you can configure a custom validator function. _It may be asynchronous._
+With `validate`, you can configure your validation function. _It can be asynchronous._
 
 **Example**
 ```js
@@ -290,7 +291,7 @@ With `validate`, you can configure a custom validator function. _It may be async
 
 
 ### `get`: \<Function\> _(Default: `null`)_
-The `get` function is called at transformation of entities. With this function, you can modify an entity value before sending back to the caller or calculate a value from other fields of entity in virtual fields.
+The `get` function is called when transforming entities. With this function, you can modify an entity value before sending it back to the caller or calculate a value from other fields of the entity in virtual fields.
 
 **Example**
 ```js
@@ -305,7 +306,7 @@ The `get` function is called at transformation of entities. With this function, 
 
 
 ### `set`: \<Function\> _(Default: `null`)_
-The `set` function is called at entity creating or updating. You can modify the input value or compute a new one from other values of the entity. _It may be asynchronous._
+The `set` function is called when creating or updating entities. You can change the input value or calculate a new one from other values of the entity. _It can be asynchronous._
 
 **Example**
 ```js
@@ -322,18 +323,18 @@ The `set` function is called at entity creating or updating. You can modify the 
 ```
 
 ### `permission`: \<string\> _(Default: `null`)_
-With `permission` property, you can control who can view & modify the value of the field. [Read more here.](#permissions)
+With the `permission` property, you can control who can see & change the value of the field. [Read more here.](#permissions)
 
 ### `readPermission`: \<string\> _(Default: `null`)_
-With `readPermission` property, you can control who can view the value of the field. [Read more here.](#permissions)
+With the `readPermission` property, you can control who can see the value of the field. [Read more here.](#permissions)
 
 ### `populate`: \<string|Object|Function\> _(Default: `null`)_
-The populate is similar as reference in SQL-based database engines, or populate in Mongoose ORM. [Read more here.](#populating)
+The populate is similar to reference in SQL-based database engines, or populate in Mongoose ORM. [Read more here.](#populating)
 
 ### `onCreate`: \<Function\> _(Default: `null`)_
-This is an operation hook which is called at new entity creating (`create` action, `createEntity` and `createEntities` methods). You can use it to set `createdAt` timestamp for entity.
+This is an operations hook that is called when creating a new entity (`create` action, `createEntity` and `createEntities` methods). You can use it to set the `createdAt` timestamp for the entity.
 
-_It may be asynchronous._
+_It can be asynchronous._
 
 **Example**
 ```js
@@ -352,9 +353,9 @@ _It may be asynchronous._
 ```
 
 ### `onUpdate`: \<Function\> _(Default: `null`)_
-This is an operation hook which is called at entity updating (`update` action, `updateEntity`). You can use it to set `updatedAt` timestamp for entity.
+This is an operations hook that is called when updating entities (`update` action, `updateEntity`). You can use it to set the `updatedAt` timestamp for entity.
 
-_It may be asynchronous._
+_It can be asynchronous._
 
 **Example**
 ```js
@@ -373,9 +374,9 @@ _It may be asynchronous._
 ```
 
 ### `onReplace`: \<Function\> _(Default: `null`)_
-This is an operation hook which is called at entity replacing (`replace` action, `replaceEntity`).
+This is an operations hook that is called when replacing entities (`replace` action, `replaceEntity`).
 
-_It may be asynchronous._
+_It can be asynchronous._
 
 **Example**
 ```js
@@ -394,10 +395,10 @@ _It may be asynchronous._
 ```
 
 ### `onRemove`: \<Function\> _(Default: `null`)_
-This is an operation hook which is called at entity removing (`remove` action, `removeEntity`).
-If you define it, the service switch to **soft delete mode**. It means, the record won't be deleted in the table/collection. [Read more about soft delete feature.](#soft-delete)
+This is an operations hook that is called when removing entities (`remove` action, `removeEntity`).
+If you define it, the service will switch to **soft delete mode**. This means that the record won't be deleted in the table/collection. [Read more about the soft delete feature.](#soft-delete)
 
-_It may be asynchronous._
+_It can be asynchronous._
 
 **Example**
 ```js
@@ -417,14 +418,14 @@ _It may be asynchronous._
 
 
 ### Additional field properties
-You can use any additional properties for validation & sanitization from the Fastest Validator rule properties like `min`, `max`, `trim`, `lowercase` ...etc.
+You can use all additional properties for validation & sanitization from the Fastest Validator rule properties like `min`, `max`, `trim`, `lowercase` ...etc.
 
-[Check the documentation of Fastest Validator.](https://github.com/icebob/fastest-validator#readme)
+[Check Fastest Validator documentation.](https://github.com/icebob/fastest-validator#readme)
 
 # Actions
 
 The service generates common CRUD actions if the `createActions` mixin option is not `false`.
-You can fine control which actions should be created.
+You can finely control which actions should be created.
 
 **Example to disable all action creation**
 ```js
@@ -454,15 +455,15 @@ Find entitites by query.
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `limit` | `Number` | `null` | Max count of rows. |
-| `offset` | `Number` | `null` | Count of skipped rows. |
+| `offset` | `Number` | `null` | Number of skipped rows. |
 | `fields` | `String\|Array<String>` | `null` | Fields to return. |
 | `sort` | `String` | `null` | Sorted fields. |
 | `search` | `String` | `null` | Search text. |
-| `searchFields` | `String\|Array<String>` | `null` | Fields for searching. |
-| `collation` | `Object` | `null` | Collaction settings. Passed for adapter directly. |
-| `scope` | `String\|Array<String>\|Boolean` | `null` | Scopes for query. If `false`, disables the default scopes. |
+| `searchFields` | `String\|Array<String>` | `null` | Fields for search. |
+| `collation` | `Object` | `null` | Collation settings. Passed for adapter directly. |
+| `scope` | `String\|Array<String>\|Boolean` | `null` | Scopes for the query. If `false`, the default scopes are disabled. |
 | `populate` | `String\|Array<String>` | `null` | Populated fields. |
-| `query` | `String\|Object` | `null` | Query object. If `String`, it's converted with `JSON.parse` |
+| `query` | `String\|Object` | `null` | Query object. If `String`, it will be converted with `JSON.parse` |
 
 ### REST endpoint
 ```js
@@ -511,7 +512,7 @@ const posts = await broker.call("posts.find", { sort: "createdAt" });
 ```
 
 #### Sorting (multiple fields)
-_The `-` negative sign prefix means descendant sorting._
+_The `-` prefix with a negative sign means descending sort._
 ```js
 const posts = await broker.call("posts.find", { sort: ["-votes", "title"] });
 ```
@@ -573,7 +574,7 @@ const posts = await broker.call("posts.find", {
 #### 
 
 ## `list` List entities
-List entitites with pagination. It returns with the total number of rows, as well.
+List entities with pagination. It returns also the total number of rows.
 
 ### Parameters
 | Property | Type | Default | Description |
@@ -583,9 +584,9 @@ List entitites with pagination. It returns with the total number of rows, as wel
 | `fields` | `String\|Array<String>` | `null` | Fields to return. |
 | `sort` | `String` | `null` | Sorted fields. |
 | `search` | `String` | `null` | Search text. |
-| `searchFields` | `String\|Array<String>` | `null` | Fields for searching. |
+| `searchFields` | `String\|Array<String>` | `null` | Fields for search. |
 | `collation` | `Object` | `null` | Collaction settings. Passed for adapter directly. |
-| `scope` | `String\|Array<String>\|Boolean` | `null` | Scopes for query. If `false`, disables the default scopes. |
+| `scope` | `String\|Array<String>\|Boolean` | `null` | Scopes for the query. If `false`, the default scopes are disabled. |
 | `populate` | `String\|Array<String>` | `null` | Populated fields. |
 | `query` | `String\|Object` | `null` | Query object. If `String`, it's converted with `JSON.parse` |
 
@@ -639,17 +640,17 @@ const posts = await broker.call("posts.list", { page: 3, pageSize: 10 });
 ```
 
 ------
-The other parameter examples are same as [`find`](#find-find-entities) action.
+The other parameter examples are the same as for the [`find`](#find-find-entities) action.
 
 ## `count` Count entities
-Get count of entities by query.
+Get the number of entities by query.
 
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `search` | `String` | `null` | Search text. |
-| `searchFields` | `String\|Array<String>` | `null` | Fields for searching. |
-| `scope` | `String\|Array<String>\|Boolean` | `null` | Scopes for query. If `false`, disables the default scopes. |
+| `searchFields` | `String\|Array<String>` | `null` | Fields for search. |
+| `scope` | `String\|Array<String>\|Boolean` | `null` | Scopes for the query. If `false`, the default scopes are disabled. |
 | `query` | `String\|Object` | `null` | Query object. If `String`, it's converted with `JSON.parse` |
 
 ### REST endpoint
@@ -669,7 +670,7 @@ GET /{serviceName}/count
 const postCount = await broker.call("posts.count");
 ```
 
-The parameter examples are same as [`find`](#find-find-entities) action.
+The parameter examples are the same as for the [`find`](#find-find-entities) action.
 
 
 ## `get` Get an entity by ID
@@ -678,9 +679,9 @@ Get an entity by ID.
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
-| `<id>` | `any` | `null` | ID of entity. The name of property comes from the primaryKey field. |
+| `<id>` | `any` | `null` | ID of the entity. The name of the property comes from the primary key field. |
 | `fields` | `String\|Array<String>` | `null` | Fields to return. |
-| `scope` | `String\|Array<String>\|Boolean` | `null` | Scopes for query. If `false`, disables the default scopes. |
+| `scope` | `String\|Array<String>\|Boolean` | `null` | Scopes for the query. If `false`, the default scopes are disabled. |
 | `populate` | `String\|Array<String>` | `null` | Populated fields. |
 
 ### REST endpoint
@@ -708,7 +709,7 @@ const post = await broker.call("posts.get", { id: "YVdnh5oQCyEIRja0" });
 ```
 
 #### Different ID field
-If you can use different primary key field name instead of `id`, you should use it in the action params, as well.
+If you can use another primary key field name instead of `id`, you should also use it in the action parameters.
 
 **Primary key definition in `fields`**
 ```js
@@ -723,21 +724,21 @@ const post = await broker.call("posts.get", { key: "YVdnh5oQCyEIRja0" });
 ```
 
 ------
-The other parameter examples are same as [`find`](#find-find-entities) action.
+The other parameter examples are the same as for the [`find`](#find-find-entities) action.
 
 
 ## `resolve` Get entit(ies) by ID(s)
-Resolve an entity by one or multiple IDs.
+Resolve an entity based on one or more IDs.
 
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
-| `<id>` | `any\|Array<any>` | `null` | ID of entity(ies). The name of property comes from the primary key field. |
+| `<id>` | `any\|Array<any>` | `null` | ID of the entity(ies). The name of property comes from the primary key field. |
 | `fields` | `String\|Array<String>` | `null` | Fields to return. |
-| `scope` | `String\|Array<String>\|Boolean` | `null` | Scopes for query. If `false`, disables the default scopes. |
+| `scope` | `String\|Array<String>\|Boolean` | `null` | Scopes for the query. If `false`, the default scopes are disabled. |
 | `populate` | `String\|Array<String>` | `null` | Populated fields. |
 | `mapping` | `boolean` | `false` | Convert the result to `Object` where the key is the ID. |
-| `throwIfNotExist` | `boolean` | `false` | If `true`, throw `EntityNotFound` error if the entity is not exist. |
+| `throwIfNotExist` | `boolean` | `false` | If `true`, th error `EntityNotFound` is thrown if the entity does not exist. |
 
 
 ### REST endpoint
@@ -818,14 +819,14 @@ const post = await broker.call("posts.resolve", {
 ```
 
 ------
-The other parameter examples are the same as [`find`](#find-find-entities) action.
+The other parameter examples are the same as for the [`find`](#find-find-entities) action.
 
 
 ## `create` Create an entity
 Create an entity.
 
 ### Parameters
-There are no any special parameters. All fields will be used for the entity after validation.
+There are no special parameters. All fields are used after validation for the entity.
 
 ### REST endpoint
 ```js
@@ -833,7 +834,7 @@ POST /{serviceName}
 ```
 
 ### Results
-Return with the new entity.
+Return the new entity.
 
 ### Examples
 
@@ -858,14 +859,14 @@ const post = await broker.call("posts.create", {
 
 
 ## `update` Update an entity
-Update an existing entity. Only the provided fields will be updated.
+Update an existing entity. Only the specified fields will be updated.
 
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
-| `<id>` | `any` | `null` | ID of entity. The name of property comes from the primary key field. |
+| `<id>` | `any` | `null` | ID of the entity. The name of property comes from the primary key field. |
 
-There are no any special parameters. All fields will be used for entity after validation.
+There are no special parameters. All fields are used after validation for the entity.
 
 ### REST endpoint
 ```js
@@ -873,7 +874,7 @@ PATCH /{serviceName}/{id}
 ```
 
 ### Results
-Return with the updated entity.
+Return the updated entity.
 
 ### Examples
 
@@ -900,14 +901,14 @@ const post = await broker.call("posts.update", {
 
 
 ## `replace` Replace an entity
-Replace an existing entity. The difference between replace and update that replace will replace the entiry entity. It means you should provide all required entity fields. This function doesn't merge the new and old entity.
+Replace an existing entity. The difference between replace and update that replace replaces the whole entity. This means that you should specify all required entity fields. This function doesn't merge the new and old entity.
 
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `<id>` | `any` | `null` | ID of entity. The name of property comes from the primary key field. |
 
-There are no any special parameters. All fields will be used for entity after validation.
+There are no special parameters. All fields will be used after validation for the entity.
 
 ### REST endpoint
 ```js
@@ -915,7 +916,7 @@ PUT /{serviceName}/{id}
 ```
 
 ### Results
-Return with the replaced entity.
+Return the replaced entity.
 
 ### Examples
 
@@ -958,7 +959,7 @@ DELETE /{serviceName}/{id}
 ```
 
 ### Results
-Return with the deleted entity ID.
+Return the ID of the deleted entity.
 
 ### Examples
 
@@ -973,7 +974,7 @@ const post = await broker.call("posts.delete", { id: "YVdnh5oQCyEIRja0" });
 
 
 ## Custom actions
-To add custom actions, just create them under `actions` and call the built-in methods.
+To add your own actions, simply create them under `actions` and call the built-in methods.
 
 **Example**
 ```js
@@ -1018,7 +1019,7 @@ module.exports = {
 ## `getAdapter`
 `getAdapter(ctx?: Context)`
 
-It returns an adapter instance based on the `Context`. If not found adapter, then it creates a new one. _It's important only in multi-tenant mode if custom `getAdapterByContext` method is implemented._
+It returns an adapter instance based on the `Context`. If no adapter is found, then a new one is created. _It's only important in multi-tenant mode if a custom `getAdapterByContext` method is implemented._
 
 ## `sanitizeParams`
 `sanitizeParams(params: object, opts?: object)`
@@ -1029,7 +1030,7 @@ Sanitize the input parameters for `find`, `list` and `count` actions.
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `removeLimit` | `Boolean` | `false` | Remove the limit & offset properties (for `count` action). |
-| `list` | `Boolean` | `false` | If `true`, it sanitize the `page` and `pageSize` parameters (for `list` action). |
+| `list` | `Boolean` | `false` | If `true`, the `page` and `pageSize` parameters (for `list` action) are sanitized. |
 
 
 ## `findEntities`
@@ -1041,7 +1042,7 @@ Find entities by query.
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
-| `params` | `Object` | `null` | Parameters for finding. It's same as [`find` action parameters](#parameters) |
+| `params` | `Object` | `null` | Parameters for search. It's same as [`find` action parameters](#parameters) |
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
 
@@ -1054,7 +1055,7 @@ Find entitites by query like the `findEntities` but it returns a `Stream`
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
-| `params` | `Object` | `null` | Parameters for finding. It's same as [`find` action parameters](#parameters) |
+| `params` | `Object` | `null` | Parameters for search. It's same as [`find` action parameters](#parameters) |
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
 
@@ -1062,24 +1063,24 @@ Find entitites by query like the `findEntities` but it returns a `Stream`
 ## `countEntities`
 `countEntities(ctx?: Context, params: object)`
 
-Get count of entities by query.
+Return the number of entities by query.
 
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
-| `params` | `Object` | `null` | Parameters for finding. It's same as [`count` action parameters](#parameters-2) |
+| `params` | `Object` | `null` | Parameters for search. It's same as [`count` action parameters](#parameters-2) |
 
 
 ## `findEntity`
 `findEntity(ctx?: Context, params: object, opts?: object)`
 
-Find an entityby query. It returns only the first row of the result.
+Find an entity by query. It returns only the first row of the result.
 
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
-| `params` | `Object` | `null` | Parameters for finding. It's same as [`find` action parameters](#parameters) |
+| `params` | `Object` | `null` | Parameters for search. It's same as [`find` action parameters](#parameters) |
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
 
@@ -1087,16 +1088,16 @@ Find an entityby query. It returns only the first row of the result.
 ## `resolveEntities`
 `resolveEntities(ctx?: Context, params: object, opts?: object)`
 
-Get entity(ies) by ID(s).
+Return entity(ies) by ID(s).
 
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
-| `params` | `Object` | `null` | Parameters for finding. It's same as [`resolve` action parameters](#parameters-4) |
+| `params` | `Object` | `null` | Parameters for search. It's same as [`resolve` action parameters](#parameters-4) |
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
-| `opts.throwIfNotExist` | `boolean` | `false` | If `true`, throw `EntityNotFound` error if the entity is not exist. |
+| `opts.throwIfNotExist` | `boolean` | `false` | If `true`, th error `EntityNotFound` is thrown if the entity does not exist. |
 
 
 ## `createEntity`
@@ -1130,13 +1131,13 @@ Create multiple entities.
 ## `updateEntity`
 `updateEntity(ctx?: Context, params: object, opts?: object)`
 
-Update an existing entity. Only the provided fields will be updated.
+Update an existing entity. Only the specified fields will be updated.
 
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
-| `params` | `Object` | `null` | It contains the ID of the entity and the changed field values. |
+| `params` | `Object` | `null` | It contains the entity ID and the changed field values. |
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.raw` | `Boolean` | `false` | If `true`, the `params` is passed directly to the database client. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
@@ -1151,7 +1152,7 @@ Replace an existing entity.
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
-| `params` | `Object` | `null` | It contains the entire entity, which will be replaced. |
+| `params` | `Object` | `null` | It contains the entire entity that is to be replaced. |
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
 
@@ -1169,30 +1170,30 @@ Delete an entity by ID.
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
 
-The method returns the deleted entity ID only.
+The method returns only the ID of the deleted entity.
 
 ## `clearEntities`
 `clearEntities(ctx?: Context, params: object)`
 
-Clear all entities in the table/collection.
+Delete all entities in the table/collection.
 
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
-| `params` | `Object` | `null` | It contains the entity ID. |
+| `params` | `Object` | `null` | Not used. |
 
 
 ## `validateParams`
 `validateParams(ctx?: Context, params: object, opts?: object)`
 
-It validates & sanitizes the input data in `params` against the `fields` definition. It's called in `createEntity`, `createEntities`, `updateEntity` and `replaceEntity` methods.
+It validates & sanitizes the input data in `params` against the `fields` definition. It's called in the `createEntity`, `createEntities`, `updateEntity` and `replaceEntity` methods.
 
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
-| `params` | `Object` | `null` | Entitiy field values. |
+| `params` | `Object` | `null` | Values of the entity fields. |
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.type` | `String` | `"create"` | Type of method. |
 
@@ -1200,7 +1201,7 @@ It validates & sanitizes the input data in `params` against the `fields` definit
 ## `transformResult`
 `transformResult(adapter: Adapter, docs: object|Array<object>, params?: object, ctx?: Context)`
 
-It transforms the entities which comes from the database according to `fields` definitions.
+It transforms the entities coming from the database according to the definitions of the `fields`.
 
 ### Parameters
 | Property | Type | Default | Description |
@@ -1228,17 +1229,17 @@ Create an index by definition. [Read more here](#indexes).
 
 For multi-tenancy, you should define this method which creates an Adapter definition by the `Context`. 
 
-It should return an `Array` with two values. First is a cache key, the second is the adapter definition.
-The service uses the cache key to store the created adapter. Therefore in the next time, if the cache key is exist in the cache, the service won't create a new Adapter instance, instead using the previous one.
+It should return an `Array` with two values. The first is a cache key, the second is the adapter definition.
+The service uses the cache key to store the created adapter. Therefore in the next time, if the cache key is present in the cache, the service won't create a new adapter instance but will use the previous one.
 
 [About multi-tenant configuration, read more here](#multi-tenancy).
 
 ## `entityChanged`
 `entityChanged(type: String, data?: any, ctx?: Context, opts?: object)`
 
-It's a method which is called when an entity created, updated, replaced or removed. You can use it to clear the cache or send an event.
+It's a method that is called when an entity is created, updated, replaced or removed. You can use it to clear the cache or send an event.
 
-There is a default implementation which sends an entity changed events. [Read more about it here](#events).
+There is a default implementation that sends an entity change events. [Read more about it here](#events).
 
 ### Parameters
 | Property | Type | Description |
@@ -1247,26 +1248,26 @@ There is a default implementation which sends an entity changed events. [Read mo
 | `data` | `Object\|Array<Object>` | Changed entity or entities. |
 | `ctx` | `Context` | Moleculer `Context` instance. It can be `null`. |
 | `opts` | `Object` | Additional options. |
-| `opts.batch` | `Boolean` | It's true if the operation affected multiple entities. |
-| `opts.softDelete` | `Boolean` | It's true in case of soft deleting. |
+| `opts.batch` | `Boolean` | It's true when the operation has affected more entities. |
+| `opts.softDelete` | `Boolean` | It's true in case of soft delete. |
 
 
 ## `encodeID`
 `encodeID(id: any)`
 
-You should define it, if you use secure primary key to encode the IDs before returning.
+You should define it when you use secure primary key to encrypt the IDs before returning them.
 
 ## `decodeID`
 `decodeID(id: any)`
 
-You should define it, if you use secure primary key to decode the received IDs.
+You should define it when you use secure primary key to decrypt the received IDs.
 
 ## `checkFieldAuthority`
 `checkFieldAuthority(ctx?: Context, permission: any, params: object, field: object)`
 
-If you use `permission` and `readPermission` in field definitions, you should define this method and write the permission checking logic. 
+If you use `permission` and `readPermission` in field definitions, you should define this method and write the logic for permission checking. 
 
-_It may be asynchronous._
+_It can be asynchronous._
 
 ### Parameters
 | Property | Type | Description |
@@ -1280,9 +1281,9 @@ _It may be asynchronous._
 ## `checkScopeAuthority`
 `checkScopeAuthority(ctx?: Context, name?: string, scope?: any)`
 
-You should implement it, if you want to check the permission of scopes.
+You should implement it if you want to check the authorization of scopes.
 
-_It may be asynchronous._
+_It can be asynchronous._
 
 ### Parameters
 | Property | Type | Description |
@@ -1291,15 +1292,15 @@ _It may be asynchronous._
 | `name` | `String?` | Name of the scope. |
 | `scope` | `any?` | Scope definition. |
 
-_If `name` and `scope` are `null`, it means you should check the authority of default scope disabling._
+_If `name` and `scope` are `null`, it means that you should check the authority of default scope disabling._
 
 # Scopes
-The scopes allow you to add constraints for all query methods, like `find`, `list` or `count`. You can use it with soft-delete feature when you want to list only non-deleted entities, by default.
+The scopes allow you to add constraints for all query methods, like `find`, `list` or `count`. You can use them with soft-delete feature if you want to list only non-deleted entities.
 
-You can define your scopes in the service settings and define the default scopes.
+You can define your scopes in the service settings and set the default scopes.
 
 ## Example
-In this example we create some scopes and show how you can use it at action calling.
+In this example, we'll create some scopes and show how you can use them when calling actions.
 
 **Define the service with scopes**
 ```js
@@ -1335,7 +1336,7 @@ In this example we create some scopes and show how you can use it at action call
 }
 ```
 
-**List the active posts without defining the scope**
+**List the active posts without scope definition**
 ```js
 const activePosts = await broker.call("posts.find");
 ```
@@ -1355,14 +1356,14 @@ const activePublicPosts = await broker.call("posts.find", { scope: ["onlyActive"
 const activePosts = await broker.call("posts.find", { scope: false });
 ```
 
-You can do the same in REST calls:
+You can do the same thing in REST calls:
 ```
 GET /posts?scope=public
 GET /posts?scope=onlyActive,public
 ```
 
 # Indexes
-You can define the indexes in the service `settings.indexes` property. It has a common format and every adapter will process and creates the indexes. Another option, if you call the `this.createIndex` method directly. [More info](#createindex)
+You can define the indexes in the service `settings.indexes` property. It has a common format and each adapter will process and create the indexes. Another way, if you call the `this.createIndex` method directly. [More info](#createindex)
 
 ## Index definition
 
@@ -1417,10 +1418,10 @@ You can define the indexes in the service `settings.indexes` property. It has a 
 ```
 
 # Streaming
-The service has a [`streamEntities`](#streamentities) method which similar to the `findEntities` which returns the entities by the query. But this method returns a `Stream` instance instead of all rows. 
+The service has a [`streamEntities`](#streamentities) method that returns the entities by the query similar to the `findEntities`. But this method returns a `Stream` instance instead of all rows. 
 
 ## Action for streaming
-There is no pre-defined action for the method, by default. But you can create one easily:
+There is no predefined action for the method, by default. But you can easily create one:
 
 ```js
 module.exports = {
@@ -1450,7 +1451,7 @@ ss.on("end", () => {
 ```
 
 # Nested objects & arrays
-The document-based database engines handle nested objects & arrays generally. You can use them in the field definitions, as well.
+The document-based database engines generally handle nested objects & arrays. You can also use them in the field definitions.
 The definition is similar to [Fastest Validator nested object schema](https://github.com/icebob/fastest-validator#object).
 
 ## Example for nested object field
@@ -1514,7 +1515,7 @@ module.exports = {
 ```
 
 ## Storing with non-supported adapters
-Mostly, the SQL-based adapters (Knex, Sequelize) can't handle them, so that they convert the `object` and `array` to a JSON string and store them as a `String`. But when you receive the entity, the adapter converts back to `object` and `array`. So you won't notice that it stores in different types. The only disadvantage is that you can't filter by properties of nested objects. 
+Mostly, the SQL-based adapters (Knex, Sequelize) can't handle this, so they convert the `object` and `array` to a JSON string and store it as a `String`. But when you get the entity, the adapter converts back to `object` and `array`. So you won't notice that it stores in different types. The only drawback is that you can't filter by properties of nested objects. 
 
 ### Example
 ```js
@@ -1537,7 +1538,7 @@ module.exports = {
 
 
 # Populating
-The service allows you to easily populate fields from other services. For example: If you have an `author` field in the `posts` entity, you can populate it with `users` service by ID of the author. If the field is an `Array` of IDs, it will populate all entities via only one request
+The service allows you to easily populate fields from other services. For example: If you have an `author` field in the `posts` entity, you can populate it with `users` service by the author's ID. If the field is an `Array` of IDs, it will populate all entities with only one request.
 
 ## Example of populate fields
 ```js
@@ -1599,7 +1600,7 @@ module.exports = {
 ```
 
 # Permissions
-You can configure the readable & writable fields in the field definitions. It's useful when you want to return more fields if the logged in user is an administrator but less fields for the regular users.
+You can configure the readable & writable fields in the field definitions. This is useful if you want to return more fields when the logged in user is an administrator but less fields for the normal users.
 To check the authority, you should define the [`checkFieldAuthority`](#checkfieldauthority) method.
 
 ## Example field definitions
@@ -1633,9 +1634,9 @@ module.exports = {
 ```
 
 # Soft delete
-For using the soft-delete feature, you should just define the [`onRemove`](#onremove-function-default-null) property for a field. The service detects it at the initialization and turn on this feature. Then, you can call the `remove` action or `removeEntity` method, they won't remove the entities physically, just set the value of the defined field.
+To use the soft-delete feature, you should simply define the [`onRemove`](#onremove-function-default-null) property for a field. The service will detect this during initialization and enable this feature. Then, you can call the `remove` action or `removeEntity` method, they will not physically remove the entities but only set the value of the defined field.
 
-Please note, you should configure scopes, as well in order to skip the deleted entities in the listing methods.
+Please note that you should also configure scopes to skip the deleted entities in the listing methods.
 
 ## Example
 ```js
@@ -1664,17 +1665,17 @@ module.exports = {
 };
 ```
 
-**List all available posts (excluding deleted entities)**
+**List all available posts (without deleted entities)**
 ```js
 const posts = await broker.call("posts.find");
 ```
 
-**List all posts (including deleted entities, as well)**
+**List all posts (also deleted entities)**
 ```js
 const allPosts = await broker.call("posts.find", { scope: false });
 ```
 
-As you see, it can cause a security issue if the user in the browser can request the deleted posts, as well. To avoid it, you can control the authority of scopes and default scopes disabling with the [`checkScopeAuthority`](#checkscopeauthority) method.
+As you can see, it can cause a security problem if the user can also request the deleted posts in the browser. To avoid this, you can control the authority of scopes and default scopes disabling with the [`checkScopeAuthority`](#checkscopeauthority) method.
 
 ## Example with authority
 ```js
@@ -1711,7 +1712,7 @@ module.exports = {
 ```
 
 # Raw updating
-The raw update is available via `updateEntity()` method with the `raw: true` option. In this case, the params is passed directly to the database client. E.g. in case of MongoDB, you can use the `$inc`, `$push`...etc modifiers.
+The raw update is available via `updateEntity()` method with the `raw: true` option. In this case, the params are passed directly to the database client. In case of MongoDB, you can use the `$inc`, `$push`...etc modifiers.
 
 ## Example
 ```js
@@ -1732,7 +1733,7 @@ const row = await this.updateEntity(ctx, {
 ```
 
 ## Expose as an action
-The raw updating is not available via the default `update` action, because it can cause security issues. But if you are know what you are doing, you can expose it as a new `action`
+The raw update is not available via the default `update` action because it can cause security issues. But if you know what you are doing, you can make it  available as a new `action`.
 
 ### Example
 ```js
@@ -1750,19 +1751,19 @@ module.exports = {
 ```
 
 # Caching
-The service has a built-in caching mechanism. If a cacher is configured in the ServiceBroker, the service stores the responses of `find`, `list`, `get` and `resolve` actions and clear the cache if any entities have been changed.
+The service has a built-in caching mechanism. If a cacher is configured in the ServiceBroker, the service caches the responses of `find`, `list`, `get` and `resolve` actions and clears the cache if any entities have been modified.
 
-The caching is enabled by default and uses the `cache.clean.{serviceName}` (e.g. `cache.clean.posts`) event name for clearing the cached entries. To disable it, set `cache.enabled = false` in [Mixin options](#mixin-options).
+Caching is enabled by default and uses the event name `cache.clean.{serviceName}` (e.g. `cache.clean.posts`) to delete cached entries. To disable it, set `cache.enabled = false` in [Mixin options](#mixin-options).
 
 ## Under the hood
-To store the responses in the cache, service uses the ServiceBroker built-in action caching mechanism. The cache clearing is a little bit complicated because if you are running multiple instances of the service with a local Memory cache, you should notify the other instances if an entity changed. To cover it, the service broadcasts a cache clearing event (e.g. `cache.clean.posts`) and also subscribes to this event. In the subscription handler, it calls the `broker.cacher.clean` method.
+To cache the responses, the service uses the built-in action caching mechanism of ServiceBroker. The cache clearing is a bit complicated because if you are running multiple instances of the service with a local Memory cache, you should notify the other instances when an entity has changed. To cover this, the service broadcasts a cache clearing event (e.g. `cache.clean.posts`) and also subscribes to this event. In the subscription handler, it calls the `broker.cacher.clean` method.
 
-So if you have multiple instances of the service, and the first instance updates an entity, then it broadcasts the cache clearing event. Both instances receives the event and both will clear the cache entries. It's simple but works any number of instances.
+So if you have multiple instances of the service, and the first instance updates an entity, then it broadcasts the cache clearing event. Both instances will receive the event and both will clear the cache entries. It's simple but works with any number of instances.
 
 ## Clear cached populated data
-When you use populated data in your service, it means that the service will store data from other services in the cache.
+If you use populated data in your service, it means that the service will cache data from other services.
 
-Let's say, you have two services, `posts` and `users`. Every post entity has an `author` which points to a `user` entity. You configure `populate` for the `author` field in `posts` service which resolves the author from the `users` service. So if you get a post with author, the cache will store the user entity inside the post entity. For example:
+Let's say, you have two services, `posts` and `users`. Each post entity has an `author` that points to a `user` entity. You configure `populate` for the `author` field in `posts` service, which resolves the author from the `users` service. So when you get a post with author, the cache stores the user entity inside the post entity. For example:
 ```js
 // GET /api/posts/12345?populate=author
 {
@@ -1773,9 +1774,9 @@ Let's say, you have two services, `posts` and `users`. Every post entity has an 
     }
 }
 ```
-Imagine that, the author updates his name to "Mr. John Doe" in the `users` service. But if he gets the post response, he will see still his old name because the response comes from the `posts` service cache. The changes happened in the `users` service, but the `posts` service doesn't know about it.
+Imagine that, the author updates his name to "Mr. John Doe" in the `users` service. But when he gets the post response, he will still see his old name because the response comes the cache of the from the `posts` service. The changes happened in the `users` service, but the `posts` service doesn't know about it.
 
-To avoid it, you should subscribe to the cache cleaning events of the dependent services.
+To avoid this, you should subscribe to the cache clearing events of the dependent services.
 
 ### Example
 ```js
@@ -1808,30 +1809,30 @@ module.exports = {
 
 
 # Events
-The [`entityChanged`](#entitychanged) method has a default implementation which sends entity lifecycle events. You can use it to subscribe them in other dependent services.
+The [`entityChanged`](#entitychanged) method has a default implementation that sends entity lifecycle events. You can use it to subscribe to them in other dependent services.
 
 | Action | Method | Event | Description |
 | -------- | ---- | ------- | ----------- |
-| `create` | `createEntity` | `{serviceName}.created` | Sent after a new entity created and saved to the database. |
-| - | `createEntities` | `{serviceName}.created` | Sent after multiple entities created and saved to the database. In this case the `opts.batch == true` |
-| `update` | `updateEntity` | `{serviceName}.updated` | Sent after an entity updated. |
-| `replace` | `replaceEntity` | `{serviceName}.replaced` | Sent after an entity replaced. |
-| `remove` | `removeEntity` | `{serviceName}.removed` | Sent after an entity deleted. |
-| - | `clearEntities` | `{serviceName}.cleared` | Sent after the table/collection cleared (deleted all entities). |
+| `create` | `createEntity` | `{serviceName}.created` | Sent after a new entity is created and stored in the database. |
+| - | `createEntities` | `{serviceName}.created` | Sent after multiple entities have been created and stored in the database. In this case, the `opts.batch == true` |
+| `update` | `updateEntity` | `{serviceName}.updated` | Sent after an entity has been updated. |
+| `replace` | `replaceEntity` | `{serviceName}.replaced` | Sent after an entity has been replaced. |
+| `remove` | `removeEntity` | `{serviceName}.removed` | Sent after an entity has been deleted. |
+| - | `clearEntities` | `{serviceName}.cleared` | Sent after the table/collection cleared (all entities deleted). |
 
-If you want to change it, just simply overwrite the [`entityChanged`](#entitychanged) method and implement your own logic.
+If you want to change it, just overwrite the [`entityChanged`](#entitychanged) method and implement your own logic.
 
 # Cascade delete
-In DBMS, you can configure `CASCADE DELETE` feature for relationships between tables. It means, if a record is deleted from the parent table, the database engine will delete the related child records, as well. In microservices projects and in this database services you can't define relations because it's a common case that some services use different database engines.
+In DBMS, you can configure `CASCADE DELETE` feature for relationships between tables. This means that when a record is deleted from the parent table, the database engine also deletes the related child records. In microservices projects and in these database services, you can't define relationships because it's a common case that some services use different database engines.
 
-But you can use this cascade delete feature with a simple event subscription. If an entity changed in the parent table/collection, the service broadcasts entity lifecycle events. So you can subscribe to this event in your child services and remove the relevant entities.
+But you can use this cascade delete feature with a simple event subscription. When an entity has changed in the parent table/collection, the service broadcasts entity lifecycle events. So you can subscribe to this event in your child services and remove the relevant entities.
 
 ## Example
-Let's say, you have a `users` service and a `posts` service. If a user is deleted, we should delete the user's posts, as well.
+Let's say, you have a `users` service and a `posts` service. If a user is deleted, we should also delete the user's posts.
 
 **users.service.js**
 
-It's just a simple service, no need to set any special.
+It's just a simple service, you don't have to set anything special.
 ```js
 module.exports = {
     name: "users",
@@ -1848,7 +1849,7 @@ module.exports = {
 
 **posts.service.js**
 
-Subscribe to the `users.removed` event and remove posts by `adapter.removeMany`.
+Subscribe to the `users.removed` event and remove posts with `adapter.removeMany`.
 ```js
 module.exports = {
     name: "posts",
@@ -1875,14 +1876,14 @@ module.exports = {
 
 # Multi-tenancy
 The service supports many multi-tenancy methods. But each method has a different configuration.
-For each method it's mandatory that you store the tenant ID in the `ctx.meta`. The best practice is to resolve the logged in user in the API gateway `authenticate` or `authorize` method and set the resolved user into the `ctx.meta.user`.
+For each method it's mandatory that you store the tenant ID in the `ctx.meta`. The best method is to resolve the logged in user in the `authenticate` or `authorize` method of the API gateway and set the resolved user into the `ctx.meta.user`.
 
 ## Record-based tenancy
-This mode uses the same database server, same database and same collection/table. But there is a tenant ID field in the collection/table for filtering.
+This mode uses the same database server, database and collection/table. But there is a tenant ID field in the collection/table for filtering.
 
 ### Steps for configuration
-1. Create a tenant ID field in the `fields` and create a `set` method which reads the tenant ID from the `ctx.meta`.
-2. Create a custom scope which filtering the entities by tenant ID.
+1. Create a tenant ID field in the `fields` and create a `set` method that reads the tenant ID from the `ctx.meta`.
+2. Create a custom scope that filters the entities by tenant ID.
 3. Set this scope as default scope.
 
 ### Example
@@ -1917,10 +1918,10 @@ module.exports = {
 ```
 
 ## Table/Collection-based tenancy
-This mode uses the same database server, same database but different collection/table. It means every tenant has an individual table/collection.
+This mode uses the same database server, the same database but different collections/tables. It means that each tenant has its own table/collection.
 
 ### Steps for configuration
-1. Define the `getAdapterByContext` method to generate adapter options for every tenant.
+1. Define the `getAdapterByContext` method to generate adapter options for each tenant.
 
 ### Example
 ```js
@@ -1960,10 +1961,10 @@ module.exports = {
 ```
 
 ## Database/Server-based tenancy
-This mode uses different connection strings. It means every tenant has an individual database or server.
+This mode uses different connection strings. It means that each tenant has its own database or server.
 
 ### Steps for configuration
-1. Define the `getAdapterByContext` method to generate adapter options for every tenant.
+1. Define the `getAdapterByContext` method to generate adapter options for each tenant.
 
 ### Example
 ```js
@@ -2003,20 +2004,20 @@ module.exports = {
 ```
 
 # Adapters
-The adapter is a class that executes the database operations with NPM libraries. This project contains many built-in adapters. 
+The adapter is a class that performs the database operations with NPM libraries. This project contains many built-in adapters. 
 
-If the `adapter` is not defined in the Mixin options, the service will use the NeDB adapter with memory database. It can be enough for testing & prototyping. It has the same API as MongoDB client library.
+If the `adapter` is not defined in the Mixin options, the service will use the NeDB adapter with memory database. It can be sufficient for testing & prototyping. It has the same API as the MongoDB client library.
 
->Note: The adapter connects to the database only at the first request. It means your service will start properly even if the database server is not available. The reason is that in multi-tenancy mode, the service can't establish a connection without tenant ID.
+>Note: The adapter connects to the database only on the first request. This means that your service will start properly even if the database server is not available. The reason for this is that the service cannot connect in multi-tenancy mode without a tenant ID.
 
 ## Cassandra
-*Not implemented yet.*
+*Not yet implemented.*
 
 ## Couchbase
-*Not implemented yet.*
+*Not yet implemented.*
 
 ## CouchDB
-*Not implemented yet.*
+*Not yet implemented.*
 
 ## Knex
 [Knex adapter documentation](/docs/adapters/Knex.md)
@@ -2025,20 +2026,20 @@ If the `adapter` is not defined in the Mixin options, the service will use the N
 [MongoDB adapter documentation](/docs/adapters/MongoDB.md)
 
 ## Mongoose
-*Not implemented yet.*
+*Not yet implemented.*
 
 ## NeDB
 [NeDB adapter documentation](/docs/adapters/NeDB.md)
 
 ## Sequelize
-*Not implemented yet.*
+*Not yet implemented.*
 
 ## Adapter common methods
 
 ## Constructor
 `constructor(opts?: object)`
 
-The constructor has an optional `opts` parameter which is adapter-specific. Every adapter has custom options.
+The constructor has an optional `opts` parameter that is adapter-specific. Each adapter has its own options.
 
 ## `hasNestedFieldSupport`
 `get hasNestedFieldSupport`
@@ -2063,17 +2064,17 @@ Find entities by `params`. The `params` contains the same properties as [`find` 
 ## `findOne`
 `findOne(query: object)`
 
-Find only first entity by `query`.
+Find only the first entity by `query`.
 
 ## `findById`
 `findById(id: any)`
 
-Find an entity by primary key.
+Find an entity based on the primary key.
 
 ## `findByIds`
 `findByIds(id: Array<any>)`
 
-Find multiple entities by primary keys.
+Find multiple entities using primary keys.
 
 ## `findStream`
 `findStream(params: object)`
@@ -2091,26 +2092,26 @@ Count entities by `params`. The `params` contains the same properties as [`count
 ## `insert`
 `insert(entity: object)`
 
-Insert an entity. It returns the saved entity.
+Insert an entity. It returns the stored entity.
 
 ## `insertMany`
 `insertMany(entities: Array<object>)`
 
-Insert multiple entities. It returns the saved entities.
+Insert multiple entities. It returns the stored entities.
 
 ## `updateById`
 `updateById(id: any, changes: object, opts: object)`
 
-Update an entity by ID. The `changes` contains the changed properties of entity. It returns the updated entity.
+Update an entity by ID. The `changes` contains the changed properties of the entity. It returns the updated entity.
 
-> If the adapter supports the raw changes, you can enable it with `opts.raw = true`. In this case, the changes is not manipulated, instead passed directly to the database client.
+> If the adapter supports the raw changes, you can enable it with `opts.raw = true`. In this case, the `changes` is not manipulated but passed directly to the database client.
 
 ## `updateMany`
 `updateMany(query: object, changes: object, opts: object)`
 
 Update multiple entities by query. The `changes` contains the changed properties of entity. It returns the number of updated entities.
 
-> If the adapter supports the raw changes, you can enable it with `opts.raw = true`. In this case, the changes is not manipulated, instead passed directly to the database client.
+> If the adapter supports the raw changes, you can enable it with `opts.raw = true`. In this case, the `changes` is not manipulated but passed directly to the database client.
 
 ## `replaceById`
 `replaceById(id: any, entity: object)`
@@ -2125,17 +2126,17 @@ Remove an entity by ID. It returns the removed entity ID.
 ## `removeMany`
 `removeMany(query: object)`
 
-Remove multiple entities by `query`. It returns the number of removed entities.
+Remove multiple entities by `query`. It returns the number of entities removed.
 
 ## `clear`
 `clear()`
 
-Clear (truncate) the whole table/collection. It returns the number of removed entities.
+Clear (truncate) the entire table/collection. It returns the number of entities removed.
 
 ## `entityToJSON`
 `entityToJSON(entity: object)`
 
-Convert data from the database client to [POJO](https://masteringjs.io/tutorials/fundamentals/pojo).
+Convert data from database client to [POJO](https://masteringjs.io/tutorials/fundamentals/pojo).
 
 ## `createIndex`
 `createIndex(def: any)`

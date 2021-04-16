@@ -880,7 +880,7 @@ module.exports = (getAdapter, adapterType) => {
 				DbService({
 					adapter: getAdapter(),
 					createActions: false,
-					entityChangedEventMode: "emit"
+					entityChangedEventType: "emit"
 				})
 			],
 			settings: {

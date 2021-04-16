@@ -10,6 +10,7 @@
 
 ## Methods
 - [ ] create methods for `updateMany` and `removeMany` (clear cache, send notify event without entities)
+  - [ ] or find with query validate every entity, clear cache, send notify (batch)
 - [ ] ad-hoc populate in find/list actions `populate: ["author", { key: "createdBy", action: "users.resolve", fields: ["name", "avatar"] }]` { }
 - [ ] limiting the maximum opened adapters (multi-tenancy)
 
@@ -20,7 +21,7 @@
 - [ ] `bulkCreate` action without REST
 - [ ] option to add other service cache cleaning events in the Mixin options
 - [ ] generate GraphQL types & resolvers
-
+- [ ] validate `raw: true` update fields (`$set`, `$inc`)
 
 ## Adapters
 - [ ] Cassandra
@@ -39,3 +40,6 @@
 - [ ] Generate sample data based on fields with Fakerator. `username: { type: "string", fake: "entity.user.userName" }`
 - [ ] client-side (Vue) module which can communicate with service via REST or GraphQL.
 - [ ] auto revision handling (`_rev: 1`). Auto increment on every update/replace and always checks the rev value to avoid concurrent updating.
+- [ ] `introspect: true`
+  - [ ] create REST API to get the field definitions, and actions with params
+- [ ] 

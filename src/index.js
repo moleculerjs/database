@@ -48,7 +48,7 @@ module.exports = function DatabaseMixin(mixinOpts) {
 		rest: true,
 
 		// Entity changed lifecycle event mode. Values: null, "broadcast", "emit". The `null` disables event sending.
-		entityChangedEventMode: "broadcast",
+		entityChangedEventType: "broadcast",
 
 		/** @type {Number} Auto reconnect if the DB server is not available at first connecting */
 		autoReconnect: true,
