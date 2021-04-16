@@ -818,84 +818,93 @@ module.exports = (getAdapter, adapterType) => {
 		runTenantTestcases(broker, svc, "database");
 	});
 
-	describe("Test adapter limit with tenancy", () => {
-		const broker = new ServiceBroker({ logger: false });
-		const svc = broker.createService({
-			name: "posts",
-			mixins: [DbService({ adapter: getAdapter(), maximumAdapters: 5 })],
-			settings: {
-				fields: {
-					id: {
-						type: "string",
-						primaryKey: true,
-						generated: "user",
-						columnName: "_id"
-					},
-					title: { type: "string", required: true, min: 5 },
-					content: { type: "string", required: true }
+	if (getAdapter.adapterName != "Knex-SQLite") {
+		describe("Test adapter limit with tenancy", () => {
+			const broker = new ServiceBroker({
+				logger: false,
+				errorHandler: err => {
+					console.log(err);
+					throw err;
 				}
-			},
-
-			methods: {
-				getAdapterByContext(ctx, adapterDef) {
-					const tenantId = ctx && ctx.meta.tenantId;
-					if (!tenantId) throw new Error("Missing tenantId!");
-
-					return [
-						tenantId,
-						{
-							type: adapterType,
-							options: {
-								...(adapterDef.options || {}),
-								collection: `posts-${tenantId}`,
-								tableName: `posts-${tenantId}`
-							}
-						}
-					];
+			});
+			const svc = broker.createService({
+				name: "posts",
+				mixins: [DbService({ adapter: getAdapter(), maximumAdapters: 5 })],
+				settings: {
+					fields: {
+						id: {
+							type: "string",
+							primaryKey: true,
+							generated: "user",
+							columnName: "_id"
+						},
+						title: { type: "string", required: true, min: 5 },
+						content: { type: "string", required: true }
+					}
 				},
 
-				async createTenantTable(ctx, tableName) {
-					const adapter = await this.getAdapter(ctx);
-					if (await adapter.client.schema.hasTable(tableName))
-						await adapter.dropTable(tableName);
-					await adapter.client.schema.createTable(tableName, table => {
-						table.string("_id");
-						table.string("title").index();
-						table.string("content").index();
-					});
-				}
-			},
+				methods: {
+					getAdapterByContext(ctx, adapterDef) {
+						const tenantId = ctx && ctx.meta.tenantId;
+						if (!tenantId) throw new Error("Missing tenantId!");
 
-			actions: {
-				countAdapters() {
-					return this.adapters.size;
-				}
-			},
+						const tableName = `posts_${tenantId}`;
 
-			async started() {
-				if (adapterType == "Knex") {
-					for (let i = 1; i <= 10; i++)
-						await this.createTenantTable({ meta: { tenantId: i } }, "posts-" + i);
-				}
-			}
-		});
-
-		beforeAll(() => broker.start());
-		afterAll(() => broker.stop());
-
-		it("should work property with limited adapters", async () => {
-			for (let i = 1; i <= 10; i++) {
-				await broker.call(
-					"posts.create",
-					{
-						title: `Post #${i}`,
-						content: `Post content #${i}`
+						return [
+							tenantId,
+							{
+								type: adapterType,
+								options: {
+									...(adapterDef.options || {}),
+									collection: tableName
+								}
+							}
+						];
 					},
-					{ meta: { tenantId: i } }
-				);
-			}
 
-			expect(await broker.call("posts.countAdapters")).toBe(5);
+					async createTenantTable(ctx, tableName) {
+						const adapter = await this.getAdapter(ctx);
+						if (await adapter.client.schema.hasTable(tableName))
+							await adapter.dropTable(tableName);
+						await adapter.client.schema.createTable(tableName, table => {
+							table.string("_id");
+							table.string("title").index();
+							table.string("content").index();
+						});
+					}
+				},
+
+				actions: {
+					countAdapters() {
+						return this.adapters.size;
+					}
+				},
+
+				async started() {
+					if (adapterType == "Knex") {
+						for (let i = 1; i <= 10; i++)
+							await this.createTenantTable({ meta: { tenantId: i } }, "posts_" + i);
+					}
+				}
+			});
+
+			beforeAll(() => broker.start());
+			afterAll(() => broker.stop());
+
+			it("should work property with limited adapters", async () => {
+				for (let i = 1; i <= 10; i++) {
+					await broker.call(
+						"posts.create",
+						{
+							title: `Post #${i}`,
+							content: `Post content #${i}`
+						},
+						{ meta: { tenantId: i } }
+					);
+				}
+
+				expect(await broker.call("posts.countAdapters")).toBe(5);
+			});
 		});
-	});
+	}
 };
