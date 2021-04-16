@@ -835,7 +835,6 @@ module.exports = (getAdapter, adapterType) => {
 						id: {
 							type: "string",
 							primaryKey: true,
-							generated: "user",
 							columnName: "_id"
 						},
 						title: { type: "string", required: true, min: 5 },
