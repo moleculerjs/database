@@ -7,8 +7,6 @@ const globby = require("globby");
 const humanize = require("tiny-human-time");
 
 async function generateMarkdown(folder) {
-	const rows = ["# Benchmark results", ""];
-
 	const files = await globby(["bench_*.json"], { cwd: folder });
 	if (files.length == 0) return;
 
@@ -20,12 +18,18 @@ async function generateMarkdown(folder) {
 
 	//console.dir(results, { depth: 3 });
 
+	const rows = [
+		"<!-- THIS PAGE IS GENERATED. DO NOT EDIT MANUALLY! -->",
+		`# Benchmark results (${results[0].meta.type})`,
+		""
+	];
+
 	const suites = results[0].suites;
 
 	for (const suite of suites) {
 		const p = suite.name.split(" - ");
 		const suiteName = p.length > 1 ? p[1] : p[0];
-		rows.push(`## ${suiteName}`, "", "### Result");
+		rows.push(`## ${suiteName}`, suite.meta.description || "", "", "### Result");
 
 		const resByAdapter = {};
 

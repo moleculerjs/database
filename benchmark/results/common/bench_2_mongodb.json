@@ -8,7 +8,8 @@
     {
       "name": "Adapter: MongoDB - Entity creation (1000)",
       "meta": {
-        "type": "create"
+        "type": "create",
+        "description": "This test calls the `users.create` service action to create an entity."
       },
       "tests": [
         {
@@ -16,11 +17,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.104788599,
+            "duration": 5.2633509,
             "cycle": 0,
-            "count": 14000,
-            "avg": 0.00036462775707142857,
-            "rps": 2742.5229720076013,
+            "count": 15000,
+            "avg": 0.00035089006,
+            "rps": 2849.895491482432,
             "percent": 0
           }
         }
@@ -29,7 +30,8 @@
     {
       "name": "Adapter: MongoDB - Entity finding (1000)",
       "meta": {
-        "type": "find"
+        "type": "find",
+        "description": "This test calls the `users.find` service action to get random 20 entities."
       },
       "tests": [
         {
@@ -37,11 +39,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.1968996,
+            "duration": 5.354772299,
             "cycle": 0,
             "count": 12000,
-            "avg": 0.00043307496666666667,
-            "rps": 2309.0690457056357,
+            "avg": 0.0004462310249166667,
+            "rps": 2240.9916481866076,
             "percent": 0
           }
         }
@@ -50,7 +52,8 @@
     {
       "name": "Adapter: MongoDB - Entity listing (1000)",
       "meta": {
-        "type": "list"
+        "type": "list",
+        "description": "This test calls the `users.list` service action to random 20 entities."
       },
       "tests": [
         {
@@ -58,11 +61,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.897457501,
+            "duration": 5.935200399,
             "cycle": 0,
             "count": 5000,
-            "avg": 0.0011794915001999999,
-            "rps": 847.8229812003185,
+            "avg": 0.0011870400798,
+            "rps": 842.4315379211848,
             "percent": 0
           }
         }
@@ -71,7 +74,8 @@
     {
       "name": "Adapter: MongoDB - Entity counting (1000)",
       "meta": {
-        "type": "count"
+        "type": "count",
+        "description": "This test calls the `users.count` service action to get the number of entities."
       },
       "tests": [
         {
@@ -79,11 +83,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.2506083,
+            "duration": 5.2324066,
             "cycle": 0,
             "count": 9000,
-            "avg": 0.0005834009222222222,
-            "rps": 1714.08710872605,
+            "avg": 0.0005813785111111111,
+            "rps": 1720.0498141715516,
             "percent": 0
           }
         }
@@ -92,7 +96,8 @@
     {
       "name": "Adapter: MongoDB - Entity getting (1000)",
       "meta": {
-        "type": "get"
+        "type": "get",
+        "description": "This test calls the `users.get` service action to get a random entity."
       },
       "tests": [
         {
@@ -100,11 +105,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.0627709,
+            "duration": 5.210035,
             "cycle": 0,
             "count": 21000,
-            "avg": 0.00024108432857142858,
-            "rps": 4147.926188009021,
+            "avg": 0.0002480969047619048,
+            "rps": 4030.68309521913,
             "percent": 0
           }
         }
@@ -113,7 +118,8 @@
     {
       "name": "Adapter: MongoDB - Entity resolving (1000)",
       "meta": {
-        "type": "resolve"
+        "type": "resolve",
+        "description": "This test calls the `users.resolve` service action to resolve a random entity."
       },
       "tests": [
         {
@@ -121,11 +127,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.039942,
+            "duration": 5.1709078,
             "cycle": 0,
             "count": 21000,
-            "avg": 0.0002399972380952381,
-            "rps": 4166.7146169539255,
+            "avg": 0.00024623370476190476,
+            "rps": 4061.1824484667854,
             "percent": 0
           }
         }
@@ -134,7 +140,8 @@
     {
       "name": "Adapter: MongoDB - Entity updating (1000)",
       "meta": {
-        "type": "update"
+        "type": "update",
+        "description": "This test calls the `users.update` service action to update a entity."
       },
       "tests": [
         {
@@ -142,11 +149,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.4147044,
+            "duration": 5.0709139,
             "cycle": 0,
-            "count": 10000,
-            "avg": 0.0005414704399999999,
-            "rps": 1846.8228847358687,
+            "count": 9000,
+            "avg": 0.0005634348777777778,
+            "rps": 1774.8280048691026,
             "percent": 0
           }
         }
@@ -155,7 +162,8 @@
     {
       "name": "Adapter: MongoDB - Entity replacing (1000)",
       "meta": {
-        "type": "replace"
+        "type": "replace",
+        "description": "This test calls the `users.replace` service action to replace a random entity."
       },
       "tests": [
         {
@@ -163,11 +171,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.098956301,
+            "duration": 5.1397265,
             "cycle": 0,
             "count": 9000,
-            "avg": 0.0005665507001111111,
-            "rps": 1765.0670977970399,
+            "avg": 0.0005710807222222222,
+            "rps": 1751.0659370688304,
             "percent": 0
           }
         }
@@ -176,7 +184,8 @@
     {
       "name": "Adapter: MongoDB - Entity deleting (1000)",
       "meta": {
-        "type": "remove"
+        "type": "remove",
+        "description": "This test calls the `users.remove` service action to delete a random entity."
       },
       "tests": [
         {
@@ -184,18 +193,18 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 7.8381274,
+            "duration": 7.4821335,
             "cycle": 0,
-            "count": 62643,
-            "avg": 0.0001251237552479926,
-            "rps": 7992.087497837812,
+            "count": 60616,
+            "avg": 0.00012343495941665567,
+            "rps": 8101.43256599204,
             "percent": 0
           }
         }
       ]
     }
   ],
-  "timestamp": 1618657400020,
-  "generated": "Sat Apr 17 2021 13:03:20 GMT+0200 (GMT+02:00)",
-  "elapsedMs": 53589
+  "timestamp": 1618658402018,
+  "generated": "Sat Apr 17 2021 13:20:02 GMT+0200 (GMT+02:00)",
+  "elapsedMs": 53566
 }

@@ -8,7 +8,8 @@
     {
       "name": "Adapter: Knex-SQLite-Memory - Entity creation (1000)",
       "meta": {
-        "type": "create"
+        "type": "create",
+        "description": "This test calls the `users.create` service action to create an entity."
       },
       "tests": [
         {
@@ -16,11 +17,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.2049378,
+            "duration": 5.183513401,
             "cycle": 0,
             "count": 17000,
-            "avg": 0.00030617281176470587,
-            "rps": 3266.1293281929325,
+            "avg": 0.00030491255299999997,
+            "rps": 3279.6288318113293,
             "percent": 0
           }
         }
@@ -29,7 +30,8 @@
     {
       "name": "Adapter: Knex-SQLite-Memory - Entity finding (1000)",
       "meta": {
-        "type": "find"
+        "type": "find",
+        "description": "This test calls the `users.find` service action to get random 20 entities."
       },
       "tests": [
         {
@@ -37,11 +39,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.1043614,
+            "duration": 5.0769569,
             "cycle": 0,
             "count": 17000,
-            "avg": 0.00030025655294117645,
-            "rps": 3330.485180771095,
+            "avg": 0.00029864452352941175,
+            "rps": 3348.4625406215287,
             "percent": 0
           }
         }
@@ -50,7 +52,8 @@
     {
       "name": "Adapter: Knex-SQLite-Memory - Entity listing (1000)",
       "meta": {
-        "type": "list"
+        "type": "list",
+        "description": "This test calls the `users.list` service action to random 20 entities."
       },
       "tests": [
         {
@@ -58,11 +61,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.0718558,
+            "duration": 5.1786048000000005,
             "cycle": 0,
             "count": 12000,
-            "avg": 0.00042265464999999996,
-            "rps": 2365.9978661065247,
+            "avg": 0.00043155040000000003,
+            "rps": 2317.226446783504,
             "percent": 0
           }
         }
@@ -71,7 +74,8 @@
     {
       "name": "Adapter: Knex-SQLite-Memory - Entity counting (1000)",
       "meta": {
-        "type": "count"
+        "type": "count",
+        "description": "This test calls the `users.count` service action to get the number of entities."
       },
       "tests": [
         {
@@ -79,11 +83,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.0777105,
+            "duration": 5.103024799,
             "cycle": 0,
             "count": 42000,
-            "avg": 0.00012089786904761906,
-            "rps": 8271.444384235769,
+            "avg": 0.00012150059045238096,
+            "rps": 8230.41267763982,
             "percent": 0
           }
         }
@@ -92,7 +96,8 @@
     {
       "name": "Adapter: Knex-SQLite-Memory - Entity getting (1000)",
       "meta": {
-        "type": "get"
+        "type": "get",
+        "description": "This test calls the `users.get` service action to get a random entity."
       },
       "tests": [
         {
@@ -100,11 +105,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.0606525,
+            "duration": 5.0418008,
             "cycle": 0,
             "count": 34000,
-            "avg": 0.0001488427205882353,
-            "rps": 6718.501220939395,
+            "avg": 0.0001482882588235294,
+            "rps": 6743.622239101553,
             "percent": 0
           }
         }
@@ -113,7 +118,8 @@
     {
       "name": "Adapter: Knex-SQLite-Memory - Entity resolving (1000)",
       "meta": {
-        "type": "resolve"
+        "type": "resolve",
+        "description": "This test calls the `users.resolve` service action to resolve a random entity."
       },
       "tests": [
         {
@@ -121,11 +127,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.066847301,
+            "duration": 5.154043999,
             "cycle": 0,
             "count": 35000,
-            "avg": 0.00014476706574285714,
-            "rps": 6907.648468721833,
+            "avg": 0.00014725839997142855,
+            "rps": 6790.784092411859,
             "percent": 0
           }
         }
@@ -134,7 +140,8 @@
     {
       "name": "Adapter: Knex-SQLite-Memory - Entity updating (1000)",
       "meta": {
-        "type": "update"
+        "type": "update",
+        "description": "This test calls the `users.update` service action to update a entity."
       },
       "tests": [
         {
@@ -142,11 +149,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.2459121,
+            "duration": 5.2933287,
             "cycle": 0,
             "count": 12000,
-            "avg": 0.00043715934166666665,
-            "rps": 2287.495438591127,
+            "avg": 0.000441110725,
+            "rps": 2267.0045032344206,
             "percent": 0
           }
         }
@@ -155,7 +162,8 @@
     {
       "name": "Adapter: Knex-SQLite-Memory - Entity replacing (1000)",
       "meta": {
-        "type": "replace"
+        "type": "replace",
+        "description": "This test calls the `users.replace` service action to replace a random entity."
       },
       "tests": [
         {
@@ -163,11 +171,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.0058917,
+            "duration": 5.0409323,
             "cycle": 0,
             "count": 11000,
-            "avg": 0.0004550810636363637,
-            "rps": 2197.410703072142,
+            "avg": 0.0004582665727272727,
+            "rps": 2182.1360306703587,
             "percent": 0
           }
         }
@@ -176,7 +184,8 @@
     {
       "name": "Adapter: Knex-SQLite-Memory - Entity deleting (1000)",
       "meta": {
-        "type": "remove"
+        "type": "remove",
+        "description": "This test calls the `users.remove` service action to delete a random entity."
       },
       "tests": [
         {
@@ -184,18 +193,18 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 6.1206069,
+            "duration": 6.159978801,
             "cycle": 0,
-            "count": 84616,
-            "avg": 0.00007233391911695189,
-            "rps": 13824.77283421028,
+            "count": 84614,
+            "avg": 0.00007280094075448508,
+            "rps": 13736.086232352603,
             "percent": 0
           }
         }
       ]
     }
   ],
-  "timestamp": 1618657452394,
-  "generated": "Sat Apr 17 2021 13:04:12 GMT+0200 (GMT+02:00)",
-  "elapsedMs": 52212
+  "timestamp": 1618658454649,
+  "generated": "Sat Apr 17 2021 13:20:54 GMT+0200 (GMT+02:00)",
+  "elapsedMs": 52471
 }

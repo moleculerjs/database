@@ -93,7 +93,10 @@ async function runTest(adapter, idx) {
 	});
 
 	const bench1 = benchmark.createSuite(`Adapter: ${adapterName} - Entity creation (${COUNT})`, {
-		meta: { type: "create" }
+		meta: {
+			type: "create",
+			description: "This test calls the `users.create` service action to create an entity."
+		}
 	});
 	(function (bench) {
 		const broker = new ServiceBroker({ logger: false });
@@ -117,7 +120,11 @@ async function runTest(adapter, idx) {
 	})(bench1);
 
 	const bench2 = benchmark.createSuite(`Adapter: ${adapterName} - Entity finding (${COUNT})`, {
-		meta: { type: "find" }
+		meta: {
+			type: "find",
+			description:
+				"This test calls the `users.find` service action to get random 20 entities."
+		}
 	});
 	(function (bench) {
 		const broker = new ServiceBroker({ logger: false });
@@ -139,7 +146,10 @@ async function runTest(adapter, idx) {
 	})(bench2);
 
 	const bench3 = benchmark.createSuite(`Adapter: ${adapterName} - Entity listing (${COUNT})`, {
-		meta: { type: "list" }
+		meta: {
+			type: "list",
+			description: "This test calls the `users.list` service action to random 20 entities."
+		}
 	});
 	(function (bench) {
 		const broker = new ServiceBroker({ logger: false });
@@ -162,7 +172,11 @@ async function runTest(adapter, idx) {
 	})(bench3);
 
 	const bench4 = benchmark.createSuite(`Adapter: ${adapterName} - Entity counting (${COUNT})`, {
-		meta: { type: "count" }
+		meta: {
+			type: "count",
+			description:
+				"This test calls the `users.count` service action to get the number of entities."
+		}
 	});
 	(function (bench) {
 		const broker = new ServiceBroker({ logger: false });
@@ -183,7 +197,10 @@ async function runTest(adapter, idx) {
 	})(bench4);
 
 	const bench5 = benchmark.createSuite(`Adapter: ${adapterName} - Entity getting (${COUNT})`, {
-		meta: { type: "get" }
+		meta: {
+			type: "get",
+			description: "This test calls the `users.get` service action to get a random entity."
+		}
 	});
 	(function (bench) {
 		const broker = new ServiceBroker({ logger: false });
@@ -207,7 +224,11 @@ async function runTest(adapter, idx) {
 	})(bench5);
 
 	const bench6 = benchmark.createSuite(`Adapter: ${adapterName} - Entity resolving (${COUNT})`, {
-		meta: { type: "resolve" }
+		meta: {
+			type: "resolve",
+			description:
+				"This test calls the `users.resolve` service action to resolve a random entity."
+		}
 	});
 	(function (bench) {
 		const broker = new ServiceBroker({ logger: false });
@@ -231,7 +252,10 @@ async function runTest(adapter, idx) {
 	})(bench6);
 
 	const bench7 = benchmark.createSuite(`Adapter: ${adapterName} - Entity updating (${COUNT})`, {
-		meta: { type: "update" }
+		meta: {
+			type: "update",
+			description: "This test calls the `users.update` service action to update a entity."
+		}
 	});
 	(function (bench) {
 		const broker = new ServiceBroker({ logger: false });
@@ -256,7 +280,11 @@ async function runTest(adapter, idx) {
 	})(bench7);
 
 	const bench8 = benchmark.createSuite(`Adapter: ${adapterName} - Entity replacing (${COUNT})`, {
-		meta: { type: "replace" }
+		meta: {
+			type: "replace",
+			description:
+				"This test calls the `users.replace` service action to replace a random entity."
+		}
 	});
 	(function (bench) {
 		const broker = new ServiceBroker({ logger: false });
@@ -281,7 +309,11 @@ async function runTest(adapter, idx) {
 	})(bench8);
 
 	const bench9 = benchmark.createSuite(`Adapter: ${adapterName} - Entity deleting (${COUNT})`, {
-		meta: { type: "remove" }
+		meta: {
+			type: "remove",
+			description:
+				"This test calls the `users.remove` service action to delete a random entity."
+		}
 	});
 	(function (bench) {
 		const broker = new ServiceBroker({ logger: false });

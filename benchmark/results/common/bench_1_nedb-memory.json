@@ -8,7 +8,8 @@
     {
       "name": "Adapter: NeDB-memory - Entity creation (1000)",
       "meta": {
-        "type": "create"
+        "type": "create",
+        "description": "This test calls the `users.create` service action to create an entity."
       },
       "tests": [
         {
@@ -16,11 +17,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.0148424,
+            "duration": 5.018637101,
             "cycle": 0,
             "count": 100000,
-            "avg": 0.000050148424,
-            "rps": 19940.80611586119,
+            "avg": 0.00005018637101,
+            "rps": 19925.728437323007,
             "percent": 0
           }
         }
@@ -29,7 +30,8 @@
     {
       "name": "Adapter: NeDB-memory - Entity finding (1000)",
       "meta": {
-        "type": "find"
+        "type": "find",
+        "description": "This test calls the `users.find` service action to get random 20 entities."
       },
       "tests": [
         {
@@ -37,11 +39,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.1212426,
+            "duration": 5.0136386,
             "cycle": 0,
-            "count": 33000,
-            "avg": 0.00015518916969696971,
-            "rps": 6443.7486324119845,
+            "count": 32000,
+            "avg": 0.00015667620625,
+            "rps": 6382.5900813832095,
             "percent": 0
           }
         }
@@ -50,7 +52,8 @@
     {
       "name": "Adapter: NeDB-memory - Entity listing (1000)",
       "meta": {
-        "type": "list"
+        "type": "list",
+        "description": "This test calls the `users.list` service action to random 20 entities."
       },
       "tests": [
         {
@@ -58,11 +61,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.034211201,
+            "duration": 5.100770701,
             "cycle": 0,
             "count": 5000,
-            "avg": 0.0010068422401999998,
-            "rps": 993.204257899787,
+            "avg": 0.0010201541402,
+            "rps": 980.2440245000145,
             "percent": 0
           }
         }
@@ -71,7 +74,8 @@
     {
       "name": "Adapter: NeDB-memory - Entity counting (1000)",
       "meta": {
-        "type": "count"
+        "type": "count",
+        "description": "This test calls the `users.count` service action to get the number of entities."
       },
       "tests": [
         {
@@ -79,11 +83,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.535598799,
+            "duration": 5.328333499,
             "cycle": 0,
             "count": 7000,
-            "avg": 0.0007907998284285714,
-            "rps": 1264.5425100649531,
+            "avg": 0.0007611904998571429,
+            "rps": 1313.731582550854,
             "percent": 0
           }
         }
@@ -92,7 +96,8 @@
     {
       "name": "Adapter: NeDB-memory - Entity getting (1000)",
       "meta": {
-        "type": "get"
+        "type": "get",
+        "description": "This test calls the `users.get` service action to get a random entity."
       },
       "tests": [
         {
@@ -100,11 +105,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.020223,
+            "duration": 5.0154872,
             "cycle": 0,
-            "count": 183000,
-            "avg": 0.000027432912568306008,
-            "rps": 36452.56395980816,
+            "count": 191000,
+            "avg": 0.000026259095287958114,
+            "rps": 38082.043156246116,
             "percent": 0
           }
         }
@@ -113,7 +118,8 @@
     {
       "name": "Adapter: NeDB-memory - Entity resolving (1000)",
       "meta": {
-        "type": "resolve"
+        "type": "resolve",
+        "description": "This test calls the `users.resolve` service action to resolve a random entity."
       },
       "tests": [
         {
@@ -121,11 +127,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.022950901,
+            "duration": 5.029181,
             "cycle": 0,
-            "count": 187000,
-            "avg": 0.000026860700005347592,
-            "rps": 37229.11166875449,
+            "count": 182000,
+            "avg": 0.00002763286263736264,
+            "rps": 36188.7949548843,
             "percent": 0
           }
         }
@@ -134,7 +140,8 @@
     {
       "name": "Adapter: NeDB-memory - Entity updating (1000)",
       "meta": {
-        "type": "update"
+        "type": "update",
+        "description": "This test calls the `users.update` service action to update a entity."
       },
       "tests": [
         {
@@ -142,11 +149,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.0309992,
+            "duration": 5.006403,
             "cycle": 0,
-            "count": 60000,
-            "avg": 0.00008384998666666667,
-            "rps": 11926.060334098243,
+            "count": 59000,
+            "avg": 0.00008485428813559321,
+            "rps": 11784.908246499534,
             "percent": 0
           }
         }
@@ -155,7 +162,8 @@
     {
       "name": "Adapter: NeDB-memory - Entity replacing (1000)",
       "meta": {
-        "type": "replace"
+        "type": "replace",
+        "description": "This test calls the `users.replace` service action to replace a random entity."
       },
       "tests": [
         {
@@ -163,11 +171,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.0105184,
+            "duration": 5.0505593,
             "cycle": 0,
-            "count": 57000,
-            "avg": 0.00008790383157894736,
-            "rps": 11376.068392444184,
+            "count": 58000,
+            "avg": 0.00008707860862068965,
+            "rps": 11483.876647087383,
             "percent": 0
           }
         }
@@ -176,7 +184,8 @@
     {
       "name": "Adapter: NeDB-memory - Entity deleting (1000)",
       "meta": {
-        "type": "remove"
+        "type": "remove",
+        "description": "This test calls the `users.remove` service action to delete a random entity."
       },
       "tests": [
         {
@@ -184,18 +193,18 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.2148778,
+            "duration": 5.2454964,
             "cycle": 0,
-            "count": 85885,
-            "avg": 0.000060719308377481515,
-            "rps": 16469.225798541243,
+            "count": 85279,
+            "avg": 0.00006150982539663927,
+            "rps": 16257.565251593727,
             "percent": 0
           }
         }
       ]
     }
   ],
-  "timestamp": 1618657346250,
-  "generated": "Sat Apr 17 2021 13:02:26 GMT+0200 (GMT+02:00)",
-  "elapsedMs": 49416
+  "timestamp": 1618658348262,
+  "generated": "Sat Apr 17 2021 13:19:08 GMT+0200 (GMT+02:00)",
+  "elapsedMs": 49208
 }
