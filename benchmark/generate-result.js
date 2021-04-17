@@ -40,7 +40,7 @@ async function generateMarkdown(folder) {
 			}
 		});
 
-		console.log(suiteName, resByAdapter);
+		//console.log(suiteName, resByAdapter);
 
 		const labels = Array.from(Object.keys(resByAdapter));
 		const values = Array.from(Object.values(resByAdapter));
@@ -86,20 +86,6 @@ function saveMarkdown(filename, rows) {
 	const content = rows.join("\n");
 	fs.writeFileSync(filename, content, "utf8");
 }
-/*
-{
-  chd: 'a:21226,9373,9773',
-  chf: 'b0,lg,90,03a9f4,0,3f51b5,1',
-  chg: '0,50',
-  chl: '|||| 33% !|x2 ',
-  chma: '0,0,10,10',
-  chs: '800x450',
-  cht: 'bvs',
-  chtt: 'Entity creation|(ops/sec)',
-  chxl: '0:|NeDB|MongoDB|Knex-SQLite',
-  chxt: 'x,y'
-}
-*/
 
 function createChartURL(opts) {
 	return `https://image-charts.com/chart?${qs.stringify(opts)}`;
@@ -107,4 +93,4 @@ function createChartURL(opts) {
 
 module.exports = { generateMarkdown };
 
-generateMarkdown(path.join(__dirname, "results", "common"));
+//generateMarkdown(path.join(__dirname, "results", "common"));

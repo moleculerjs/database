@@ -21,11 +21,19 @@ const adapters = [
 		name: "Knex-SQLite-Memory",
 		type: "Knex",
 		options: {
-			client: "sqlite3",
-			connection: {
-				filename: ":memory:"
-			},
-			useNullAsDefault: true
+			knex: {
+				client: "sqlite3",
+				connection: {
+					filename: ":memory:"
+				},
+				useNullAsDefault: true,
+				log: {
+					warn(message) {},
+					error(message) {},
+					deprecate(message) {},
+					debug(message) {}
+				}
+			}
 		}
 	}
 ];
@@ -44,7 +52,7 @@ function slug(text) {
 const UserServiceSchema = adapterSpec => {
 	return {
 		name: "users",
-		mixins: [DbService({ adapterSpec })],
+		mixins: [DbService({ adapter: adapterSpec })],
 		settings: {
 			fields: {
 				id: { type: "string", primaryKey: true, columnName: "_id" },
@@ -57,12 +65,12 @@ const UserServiceSchema = adapterSpec => {
 				username: { type: "string" },
 				email: { type: "string" },
 				password: { type: "string", hidden: true },
-				status: { type: "number", default: 1 }
+				status: { type: "number", default: 1, columnType: "integer" }
 			}
 		},
 		async started() {
 			const adapter = await this.getAdapter();
-			if (adapterSpec.name == "Knex") {
+			if (adapterSpec.type == "Knex") {
 				await adapter.createTable();
 			}
 

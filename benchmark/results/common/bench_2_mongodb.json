@@ -16,11 +16,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.0183966,
+            "duration": 5.104788599,
             "cycle": 0,
-            "count": 44000,
-            "avg": 0.00011405446818181819,
-            "rps": 8767.740676374602,
+            "count": 14000,
+            "avg": 0.00036462775707142857,
+            "rps": 2742.5229720076013,
             "percent": 0
           }
         }
@@ -37,11 +37,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.205657499,
+            "duration": 5.1968996,
             "cycle": 0,
-            "count": 18000,
-            "avg": 0.0002892031943888889,
-            "rps": 3457.7764679020424,
+            "count": 12000,
+            "avg": 0.00043307496666666667,
+            "rps": 2309.0690457056357,
             "percent": 0
           }
         }
@@ -58,11 +58,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.0520837,
+            "duration": 5.897457501,
             "cycle": 0,
-            "count": 6000,
-            "avg": 0.00084201395,
-            "rps": 1187.628779784468,
+            "count": 5000,
+            "avg": 0.0011794915001999999,
+            "rps": 847.8229812003185,
             "percent": 0
           }
         }
@@ -79,11 +79,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.3309646,
+            "duration": 5.2506083,
             "cycle": 0,
             "count": 9000,
-            "avg": 0.0005923294,
-            "rps": 1688.2498150522329,
+            "avg": 0.0005834009222222222,
+            "rps": 1714.08710872605,
             "percent": 0
           }
         }
@@ -100,11 +100,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.0117352,
+            "duration": 5.0627709,
             "cycle": 0,
-            "count": 214000,
-            "avg": 0.000023419323364485983,
-            "rps": 42699.78190388031,
+            "count": 21000,
+            "avg": 0.00024108432857142858,
+            "rps": 4147.926188009021,
             "percent": 0
           }
         }
@@ -121,11 +121,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.017142199,
+            "duration": 5.039942,
             "cycle": 0,
-            "count": 211000,
-            "avg": 0.000023777925113744077,
-            "rps": 42055.81417286833,
+            "count": 21000,
+            "avg": 0.0002399972380952381,
+            "rps": 4166.7146169539255,
             "percent": 0
           }
         }
@@ -142,11 +142,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.0396667,
+            "duration": 5.4147044,
             "cycle": 0,
-            "count": 61000,
-            "avg": 0.00008261748688524589,
-            "rps": 12103.975050572293,
+            "count": 10000,
+            "avg": 0.0005414704399999999,
+            "rps": 1846.8228847358687,
             "percent": 0
           }
         }
@@ -163,11 +163,11 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.034915099,
+            "duration": 5.098956301,
             "cycle": 0,
-            "count": 61000,
-            "avg": 0.00008253959178688525,
-            "rps": 12115.397936325759,
+            "count": 9000,
+            "avg": 0.0005665507001111111,
+            "rps": 1765.0670977970399,
             "percent": 0
           }
         }
@@ -184,18 +184,18 @@
           "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 5.2725092,
+            "duration": 7.8381274,
             "cycle": 0,
-            "count": 87141,
-            "avg": 0.00006050549339576089,
-            "rps": 16527.424930809037,
+            "count": 62643,
+            "avg": 0.0001251237552479926,
+            "rps": 7992.087497837812,
             "percent": 0
           }
         }
       ]
     }
   ],
-  "timestamp": 1618654557185,
-  "generated": "Sat Apr 17 2021 12:15:57 GMT+0200 (GMT+02:00)",
-  "elapsedMs": 48998
+  "timestamp": 1618657400020,
+  "generated": "Sat Apr 17 2021 13:03:20 GMT+0200 (GMT+02:00)",
+  "elapsedMs": 53589
 }
