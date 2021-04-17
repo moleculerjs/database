@@ -1,23 +1,50 @@
 "use strict";
 
 const { ServiceBroker, Context } = require("moleculer");
+const { makeDirs } = require("moleculer").Utils;
 const DbService = require("../..").Service;
+
+const fs = require("fs");
+const path = require("path");
 
 const Fakerator = require("fakerator");
 const fakerator = new Fakerator();
 
+const { generateMarkdown } = require("../generate-result");
+
 const Benchmarkify = require("../benchmarkify");
-const benchmark = new Benchmarkify("Moleculer Database benchmark").printHeader();
 
 const adapters = [
-	{ type: "NeDB" },
-	{ type: "MongoDB", options: { dbName: "bench-test", collection: "users" } }
+	{ name: "NeDB-memory", type: "NeDB" },
+	{ name: "MongoDB", type: "MongoDB", options: { dbName: "bench-test", collection: "users" } },
+	{
+		name: "Knex-SQLite-Memory",
+		type: "Knex",
+		options: {
+			client: "sqlite3",
+			connection: {
+				filename: ":memory:"
+			},
+			useNullAsDefault: true
+		}
+	}
 ];
 
-const UserServiceSchema = adapter => {
+function slug(text) {
+	return text
+		.toString()
+		.toLowerCase()
+		.replace(/\s+/g, "-") // Replace spaces with -
+		.replace(/[^\w\-]+/g, "") // Remove all non-word chars
+		.replace(/\-\-+/g, "-") // Replace multiple - with single -
+		.replace(/^-+/, "") // Trim - from start of text
+		.replace(/-+$/, ""); // Trim - from end of text
+}
+
+const UserServiceSchema = adapterSpec => {
 	return {
 		name: "users",
-		mixins: [DbService({ adapter })],
+		mixins: [DbService({ adapterSpec })],
 		settings: {
 			fields: {
 				id: { type: "string", primaryKey: true, columnName: "_id" },
@@ -32,6 +59,14 @@ const UserServiceSchema = adapter => {
 				password: { type: "string", hidden: true },
 				status: { type: "number", default: 1 }
 			}
+		},
+		async started() {
+			const adapter = await this.getAdapter();
+			if (adapterSpec.name == "Knex") {
+				await adapter.createTable();
+			}
+
+			await this.clearEntities();
 		}
 	};
 };
@@ -40,10 +75,18 @@ function handleError(err) {
 	console.error("Benchmark execution error", err.message);
 }
 
-function runTest(adapter) {
+async function runTest(adapter, idx) {
 	const COUNT = 1000;
 
-	const bench1 = benchmark.createSuite(`Adapter: ${adapter.type} - Entity creation (${COUNT})`);
+	const adapterName = adapter.name || adapter.type;
+
+	const benchmark = new Benchmarkify("Moleculer Database benchmark - Common", {
+		meta: { type: "common", adapter: adapterName }
+	});
+
+	const bench1 = benchmark.createSuite(`Adapter: ${adapterName} - Entity creation (${COUNT})`, {
+		meta: { type: "create" }
+	});
 	(function (bench) {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService(UserServiceSchema(adapter));
@@ -65,7 +108,9 @@ function runTest(adapter) {
 		});
 	})(bench1);
 
-	const bench2 = benchmark.createSuite(`Adapter: ${adapter.type} - Entity listing (${COUNT})`);
+	const bench2 = benchmark.createSuite(`Adapter: ${adapterName} - Entity finding (${COUNT})`, {
+		meta: { type: "find" }
+	});
 	(function (bench) {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService(UserServiceSchema(adapter));
@@ -83,15 +128,34 @@ function runTest(adapter) {
 			const offset = Math.floor(Math.random() * 80);
 			broker.call("users.find", { offset, limit: 20 }).then(done);
 		});
+	})(bench2);
+
+	const bench3 = benchmark.createSuite(`Adapter: ${adapterName} - Entity listing (${COUNT})`, {
+		meta: { type: "list" }
+	});
+	(function (bench) {
+		const broker = new ServiceBroker({ logger: false });
+		const svc = broker.createService(UserServiceSchema(adapter));
+		const ctx = Context.create(broker, null, {});
+
+		bench.setup(async () => {
+			await broker.start();
+
+			await svc.clearEntities(ctx);
+			await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT));
+		});
+		bench.tearDown(() => broker.stop());
 
 		bench.ref("Call 'users.list'", done => {
 			const maxPage = COUNT / 20 - 2;
 			const page = Math.floor(Math.random() * maxPage) + 1;
 			broker.call("users.list", { page, pageSize: 20 }).then(done);
 		});
-	})(bench2);
+	})(bench3);
 
-	const bench3 = benchmark.createSuite(`Adapter: ${adapter.type} - Entity counting (${COUNT})`);
+	const bench4 = benchmark.createSuite(`Adapter: ${adapterName} - Entity counting (${COUNT})`, {
+		meta: { type: "count" }
+	});
 	(function (bench) {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService(UserServiceSchema(adapter));
@@ -108,9 +172,35 @@ function runTest(adapter) {
 		bench.ref("Call 'users.count'", done => {
 			broker.call("users.count").then(done);
 		});
-	})(bench3);
+	})(bench4);
 
-	const bench4 = benchmark.createSuite(`Adapter: ${adapter.type} - Entity getting (${COUNT})`);
+	const bench5 = benchmark.createSuite(`Adapter: ${adapterName} - Entity getting (${COUNT})`, {
+		meta: { type: "get" }
+	});
+	(function (bench) {
+		const broker = new ServiceBroker({ logger: false });
+		const svc = broker.createService(UserServiceSchema(adapter));
+
+		const ctx = Context.create(broker, null, {});
+		let docs;
+
+		bench.setup(async () => {
+			await broker.start();
+
+			await svc.clearEntities(ctx);
+			docs = await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT));
+		});
+		bench.tearDown(() => broker.stop());
+
+		bench.ref("Call 'users.get'", done => {
+			const entity = docs[Math.floor(Math.random() * docs.length)];
+			return broker.call("users.get", { id: entity.id }).then(done);
+		});
+	})(bench5);
+
+	const bench6 = benchmark.createSuite(`Adapter: ${adapterName} - Entity resolving (${COUNT})`, {
+		meta: { type: "resolve" }
+	});
 	(function (bench) {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService(UserServiceSchema(adapter));
@@ -130,14 +220,11 @@ function runTest(adapter) {
 			const entity = docs[Math.floor(Math.random() * docs.length)];
 			return broker.call("users.resolve", { id: entity.id }).then(done);
 		});
+	})(bench6);
 
-		bench.add("Call 'users.get'", done => {
-			const entity = docs[Math.floor(Math.random() * docs.length)];
-			return broker.call("users.get", { id: entity.id }).then(done);
-		});
-	})(bench4);
-
-	const bench5 = benchmark.createSuite(`Adapter: ${adapter.type} - Entity updating (${COUNT})`);
+	const bench7 = benchmark.createSuite(`Adapter: ${adapterName} - Entity updating (${COUNT})`, {
+		meta: { type: "update" }
+	});
 	(function (bench) {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService(UserServiceSchema(adapter));
@@ -158,9 +245,11 @@ function runTest(adapter) {
 			const newStatus = Math.round(Math.random());
 			return broker.call("users.update", { id: entity.id, status: newStatus }).then(done);
 		});
-	})(bench5);
+	})(bench7);
 
-	const bench6 = benchmark.createSuite(`Adapter: ${adapter.type} - Entity replacing (${COUNT})`);
+	const bench8 = benchmark.createSuite(`Adapter: ${adapterName} - Entity replacing (${COUNT})`, {
+		meta: { type: "replace" }
+	});
 	(function (bench) {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService(UserServiceSchema(adapter));
@@ -181,9 +270,11 @@ function runTest(adapter) {
 			entity.status = Math.round(Math.random());
 			return broker.call("users.replace", entity).then(done);
 		});
-	})(bench6);
+	})(bench8);
 
-	const bench7 = benchmark.createSuite(`Adapter: ${adapter.type} - Entity deleting (${COUNT})`);
+	const bench9 = benchmark.createSuite(`Adapter: ${adapterName} - Entity deleting (${COUNT})`, {
+		meta: { type: "remove" }
+	});
 	(function (bench) {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService(UserServiceSchema(adapter));
@@ -206,14 +297,37 @@ function runTest(adapter) {
 			const entity = docs[Math.floor(Math.random() * docs.length)];
 			return broker.call("users.remove", { id: entity.id }).catch(done).then(done);
 		});
-	})(bench7);
+	})(bench9);
 
-	benchmark.run([bench1, bench2, bench3, bench4, bench5, bench6, bench7]).then(() => {
-		if (adapters.length > 0) runTest(adapters.shift());
-	});
+	const results = await benchmark.run([
+		bench1,
+		bench2,
+		bench3,
+		bench4,
+		bench5,
+		bench6,
+		bench7,
+		bench8,
+		bench9
+	]);
+	const folder = path.join(__dirname, "..", "results", "common");
+	makeDirs(folder);
+
+	fs.writeFileSync(
+		path.join(folder, `bench_${idx}_${slug(adapterName)}.json`),
+		JSON.stringify(results, null, 2),
+		"utf8"
+	);
+
+	if (adapters.length > 0) {
+		runTest(adapters.shift(), idx + 1);
+	} else {
+		console.log("Generate results...");
+		await generateMarkdown(folder);
+	}
 }
 
-runTest(adapters.shift());
+runTest(adapters.shift(), 1);
 
 /* RESULT
 

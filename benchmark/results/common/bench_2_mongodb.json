@@ -1,0 +1,201 @@
+{
+  "name": "Moleculer Database benchmark - Common",
+  "meta": {
+    "type": "common",
+    "adapter": "MongoDB"
+  },
+  "suites": [
+    {
+      "name": "Adapter: MongoDB - Entity creation (1000)",
+      "meta": {
+        "type": "create"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.create'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.0183966,
+            "cycle": 0,
+            "count": 44000,
+            "avg": 0.00011405446818181819,
+            "rps": 8767.740676374602,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: MongoDB - Entity finding (1000)",
+      "meta": {
+        "type": "find"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.find'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.205657499,
+            "cycle": 0,
+            "count": 18000,
+            "avg": 0.0002892031943888889,
+            "rps": 3457.7764679020424,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: MongoDB - Entity listing (1000)",
+      "meta": {
+        "type": "list"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.list'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.0520837,
+            "cycle": 0,
+            "count": 6000,
+            "avg": 0.00084201395,
+            "rps": 1187.628779784468,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: MongoDB - Entity counting (1000)",
+      "meta": {
+        "type": "count"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.count'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.3309646,
+            "cycle": 0,
+            "count": 9000,
+            "avg": 0.0005923294,
+            "rps": 1688.2498150522329,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: MongoDB - Entity getting (1000)",
+      "meta": {
+        "type": "get"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.get'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.0117352,
+            "cycle": 0,
+            "count": 214000,
+            "avg": 0.000023419323364485983,
+            "rps": 42699.78190388031,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: MongoDB - Entity resolving (1000)",
+      "meta": {
+        "type": "resolve"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.resolve'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.017142199,
+            "cycle": 0,
+            "count": 211000,
+            "avg": 0.000023777925113744077,
+            "rps": 42055.81417286833,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: MongoDB - Entity updating (1000)",
+      "meta": {
+        "type": "update"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.update'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.0396667,
+            "cycle": 0,
+            "count": 61000,
+            "avg": 0.00008261748688524589,
+            "rps": 12103.975050572293,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: MongoDB - Entity replacing (1000)",
+      "meta": {
+        "type": "replace"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.replace'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.034915099,
+            "cycle": 0,
+            "count": 61000,
+            "avg": 0.00008253959178688525,
+            "rps": 12115.397936325759,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: MongoDB - Entity deleting (1000)",
+      "meta": {
+        "type": "remove"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.remove'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.2725092,
+            "cycle": 0,
+            "count": 87141,
+            "avg": 0.00006050549339576089,
+            "rps": 16527.424930809037,
+            "percent": 0
+          }
+        }
+      ]
+    }
+  ],
+  "timestamp": 1618654557185,
+  "generated": "Sat Apr 17 2021 12:15:57 GMT+0200 (GMT+02:00)",
+  "elapsedMs": 48998
+}

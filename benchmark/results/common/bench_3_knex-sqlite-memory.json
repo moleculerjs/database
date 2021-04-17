@@ -1,0 +1,201 @@
+{
+  "name": "Moleculer Database benchmark - Common",
+  "meta": {
+    "type": "common",
+    "adapter": "Knex-SQLite-Memory"
+  },
+  "suites": [
+    {
+      "name": "Adapter: Knex-SQLite-Memory - Entity creation (1000)",
+      "meta": {
+        "type": "create"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.create'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.020135001,
+            "cycle": 0,
+            "count": 48000,
+            "avg": 0.00010458614585416667,
+            "rps": 9561.495854282506,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: Knex-SQLite-Memory - Entity finding (1000)",
+      "meta": {
+        "type": "find"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.find'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.104450401,
+            "cycle": 0,
+            "count": 19000,
+            "avg": 0.0002686552842631579,
+            "rps": 3722.2420647436907,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: Knex-SQLite-Memory - Entity listing (1000)",
+      "meta": {
+        "type": "list"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.list'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.313236901,
+            "cycle": 0,
+            "count": 7000,
+            "avg": 0.000759033843,
+            "rps": 1317.4643123257945,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: Knex-SQLite-Memory - Entity counting (1000)",
+      "meta": {
+        "type": "count"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.count'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.4152344,
+            "cycle": 0,
+            "count": 8000,
+            "avg": 0.0006769043,
+            "rps": 1477.3137059404114,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: Knex-SQLite-Memory - Entity getting (1000)",
+      "meta": {
+        "type": "get"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.get'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.0214226,
+            "cycle": 0,
+            "count": 143000,
+            "avg": 0.00003511484335664336,
+            "rps": 28477.98550155886,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: Knex-SQLite-Memory - Entity resolving (1000)",
+      "meta": {
+        "type": "resolve"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.resolve'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.023785,
+            "cycle": 0,
+            "count": 180000,
+            "avg": 0.00002790991666666667,
+            "rps": 35829.55878884148,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: Knex-SQLite-Memory - Entity updating (1000)",
+      "meta": {
+        "type": "update"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.update'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.0785889,
+            "cycle": 0,
+            "count": 61000,
+            "avg": 0.00008325555573770491,
+            "rps": 12011.210436820355,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: Knex-SQLite-Memory - Entity replacing (1000)",
+      "meta": {
+        "type": "replace"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.replace'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.058980701,
+            "cycle": 0,
+            "count": 61000,
+            "avg": 0.00008293410985245903,
+            "rps": 12057.764914569101,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: Knex-SQLite-Memory - Entity deleting (1000)",
+      "meta": {
+        "type": "remove"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.remove'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.2108114,
+            "cycle": 0,
+            "count": 83282,
+            "avg": 0.00006256827885977762,
+            "rps": 15982.53968662155,
+            "percent": 0
+          }
+        }
+      ]
+    }
+  ],
+  "timestamp": 1618654606559,
+  "generated": "Sat Apr 17 2021 12:16:46 GMT+0200 (GMT+02:00)",
+  "elapsedMs": 49231
+}

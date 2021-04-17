@@ -1,0 +1,201 @@
+{
+  "name": "Moleculer Database benchmark - Common",
+  "meta": {
+    "type": "common",
+    "adapter": "NeDB-memory"
+  },
+  "suites": [
+    {
+      "name": "Adapter: NeDB-memory - Entity creation (1000)",
+      "meta": {
+        "type": "create"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.create'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.0307922,
+            "cycle": 0,
+            "count": 92000,
+            "avg": 0.00005468252391304347,
+            "rps": 18287.378278116914,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: NeDB-memory - Entity finding (1000)",
+      "meta": {
+        "type": "find"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.find'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.0583539,
+            "cycle": 0,
+            "count": 30000,
+            "avg": 0.00016861179666666668,
+            "rps": 5930.783134805969,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: NeDB-memory - Entity listing (1000)",
+      "meta": {
+        "type": "list"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.list'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.2257936,
+            "cycle": 0,
+            "count": 7000,
+            "avg": 0.0007465419428571429,
+            "rps": 1339.5094670405658,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: NeDB-memory - Entity counting (1000)",
+      "meta": {
+        "type": "count"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.count'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.9587813,
+            "cycle": 0,
+            "count": 10000,
+            "avg": 0.00059587813,
+            "rps": 1678.1955061851322,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: NeDB-memory - Entity getting (1000)",
+      "meta": {
+        "type": "get"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.get'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.024510901,
+            "cycle": 0,
+            "count": 177000,
+            "avg": 0.000028387067237288136,
+            "rps": 35227.30938145098,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: NeDB-memory - Entity resolving (1000)",
+      "meta": {
+        "type": "resolve"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.resolve'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.023773001,
+            "cycle": 0,
+            "count": 178000,
+            "avg": 0.0000282234438258427,
+            "rps": 35431.537206113506,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: NeDB-memory - Entity updating (1000)",
+      "meta": {
+        "type": "update"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.update'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.049675001,
+            "cycle": 0,
+            "count": 60000,
+            "avg": 0.00008416125001666667,
+            "rps": 11881.952796589494,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: NeDB-memory - Entity replacing (1000)",
+      "meta": {
+        "type": "replace"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.replace'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.079514601,
+            "cycle": 0,
+            "count": 60000,
+            "avg": 0.00008465857668333333,
+            "rps": 11812.152284824195,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adapter: NeDB-memory - Entity deleting (1000)",
+      "meta": {
+        "type": "remove"
+      },
+      "tests": [
+        {
+          "name": "Call 'users.remove'",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.2103823,
+            "cycle": 0,
+            "count": 86601,
+            "avg": 0.000060165382616828903,
+            "rps": 16620.85332970673,
+            "percent": 0
+          }
+        }
+      ]
+    }
+  ],
+  "timestamp": 1618654507972,
+  "generated": "Sat Apr 17 2021 12:15:07 GMT+0200 (GMT+02:00)",
+  "elapsedMs": 50072
+}

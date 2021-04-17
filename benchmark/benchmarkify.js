@@ -502,7 +502,8 @@ class Suite {
 		// Generate result to return
 		const result = this.tests.map(test => {
 			let item = {
-				name: test.name
+				name: test.name,
+				meta: test.meta
 			};
 
 			if (test === fastest) item.fastest = true;
@@ -537,6 +538,7 @@ class Benchmarkify {
 	constructor(name, opts = {}) {
 		this.name = name;
 		this.logger = opts.logger || console;
+		this.meta = opts.meta || {};
 		if (opts.spinner !== false) {
 			this.spinner = ora({
 				text: "Running benchmark...",
@@ -622,6 +624,7 @@ class Benchmarkify {
 			return suite.run().then(res => {
 				results.push({
 					name: suite.name,
+					meta: suite.meta,
 					tests: res
 				});
 
@@ -629,6 +632,7 @@ class Benchmarkify {
 
 				return {
 					name: self.name,
+					meta: self.meta,
 					suites: results,
 					timestamp: Date.now(),
 					generated: new Date().toString(),
