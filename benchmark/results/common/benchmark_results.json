@@ -2,7 +2,7 @@
   "name": "Moleculer Database benchmark - Common",
   "description": "This is a common benchmark which create, list, get, update, replace and delete entities via service actions.",
   "meta": {
-    "type": "common2",
+    "type": "common",
     "adapters": [
       {
         "name": "NeDB (memory)",
@@ -13,7 +13,7 @@
         "ref": true,
         "type": "MongoDB",
         "options": {
-          "dbName": "bench-test",
+          "dbName": "bench_test",
           "collection": "users"
         }
       },
@@ -30,6 +30,22 @@
             "log": {}
           }
         }
+      },
+      {
+        "name": "Knex-Postgresql",
+        "type": "Knex",
+        "options": {
+          "knex": {
+            "client": "pg",
+            "connection": {
+              "host": "127.0.0.1",
+              "port": 5432,
+              "user": "postgres",
+              "password": "moleculer",
+              "database": "bench_test"
+            }
+          }
+        }
       }
     ],
     "count": 1000
@@ -44,37 +60,52 @@
       "tests": [
         {
           "name": "NeDB (memory)",
+          "meta": {},
           "fastest": true,
           "stat": {
-            "duration": 5.025594999,
+            "duration": 5.059941328,
             "cycle": 0,
-            "count": 78000,
-            "avg": 0.00006443070511538461,
-            "rps": 15520.550306087249,
-            "percent": 425.9112500163485
+            "count": 38000,
+            "avg": 0.0001331563507368421,
+            "rps": 7509.968502939131,
+            "percent": 615.9979154011249
           }
         },
         {
           "name": "MongoDB",
+          "meta": {},
           "reference": true,
           "stat": {
-            "duration": 5.0827249,
+            "duration": 5.720380173,
             "cycle": 0,
-            "count": 15000,
-            "avg": 0.00033884832666666664,
-            "rps": 2951.1729033377355,
+            "count": 6000,
+            "avg": 0.0009533966955,
+            "rps": 1048.8813362999538,
             "percent": 0
           }
         },
         {
           "name": "Knex SQLite (memory)",
+          "meta": {},
           "stat": {
-            "duration": 5.0812083,
+            "duration": 5.015911564,
             "cycle": 0,
-            "count": 16000,
-            "avg": 0.00031757551875,
-            "rps": 3148.8573298599076,
-            "percent": 6.69850371350978
+            "count": 6000,
+            "avg": 0.0008359852606666666,
+            "rps": 1196.193338627212,
+            "percent": 14.04467762262962
+          }
+        },
+        {
+          "name": "Knex-Postgresql",
+          "meta": {},
+          "stat": {
+            "duration": 6.985898134,
+            "cycle": 0,
+            "count": 3000,
+            "avg": 0.0023286327113333336,
+            "rps": 429.4365509567277,
+            "percent": -59.05766113909385
           }
         }
       ]
@@ -88,37 +119,52 @@
       "tests": [
         {
           "name": "NeDB (memory)",
+          "meta": {},
+          "fastest": true,
           "stat": {
-            "duration": 5.078384401,
+            "duration": 5.508628646,
             "cycle": 0,
-            "count": 22000,
-            "avg": 0.0002308356545909091,
-            "rps": 4332.086400483569,
-            "percent": 159.83399356214971
+            "count": 10000,
+            "avg": 0.0005508628646,
+            "rps": 1815.3338412567227,
+            "percent": 161.13268740569953
           }
         },
         {
           "name": "MongoDB",
+          "meta": {},
           "reference": true,
           "stat": {
-            "duration": 5.398105499,
+            "duration": 5.753932009,
             "cycle": 0,
-            "count": 9000,
-            "avg": 0.0005997894998888888,
-            "rps": 1667.251594409789,
+            "count": 4000,
+            "avg": 0.0014384830022499998,
+            "rps": 695.176792798978,
             "percent": 0
           }
         },
         {
           "name": "Knex SQLite (memory)",
-          "fastest": true,
+          "meta": {},
           "stat": {
-            "duration": 5.1631963,
+            "duration": 5.330920725,
             "cycle": 0,
-            "count": 30000,
-            "avg": 0.00017210654333333334,
-            "rps": 5810.354334194111,
-            "percent": 248.4989520283524
+            "count": 7000,
+            "avg": 0.0007615601035714287,
+            "rps": 1313.0939965347168,
+            "percent": 88.88633943717105
+          }
+        },
+        {
+          "name": "Knex-Postgresql",
+          "meta": {},
+          "stat": {
+            "duration": 5.049211479,
+            "cycle": 0,
+            "count": 5000,
+            "avg": 0.0010098422958,
+            "rps": 990.2536308481683,
+            "percent": 42.446301589143616
           }
         }
       ]
@@ -132,37 +178,52 @@
       "tests": [
         {
           "name": "NeDB (memory)",
+          "meta": {},
           "stat": {
-            "duration": 5.668252301,
+            "duration": 6.804535566,
             "cycle": 0,
-            "count": 5000,
-            "avg": 0.0011336504602,
-            "rps": 882.1061121640429,
-            "percent": 11.69386371321302
+            "count": 3000,
+            "avg": 0.002268178522,
+            "rps": 440.8824042290265,
+            "percent": 27.38809844439571
           }
         },
         {
           "name": "MongoDB",
+          "meta": {},
           "reference": true,
           "stat": {
-            "duration": 5.064872,
+            "duration": 5.778778977,
             "cycle": 0,
-            "count": 4000,
-            "avg": 0.0012662180000000002,
-            "rps": 789.7534231862128,
+            "count": 2000,
+            "avg": 0.0028893894885,
+            "rps": 346.0938734566868,
             "percent": 0
           }
         },
         {
           "name": "Knex SQLite (memory)",
+          "meta": {},
           "fastest": true,
           "stat": {
-            "duration": 5.209675,
+            "duration": 5.298133104,
             "cycle": 0,
-            "count": 9000,
-            "avg": 0.0005788527777777778,
-            "rps": 1727.554981836679,
-            "percent": 118.74612139912762
+            "count": 5000,
+            "avg": 0.0010596266207999999,
+            "rps": 943.7286496681418,
+            "percent": 172.6799640347428
+          }
+        },
+        {
+          "name": "Knex-Postgresql",
+          "meta": {},
+          "stat": {
+            "duration": 5.266937318,
+            "cycle": 0,
+            "count": 3000,
+            "avg": 0.0017556457726666667,
+            "rps": 569.5909821723836,
+            "percent": 64.5770196633276
           }
         }
       ]
@@ -176,37 +237,52 @@
       "tests": [
         {
           "name": "NeDB (memory)",
+          "meta": {},
           "stat": {
-            "duration": 5.3697878,
+            "duration": 5.279153128,
             "cycle": 0,
-            "count": 4000,
-            "avg": 0.00134244695,
-            "rps": 744.9083928418921,
-            "percent": -35.64761472821452
+            "count": 3000,
+            "avg": 0.0017597177093333332,
+            "rps": 568.2729648602835,
+            "percent": -19.11565166385529
           }
         },
         {
           "name": "MongoDB",
+          "meta": {},
           "reference": true,
           "stat": {
-            "duration": 5.1833798,
+            "duration": 5.693344807,
             "cycle": 0,
-            "count": 6000,
-            "avg": 0.0008638966333333333,
-            "rps": 1157.5458931255625,
+            "count": 4000,
+            "avg": 0.00142333620175,
+            "rps": 702.5746965267197,
             "percent": 0
           }
         },
         {
           "name": "Knex SQLite (memory)",
+          "meta": {},
           "fastest": true,
           "stat": {
-            "duration": 5.095537201,
+            "duration": 5.16610225,
             "cycle": 0,
-            "count": 35000,
-            "avg": 0.00014558677717142857,
-            "rps": 6868.75566194105,
-            "percent": 493.3894891540144
+            "count": 17000,
+            "avg": 0.00030388836764705883,
+            "rps": 3290.6820611225803,
+            "percent": 368.37469060450746
+          }
+        },
+        {
+          "name": "Knex-Postgresql",
+          "meta": {},
+          "stat": {
+            "duration": 5.317160803,
+            "cycle": 0,
+            "count": 7000,
+            "avg": 0.0007595944004285714,
+            "rps": 1316.4920639696516,
+            "percent": 87.38108139645817
           }
         }
       ]
@@ -220,37 +296,52 @@
       "tests": [
         {
           "name": "NeDB (memory)",
+          "meta": {},
           "fastest": true,
           "stat": {
-            "duration": 5.039316399,
+            "duration": 5.044562827,
             "cycle": 0,
-            "count": 119000,
-            "avg": 0.0000423471966302521,
-            "rps": 23614.314041407346,
-            "percent": 548.1687740979605
+            "count": 74000,
+            "avg": 0.00006816976793243244,
+            "rps": 14669.259267409656,
+            "percent": 1046.6752887592265
           }
         },
         {
           "name": "MongoDB",
+          "meta": {},
           "reference": true,
           "stat": {
-            "duration": 5.2151448,
+            "duration": 5.471801183,
             "cycle": 0,
-            "count": 19000,
-            "avg": 0.0002744813052631579,
-            "rps": 3643.2353709526915,
+            "count": 7000,
+            "avg": 0.0007816858832857143,
+            "rps": 1279.286247049302,
             "percent": 0
           }
         },
         {
           "name": "Knex SQLite (memory)",
+          "meta": {},
           "stat": {
-            "duration": 5.003961901,
+            "duration": 5.329291996,
             "cycle": 0,
-            "count": 34000,
-            "avg": 0.00014717535002941177,
-            "rps": 6794.6160807510105,
-            "percent": 86.49950906065794
+            "count": 13000,
+            "avg": 0.0004099455381538462,
+            "rps": 2439.3484180933215,
+            "percent": 90.68042228388876
+          }
+        },
+        {
+          "name": "Knex-Postgresql",
+          "meta": {},
+          "stat": {
+            "duration": 5.491401338,
+            "cycle": 0,
+            "count": 7000,
+            "avg": 0.0007844859054285714,
+            "rps": 1274.72016142048,
+            "percent": -0.35692446779238196
           }
         }
       ]
@@ -264,37 +355,52 @@
       "tests": [
         {
           "name": "NeDB (memory)",
+          "meta": {},
           "fastest": true,
           "stat": {
-            "duration": 5.0079005,
+            "duration": 5.004632254,
             "cycle": 0,
-            "count": 172000,
-            "avg": 0.000029115700581395348,
-            "rps": 34345.730311534746,
-            "percent": 859.9085906581233
+            "count": 74000,
+            "avg": 0.00006763016559459458,
+            "rps": 14786.301219406241,
+            "percent": 1072.0981556117695
           }
         },
         {
           "name": "MongoDB",
+          "meta": {},
           "reference": true,
           "stat": {
-            "duration": 5.030714,
+            "duration": 5.548843465,
             "cycle": 0,
-            "count": 18000,
-            "avg": 0.00027948411111111107,
-            "rps": 3578.02093301269,
+            "count": 7000,
+            "avg": 0.0007926919235714285,
+            "rps": 1261.5241435721416,
             "percent": 0
           }
         },
         {
           "name": "Knex SQLite (memory)",
+          "meta": {},
           "stat": {
-            "duration": 5.021417,
+            "duration": 5.235700207,
             "cycle": 0,
-            "count": 34000,
-            "avg": 0.00014768873529411763,
-            "rps": 6770.997110974851,
-            "percent": 89.23861088967075
+            "count": 15000,
+            "avg": 0.0003490466804666667,
+            "rps": 2864.946312232579,
+            "percent": 127.10198031725136
+          }
+        },
+        {
+          "name": "Knex-Postgresql",
+          "meta": {},
+          "stat": {
+            "duration": 5.291840762,
+            "cycle": 0,
+            "count": 7000,
+            "avg": 0.0007559772517142857,
+            "rps": 1322.7911259662353,
+            "percent": 4.85658421253909
           }
         }
       ]
@@ -308,37 +414,52 @@
       "tests": [
         {
           "name": "NeDB (memory)",
+          "meta": {},
           "fastest": true,
           "stat": {
-            "duration": 5.0481215,
+            "duration": 5.024873001,
             "cycle": 0,
-            "count": 46000,
-            "avg": 0.00010974177173913042,
-            "rps": 9112.300486428467,
-            "percent": 406.3902712237722
+            "count": 23000,
+            "avg": 0.00021847273917391301,
+            "rps": 4577.230110178461,
+            "percent": 642.9985732489162
           }
         },
         {
           "name": "MongoDB",
+          "meta": {},
           "reference": true,
           "stat": {
-            "duration": 5.0014949,
+            "duration": 6.49299734,
             "cycle": 0,
-            "count": 9000,
-            "avg": 0.0005557216555555556,
-            "rps": 1799.461996852181,
+            "count": 4000,
+            "avg": 0.001623249335,
+            "rps": 616.0483041257492,
             "percent": 0
           }
         },
         {
           "name": "Knex SQLite (memory)",
+          "meta": {},
           "stat": {
-            "duration": 5.304415799,
+            "duration": 5.490278795,
             "cycle": 0,
-            "count": 12000,
-            "avg": 0.00044203464991666666,
-            "rps": 2262.2660920100316,
-            "percent": 25.719025795901146
+            "count": 5000,
+            "avg": 0.001098055759,
+            "rps": 910.7005648881625,
+            "percent": 47.82940863388342
+          }
+        },
+        {
+          "name": "Knex-Postgresql",
+          "meta": {},
+          "stat": {
+            "duration": 5.789294301,
+            "cycle": 0,
+            "count": 2000,
+            "avg": 0.0028946471505,
+            "rps": 345.4652494785996,
+            "percent": -43.922376351825406
           }
         }
       ]
@@ -352,87 +473,58 @@
       "tests": [
         {
           "name": "NeDB (memory)",
+          "meta": {},
           "fastest": true,
           "stat": {
-            "duration": 5.062785799,
+            "duration": 5.07460013,
             "cycle": 0,
-            "count": 48000,
-            "avg": 0.00010547470414583334,
-            "rps": 9480.946242971793,
-            "percent": 441.0363599702433
+            "count": 24000,
+            "avg": 0.00021144167208333336,
+            "rps": 4729.43668174304,
+            "percent": 725.1279955727271
           }
         },
         {
           "name": "MongoDB",
+          "meta": {},
           "reference": true,
           "stat": {
-            "duration": 5.1359085,
+            "duration": 5.233993292,
             "cycle": 0,
-            "count": 9000,
-            "avg": 0.0005706565000000001,
-            "rps": 1752.367667765109,
+            "count": 3000,
+            "avg": 0.0017446644306666668,
+            "rps": 573.1761262639386,
             "percent": 0
           }
         },
         {
           "name": "Knex SQLite (memory)",
+          "meta": {},
           "stat": {
-            "duration": 5.071481901,
+            "duration": 5.96626384,
             "cycle": 0,
-            "count": 11000,
-            "avg": 0.0004610438091818182,
-            "rps": 2168.991276066865,
-            "percent": 23.77489701308511
-          }
-        }
-      ]
-    },
-    {
-      "name": "Entity deleting",
-      "description": "This test calls the `users.remove` service action to delete a random entity.",
-      "meta": {
-        "type": "remove"
-      },
-      "tests": [
-        {
-          "name": "NeDB (memory)",
-          "stat": {
-            "duration": 15.7247577,
-            "cycle": 0,
-            "count": 91956,
-            "avg": 0.00017100306342163643,
-            "rps": 5847.848453652166,
-            "percent": -0.3005403120625232
+            "count": 5000,
+            "avg": 0.001193252768,
+            "rps": 838.0454056487049,
+            "percent": 46.21080105189134
           }
         },
         {
-          "name": "MongoDB",
-          "fastest": true,
-          "reference": true,
+          "name": "Knex-Postgresql",
+          "meta": {},
           "stat": {
-            "duration": 9.6524126,
+            "duration": 6.433467973,
             "cycle": 0,
-            "count": 56616,
-            "avg": 0.00017048913028119259,
-            "rps": 5865.476575255393,
-            "percent": 0
-          }
-        },
-        {
-          "name": "Knex SQLite (memory)",
-          "stat": {
-            "duration": 5.251681999,
-            "cycle": 0,
-            "count": 3869,
-            "avg": 0.001357374515120186,
-            "rps": 736.7163512064737,
-            "percent": -87.43978700188747
+            "count": 2000,
+            "avg": 0.0032167339865,
+            "rps": 310.8743228991901,
+            "percent": -45.7628626430199
           }
         }
       ]
     }
   ],
-  "timestamp": 1618665002020,
-  "generated": "Sat Apr 17 2021 15:10:02 GMT+0200 (GMT+02:00)",
-  "elapsedMs": 145158
+  "timestamp": 1618679677663,
+  "generated": "Sat Apr 17 2021 19:14:37 GMT+0200 (Central European Summer Time)",
+  "elapsedMs": 185806
 }

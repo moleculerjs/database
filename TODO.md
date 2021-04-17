@@ -1,6 +1,9 @@
 # TODO
 
 - [ ] add more debug log messages
+- [ ] `sort` fields should be converted to `columnName`
+- [ ] in Knex if MSSQL and has offset but no sort, if should add a sort to the primaryKey field
+  - [ ] https://github.com/knex/knex/issues/1527
 
 ## Actions
 - [ ] `aggregate` action with params: `type: "sum", "avg", "count", "min", "max"` & `field: "price"`

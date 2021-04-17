@@ -1,3 +1,4 @@
+CREATE DATABASE bench_test;
 CREATE DATABASE db_int_test;
 CREATE DATABASE db_int_posts_1000;
 CREATE DATABASE db_int_posts_1001;

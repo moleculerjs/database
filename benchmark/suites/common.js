@@ -19,7 +19,7 @@ const Adapters = [
 		name: "MongoDB",
 		ref: true,
 		type: "MongoDB",
-		options: { dbName: "bench-test", collection: "users" }
+		options: { dbName: "bench_test", collection: "users" }
 	},
 	{
 		name: "Knex SQLite (memory)",
@@ -36,6 +36,82 @@ const Adapters = [
 					error(message) {},
 					deprecate(message) {},
 					debug(message) {}
+				}
+			}
+		}
+	},
+	{
+		name: "Knex-Postgresql",
+		type: "Knex",
+		options: {
+			knex: {
+				client: "pg",
+				connection: {
+					//"postgres://postgres:moleculer@127.0.0.1:5432/bench_test"
+					host: "127.0.0.1",
+					port: 5432,
+					user: "postgres",
+					password: "moleculer",
+					database: "bench_test"
+				}
+			}
+		}
+	},
+	{
+		name: "Knex-MySQL",
+		type: "Knex",
+		options: {
+			knex: {
+				client: "mysql",
+				connection: {
+					host: "127.0.0.1",
+					user: "root",
+					password: "moleculer",
+					database: "bench_test"
+				},
+				log: {
+					warn(message) {},
+					error(message) {},
+					deprecate(message) {},
+					debug(message) {}
+				}
+			}
+		}
+	},
+	{
+		name: "Knex-MySQL2",
+		type: "Knex",
+		options: {
+			knex: {
+				client: "mysql2",
+				connection: {
+					host: "127.0.0.1",
+					user: "root",
+					password: "moleculer",
+					database: "bench_test"
+				},
+				log: {
+					warn(message) {},
+					error(message) {},
+					deprecate(message) {},
+					debug(message) {}
+				}
+			}
+		}
+	},
+	{
+		name: "Knex-MSSQL",
+		type: "Knex",
+		options: {
+			knex: {
+				client: "mssql",
+				connection: {
+					host: "127.0.0.1",
+					port: 1433,
+					user: "sa",
+					password: "Moleculer@Pass1234",
+					database: "bench_test",
+					encrypt: false
 				}
 			}
 		}
@@ -61,9 +137,11 @@ const UserServiceSchema = (serviceName, adapterDef) => {
 				lastName: { type: "string" },
 				fullName: {
 					type: "string",
+					readonly: true,
+					virtual: true,
 					get: (_, entity) => entity.firstName + " " + entity.lastName
 				},
-				username: { type: "string" },
+				userName: { type: "string", columnName: "username" },
 				email: { type: "string" },
 				password: { type: "string", hidden: true },
 				status: { type: "number", default: 1, columnType: "integer" }
@@ -81,7 +159,6 @@ const UserServiceSchema = (serviceName, adapterDef) => {
 };
 
 const USERS = fakerator.times(fakerator.entity.user, COUNT * 5);
-const USERS_LEN = USERS.length;
 
 const broker = new ServiceBroker({ logger: false });
 Adapters.forEach((adapterDef, i) => {
@@ -108,9 +185,10 @@ Adapters.forEach((adapterDef, i) => {
 		const svc = adapterDef.svc;
 		const actionName = `${adapterDef.svcName}.create`;
 
+		const len = USERS.length;
 		let c = 0;
 		bench[adapterDef.ref ? "ref" : "add"](adapterName, done => {
-			broker.call(actionName, USERS[c++ % USERS_LEN]).then(done);
+			broker.call(actionName, USERS[c++ % len]).then(done);
 		});
 
 		// Clear all entities and create only the specified count.
@@ -138,7 +216,7 @@ Adapters.forEach((adapterDef, i) => {
 
 		let c = 0;
 		bench[adapterDef.ref ? "ref" : "add"](adapterName, done => {
-			const offset = Math.floor(Math.random() * (USERS_LEN - 20));
+			const offset = Math.floor(Math.random() * (COUNT - 20));
 			broker.call(actionName, { offset, limit: 20 }).then(done);
 		});
 	});
@@ -158,9 +236,9 @@ Adapters.forEach((adapterDef, i) => {
 		const adapterName = adapterDef.name || adapterDef.type;
 		const actionName = `${adapterDef.svcName}.list`;
 
+		const maxPage = COUNT / 20 - 2;
 		let c = 0;
 		bench[adapterDef.ref ? "ref" : "add"](adapterName, done => {
-			const maxPage = COUNT / 20 - 2;
 			const page = Math.floor(Math.random() * maxPage) + 1;
 			broker.call(actionName, { page, pageSize: 20 }).then(done);
 		});
