@@ -2,12 +2,22 @@
 
 const { ServiceBroker, Context } = require("moleculer");
 const DbService = require("../..").Service;
+const { writeResult } = require("../utils");
+const { generateMarkdown } = require("../generate-result");
 
 const Fakerator = require("fakerator");
 const fakerator = new Fakerator();
 
 const Benchmarkify = require("../benchmarkify");
-const benchmark = new Benchmarkify("Moleculer Database - Transformation benchmark").printHeader();
+const benchmark = new Benchmarkify("Moleculer Database benchmark - Transformation benchmark", {
+	description:
+		"This is a transformation benchmark. It tests all service methods with and without transformation."
+}).printHeader();
+
+const COUNT = 1000;
+const SUITE_NAME = "transform";
+
+const suites = [];
 
 const UserServiceSchema = {
 	name: "users",
@@ -33,13 +43,7 @@ const UserServiceSchema = {
 	}
 };
 
-function handleError(err) {
-	console.error("Benchmark execution error", err.message);
-}
-
-const COUNT = 1000;
-
-const bench1 = benchmark.createSuite(`Entity creation (${COUNT})`);
+const bench1 = benchmark.createSuite("Entity creation");
 (function (bench) {
 	const broker = new ServiceBroker({ logger: false });
 	const svc = broker.createService(UserServiceSchema);
@@ -62,8 +66,9 @@ const bench1 = benchmark.createSuite(`Entity creation (${COUNT})`);
 	);
 	bench.add("With transform", done => svc.createEntity(ctx, entity1).then(done));
 })(bench1);
+suites.push(bench1);
 
-const bench2 = benchmark.createSuite(`Entity listing (${COUNT})`);
+const bench2 = benchmark.createSuite("Entity listing");
 (function (bench) {
 	const broker = new ServiceBroker({ logger: false });
 	const svc = broker.createService(UserServiceSchema);
@@ -90,8 +95,9 @@ const bench2 = benchmark.createSuite(`Entity listing (${COUNT})`);
 		return svc.findEntities(ctx, { offset, limit: 20 }).then(done);
 	});
 })(bench2);
+suites.push(bench2);
 
-const bench3 = benchmark.createSuite(`Entity counting (${COUNT})`);
+const bench3 = benchmark.createSuite("Entity counting");
 (function (bench) {
 	const broker = new ServiceBroker({ logger: false });
 	const svc = broker.createService(UserServiceSchema);
@@ -116,8 +122,9 @@ const bench3 = benchmark.createSuite(`Entity counting (${COUNT})`);
 		return svc.adapter.collection.countDocuments().then(done);
 	});*/
 })(bench3);
+suites.push(bench3);
 
-const bench4 = benchmark.createSuite(`Entity getting (${COUNT})`);
+const bench4 = benchmark.createSuite("Entity getting");
 (function (bench) {
 	const broker = new ServiceBroker({ logger: false });
 	const svc = broker.createService(UserServiceSchema);
@@ -152,8 +159,9 @@ const bench4 = benchmark.createSuite(`Entity getting (${COUNT})`);
 			.then(done);
 	});
 })(bench4);
+suites.push(bench4);
 
-const bench5 = benchmark.createSuite(`Entity updating (${COUNT})`);
+const bench5 = benchmark.createSuite("Entity updating");
 (function (bench) {
 	const broker = new ServiceBroker({ logger: false });
 	const svc = broker.createService(UserServiceSchema);
@@ -186,8 +194,9 @@ const bench5 = benchmark.createSuite(`Entity updating (${COUNT})`);
 			.then(done);
 	});
 })(bench5);
+suites.push(bench5);
 
-const bench6 = benchmark.createSuite(`Entity replacing (${COUNT})`);
+const bench6 = benchmark.createSuite("Entity replacing");
 (function (bench) {
 	const broker = new ServiceBroker({ logger: false });
 	const svc = broker.createService(UserServiceSchema);
@@ -216,8 +225,9 @@ const bench6 = benchmark.createSuite(`Entity replacing (${COUNT})`);
 		return svc.replaceEntity(ctx, entity, { transform: true }).then(done);
 	});
 })(bench6);
+suites.push(bench6);
 
-const bench7 = benchmark.createSuite(`Entity deleting (${COUNT})`);
+const bench7 = benchmark.createSuite("Entity deleting");
 (function (bench) {
 	const broker = new ServiceBroker({ logger: false });
 	const svc = broker.createService(UserServiceSchema);
@@ -250,8 +260,19 @@ const bench7 = benchmark.createSuite(`Entity deleting (${COUNT})`);
 		return svc.removeEntity(ctx, { id: entity.id }, { transform: true }).catch(done).then(done);
 	});
 })(bench7);
+suites.push(bench7);
 
-benchmark.run([bench1, bench2, bench3, bench4, bench5, bench6, bench7]);
+async function run() {
+	console.log("Running suites...");
+	const results = await benchmark.run(suites);
+	console.log("Save the results to file...");
+	writeResult(SUITE_NAME, "benchmark_results.json", results);
+	console.log("Generate README.md...");
+	await generateMarkdown(SUITE_NAME);
+	console.log("Done.");
+}
+
+run();
 
 /* RESULT
 

@@ -1,0 +1,438 @@
+{
+  "name": "Moleculer Database benchmark - Common",
+  "description": "This is a common benchmark which create, list, get, update, replace and delete entities via service actions.",
+  "meta": {
+    "type": "common2",
+    "adapters": [
+      {
+        "name": "NeDB (memory)",
+        "type": "NeDB"
+      },
+      {
+        "name": "MongoDB",
+        "ref": true,
+        "type": "MongoDB",
+        "options": {
+          "dbName": "bench-test",
+          "collection": "users"
+        }
+      },
+      {
+        "name": "Knex SQLite (memory)",
+        "type": "Knex",
+        "options": {
+          "knex": {
+            "client": "sqlite3",
+            "connection": {
+              "filename": ":memory:"
+            },
+            "useNullAsDefault": true,
+            "log": {}
+          }
+        }
+      }
+    ],
+    "count": 1000
+  },
+  "suites": [
+    {
+      "name": "Entity creation",
+      "description": "This test calls the `create` action to create an entity.",
+      "meta": {
+        "type": "create"
+      },
+      "tests": [
+        {
+          "name": "NeDB (memory)",
+          "fastest": true,
+          "stat": {
+            "duration": 5.025594999,
+            "cycle": 0,
+            "count": 78000,
+            "avg": 0.00006443070511538461,
+            "rps": 15520.550306087249,
+            "percent": 425.9112500163485
+          }
+        },
+        {
+          "name": "MongoDB",
+          "reference": true,
+          "stat": {
+            "duration": 5.0827249,
+            "cycle": 0,
+            "count": 15000,
+            "avg": 0.00033884832666666664,
+            "rps": 2951.1729033377355,
+            "percent": 0
+          }
+        },
+        {
+          "name": "Knex SQLite (memory)",
+          "stat": {
+            "duration": 5.0812083,
+            "cycle": 0,
+            "count": 16000,
+            "avg": 0.00031757551875,
+            "rps": 3148.8573298599076,
+            "percent": 6.69850371350978
+          }
+        }
+      ]
+    },
+    {
+      "name": "Entity finding",
+      "description": "This test calls the `find` action to get random 20 entities.",
+      "meta": {
+        "type": "find"
+      },
+      "tests": [
+        {
+          "name": "NeDB (memory)",
+          "stat": {
+            "duration": 5.078384401,
+            "cycle": 0,
+            "count": 22000,
+            "avg": 0.0002308356545909091,
+            "rps": 4332.086400483569,
+            "percent": 159.83399356214971
+          }
+        },
+        {
+          "name": "MongoDB",
+          "reference": true,
+          "stat": {
+            "duration": 5.398105499,
+            "cycle": 0,
+            "count": 9000,
+            "avg": 0.0005997894998888888,
+            "rps": 1667.251594409789,
+            "percent": 0
+          }
+        },
+        {
+          "name": "Knex SQLite (memory)",
+          "fastest": true,
+          "stat": {
+            "duration": 5.1631963,
+            "cycle": 0,
+            "count": 30000,
+            "avg": 0.00017210654333333334,
+            "rps": 5810.354334194111,
+            "percent": 248.4989520283524
+          }
+        }
+      ]
+    },
+    {
+      "name": "Entity listing",
+      "description": "This test calls the `users.list` service action to random 20 entities.",
+      "meta": {
+        "type": "list"
+      },
+      "tests": [
+        {
+          "name": "NeDB (memory)",
+          "stat": {
+            "duration": 5.668252301,
+            "cycle": 0,
+            "count": 5000,
+            "avg": 0.0011336504602,
+            "rps": 882.1061121640429,
+            "percent": 11.69386371321302
+          }
+        },
+        {
+          "name": "MongoDB",
+          "reference": true,
+          "stat": {
+            "duration": 5.064872,
+            "cycle": 0,
+            "count": 4000,
+            "avg": 0.0012662180000000002,
+            "rps": 789.7534231862128,
+            "percent": 0
+          }
+        },
+        {
+          "name": "Knex SQLite (memory)",
+          "fastest": true,
+          "stat": {
+            "duration": 5.209675,
+            "cycle": 0,
+            "count": 9000,
+            "avg": 0.0005788527777777778,
+            "rps": 1727.554981836679,
+            "percent": 118.74612139912762
+          }
+        }
+      ]
+    },
+    {
+      "name": "Entity counting",
+      "description": "This test calls the `users.count` service action to get the number of entities.",
+      "meta": {
+        "type": "count"
+      },
+      "tests": [
+        {
+          "name": "NeDB (memory)",
+          "stat": {
+            "duration": 5.3697878,
+            "cycle": 0,
+            "count": 4000,
+            "avg": 0.00134244695,
+            "rps": 744.9083928418921,
+            "percent": -35.64761472821452
+          }
+        },
+        {
+          "name": "MongoDB",
+          "reference": true,
+          "stat": {
+            "duration": 5.1833798,
+            "cycle": 0,
+            "count": 6000,
+            "avg": 0.0008638966333333333,
+            "rps": 1157.5458931255625,
+            "percent": 0
+          }
+        },
+        {
+          "name": "Knex SQLite (memory)",
+          "fastest": true,
+          "stat": {
+            "duration": 5.095537201,
+            "cycle": 0,
+            "count": 35000,
+            "avg": 0.00014558677717142857,
+            "rps": 6868.75566194105,
+            "percent": 493.3894891540144
+          }
+        }
+      ]
+    },
+    {
+      "name": "Entity getting",
+      "description": "This test calls the `users.get` service action to get a random entity.",
+      "meta": {
+        "type": "get"
+      },
+      "tests": [
+        {
+          "name": "NeDB (memory)",
+          "fastest": true,
+          "stat": {
+            "duration": 5.039316399,
+            "cycle": 0,
+            "count": 119000,
+            "avg": 0.0000423471966302521,
+            "rps": 23614.314041407346,
+            "percent": 548.1687740979605
+          }
+        },
+        {
+          "name": "MongoDB",
+          "reference": true,
+          "stat": {
+            "duration": 5.2151448,
+            "cycle": 0,
+            "count": 19000,
+            "avg": 0.0002744813052631579,
+            "rps": 3643.2353709526915,
+            "percent": 0
+          }
+        },
+        {
+          "name": "Knex SQLite (memory)",
+          "stat": {
+            "duration": 5.003961901,
+            "cycle": 0,
+            "count": 34000,
+            "avg": 0.00014717535002941177,
+            "rps": 6794.6160807510105,
+            "percent": 86.49950906065794
+          }
+        }
+      ]
+    },
+    {
+      "name": "Entity resolving",
+      "description": "This test calls the `users.resolve` service action to resolve a random entity.",
+      "meta": {
+        "type": "resolve"
+      },
+      "tests": [
+        {
+          "name": "NeDB (memory)",
+          "fastest": true,
+          "stat": {
+            "duration": 5.0079005,
+            "cycle": 0,
+            "count": 172000,
+            "avg": 0.000029115700581395348,
+            "rps": 34345.730311534746,
+            "percent": 859.9085906581233
+          }
+        },
+        {
+          "name": "MongoDB",
+          "reference": true,
+          "stat": {
+            "duration": 5.030714,
+            "cycle": 0,
+            "count": 18000,
+            "avg": 0.00027948411111111107,
+            "rps": 3578.02093301269,
+            "percent": 0
+          }
+        },
+        {
+          "name": "Knex SQLite (memory)",
+          "stat": {
+            "duration": 5.021417,
+            "cycle": 0,
+            "count": 34000,
+            "avg": 0.00014768873529411763,
+            "rps": 6770.997110974851,
+            "percent": 89.23861088967075
+          }
+        }
+      ]
+    },
+    {
+      "name": "Entity updating",
+      "description": "This test calls the `users.update` service action to update a entity.",
+      "meta": {
+        "type": "update"
+      },
+      "tests": [
+        {
+          "name": "NeDB (memory)",
+          "fastest": true,
+          "stat": {
+            "duration": 5.0481215,
+            "cycle": 0,
+            "count": 46000,
+            "avg": 0.00010974177173913042,
+            "rps": 9112.300486428467,
+            "percent": 406.3902712237722
+          }
+        },
+        {
+          "name": "MongoDB",
+          "reference": true,
+          "stat": {
+            "duration": 5.0014949,
+            "cycle": 0,
+            "count": 9000,
+            "avg": 0.0005557216555555556,
+            "rps": 1799.461996852181,
+            "percent": 0
+          }
+        },
+        {
+          "name": "Knex SQLite (memory)",
+          "stat": {
+            "duration": 5.304415799,
+            "cycle": 0,
+            "count": 12000,
+            "avg": 0.00044203464991666666,
+            "rps": 2262.2660920100316,
+            "percent": 25.719025795901146
+          }
+        }
+      ]
+    },
+    {
+      "name": "Entity replacing",
+      "description": "This test calls the `users.replace` service action to replace a random entity.",
+      "meta": {
+        "type": "replace"
+      },
+      "tests": [
+        {
+          "name": "NeDB (memory)",
+          "fastest": true,
+          "stat": {
+            "duration": 5.062785799,
+            "cycle": 0,
+            "count": 48000,
+            "avg": 0.00010547470414583334,
+            "rps": 9480.946242971793,
+            "percent": 441.0363599702433
+          }
+        },
+        {
+          "name": "MongoDB",
+          "reference": true,
+          "stat": {
+            "duration": 5.1359085,
+            "cycle": 0,
+            "count": 9000,
+            "avg": 0.0005706565000000001,
+            "rps": 1752.367667765109,
+            "percent": 0
+          }
+        },
+        {
+          "name": "Knex SQLite (memory)",
+          "stat": {
+            "duration": 5.071481901,
+            "cycle": 0,
+            "count": 11000,
+            "avg": 0.0004610438091818182,
+            "rps": 2168.991276066865,
+            "percent": 23.77489701308511
+          }
+        }
+      ]
+    },
+    {
+      "name": "Entity deleting",
+      "description": "This test calls the `users.remove` service action to delete a random entity.",
+      "meta": {
+        "type": "remove"
+      },
+      "tests": [
+        {
+          "name": "NeDB (memory)",
+          "stat": {
+            "duration": 15.7247577,
+            "cycle": 0,
+            "count": 91956,
+            "avg": 0.00017100306342163643,
+            "rps": 5847.848453652166,
+            "percent": -0.3005403120625232
+          }
+        },
+        {
+          "name": "MongoDB",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 9.6524126,
+            "cycle": 0,
+            "count": 56616,
+            "avg": 0.00017048913028119259,
+            "rps": 5865.476575255393,
+            "percent": 0
+          }
+        },
+        {
+          "name": "Knex SQLite (memory)",
+          "stat": {
+            "duration": 5.251681999,
+            "cycle": 0,
+            "count": 3869,
+            "avg": 0.001357374515120186,
+            "rps": 736.7163512064737,
+            "percent": -87.43978700188747
+          }
+        }
+      ]
+    }
+  ],
+  "timestamp": 1618665002020,
+  "generated": "Sat Apr 17 2021 15:10:02 GMT+0200 (GMT+02:00)",
+  "elapsedMs": 145158
+}

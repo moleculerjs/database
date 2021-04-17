@@ -231,9 +231,10 @@ class Suite {
 	 *
 	 * @memberOf Suite
 	 */
-	constructor(parent, name, opts) {
+	constructor(parent, name, opts = {}) {
 		this.parent = parent;
 		this.name = name;
+		this.description = opts.description;
 		this.logger = this.parent.logger;
 		this.onlyTest = null;
 		this.done = false;
@@ -369,6 +370,8 @@ class Suite {
 		return Promise.resolve()
 			.then(() => {
 				if (_.isFunction(self.setupFn)) return self.setupFn.call(self);
+				else if (Array.isArray(self.setupFn))
+					return Promise.all(self.setupFn.map(fn => fn.call(self)));
 			})
 			.then(() => {
 				return new Promise(resolve => {
@@ -380,6 +383,8 @@ class Suite {
 			})
 			.then(() => {
 				if (_.isFunction(self.tearDownFn)) return self.tearDownFn.call(self);
+				else if (Array.isArray(self.tearDownFn))
+					return Promise.all(self.tearDownFn.map(fn => fn.call(self)));
 			})
 			.then(() => {
 				if (self.parent.spinner) self.parent.spinner.stop();
@@ -503,7 +508,7 @@ class Suite {
 		const result = this.tests.map(test => {
 			let item = {
 				name: test.name,
-				meta: test.meta
+				meta: test.meta || {}
 			};
 
 			if (test === fastest) item.fastest = true;
@@ -537,8 +542,9 @@ class Benchmarkify {
 	 */
 	constructor(name, opts = {}) {
 		this.name = name;
-		this.logger = opts.logger || console;
+		this.description = opts.description;
 		this.meta = opts.meta || {};
+		this.logger = opts.logger || console;
 		if (opts.spinner !== false) {
 			this.spinner = ora({
 				text: "Running benchmark...",
@@ -624,6 +630,7 @@ class Benchmarkify {
 			return suite.run().then(res => {
 				results.push({
 					name: suite.name,
+					description: suite.description,
 					meta: suite.meta,
 					tests: res
 				});
@@ -632,6 +639,7 @@ class Benchmarkify {
 
 				return {
 					name: self.name,
+					description: self.description,
 					meta: self.meta,
 					suites: results,
 					timestamp: Date.now(),

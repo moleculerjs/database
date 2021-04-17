@@ -2,99 +2,103 @@
 
 const fs = require("fs");
 const path = require("path");
-const qs = require("qs");
 const globby = require("globby");
 const humanize = require("tiny-human-time");
+const { saveMarkdown, createChartURL, numToStr, makeTableRow } = require("./utils");
 
-async function generateMarkdown(folder) {
-	const files = await globby(["bench_*.json"], { cwd: folder });
+async function generateMarkdown(folderName) {
+	const folder = path.join(__dirname, "results", folderName);
+	const files = await globby(["*.json"], { cwd: folder });
 	if (files.length == 0) return;
 
-	files.sort();
+	console.log("Found files:", files);
 
 	const results = files
 		.map(filename => fs.readFileSync(path.join(folder, filename), "utf8"))
 		.map(content => JSON.parse(content));
 
-	//console.dir(results, { depth: 3 });
+	const rows = ["<!-- THIS PAGE IS GENERATED. DO NOT EDIT MANUALLY! -->", ""];
 
-	const rows = [
-		"<!-- THIS PAGE IS GENERATED. DO NOT EDIT MANUALLY! -->",
-		`# Benchmark results (${results[0].meta.type})`,
-		""
-	];
+	for (const result of results) {
+		console.log("Process test:", result.name);
 
-	const suites = results[0].suites;
+		rows.push(`# ${result.name}`);
+		rows.push(`${result.description || {}}`);
 
-	for (const suite of suites) {
-		const p = suite.name.split(" - ");
-		const suiteName = p.length > 1 ? p[1] : p[0];
-		rows.push(`## ${suiteName}`, suite.meta.description || "", "", "### Result");
-
-		const resByAdapter = {};
-
-		results.forEach(res => {
-			const rs = res.suites.find(s => s.meta.type == suite.meta.type);
-			if (rs) {
-				let resItem = resByAdapter[res.meta.adapter];
-				if (!resItem) {
-					resItem = rs.tests[0].stat;
-					resByAdapter[res.meta.adapter] = resItem;
-				}
-			}
-		});
-
-		//console.log(suiteName, resByAdapter);
-
-		const labels = Array.from(Object.keys(resByAdapter));
-		const values = Array.from(Object.values(resByAdapter));
-
-		rows.push("", "| Adapter config | Time | ops/sec |", "| -------------- | ----:| -------:|");
-		labels.forEach((label, i) => {
+		if (result.meta.adapters) {
 			rows.push(
-				`| ${label} | ${humanize.short(values[i].avg * 1000)} | ${Number(
-					values[i].rps
-				).toFixed(2)} |`
+				"## Test configurations",
+				"",
+				"| Name | Adapter | Options |",
+				"| ---- | ------- | ------- |"
 			);
-		});
-		rows.push("");
+			for (const adapter of result.meta.adapters) {
+				let options = JSON.stringify(adapter.options);
+				if (options) {
+					//options = options.replace(/\n/g, "<br>").replace(/ /g, "&nbsp;");
+					options = "`" + options + "`";
+				}
+				rows.push(
+					makeTableRow([adapter.name || adapter.type, adapter.type, options || "-"])
+				);
+			}
+		}
 
-		rows.push(
-			"![chart](" +
-				createChartURL({
-					chs: "800x450",
-					chtt: `${suiteName}|(ops/sec)`,
-					chf: "b0,lg,90,03a9f4,0,3f51b5,1",
-					chg: "0,50",
-					chl: "|||| 33% !|x2 ",
-					chma: "0,0,10,10",
-					cht: "bvs",
-					chxt: "x,y",
+		for (const suite of result.suites) {
+			rows.push(`## ${suite.name}`);
+			if (suite.meta && suite.meta.description) rows.push(suite.meta.description);
+			rows.push("", "### Result");
+			rows.push("");
 
-					chxl: "0:|" + labels.join("|"),
-					chd: "a:" + values.map(v => v.rps).join(",")
-				}) +
-				")"
-		);
-		rows.push("");
+			rows.push(
+				"",
+				"| Adapter config | Time | Diff | ops/sec |",
+				"| -------------- | ----:| ----:| -------:|"
+			);
+
+			suite.tests.forEach(test => {
+				rows.push(
+					makeTableRow([
+						test.name,
+						humanize.short(test.stat.avg * 1000),
+						numToStr(test.stat.percent) + "%",
+						numToStr(test.stat.rps)
+					])
+				);
+			});
+			rows.push("");
+
+			rows.push(
+				"![chart](" +
+					createChartURL({
+						chs: "800x450",
+						chtt: `${suite.name}|(ops/sec)`,
+						chf: "b0,lg,90,03a9f4,0,3f51b5,1",
+						chg: "0,50",
+						chl: "|||| 33% !|x2 ",
+						chma: "0,0,10,10",
+						cht: "bvs",
+						chxt: "x,y",
+
+						chxl: "0:|" + suite.tests.map(s => s.name).join("|"),
+						chd: "a:" + suite.tests.map(s => s.stat.rps).join(",")
+					}) +
+					")"
+			);
+			rows.push("");
+		}
 	}
 
 	rows.push("--------------------");
 	rows.push(`_Generated at ${new Date().toISOString()}_`);
 
 	const filename = path.join(folder, "README.md");
+	console.log("Write to file...");
 	saveMarkdown(filename, rows);
-}
 
-function saveMarkdown(filename, rows) {
-	const content = rows.join("\n");
-	fs.writeFileSync(filename, content, "utf8");
-}
-
-function createChartURL(opts) {
-	return `https://image-charts.com/chart?${qs.stringify(opts)}`;
+	console.log("Done. Result:", filename);
 }
 
 module.exports = { generateMarkdown };
 
-//generateMarkdown(path.join(__dirname, "results", "common"));
+//generateMarkdown("transform");

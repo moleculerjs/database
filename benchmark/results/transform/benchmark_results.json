@@ -1,0 +1,213 @@
+{
+  "name": "Moleculer Database benchmark - Transformation benchmark",
+  "description": "This is a tranformation benchmark. It tests all service methods with and without transformation.",
+  "meta": {},
+  "suites": [
+    {
+      "name": "Entity creation",
+      "tests": [
+        {
+          "name": "Without transform",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.034036399,
+            "cycle": 0,
+            "count": 121000,
+            "avg": 0.00004160360660330578,
+            "rps": 24036.377651944746,
+            "percent": 0
+          }
+        },
+        {
+          "name": "With transform",
+          "stat": {
+            "duration": 5.027710899,
+            "cycle": 0,
+            "count": 100000,
+            "avg": 0.000050277108989999995,
+            "rps": 19889.767333258915,
+            "percent": -17.251394443581376
+          }
+        }
+      ]
+    },
+    {
+      "name": "Entity listing",
+      "tests": [
+        {
+          "name": "Without transform",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.0343165,
+            "cycle": 0,
+            "count": 46000,
+            "avg": 0.00010944166304347826,
+            "rps": 9137.28805092012,
+            "percent": 0
+          }
+        },
+        {
+          "name": "With transform",
+          "stat": {
+            "duration": 5.1140088,
+            "cycle": 0,
+            "count": 37000,
+            "avg": 0.00013821645405405405,
+            "rps": 7235.028613951545,
+            "percent": -20.818643632199155
+          }
+        }
+      ]
+    },
+    {
+      "name": "Entity counting",
+      "tests": [
+        {
+          "name": "Without transform",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.2022702,
+            "cycle": 0,
+            "count": 10000,
+            "avg": 0.00052022702,
+            "rps": 1922.2377184483805,
+            "percent": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Entity getting",
+      "tests": [
+        {
+          "name": "Without transform",
+          "reference": true,
+          "stat": {
+            "duration": 5.013990701,
+            "cycle": 0,
+            "count": 425000,
+            "avg": 0.00001179762517882353,
+            "rps": 84762.82174102102,
+            "percent": 0
+          }
+        },
+        {
+          "name": "With transform",
+          "stat": {
+            "duration": 5.012214001,
+            "cycle": 0,
+            "count": 270000,
+            "avg": 0.00001856375555925926,
+            "rps": 53868.4102367001,
+            "percent": -36.44806870483117
+          }
+        },
+        {
+          "name": "Direct adapter access",
+          "fastest": true,
+          "stat": {
+            "duration": 5.0013589,
+            "cycle": 0,
+            "count": 449000,
+            "avg": 0.000011138883964365255,
+            "rps": 89775.60078721806,
+            "percent": 5.913888829129334
+          }
+        }
+      ]
+    },
+    {
+      "name": "Entity updating",
+      "tests": [
+        {
+          "name": "Without transform",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.033285899,
+            "cycle": 0,
+            "count": 85000,
+            "avg": 0.00005921512822352941,
+            "rps": 16887.576367733764,
+            "percent": 0
+          }
+        },
+        {
+          "name": "With transform",
+          "stat": {
+            "duration": 5.0255751,
+            "cycle": 0,
+            "count": 74000,
+            "avg": 0.00006791317702702703,
+            "rps": 14724.682952205807,
+            "percent": -12.807601093431543
+          }
+        }
+      ]
+    },
+    {
+      "name": "Entity replacing",
+      "tests": [
+        {
+          "name": "Without transform",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 5.039967399,
+            "cycle": 0,
+            "count": 83000,
+            "avg": 0.00006072249878313253,
+            "rps": 16468.36049305961,
+            "percent": 0
+          }
+        },
+        {
+          "name": "With transform",
+          "stat": {
+            "duration": 5.023935401,
+            "cycle": 0,
+            "count": 73000,
+            "avg": 0.00006882103289041096,
+            "rps": 14530.441610668313,
+            "percent": -11.767527697781503
+          }
+        }
+      ]
+    },
+    {
+      "name": "Entity deleting",
+      "tests": [
+        {
+          "name": "Without transform",
+          "fastest": true,
+          "reference": true,
+          "stat": {
+            "duration": 9.2971331,
+            "cycle": 0,
+            "count": 194662,
+            "avg": 0.00004776039031757611,
+            "rps": 20937.852336436918,
+            "percent": 0
+          }
+        },
+        {
+          "name": "With transform",
+          "stat": {
+            "duration": 5.9941769,
+            "cycle": 0,
+            "count": 54000,
+            "avg": 0.00011100327592592593,
+            "rps": 9008.743135358583,
+            "percent": -56.97389115844897
+          }
+        }
+      ]
+    }
+  ],
+  "timestamp": 1618665326351,
+  "generated": "Sat Apr 17 2021 15:15:26 GMT+0200 (GMT+02:00)",
+  "elapsedMs": 75550
+}

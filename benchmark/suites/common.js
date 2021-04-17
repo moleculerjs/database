@@ -1,24 +1,28 @@
 "use strict";
 
+const Benchmarkify = require("../benchmarkify");
+const _ = require("lodash");
 const { ServiceBroker, Context } = require("moleculer");
-const { makeDirs } = require("moleculer").Utils;
 const DbService = require("../..").Service;
-
-const fs = require("fs");
-const path = require("path");
+const { writeResult } = require("../utils");
+const { generateMarkdown } = require("../generate-result");
 
 const Fakerator = require("fakerator");
 const fakerator = new Fakerator();
 
-const { generateMarkdown } = require("../generate-result");
+const COUNT = 1000;
+const SUITE_NAME = "common";
 
-const Benchmarkify = require("../benchmarkify");
-
-const adapters = [
-	{ name: "NeDB-memory", type: "NeDB" },
-	{ name: "MongoDB", type: "MongoDB", options: { dbName: "bench-test", collection: "users" } },
+const Adapters = [
+	{ name: "NeDB (memory)", type: "NeDB" },
 	{
-		name: "Knex-SQLite-Memory",
+		name: "MongoDB",
+		ref: true,
+		type: "MongoDB",
+		options: { dbName: "bench-test", collection: "users" }
+	},
+	{
+		name: "Knex SQLite (memory)",
 		type: "Knex",
 		options: {
 			knex: {
@@ -38,21 +42,18 @@ const adapters = [
 	}
 ];
 
-function slug(text) {
-	return text
-		.toString()
-		.toLowerCase()
-		.replace(/\s+/g, "-") // Replace spaces with -
-		.replace(/[^\w\-]+/g, "") // Remove all non-word chars
-		.replace(/\-\-+/g, "-") // Replace multiple - with single -
-		.replace(/^-+/, "") // Trim - from start of text
-		.replace(/-+$/, ""); // Trim - from end of text
-}
+const benchmark = new Benchmarkify("Moleculer Database benchmark - Common", {
+	description:
+		"This is a common benchmark which create, list, get, update, replace and delete entities via service actions.",
+	meta: { type: SUITE_NAME, adapters: _.cloneDeep(Adapters), count: COUNT }
+});
 
-const UserServiceSchema = adapterSpec => {
+const suites = [];
+
+const UserServiceSchema = (serviceName, adapterDef) => {
 	return {
-		name: "users",
-		mixins: [DbService({ adapter: adapterSpec })],
+		name: serviceName,
+		mixins: [DbService({ adapter: adapterDef })],
 		settings: {
 			fields: {
 				id: { type: "string", primaryKey: true, columnName: "_id" },
@@ -70,7 +71,7 @@ const UserServiceSchema = adapterSpec => {
 		},
 		async started() {
 			const adapter = await this.getAdapter();
-			if (adapterSpec.type == "Knex") {
+			if (adapterDef.type == "Knex") {
 				await adapter.createTable();
 			}
 
@@ -79,399 +80,277 @@ const UserServiceSchema = adapterSpec => {
 	};
 };
 
-function handleError(err) {
-	console.error("Benchmark execution error", err.message);
-}
+const USERS = fakerator.times(fakerator.entity.user, COUNT * 5);
+const USERS_LEN = USERS.length;
 
-async function runTest(adapter, idx) {
-	const COUNT = 1000;
+const broker = new ServiceBroker({ logger: false });
+Adapters.forEach((adapterDef, i) => {
+	const adapterName = adapterDef.name || adapterDef.type;
+	const serviceName = `users-${i}`;
+	adapterDef.svcName = serviceName;
+	adapterDef.svc = broker.createService(UserServiceSchema(serviceName, adapterDef));
+});
 
-	const adapterName = adapter.name || adapter.type;
-
-	const benchmark = new Benchmarkify("Moleculer Database benchmark - Common", {
-		meta: { type: "common", adapter: adapterName }
-	});
-
-	const bench1 = benchmark.createSuite(`Adapter: ${adapterName} - Entity creation (${COUNT})`, {
+// --- ENTITY CREATION ---
+(function () {
+	const bench = benchmark.createSuite("Entity creation", {
+		description: "This test calls the `create` action to create an entity.",
 		meta: {
-			type: "create",
-			description: "This test calls the `users.create` service action to create an entity."
+			type: "create"
 		}
 	});
-	(function (bench) {
-		const broker = new ServiceBroker({ logger: false });
-		const svc = broker.createService(UserServiceSchema(adapter));
+	suites.push(bench);
+	const tearDowns = [];
+	bench.tearDown(tearDowns);
 
-		const entity1 = {
-			firstName: "John",
-			lastName: "Doe",
-			username: "john.doe81",
-			email: "john.doe@moleculer.services",
-			password: "pass1234",
-			status: 1
-		};
+	Adapters.forEach(adapterDef => {
+		const adapterName = adapterDef.name || adapterDef.type;
+		const svc = adapterDef.svc;
+		const actionName = `${adapterDef.svcName}.create`;
 
-		bench.setup(() => broker.start());
-		bench.tearDown(() => broker.stop());
-
-		bench.ref("Call 'users.create'", done => {
-			broker.call("users.create", entity1).then(done);
+		let c = 0;
+		bench[adapterDef.ref ? "ref" : "add"](adapterName, done => {
+			broker.call(actionName, USERS[c++ % USERS_LEN]).then(done);
 		});
-	})(bench1);
 
-	const bench2 = benchmark.createSuite(`Adapter: ${adapterName} - Entity finding (${COUNT})`, {
-		meta: {
-			type: "find",
-			description:
-				"This test calls the `users.find` service action to get random 20 entities."
-		}
-	});
-	(function (bench) {
-		const broker = new ServiceBroker({ logger: false });
-		const svc = broker.createService(UserServiceSchema(adapter));
-		const ctx = Context.create(broker, null, {});
-
-		bench.setup(async () => {
-			await broker.start();
-
+		// Clear all entities and create only the specified count.
+		tearDowns.push(async () => {
+			const ctx = Context.create(broker, null, {});
 			await svc.clearEntities(ctx);
-			await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT));
+			await svc.createEntities(ctx, USERS.slice(0, COUNT));
 		});
-		bench.tearDown(() => broker.stop());
+	});
+})();
 
-		bench.ref("Call 'users.find'", done => {
-			const offset = Math.floor(Math.random() * 80);
-			broker.call("users.find", { offset, limit: 20 }).then(done);
-		});
-	})(bench2);
-
-	const bench3 = benchmark.createSuite(`Adapter: ${adapterName} - Entity listing (${COUNT})`, {
+// --- ENTITY FINDING ---
+(function () {
+	const bench = benchmark.createSuite("Entity finding", {
+		description: "This test calls the `find` action to get random 20 entities.",
 		meta: {
-			type: "list",
-			description: "This test calls the `users.list` service action to random 20 entities."
+			type: "find"
 		}
 	});
-	(function (bench) {
-		const broker = new ServiceBroker({ logger: false });
-		const svc = broker.createService(UserServiceSchema(adapter));
-		const ctx = Context.create(broker, null, {});
+	suites.push(bench);
 
-		bench.setup(async () => {
-			await broker.start();
+	Adapters.forEach(adapterDef => {
+		const adapterName = adapterDef.name || adapterDef.type;
+		const actionName = `${adapterDef.svcName}.find`;
 
-			await svc.clearEntities(ctx);
-			await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT));
+		let c = 0;
+		bench[adapterDef.ref ? "ref" : "add"](adapterName, done => {
+			const offset = Math.floor(Math.random() * (USERS_LEN - 20));
+			broker.call(actionName, { offset, limit: 20 }).then(done);
 		});
-		bench.tearDown(() => broker.stop());
+	});
+})();
 
-		bench.ref("Call 'users.list'", done => {
+// --- ENTITY LISTING ---
+(function () {
+	const bench = benchmark.createSuite("Entity listing", {
+		description: "This test calls the `users.list` service action to random 20 entities.",
+		meta: {
+			type: "list"
+		}
+	});
+	suites.push(bench);
+
+	Adapters.forEach(adapterDef => {
+		const adapterName = adapterDef.name || adapterDef.type;
+		const actionName = `${adapterDef.svcName}.list`;
+
+		let c = 0;
+		bench[adapterDef.ref ? "ref" : "add"](adapterName, done => {
 			const maxPage = COUNT / 20 - 2;
 			const page = Math.floor(Math.random() * maxPage) + 1;
-			broker.call("users.list", { page, pageSize: 20 }).then(done);
+			broker.call(actionName, { page, pageSize: 20 }).then(done);
 		});
-	})(bench3);
+	});
+})();
 
-	const bench4 = benchmark.createSuite(`Adapter: ${adapterName} - Entity counting (${COUNT})`, {
+// --- ENTITY COUNTING ---
+(function () {
+	const bench = benchmark.createSuite("Entity counting", {
+		description:
+			"This test calls the `users.count` service action to get the number of entities.",
 		meta: {
-			type: "count",
-			description:
-				"This test calls the `users.count` service action to get the number of entities."
+			type: "count"
 		}
 	});
-	(function (bench) {
-		const broker = new ServiceBroker({ logger: false });
-		const svc = broker.createService(UserServiceSchema(adapter));
+	suites.push(bench);
 
-		const ctx = Context.create(broker, null, {});
-		bench.setup(async () => {
-			await broker.start();
+	Adapters.forEach(adapterDef => {
+		const adapterName = adapterDef.name || adapterDef.type;
+		const actionName = `${adapterDef.svcName}.count`;
 
-			await svc.clearEntities(ctx);
-			await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT));
+		let c = 0;
+		bench[adapterDef.ref ? "ref" : "add"](adapterName, done => {
+			broker.call(actionName).then(done);
 		});
-		bench.tearDown(() => broker.stop());
+	});
+})();
 
-		bench.ref("Call 'users.count'", done => {
-			broker.call("users.count").then(done);
-		});
-	})(bench4);
-
-	const bench5 = benchmark.createSuite(`Adapter: ${adapterName} - Entity getting (${COUNT})`, {
+// --- ENTITY GETTING ---
+(function () {
+	const bench = benchmark.createSuite("Entity getting", {
+		description: "This test calls the `users.get` service action to get a random entity.",
 		meta: {
-			type: "get",
-			description: "This test calls the `users.get` service action to get a random entity."
+			type: "get"
 		}
 	});
-	(function (bench) {
-		const broker = new ServiceBroker({ logger: false });
-		const svc = broker.createService(UserServiceSchema(adapter));
+	suites.push(bench);
+	const setups = [];
+	bench.setup(setups);
 
-		const ctx = Context.create(broker, null, {});
-		let docs;
+	Adapters.forEach(adapterDef => {
+		const adapterName = adapterDef.name || adapterDef.type;
+		const actionName = `${adapterDef.svcName}.get`;
 
-		bench.setup(async () => {
-			await broker.start();
-
-			await svc.clearEntities(ctx);
-			docs = await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT));
+		let docs = null;
+		setups.push(async () => {
+			docs = await broker.call(`${adapterDef.svcName}.find`);
 		});
-		bench.tearDown(() => broker.stop());
 
-		bench.ref("Call 'users.get'", done => {
+		let c = 0;
+		bench[adapterDef.ref ? "ref" : "add"](adapterName, done => {
 			const entity = docs[Math.floor(Math.random() * docs.length)];
-			return broker.call("users.get", { id: entity.id }).then(done);
+			return broker.call(actionName, { id: entity.id }).then(done);
 		});
-	})(bench5);
+	});
+})();
 
-	const bench6 = benchmark.createSuite(`Adapter: ${adapterName} - Entity resolving (${COUNT})`, {
+// --- ENTITY RESOLVING ---
+(function () {
+	const bench = benchmark.createSuite("Entity resolving", {
+		description:
+			"This test calls the `users.resolve` service action to resolve a random entity.",
 		meta: {
-			type: "resolve",
-			description:
-				"This test calls the `users.resolve` service action to resolve a random entity."
+			type: "resolve"
 		}
 	});
-	(function (bench) {
-		const broker = new ServiceBroker({ logger: false });
-		const svc = broker.createService(UserServiceSchema(adapter));
+	suites.push(bench);
+	const setups = [];
+	bench.setup(setups);
 
-		const ctx = Context.create(broker, null, {});
-		let docs;
+	Adapters.forEach(adapterDef => {
+		const adapterName = adapterDef.name || adapterDef.type;
+		const actionName = `${adapterDef.svcName}.resolve`;
 
-		bench.setup(async () => {
-			await broker.start();
-
-			await svc.clearEntities(ctx);
-			docs = await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT));
+		let docs = null;
+		setups.push(async () => {
+			docs = await broker.call(`${adapterDef.svcName}.find`);
 		});
-		bench.tearDown(() => broker.stop());
 
-		bench.ref("Call 'users.resolve'", done => {
+		let c = 0;
+		bench[adapterDef.ref ? "ref" : "add"](adapterName, done => {
 			const entity = docs[Math.floor(Math.random() * docs.length)];
-			return broker.call("users.resolve", { id: entity.id }).then(done);
+			return broker.call(actionName, { id: entity.id }).then(done);
 		});
-	})(bench6);
+	});
+})();
 
-	const bench7 = benchmark.createSuite(`Adapter: ${adapterName} - Entity updating (${COUNT})`, {
+// --- ENTITY UPDATING ---
+(function () {
+	const bench = benchmark.createSuite("Entity updating", {
+		description: "This test calls the `users.update` service action to update a entity.",
 		meta: {
-			type: "update",
-			description: "This test calls the `users.update` service action to update a entity."
+			type: "update"
 		}
 	});
-	(function (bench) {
-		const broker = new ServiceBroker({ logger: false });
-		const svc = broker.createService(UserServiceSchema(adapter));
+	suites.push(bench);
+	const setups = [];
+	bench.setup(setups);
 
-		const ctx = Context.create(broker, null, {});
-		let docs;
+	Adapters.forEach(adapterDef => {
+		const adapterName = adapterDef.name || adapterDef.type;
+		const actionName = `${adapterDef.svcName}.update`;
 
-		bench.setup(async () => {
-			await broker.start();
-
-			await svc.clearEntities(ctx);
-			docs = await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT));
+		let docs = null;
+		setups.push(async () => {
+			docs = await broker.call(`${adapterDef.svcName}.find`);
 		});
-		bench.tearDown(() => broker.stop());
 
-		bench.ref("Call 'users.update'", done => {
+		let c = 0;
+		bench[adapterDef.ref ? "ref" : "add"](adapterName, done => {
 			const entity = docs[Math.floor(Math.random() * docs.length)];
 			const newStatus = Math.round(Math.random());
-			return broker.call("users.update", { id: entity.id, status: newStatus }).then(done);
+			return broker.call(actionName, { id: entity.id, status: newStatus }).then(done);
 		});
-	})(bench7);
+	});
+})();
 
-	const bench8 = benchmark.createSuite(`Adapter: ${adapterName} - Entity replacing (${COUNT})`, {
+// --- ENTITY REPLACING ---
+(function () {
+	const bench = benchmark.createSuite("Entity replacing", {
+		description:
+			"This test calls the `users.replace` service action to replace a random entity.",
 		meta: {
-			type: "replace",
-			description:
-				"This test calls the `users.replace` service action to replace a random entity."
+			type: "replace"
 		}
 	});
-	(function (bench) {
-		const broker = new ServiceBroker({ logger: false });
-		const svc = broker.createService(UserServiceSchema(adapter));
+	suites.push(bench);
+	const setups = [];
+	bench.setup(setups);
 
-		let docs;
-		const ctx = Context.create(broker, null, {});
+	Adapters.forEach(adapterDef => {
+		const adapterName = adapterDef.name || adapterDef.type;
+		const actionName = `${adapterDef.svcName}.replace`;
 
-		bench.setup(async () => {
-			await broker.start();
-
-			await svc.clearEntities(ctx);
-			docs = await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT));
+		let docs = null;
+		setups.push(async () => {
+			docs = await broker.call(`${adapterDef.svcName}.find`);
 		});
-		bench.tearDown(() => broker.stop());
 
-		bench.ref("Call 'users.replace'", done => {
+		let c = 0;
+		bench[adapterDef.ref ? "ref" : "add"](adapterName, done => {
 			const entity = docs[Math.floor(Math.random() * docs.length)];
 			entity.status = Math.round(Math.random());
-			return broker.call("users.replace", entity).then(done);
+			return broker.call(actionName, entity).then(done);
 		});
-	})(bench8);
+	});
+})();
 
-	const bench9 = benchmark.createSuite(`Adapter: ${adapterName} - Entity deleting (${COUNT})`, {
+// --- ENTITY DELETING ---
+(function () {
+	const bench = benchmark.createSuite("Entity deleting", {
+		description: "This test calls the `users.remove` service action to delete a random entity.",
 		meta: {
-			type: "remove",
-			description:
-				"This test calls the `users.remove` service action to delete a random entity."
+			type: "remove"
 		}
 	});
-	(function (bench) {
-		const broker = new ServiceBroker({ logger: false });
-		const svc = broker.createService(UserServiceSchema(adapter));
+	suites.push(bench);
+	const setups = [];
+	bench.setup(setups);
 
-		let docs;
-		const ctx = Context.create(broker, null, {});
+	Adapters.forEach(adapterDef => {
+		const adapterName = adapterDef.name || adapterDef.type;
+		const actionName = `${adapterDef.svcName}.remove`;
 
-		bench.setup(async () => {
-			await broker.start();
-
-			await svc.clearEntities(ctx);
-			docs = await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT));
-		});
-		bench.tearDown(async () => {
-			//console.log("Remaining record", await svc.countEntities(ctx));
-			await broker.stop();
+		let docs = null;
+		setups.push(async () => {
+			docs = await broker.call(`${adapterDef.svcName}.find`);
 		});
 
-		bench.ref("Call 'users.remove'", done => {
+		let c = 0;
+		bench[adapterDef.ref ? "ref" : "add"](adapterName, done => {
 			const entity = docs[Math.floor(Math.random() * docs.length)];
-			return broker.call("users.remove", { id: entity.id }).catch(done).then(done);
+			return broker.call(actionName, { id: entity.id }).catch(done).then(done);
 		});
-	})(bench9);
+	});
+})();
 
-	const results = await benchmark.run([
-		bench1,
-		bench2,
-		bench3,
-		bench4,
-		bench5,
-		bench6,
-		bench7,
-		bench8,
-		bench9
-	]);
-	const folder = path.join(__dirname, "..", "results", "common");
-	makeDirs(folder);
-
-	fs.writeFileSync(
-		path.join(folder, `bench_${idx}_${slug(adapterName)}.json`),
-		JSON.stringify(results, null, 2),
-		"utf8"
-	);
-
-	if (adapters.length > 0) {
-		runTest(adapters.shift(), idx + 1);
-	} else {
-		console.log("Generate results...");
-		await generateMarkdown(folder);
+async function run() {
+	await broker.start();
+	try {
+		console.log("Running suites...");
+		const results = await benchmark.run(suites);
+		console.log("Save the results to file...");
+		writeResult(SUITE_NAME, "benchmark_results.json", results);
+		console.log("Generate README.md...");
+		await generateMarkdown(SUITE_NAME);
+	} finally {
+		await broker.stop();
 	}
+	console.log("Done.");
 }
 
-runTest(adapters.shift(), 1);
-
-/* RESULT
-
-================================
-  Moleculer Database benchmark
-================================
-
-Platform info:
-==============
-   Windows_NT 10.0.19041 x64
-   Node.JS: 12.14.1
-   V8: 7.7.299.13-node.16
-   Intel(R) Core(TM) i7-4770K CPU @ 3.50GHz × 8
-
-Suite: Adapter: NeDB - Entity creation (1000)
-√ Call 'users.create'*           23,441 rps
-
-   Call 'users.create'* (#)       0%         (23,441 rps)   (avg: 42μs)
------------------------------------------------------------------------
-
-Suite: Adapter: NeDB - Entity listing (1000)
-√ Call 'users.find'*            6,424 rps
-√ Call 'users.list'*            1,300 rps
-
-   Call 'users.find'*     +394.11%          (6,424 rps)   (avg: 155μs)
-   Call 'users.list'* (#)       0%          (1,300 rps)   (avg: 769μs)
------------------------------------------------------------------------
-
-Suite: Adapter: NeDB - Entity counting (1000)
-√ Call 'users.count'*            1,757 rps
-
-   Call 'users.count'* (#)       0%          (1,757 rps)   (avg: 569μs)
------------------------------------------------------------------------
-
-Suite: Adapter: NeDB - Entity getting (1000)
-√ Call 'users.resolve'*           44,100 rps
-√ Call 'users.get'*               45,645 rps
-
-   Call 'users.resolve'* (#)       0%         (44,100 rps)   (avg: 22μs)
-   Call 'users.get'*            +3.5%         (45,645 rps)   (avg: 21μs)
------------------------------------------------------------------------
-
-Suite: Adapter: NeDB - Entity updating (1000)
-√ Call 'users.update'*           16,167 rps
-
-   Call 'users.update'* (#)       0%         (16,167 rps)   (avg: 61μs)
------------------------------------------------------------------------
-
-Suite: Adapter: NeDB - Entity replacing (1000)
-√ Call 'users.replace'*           16,143 rps
-
-   Call 'users.replace'* (#)       0%         (16,143 rps)   (avg: 61μs)
------------------------------------------------------------------------
-
-Suite: Adapter: NeDB - Entity deleting (1000)
-√ Call 'users.remove'*           17,381 rps
-
-   Call 'users.remove'* (#)       0%         (17,375 rps)   (avg: 57μs)
------------------------------------------------------------------------
-
-Suite: Adapter: MongoDB - Entity creation (1000)
-.   Running 'Call 'users.create''...(node:1432) DeprecationWarning: Listening to events on the Db class has been deprecated and will be removed in the next major version.
-√ Call 'users.create'*            3,182 rps
-
-   Call 'users.create'* (#)       0%          (3,182 rps)   (avg: 314μs)
------------------------------------------------------------------------
-
-Suite: Adapter: MongoDB - Entity listing (1000)
-√ Call 'users.find'*            2,285 rps
-√ Call 'users.list'*              687 rps
-
-   Call 'users.find'*     +232.41%          (2,285 rps)   (avg: 437μs)
-   Call 'users.list'* (#)       0%            (687 rps)   (avg: 1ms)
------------------------------------------------------------------------
-
-Suite: Adapter: MongoDB - Entity counting (1000)
-√ Call 'users.count'*            1,798 rps
-
-   Call 'users.count'* (#)       0%          (1,798 rps)   (avg: 556μs)
------------------------------------------------------------------------
-
-Suite: Adapter: MongoDB - Entity getting (1000)
-√ Call 'users.resolve'*            4,148 rps
-√ Call 'users.get'*                3,914 rps
-
-   Call 'users.resolve'* (#)       0%          (4,148 rps)   (avg: 241μs)
-   Call 'users.get'*           -5.64%          (3,914 rps)   (avg: 255μs)
------------------------------------------------------------------------
-
-Suite: Adapter: MongoDB - Entity updating (1000)
-√ Call 'users.update'*            1,996 rps
-
-   Call 'users.update'* (#)       0%          (1,996 rps)   (avg: 501μs)
------------------------------------------------------------------------
-
-Suite: Adapter: MongoDB - Entity replacing (1000)
-√ Call 'users.replace'*              996 rps
-
-   Call 'users.replace'* (#)       0%            (996 rps)   (avg: 1ms)
------------------------------------------------------------------------
-
-Suite: Adapter: MongoDB - Entity deleting (1000)
-√ Call 'users.remove'*            7,548 rps
-
-   Call 'users.remove'* (#)       0%         (10,516 rps)   (avg: 95μs)
------------------------------------------------------------------------
-*/
+run();
