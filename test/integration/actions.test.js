@@ -40,12 +40,14 @@ module.exports = (getAdapter, adapterType) => {
 						type: "number",
 						onCreate: Date.now,
 						columnType: "bigInteger",
+						columnName: "created_at",
 						get: v => (v != null ? Number(v) : v)
 					},
 					updatedAt: {
 						type: "number",
 						onUpdate: Date.now,
 						columnType: "bigInteger",
+						columnName: "updated_at",
 						get: v => (v != null ? Number(v) : v)
 					}
 				}
@@ -548,7 +550,12 @@ module.exports = (getAdapter, adapterType) => {
 						get: (v, entity) => entity.firstName + " " + entity.lastName
 					},
 					userName: { type: "string", trim: true, required: true },
-					email: { type: "string", trim: true, required: true },
+					email: {
+						type: "string",
+						trim: true,
+						required: true,
+						columnName: "email_address"
+					},
 					password: { type: "string", hidden: true },
 					dob: { type: "string", trim: true, required: true },
 					age: { type: "number", required: true, columnType: "integer" },

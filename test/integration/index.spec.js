@@ -113,8 +113,7 @@ if (process.env.GITHUB_ACTIONS_CI) {
 					useNullAsDefault: true
 				}
 			}
-		}
-		/*
+		},
 		{
 			name: "Knex-Postgresql",
 			type: "Knex",
@@ -147,6 +146,21 @@ if (process.env.GITHUB_ACTIONS_CI) {
 			}
 		},
 		{
+			name: "Knex-MySQL2",
+			type: "Knex",
+			options: {
+				knex: {
+					client: "mysql2",
+					connection: {
+						host: "127.0.0.1",
+						user: "root",
+						password: "moleculer",
+						database: "db_int_test"
+					}
+				}
+			}
+		},
+		{
 			name: "Knex-MSSQL",
 			type: "Knex",
 			options: {
@@ -162,22 +176,7 @@ if (process.env.GITHUB_ACTIONS_CI) {
 					}
 				}
 			}
-		},
-		{
-			name: "Knex-MySQL2",
-			type: "Knex",
-			options: {
-				knex: {
-					client: "mysql2",
-					connection: {
-						host: "127.0.0.1",
-						user: "root",
-						password: "moleculer",
-						database: "db_int_test"
-					}
-				}
-			}
-		}*/
+		}
 	];
 }
 

@@ -16,6 +16,8 @@ const _ = require("lodash");
 module.exports = function (mixinOpts) {
 	const cacheOpts = mixinOpts.cache && mixinOpts.cache.enabled ? mixinOpts.cache : null;
 
+	const cacheColumnName = new Map();
+
 	return {
 		/**
 		 * Get or create an adapter. Multi-tenant support method.
@@ -244,6 +246,7 @@ module.exports = function (mixinOpts) {
 		async findEntities(ctx, params = ctx.params, opts = {}) {
 			params = this.sanitizeParams(params);
 			params = await this._applyScopes(params, ctx);
+			params = this.paramsFieldNameConversion(params);
 
 			const adapter = await this.getAdapter(ctx);
 
@@ -265,6 +268,7 @@ module.exports = function (mixinOpts) {
 		async streamEntities(ctx, params = ctx.params, opts = {}) {
 			params = this.sanitizeParams(params);
 			params = await this._applyScopes(params, ctx);
+			params = this.paramsFieldNameConversion(params);
 
 			const adapter = await this.getAdapter(ctx);
 			const stream = await adapter.findStream(params);
@@ -295,6 +299,7 @@ module.exports = function (mixinOpts) {
 		async countEntities(ctx, params = ctx.params) {
 			params = this.sanitizeParams(params, { removeLimit: true });
 			params = await this._applyScopes(params, ctx);
+			params = this.paramsFieldNameConversion(params);
 
 			const adapter = await this.getAdapter(ctx);
 			const result = await adapter.count(params);
@@ -311,6 +316,7 @@ module.exports = function (mixinOpts) {
 		async findEntity(ctx, params = ctx.params, opts = {}) {
 			params = this.sanitizeParams(params, { removeLimit: true });
 			params = await this._applyScopes(params, ctx);
+			params = this.paramsFieldNameConversion(params);
 			params.limit = 1;
 
 			const adapter = await this.getAdapter(ctx);
@@ -357,6 +363,7 @@ module.exports = function (mixinOpts) {
 			params = Object.assign({}, params);
 			if (!params.query) params.query = {};
 			params = await this._applyScopes(params, ctx);
+			params = this.paramsFieldNameConversion(params);
 
 			let idField = this.$primaryField.columnName;
 
@@ -621,7 +628,14 @@ module.exports = function (mixinOpts) {
 		 * @param {Object} def
 		 */
 		createIndex(adapter, def) {
-			return adapter.createIndex(def);
+			const newDef = _.cloneDeep(def);
+			if (_.isString(def.fields))
+				newDef.fields = this._getColumnNameFromFieldName(def.fields);
+			else if (Array.isArray(def.fields))
+				newDef.fields = def.fields.map(f => this._getColumnNameFromFieldName(f));
+			else if (_.isPlainObject(def.fields))
+				newDef.fields = this._queryFieldNameConversion(def.fields, false);
+			return adapter.createIndex(newDef);
 		},
 
 		/**
@@ -702,6 +716,77 @@ module.exports = function (mixinOpts) {
 				return this.decodeID(id);
 			}
 			return id;
+		},
+
+		/**
+		 * Get the columnName from field name.
+		 *
+		 * @param {String} fieldName
+		 * @returns {String} columnName
+		 */
+		_getColumnNameFromFieldName(fieldName) {
+			const res = cacheColumnName.get(fieldName);
+			if (res) return res;
+
+			const field = this.$fields.find(f => f.name == fieldName);
+			if (field) {
+				cacheColumnName.set(fieldName, field.columnName);
+				return field.columnName;
+			}
+			return fieldName;
+		},
+
+		/**
+		 * Convert fieldName to columnName in `sort`
+		 * @param {Array<String>} sort
+		 * @returns {Array<String>}
+		 */
+		_sortFieldNameConversion(sort) {
+			return sort.map(fieldName => {
+				if (fieldName.startsWith("-")) {
+					return "-" + this._getColumnNameFromFieldName(fieldName.slice(1));
+				} else {
+					return this._getColumnNameFromFieldName(fieldName);
+				}
+			});
+		},
+
+		/**
+		 * Convert fieldName to columnName in `query`
+		 * @param {Object} query
+		 * @param {Boolean} recursive
+		 * @returns {Object}
+		 */
+		_queryFieldNameConversion(query, recursive) {
+			return Object.keys(query).reduce((res, fieldName) => {
+				const columnName = this._getColumnNameFromFieldName(fieldName);
+				if (_.isPlainObject(res[columnName]) && recursive) {
+					res[columnName] = this._queryFieldNameConversion(query[fieldName], recursive);
+				} else {
+					res[columnName] = query[fieldName];
+				}
+				return res;
+			}, {});
+		},
+
+		/**
+		 * Convert field names to column names in `params`
+		 * @param {Object} p
+		 * @returns {Object}
+		 */
+		paramsFieldNameConversion(p) {
+			// Fieldname -> columnName conversions
+			if (p.sort) {
+				p.sort = this._sortFieldNameConversion(p.sort);
+			}
+			if (p.searchFields) {
+				p.searchFields = this._sortFieldNameConversion(p.searchFields);
+			}
+			if (p.query) {
+				p.query = this._queryFieldNameConversion(p.query, true);
+			}
+
+			return p;
 		}
 	};
 };

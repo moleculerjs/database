@@ -58,8 +58,8 @@ module.exports = (getAdapter, adapterType) => {
 			settings: {
 				fields: {
 					id: { type: "string", primaryKey: true, columnName: "_id" },
-					name: { type: "string", trim: true, required: true },
-					age: { type: "number", columnType: "integer" },
+					name: { type: "string", trim: true, required: true, columnName: "full_name" },
+					age: { type: "number", columnType: "integer", columnName: "ages" },
 					dob: {
 						type: "number",
 						columnType: "bigInteger",
@@ -81,7 +81,7 @@ module.exports = (getAdapter, adapterType) => {
 				if (adapterType == "Knex") {
 					await adapter.createTable();
 				} else if (adapterType == "MongoDB") {
-					adapter.createIndex({
+					this.createIndex(adapter, {
 						fields: { name: "text", age: "text", roles: "text" }
 					});
 				}
@@ -132,18 +132,20 @@ module.exports = (getAdapter, adapterType) => {
 				const params = { sort: "age", limit: 2 };
 				const rows = await svc.findEntities(ctx, params);
 				expect(rows).toEqual([docs.janeDoe, docs.johnDoe]);
-
-				const count = await svc.countEntities(ctx, params);
-				expect(count).toEqual(4);
 			});
 
 			it("should sort & limit & offset rows", async () => {
 				const params = { sort: "age", limit: 2, offset: 2 };
 				const rows = await svc.findEntities(ctx, params);
 				expect(rows).toEqual([docs.kevinJames, docs.bobSmith]);
+			});
 
-				const count = await svc.countEntities(ctx, params);
-				expect(count).toEqual(4);
+			// Test MSSQL using offset without sort.
+			// https://github.com/knex/knex/issues/1527
+			it("should limit & offset rows without sort", async () => {
+				const params = { limit: 2, offset: 2 };
+				const rows = await svc.findEntities(ctx, params);
+				expect(rows.length).toBe(2);
 			});
 
 			it("should negative sort the rows", async () => {
@@ -194,20 +196,6 @@ module.exports = (getAdapter, adapterType) => {
 				const count = await svc.countEntities(ctx, params);
 				expect(count).toEqual(2);
 			});
-
-			if (["NeDB"].indexOf(adapterType) !== -1) {
-				it("should filter by searchText && searchFields", async () => {
-					const params = {
-						search: "user",
-						searchFields: ["name", "age"]
-					};
-					const rows = await svc.findEntities(ctx, params);
-					expect(rows).toEqual([]);
-
-					const count = await svc.countEntities(ctx, params);
-					expect(count).toEqual(0);
-				});
-			}
 
 			it("should filter by searchText & sort", async () => {
 				const params = {

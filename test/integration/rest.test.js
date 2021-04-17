@@ -621,7 +621,7 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 					get: adapterType == "Knex" ? v => String(v) : undefined
 				},
 				name: { type: "string", trim: true, required: true },
-				age: { type: "number", columnType: "integer" },
+				age: { type: "number", columnType: "integer", columnName: "ages" },
 				status: {
 					type: "boolean",
 					default: true,
@@ -641,18 +641,21 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 					type: "number",
 					onCreate: Date.now,
 					columnType: "bigInteger",
+					columnName: "created_at",
 					get: v => (v != null ? Number(v) : v)
 				},
 				updatedAt: {
 					type: "number",
 					onUpdate: Date.now,
 					columnType: "bigInteger",
+					columnName: "updated_at",
 					get: v => (v != null ? Number(v) : v)
 				},
 				deletedAt: {
 					type: "number",
 					onRemove: Date.now,
 					columnType: "bigInteger",
+					columnName: "deleted_at",
 					get: v => (v != null ? Number(v) : v)
 				}
 			},

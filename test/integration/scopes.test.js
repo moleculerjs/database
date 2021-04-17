@@ -58,7 +58,7 @@ module.exports = (getAdapter, adapterType) => {
 						columnType: "integer"
 					},
 					name: { type: "string", trim: true, required: true },
-					age: { type: "number", columnType: "integer" },
+					age: { type: "number", columnType: "integer", columnName: "ages" },
 					dob: { type: "number", columnType: "bigInteger" },
 					roles: { type: "array", items: "string", columnType: "string" },
 					status: {

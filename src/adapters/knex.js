@@ -389,8 +389,14 @@ class KnexAdapter extends BaseAdapter {
 				q.limit(params.limit);
 
 			// Offset
-			if (!opts.counting && _.isNumber(params.offset) && params.offset > 0)
+			if (!opts.counting && _.isNumber(params.offset) && params.offset > 0) {
+				if (!params.sort && this.opts.knex.client == "mssql") {
+					// MSSQL can't use offset without sort.
+					// https://github.com/knex/knex/issues/1527
+					q = q.orderBy(this.idFieldName, "asc");
+				}
 				q.offset(params.offset);
+			}
 		}
 
 		// If not params
