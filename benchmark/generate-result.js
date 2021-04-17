@@ -75,7 +75,6 @@ async function generateMarkdown(folderName) {
 						chtt: `${suite.name}|(ops/sec)`,
 						chf: "b0,lg,90,03a9f4,0,3f51b5,1",
 						chg: "0,50",
-						chl: "|||| 33% !|x2 ",
 						chma: "0,0,10,10",
 						cht: "bvs",
 						chxt: "x,y",
@@ -101,4 +100,4 @@ async function generateMarkdown(folderName) {
 
 module.exports = { generateMarkdown };
 
-//generateMarkdown("transform");
+//generateMarkdown("common");
