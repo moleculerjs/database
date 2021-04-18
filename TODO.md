@@ -1,9 +1,9 @@
 # TODO
 
 - [ ] add more debug log messages
-- [ ] `sort` fields should be converted to `columnName`
-- [ ] in Knex if MSSQL and has offset but no sort, if should add a sort to the primaryKey field
-  - [ ] https://github.com/knex/knex/issues/1527
+- [x] `sort` fields should be converted to `columnName`
+- [x] in Knex if MSSQL and has offset but no sort, if should add a sort to the primary key field
+  - [x] https://github.com/knex/knex/issues/1527
 
 ## Actions
 - [ ] `aggregate` action with params: `type: "sum", "avg", "count", "min", "max"` & `field: "price"`
@@ -27,7 +27,9 @@
 - [ ] option to add other service cache cleaning events in the Mixin options
 - [ ] generate GraphQL types & resolvers
 - [ ] validate `raw: true` update fields (`$set`, `$inc`)
-
+- [ ] add custom tracings (validating, transforming)
+- [ ] add custom metrics (for all basic functions (create, update, replace, remove))
+- [ ] 
 ## Adapters
 - [ ] Cassandra
 - [ ] Couchbase
