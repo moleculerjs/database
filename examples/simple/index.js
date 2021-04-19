@@ -9,7 +9,10 @@ const broker = new ServiceBroker({
 	logger: {
 		type: "Console",
 		options: {
-			level: "debug",
+			level: {
+				POSTS: "debug",
+				"*": "info"
+			},
 			objectPrinter: obj =>
 				inspect(obj, {
 					breakLength: 50,

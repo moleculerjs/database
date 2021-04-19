@@ -31,6 +31,7 @@ module.exports = function (mixinOpts) {
 				return item.adapter;
 			}
 
+			this.logger.debug(`Adapter not found for '${hash}'. Create a new adapter instance...`);
 			const adapter = Adapters.resolve(adapterOpts);
 			adapter.init(this);
 			this.adapters.set(hash, { hash, adapter, touched: Date.now() });
@@ -147,6 +148,7 @@ module.exports = function (mixinOpts) {
 			}
 
 			if (scopes && scopes.length > 0) {
+				this.logger.debug(`Applying scopes...`, scopes);
 				scopes = await this._filterScopeNamesByPermission(ctx, scopes);
 				params.query = scopes.reduce((query, scopeName) => {
 					const scope = this.settings.scopes[scopeName];
@@ -250,6 +252,7 @@ module.exports = function (mixinOpts) {
 
 			const adapter = await this.getAdapter(ctx);
 
+			this.logger.debug(`Find entities`, params);
 			let result = await adapter.find(params);
 			if (opts.transform !== false) {
 				result = await this.transformResult(adapter, result, params, ctx);
@@ -270,6 +273,7 @@ module.exports = function (mixinOpts) {
 			params = await this._applyScopes(params, ctx);
 			params = this.paramsFieldNameConversion(params);
 
+			this.logger.debug(`Stream entities`, params);
 			const adapter = await this.getAdapter(ctx);
 			const stream = await adapter.findStream(params);
 
@@ -301,6 +305,7 @@ module.exports = function (mixinOpts) {
 			params = await this._applyScopes(params, ctx);
 			params = this.paramsFieldNameConversion(params);
 
+			this.logger.debug(`Count entities`, params);
 			const adapter = await this.getAdapter(ctx);
 			const result = await adapter.count(params);
 			return result;
@@ -319,6 +324,7 @@ module.exports = function (mixinOpts) {
 			params = this.paramsFieldNameConversion(params);
 			params.limit = 1;
 
+			this.logger.debug(`Find an entity`, params);
 			const adapter = await this.getAdapter(ctx);
 			let result = await adapter.findOne(params.query);
 			if (opts.transform !== false) {
@@ -373,6 +379,7 @@ module.exports = function (mixinOpts) {
 				params.query[idField] = id[0];
 			}
 
+			this.logger.debug(`Resolve entities`, id);
 			const adapter = await this.getAdapter(ctx);
 
 			// Find the entities
@@ -421,6 +428,7 @@ module.exports = function (mixinOpts) {
 				nestedFieldSupport: adapter.hasNestedFieldSupport
 			});
 
+			this.logger.debug(`Create an entity`, params);
 			let result = await adapter.insert(params);
 			if (opts.transform !== false) {
 				result = await this.transformResult(adapter, result, {}, ctx);
@@ -449,6 +457,7 @@ module.exports = function (mixinOpts) {
 				)
 			);
 
+			this.logger.debug(`Create multiple entities`, entities);
 			let result = await adapter.insertMany(entities);
 			if (opts.transform !== false) {
 				result = await this.transformResult(adapter, result, {}, ctx);
@@ -490,6 +499,7 @@ module.exports = function (mixinOpts) {
 			//if (this.$primaryField.columnName != this.$primaryField.name)
 			delete params[this.$primaryField.name];
 
+			this.logger.debug(`Update an entity`, id, params);
 			let result;
 			const hasChanges = Object.keys(params).length > 0;
 			if (hasChanges) {
@@ -536,9 +546,11 @@ module.exports = function (mixinOpts) {
 			id = this._sanitizeID(id, opts);
 
 			delete params[this.$primaryField.columnName];
-			if (this.$primaryField.columnName != this.$primaryField.name)
+			if (this.$primaryField.columnName != this.$primaryField.name) {
 				delete params[this.$primaryField.name];
+			}
 
+			this.logger.debug(`Replace an entity`, id, params);
 			let result = await adapter.replaceById(id, params);
 
 			if (opts.transform !== false) {
@@ -575,10 +587,12 @@ module.exports = function (mixinOpts) {
 			id = this._sanitizeID(id, opts);
 
 			if (this.$softDelete) {
+				this.logger.debug(`Soft delete an entity`, id, params);
 				// Soft delete
 				await adapter.updateById(id, params);
 			} else {
 				// Real delete
+				this.logger.debug(`Delete an entity`, id);
 				await adapter.removeById(id);
 			}
 
@@ -601,6 +615,7 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} params
 		 */
 		async clearEntities(ctx, params) {
+			this.logger.debug(`Clear all entities`, params);
 			const adapter = await this.getAdapter(ctx);
 			const result = await adapter.clear(params);
 
@@ -629,6 +644,7 @@ module.exports = function (mixinOpts) {
 		 */
 		createIndex(adapter, def) {
 			const newDef = _.cloneDeep(def);
+			this.logger.debug(`Create an index`, def);
 			if (_.isString(def.fields))
 				newDef.fields = this._getColumnNameFromFieldName(def.fields);
 			else if (Array.isArray(def.fields))

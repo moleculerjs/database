@@ -1,6 +1,6 @@
 # TODO
 
-- [ ] add more debug log messages
+- [x] add more debug log messages
 - [x] `sort` fields should be converted to `columnName`
 - [x] in Knex if MSSQL and has offset but no sort, if should add a sort to the primary key field
   - [x] https://github.com/knex/knex/issues/1527
@@ -29,7 +29,7 @@
 - [ ] validate `raw: true` update fields (`$set`, `$inc`)
 - [ ] add custom tracings (validating, transforming)
 - [ ] add custom metrics (for all basic functions (create, update, replace, remove))
-- [ ] 
+  - [ ] https://gist.github.com/intech/b6e809c729835cb1da6411c4a940846b
 ## Adapters
 - [ ] Cassandra
 - [ ] Couchbase

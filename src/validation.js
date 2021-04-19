@@ -30,6 +30,8 @@ module.exports = function (mixinOpts) {
 			this.$shouldAuthorizeFields = false;
 
 			if (_.isObject(this.settings.fields)) {
+				this.logger.debug(`Process field definitions...`);
+
 				this.$fields = this._processFieldObject(this.settings.fields);
 
 				// Compile validators for basic methods
@@ -57,6 +59,7 @@ module.exports = function (mixinOpts) {
 
 			if (!this.$primaryField) this.$primaryField = { name: "_id", columnName: "_id" };
 			if (this.$softDelete) this.logger.debug("Soft delete mode: ENABLED");
+			this.logger.debug(`Primary key field`, this.$primaryField);
 		},
 
 		_processFieldObject(fields) {
@@ -250,6 +253,7 @@ module.exports = function (mixinOpts) {
 				if (check) {
 					const res = check(params);
 					if (res !== true) {
+						this.logger.debug(`Parameter validation error`, res);
 						//console.log(res);
 						throw new ValidationError("Parameters validation error!", null, res);
 					}
@@ -263,6 +267,7 @@ module.exports = function (mixinOpts) {
 					if (field.validate) {
 						const res = field.validate.call(this, value, params, field, ctx);
 						if (res !== true) {
+							this.logger.debug(`Parameter validation error`, { res, field, value });
 							throw new ValidationError(res, "VALIDATION_ERROR", {
 								field: field.name,
 								value
@@ -394,6 +399,11 @@ module.exports = function (mixinOpts) {
 						// Required/optional
 						if (field.required) {
 							if ((value === null && !field.nullable) || value === undefined) {
+								this.logger.debug(`Parameter validation error. Field is required`, {
+									field,
+									value
+								});
+
 								throw new ValidationError(
 									"Parameters validation error!",
 									"VALIDATION_ERROR",
