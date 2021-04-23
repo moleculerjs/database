@@ -860,6 +860,55 @@ const post = await broker.call("posts.create", {
 ```
 
 
+## `createMany` Create multiple entities
+Create multiple entities.
+
+### Parameters
+There are no special parameters. All fields are used after validation for the entities.
+
+### REST endpoint
+*Not configured.*
+
+### Results
+Return the new entities as an array.
+
+### Examples
+
+```js
+const post = await broker.call("posts.createMany", [
+    {
+        title: "My first post",
+        content: "Content of my first post..."
+    },
+    {
+        title: "My second post",
+        content: "Content of my second post..."
+    }
+]);
+```
+
+**Result**
+```js
+[
+    {
+        id: "YVdnh5oQCyEIRja0",
+        title: "My first post",
+        content: "Content of my first post...",
+        votes: 0,
+        status: true,
+        createdAt: 1618077608593,
+    },
+    {
+        id: "NLHAC39hJuISIoYp",
+        title: "My second post",
+        content: "Content of my second post...",
+        votes: 0,
+        status: true,
+        createdAt: 1618077608597,
+    }
+]
+```
+
 ## `update` Update an entity
 Update an existing entity. Only the specified fields will be updated.
 

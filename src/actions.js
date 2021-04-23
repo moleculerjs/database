@@ -313,6 +313,24 @@ module.exports = function (mixinOpts) {
 	}
 
 	/**
+	 * Create multiple entities.
+	 *
+	 * @actions
+	 *
+	 * @returns {Array<Object>} Saved entities.
+	 */
+	if (actionEnabled("createMany")) {
+		res.createMany = {
+			visibility: mixinOpts.actionVisibility,
+			rest: null,
+			// params: {}, generate from `fields` in the `merged`
+			async handler(ctx) {
+				return this.createEntities(ctx);
+			}
+		};
+	}
+
+	/**
 	 * Update an entity by ID. It's patch only the received fields.
 	 *
 	 * @actions

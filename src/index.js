@@ -166,6 +166,25 @@ module.exports = function DatabaseMixin(mixinOpts) {
 							);
 						}
 
+						if (schema.actions.createMany) {
+							schema.actions.createMany.params = {
+								// TODO!
+								$$root: true,
+								type: "array",
+								empty: false,
+								items: {
+									type: "object",
+									strict: mixinOpts.strict,
+									properties: generateValidatorSchemaFromFields(fields, {
+										type: "create",
+										level: 1,
+										strict: mixinOpts.strict,
+										enableParamsConversion: mixinOpts.enableParamsConversion
+									})
+								}
+							};
+						}
+
 						if (schema.actions.update) {
 							schema.actions.update.params = generateValidatorSchemaFromFields(
 								fields,
