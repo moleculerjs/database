@@ -8,6 +8,8 @@
 
 const semver = require("semver");
 
+const clientStore = Symbol("db-adapter-client-store");
+
 class BaseAdapter {
 	/**
 	 * Constructor of adapter
@@ -34,6 +36,9 @@ class BaseAdapter {
 		this.logger = service.logger;
 		this.broker = service.broker;
 		this.Promise = this.broker.Promise;
+
+		// Global adapter store to share the adapters between services on the same broker if they use the same database.
+		if (!this.broker[clientStore]) this.broker[clientStore] = new Map();
 	}
 
 	/**
@@ -57,6 +62,49 @@ class BaseAdapter {
 			);
 			return false;
 		}
+	}
+
+	/**
+	 * Get a DB client from global store. If it exists, set the adapter as a reference to it.
+	 * @param {String} key
+	 * @returns
+	 */
+	getClientFromGlobalStore(key) {
+		const res = this.broker[clientStore].get(key);
+		if (res) res.adapters.add(this);
+		return res ? res.client : null;
+	}
+
+	/**
+	 * Set a DB client to the global store
+	 * @param {String} key
+	 * @param {any} client
+	 * @returns
+	 */
+	setClientToGlobalStore(key, client) {
+		const adapters = new Set().add(this);
+		return this.broker[clientStore].set(key, {
+			client,
+			adapters
+		});
+	}
+
+	/**
+	 * Remove a referenced adapter from the DB client in the global store.
+	 * @param {String} key
+	 * @returns {Boolean} If `true`, the adapter should close the connection,
+	 */
+	removeAdapterFromClientGlobalStore(key) {
+		const res = this.broker[clientStore].get(key);
+		if (res) {
+			res.adapters.delete(this);
+			if (res.adapters.size > 0) return false; // Adapter does't close the connection yet
+
+			// Remove the client from store because there is no adapter
+			this.broker[clientStore].delete(key);
+		}
+		// Asapter closes the connection
+		return true;
 	}
 
 	/**

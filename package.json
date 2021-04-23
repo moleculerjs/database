@@ -49,6 +49,7 @@
     "kleur": "^4.1.4",
     "knex": "^0.95.4",
     "moleculer": "^0.14.13",
+    "moleculer-repl": "^0.6.4",
     "moleculer-web": "^0.10.0-beta3",
     "mongodb": "^3.6.6",
     "mongoose": "^5.12.4",

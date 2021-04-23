@@ -18,7 +18,7 @@ class MongoDBAdapter extends BaseAdapter {
 	 * Constructor of adapter.
 	 *
 	 * @param  {Object?} opts
-	 * @param  {String} opts.dbName
+	 * @param  {String?} opts.dbName
 	 * @param  {String?} opts.collection
 	 * @param  {Object?} opts.mongoClientOptions More Info: https://docs.mongodb.com/drivers/node/current/fundamentals/connection/#connection-options
 	 * @param  {Object?} opts.dbOptions More Info: http://mongodb.github.io/node-mongodb-native/3.6/api/MongoClient.html#db
@@ -47,9 +47,6 @@ class MongoDBAdapter extends BaseAdapter {
 	init(service) {
 		super.init(service);
 
-		if (!this.opts.dbName) {
-			throw new ServiceSchemaError("Missing `dbName` in adapter options!");
-		}
 		if (!this.opts.collection) {
 			this.opts.collection = service.name;
 		}
@@ -75,29 +72,38 @@ class MongoDBAdapter extends BaseAdapter {
 	async connect() {
 		const uri = this.opts.uri || "mongodb://localhost:27017";
 
-		this.logger.debug(`MongoDB adapter is connecting to '${uri}'...`);
-		this.client = new MongoClient(
-			uri,
-			_.defaultsDeep(this.opts.mongoClientOptions, {
-				useUnifiedTopology: true,
-				useNewUrlParser: true
-			})
-		);
+		this.storeKey = `mongodb|${uri}`;
+		this.client = this.getClientFromGlobalStore(this.storeKey);
+		if (!this.client) {
+			this.logger.debug(`MongoDB adapter is connecting to '${uri}'...`);
+			this.client = new MongoClient(
+				uri,
+				_.defaultsDeep(this.opts.mongoClientOptions, {
+					useUnifiedTopology: true,
+					useNewUrlParser: true
+				})
+			);
 
-		this.client.on("open", () =>
-			this.logger.info(
-				`MongoDB adapter has connected. Database: '${this.opts.dbName}', Collection: '${this.opts.collection}'`
-			)
-		);
-		this.client.on("close", () => this.logger.warn("MongoDB adapter has disconnected."));
-		this.client.on("error", err => this.logger.error("MongoDB error.", err));
+			this.logger.debug("Store the created MongoDB client", this.storeKey);
+			this.setClientToGlobalStore(this.storeKey, this.client);
 
-		// Connect the client to the server
-		await this.client.connect();
+			this.client.on("open", () => this.logger.info(`MongoDB client has connected.`));
+			this.client.on("close", () => this.logger.warn("MongoDB client has disconnected."));
+			this.client.on("error", err => this.logger.error("MongoDB error.", err));
 
-		// Select DB and verify connection
-		this.logger.debug("Selecting database:", this.opts.dbName);
-		this.db = this.client.db(this.opts.dbName, this.opts.dbOptions);
+			// Connect the client to the server
+			await this.client.connect();
+		} else {
+			this.logger.debug("Using an existing MongoDB client", this.storeKey);
+		}
+
+		if (this.opts.dbName) {
+			// Select DB and verify connection
+			this.logger.debug("Selecting database:", this.opts.dbName);
+			this.db = this.client.db(this.opts.dbName, this.opts.dbOptions);
+		} else {
+			this.db = this.client.db();
+		}
 		await this.db.command({ ping: 1 });
 		this.logger.debug("Database selected successfully.");
 
@@ -109,7 +115,9 @@ class MongoDBAdapter extends BaseAdapter {
 	 * Disconnect adapter from database
 	 */
 	async disconnect() {
-		if (this.client) await this.client.close();
+		if (this.client) {
+			if (this.removeAdapterFromClientGlobalStore(this.storeKey)) await this.client.close();
+		}
 	}
 
 	/**
