@@ -23,13 +23,14 @@
 ## Features
 - [x] Multi model/tenant solutions
     - [ ] schema-based for integration tests
-- [ ] `bulkCreate` action without REST
-- [ ] option to add other service cache cleaning events in the Mixin options
+- [ ] `createMany` action without REST
+- [x] option to add other service cache cleaning events in the Mixin options
 - [ ] generate GraphQL types & resolvers
 - [ ] validate `raw: true` update fields (`$set`, `$inc`)
 - [ ] add custom tracings (validating, transforming)
 - [ ] add custom metrics (for all basic functions (create, update, replace, remove))
   - [ ] https://gist.github.com/intech/b6e809c729835cb1da6411c4a940846b
+
 ## Adapters
 - [ ] Cassandra
 - [ ] Couchbase

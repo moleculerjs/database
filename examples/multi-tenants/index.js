@@ -4,9 +4,9 @@ const { ServiceBroker } = require("moleculer");
 const { inspect } = require("util");
 const DbService = require("../../index").Service;
 
-const tenant1Meta = { meta: { tenantId: 1001 } };
-const tenant2Meta = { meta: { tenantId: 1002 } };
-const tenant3Meta = { meta: { tenantId: 1003 } };
+const tenant1Meta = { meta: { tenantId: 1001 }, broadcast: () => {} };
+const tenant2Meta = { meta: { tenantId: 1002 }, broadcast: () => {} };
+const tenant3Meta = { meta: { tenantId: 1003 }, broadcast: () => {} };
 
 // Create broker
 const broker = new ServiceBroker({

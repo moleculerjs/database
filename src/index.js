@@ -45,7 +45,9 @@ module.exports = function DatabaseMixin(mixinOpts) {
 			/** @type {String} Name of event for clearing cache */
 			eventName: null,
 			/** @type {String} Type of event for clearing cache */
-			eventType: "broadcast"
+			eventType: "broadcast",
+			/** @type {Boolean|Array<String>} Subscribe to cache clean event of service dependencies and clear the local cache entries */
+			cacheCleanOnDeps: true
 		},
 		/** @type {Boolean} Set auto-aliasing fields */
 		rest: true,
@@ -234,6 +236,34 @@ module.exports = function DatabaseMixin(mixinOpts) {
 							await this.broker.cacher.clean(`${this.fullName}.**`);
 						}
 					};
+				}
+
+				// Subscribe to additional service cache clean events
+				if (mixinOpts.cache.cacheCleanOnDeps) {
+					const additionalEventNames = [];
+					if (Array.isArray(mixinOpts.cache.cacheCleanOnDeps)) {
+						additionalEventNames.push(...mixinOpts.cache.cacheCleanOnDeps);
+					} else if (mixinOpts.cache.cacheCleanOnDeps === true) {
+						// Traverse dependencies and collect the service names
+						const svcDeps = schema.dependencies;
+						if (Array.isArray(svcDeps)) {
+							additionalEventNames.push(
+								...svcDeps
+									.map(s => (_.isPlainObject(s) && s.name ? s.name : s))
+									.map(s => `cache.clean.${s}`)
+							);
+						}
+					}
+
+					if (additionalEventNames.length > 0) {
+						additionalEventNames.forEach(eventName => {
+							schema.events[eventName] = async function () {
+								if (this.broker.cacher) {
+									await this.broker.cacher.clean(`${this.fullName}.**`);
+								}
+							};
+						});
+					}
 				}
 			}
 		}

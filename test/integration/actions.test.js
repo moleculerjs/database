@@ -1177,4 +1177,160 @@ module.exports = (getAdapter, adapterType) => {
 			expect(svc.resolveEntities).toBeCalledTimes(0);
 		});
 	});
+
+	describe("Test caching with dependencies", () => {
+		const broker = new ServiceBroker({ logger: false, cacher: "Memory" });
+		const svc = broker.createService({
+			name: "posts",
+			mixins: [
+				DbService({
+					adapter: getAdapter()
+				})
+			],
+			dependencies: ["users", { name: "comments" }],
+			settings: {
+				fields: {
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: "integer"
+					},
+					title: { type: "string", trim: true, required: true },
+					content: { type: "string", trim: true }
+				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
+
+				jest.spyOn(broker, "broadcast");
+				jest.spyOn(broker.cacher, "clean");
+			}
+		});
+
+		broker.createService({
+			name: "users",
+			mixins: [
+				DbService({
+					adapter: getAdapter()
+				})
+			]
+		});
+
+		broker.createService({
+			name: "comments",
+			mixins: [
+				DbService({
+					adapter: getAdapter()
+				})
+			]
+		});
+
+		beforeAll(() => broker.start());
+		afterAll(() => broker.stop());
+
+		it("should clear posts cached entities if user created", async () => {
+			broker.broadcast.mockClear();
+			broker.cacher.clean.mockClear();
+
+			const row = await broker.call("users.create", { name: "John Doe" });
+
+			expect(broker.broadcast).toBeCalledTimes(2);
+			expect(broker.broadcast).toBeCalledWith(
+				"cache.clean.users",
+				{
+					type: "create",
+					data: row,
+					opts: {}
+				},
+				{
+					parentCtx: expect.any(Context)
+				}
+			);
+			expect(broker.cacher.clean).toBeCalledTimes(2);
+			expect(broker.cacher.clean).toBeCalledWith("users.**");
+			expect(broker.cacher.clean).toBeCalledWith("posts.**");
+		});
+
+		it("should clear posts cached entities if comment created", async () => {
+			broker.broadcast.mockClear();
+			broker.cacher.clean.mockClear();
+
+			const row = await broker.call("comments.create", { title: "New comment" });
+
+			expect(broker.broadcast).toBeCalledTimes(2);
+			expect(broker.broadcast).toBeCalledWith(
+				"cache.clean.comments",
+				{
+					type: "create",
+					data: row,
+					opts: {}
+				},
+				{
+					parentCtx: expect.any(Context)
+				}
+			);
+			expect(broker.cacher.clean).toBeCalledTimes(2);
+			expect(broker.cacher.clean).toBeCalledWith("comments.**");
+			expect(broker.cacher.clean).toBeCalledWith("posts.**");
+		});
+	});
+
+	describe("Test caching with additional events", () => {
+		const broker = new ServiceBroker({ logger: false, cacher: "Memory" });
+		const svc = broker.createService({
+			name: "posts",
+			mixins: [
+				DbService({
+					adapter: getAdapter(),
+					cache: {
+						cacheCleanOnDeps: ["something.created"]
+					}
+				})
+			],
+			settings: {
+				fields: {
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: "integer"
+					},
+					title: { type: "string", trim: true, required: true },
+					content: { type: "string", trim: true }
+				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
+
+				jest.spyOn(broker.cacher, "clean");
+			}
+		});
+
+		beforeAll(() => broker.start());
+		afterAll(() => broker.stop());
+
+		it("should clear posts cached entities if 'something.created' fired", async () => {
+			broker.cacher.clean.mockClear();
+
+			await broker.broadcast("something.created", { name: "John Doe" });
+
+			expect(broker.cacher.clean).toBeCalledTimes(1);
+			expect(broker.cacher.clean).toBeCalledWith("posts.**");
+		});
+	});
 };
