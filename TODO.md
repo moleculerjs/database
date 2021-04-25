@@ -5,6 +5,11 @@
 - [x] in Knex if MSSQL and has offset but no sort, if should add a sort to the primary key field
   - [x] https://github.com/knex/knex/issues/1527
 
+- [ ] More integration tests
+  - [ ] createIndex, removeIndex
+  - [ ] Knex createCursor operators `$`
+  - [ ] global pool handling
+
 ## Actions
 - [ ] `aggregate` action with params: `type: "sum", "avg", "count", "min", "max"` & `field: "price"`
 
