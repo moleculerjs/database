@@ -108,7 +108,7 @@ const res = await broker.call("posts.remove", { id: post.id });
 console.log("Deleted:", res);
 ```
 
->TODO add repl.it example with this code
+[**Try it in your browser on repl.it**](https://replit.com/@icebob/moleculer-database-common)
 
 ## Documentation
 You can find [here the documentation](docs/README.md).
