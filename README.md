@@ -29,8 +29,11 @@ Advanced Database Access Service for Moleculer microservices framework. Use it t
 - Multi-tenancy
 
 ## Install
-```
+<!-- ```
 npm i @moleculer/database nedb
+``` -->
+```
+npm i moleculerjs/database nedb
 ```
 
 ## Usage
