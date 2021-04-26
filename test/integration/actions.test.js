@@ -1266,7 +1266,24 @@ module.exports = (getAdapter, adapterType) => {
 				DbService({
 					adapter: getAdapter()
 				})
-			]
+			],
+			settings: {
+				fields: {
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: "integer"
+					}
+				}
+			},
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+			}
 		});
 
 		broker.createService({
@@ -1275,7 +1292,24 @@ module.exports = (getAdapter, adapterType) => {
 				DbService({
 					adapter: getAdapter()
 				})
-			]
+			],
+			settings: {
+				fields: {
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: "integer"
+					}
+				}
+			},
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+			}
 		});
 
 		beforeAll(() => broker.start());

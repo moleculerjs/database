@@ -60,7 +60,7 @@ module.exports = {
             votes: { type: "number", integer: true, min: 0, default: 0 },
             status: { type: "boolean", default: true },
             createdAt: { type: "number", readonly: true, onCreate: () => Date.now() },
-            updateAt: { type: "number", readonly: true, onUpdate: () => Date.now() }
+            updatedAt: { type: "number", readonly: true, onUpdate: () => Date.now() }
         }
     }
 }
