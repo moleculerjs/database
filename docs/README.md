@@ -32,6 +32,7 @@ The settings of the service.
 | `fields` | `Object` | `null` | Field definitions. [More info](#fields) |
 | `scopes` | `Object` | `null` | Scope definitions. [More info](#scopes) |
 | `defaultScopes` | `Array<String>` | `null` | Default scope names. [More info](#scopes) |
+| `defaultPopulates` | `Array<String>` | `null` | Default populated fields. [More info](#populating) |
 | `indexes` | `Object` | `null` | Index definitions. [More info](#indexes) |
 
 
@@ -1642,13 +1643,16 @@ module.exports = {
                 virtual: true,
                 populate: (ctx, values, entities, field) => {
                     return Promise.all(
-                        entities.map(entity =>
-                            ctx.call("posts.count", { query: { authorID: entity.id } })
+                        entities.map(async entity =>
+                            entity.postCount = await ctx.call("posts.count", { query: { authorID: entity.id } });
                         )
                     );
                 }
             }
-        }
+        },
+
+        // Default populates that are always populated
+        defaultPopulates: ["author", "postCount"]
     }
     // ...
 }

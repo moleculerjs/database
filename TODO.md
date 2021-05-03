@@ -23,7 +23,9 @@
   - [ ] or find with query validate every entity, clear cache, send notify (batch)
 - [x] limiting the maximum opened adapters (in case of multi-tenancy)
   - [ ] add an `onAdapterConnected` and `onAdapterDisconnected` hooks in mixin options, if string it's a method name.
-
+- [ ] `findEntity` with sorting
+- [ ] CRUD methods `opts.allowReadonly: false` to disable `readonly` validation to save these fields, as well.
+  - [ ] `skipPermissions` skips the field permission checks.
 
 ## Features
 - [x] Multi model/tenant solutions
@@ -37,6 +39,8 @@
   - [ ] https://gist.github.com/intech/b6e809c729835cb1da6411c4a940846b
 
 ## Adapters
+- [ ] `findOne` with sorting
+
 - [ ] Cassandra
 - [ ] Couchbase
 - [ ] CouchDB

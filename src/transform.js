@@ -30,7 +30,7 @@ module.exports = function (mixinOpts) {
 		/**
 		 * Transform the result rows.
 		 *
-		 * @param {Adapter} adapter
+		 * @param {Adapter?} adapter
 		 * @param {Object|Array<Object>} docs
 		 * @param {Object?} params
 		 * @param {Context?} ctx
@@ -47,10 +47,11 @@ module.exports = function (mixinOpts) {
 				}
 			}
 
+			if (!adapter) adapter = await this.getAdapter(ctx);
 			docs = docs.map(doc => adapter.entityToJSON(doc));
 
 			if (this.$fields) {
-				docs = await this._transformFields(adapter, docs, ctx, params);
+				docs = await this._transformFields(adapter, docs, params, ctx);
 			}
 
 			return isDoc ? docs[0] : docs;
@@ -61,10 +62,10 @@ module.exports = function (mixinOpts) {
 		 *
 		 * @param {Adapter} adapter
 		 * @param {Array<Object>} docs
-		 * @param {Context?} ctx
 		 * @param {Object} params
+		 * @param {Context?} ctx
 		 */
-		async _transformFields(adapter, docs, ctx, params) {
+		async _transformFields(adapter, docs, params, ctx) {
 			let customFieldList = false;
 			let selectedFields = this.$fields;
 			if (Array.isArray(params.fields)) {

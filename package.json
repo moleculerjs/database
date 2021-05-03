@@ -1,5 +1,5 @@
 {
-  "name": "database",
+  "name": "@moleculerjs/database",
   "version": "0.0.0",
   "description": "Advanced Database Access Service for Moleculer microservices framework",
   "main": "index.js",

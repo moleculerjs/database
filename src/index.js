@@ -100,6 +100,9 @@ module.exports = function DatabaseMixin(mixinOpts) {
 			/** @type {Array<String>?} Default scopes which applies to `find` & `list` actions */
 			defaultScopes: null,
 
+			/** @type {Array<String>?} Default populated fields */
+			defaultPopulates: null,
+
 			/** @type {Object?} Index definitions */
 			indexes: null
 		},
