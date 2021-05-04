@@ -30,6 +30,7 @@ jobs:
 
     - name: Run benchmark tests
       run: npm run bench
+      timeout-minutes: 15
 
     - name: Show container logs (in case of failure)
       run: docker-compose logs
