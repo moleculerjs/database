@@ -429,6 +429,8 @@ async function run() {
 		await broker.stop();
 	}
 	console.log("Done.");
+
+	process.exit(0);
 }
 
 run();
