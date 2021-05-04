@@ -52,7 +52,7 @@
     "moleculer-repl": "^0.6.4",
     "moleculer-web": "^0.10.0-beta3",
     "mongodb": "^3.6.6",
-    "mongoose": "^5.12.5",
+    "mongoose": "^5.12.7",
     "mysql": "^2.18.1",
     "mysql2": "^2.2.5",
     "nedb": "^1.8.0",
@@ -63,7 +63,7 @@
     "qs": "^6.10.1",
     "sequelize": "^6.6.2",
     "sqlite3": "^5.0.2",
-    "tedious": "^11.0.7"
+    "tedious": "^11.0.8"
   },
   "jest": {
     "testEnvironment": "node",
