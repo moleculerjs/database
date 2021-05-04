@@ -113,6 +113,9 @@ console.log("Deleted:", res);
 ## Documentation
 You can find [here the documentation](docs/README.md).
 
+## Benchmark
+There is some benchmark with all adapters. [You can find the results here.](benchmark/results/common/README.md)
+
 ## License
 The project is available under the [MIT license](https://tldrlegal.com/license/mit-license).
 
