@@ -38,6 +38,7 @@ module.exports = (getAdapter, adapterType) => {
 					},
 					createdAt: {
 						type: "number",
+						readonly: true,
 						onCreate: Date.now,
 						columnType: "bigInteger",
 						columnName: "created_at",
@@ -45,6 +46,7 @@ module.exports = (getAdapter, adapterType) => {
 					},
 					updatedAt: {
 						type: "number",
+						readonly: true,
 						onUpdate: Date.now,
 						columnType: "bigInteger",
 						columnName: "updated_at",

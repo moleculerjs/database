@@ -559,15 +559,17 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 							default: true,
 							get: adapterType == "Knex" ? v => !!v : undefined
 						},
-						updatedAt: {
+						createdAt: {
 							type: "number",
-							onUpdate: Date.now,
+							readonly: true,
+							onCreate: Date.now,
 							columnType: "bigInteger",
 							get: v => (v != null ? Number(v) : v)
 						},
-						createdAt: {
+						updatedAt: {
 							type: "number",
-							onCreate: Date.now,
+							readonly: true,
+							onUpdate: Date.now,
 							columnType: "bigInteger",
 							get: v => (v != null ? Number(v) : v)
 						}
@@ -639,6 +641,7 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 				},
 				createdAt: {
 					type: "number",
+					readonly: true,
 					onCreate: Date.now,
 					columnType: "bigInteger",
 					columnName: "created_at",
@@ -646,6 +649,7 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 				},
 				updatedAt: {
 					type: "number",
+					readonly: true,
 					onUpdate: Date.now,
 					columnType: "bigInteger",
 					columnName: "updated_at",
@@ -653,6 +657,7 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 				},
 				deletedAt: {
 					type: "number",
+					readonly: true,
 					onRemove: Date.now,
 					columnType: "bigInteger",
 					columnName: "deleted_at",
