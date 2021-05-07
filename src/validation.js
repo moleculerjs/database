@@ -268,7 +268,7 @@ module.exports = function (mixinOpts) {
 					// Custom validator
 					// Syntax: `validate: (value, entity, field, ctx) => value.length > 6 || "Too short"`
 					if (field.validate) {
-						const res = field.validate.call(this, value, params, field, ctx);
+						const res = await field.validate.call(this, value, params, field, ctx);
 						if (res !== true) {
 							this.logger.debug(`Parameter validation error`, { res, field, value });
 							throw new ValidationError(res, "VALIDATION_ERROR", {
