@@ -539,7 +539,9 @@ describe("Test validation", () => {
 				svc.settings.fields = {
 					name: { type: "string", required: true },
 					password: { type: "string", readonly: true },
-					role: { type: "string", immutable: true }
+					role: { type: "string", immutable: true },
+					slug: { type: "string", readonly: true, set: () => "slug" },
+					createdAt: { type: "number", readonly: true, onCreate: () => 123456 }
 				};
 
 				svc._processFields();
@@ -554,7 +556,9 @@ describe("Test validation", () => {
 				const res = await svc.validateParams(ctx, params);
 				expect(res).toEqual({
 					name: "John",
-					role: "admin"
+					role: "admin",
+					slug: "slug",
+					createdAt: 123456
 				});
 			});
 
@@ -565,7 +569,9 @@ describe("Test validation", () => {
 				};
 				const res = await svc.validateParams(ctx, params);
 				expect(res).toEqual({
-					name: "John"
+					name: "John",
+					slug: "slug",
+					createdAt: 123456
 				});
 			});
 
@@ -579,9 +585,13 @@ describe("Test validation", () => {
 				expect(res).toEqual({
 					name: "John2",
 					password: "pass1234",
-					role: "guest"
+					role: "guest",
+					slug: "slug",
+					createdAt: 123456
 				});
 			});
+
+			it("should set if has 'set'", async () => {});
 		});
 
 		describe("Test hook", () => {

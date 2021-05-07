@@ -353,13 +353,11 @@ module.exports = function (mixinOpts) {
 					// Virtual field
 					if (field.virtual) return;
 
-					// Readonly
-					if (field.readonly && !opts.permissive) return;
-
 					// Custom formatter (can be async)
 					// Syntax: `set: (value, entity, field, ctx) => value.toUpperCase()`
 					if (field.set) {
 						value = await field.set.call(this, value, params, field, ctx);
+						return setValue(field, value);
 					}
 
 					// Handlers
@@ -402,6 +400,7 @@ module.exports = function (mixinOpts) {
 								} else {
 									value = field.default;
 								}
+								return setValue(field, value);
 							}
 						}
 
@@ -428,6 +427,9 @@ module.exports = function (mixinOpts) {
 							}
 						}
 					}
+
+					// Readonly
+					if (field.readonly && !opts.permissive) return;
 
 					// Immutable (should check the previous value, if not set yet, we should enable)
 					if (
