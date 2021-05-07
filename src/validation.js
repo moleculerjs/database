@@ -289,6 +289,7 @@ module.exports = function (mixinOpts) {
 					// Array
 					if (field.type == "array") {
 						if (!Array.isArray(value)) {
+							this.logger.debug(`Parameter validation error`, { field, value });
 							throw new ValidationError(
 								`The field '${field.name}' must be an Array.`,
 								"VALIDATION_ERROR",
@@ -317,6 +318,31 @@ module.exports = function (mixinOpts) {
 									value[i] = await sanitizeValue(field.items, value[i]);
 								}
 							}
+						}
+					}
+				}
+
+				if (["create", "replace"].includes(type)) {
+					// Required/optional
+					if (field.required) {
+						if ((value === null && !field.nullable) || value === undefined) {
+							this.logger.debug(`Parameter validation error. Field is required`, {
+								field,
+								value
+							});
+
+							throw new ValidationError(
+								"Parameters validation error!",
+								"VALIDATION_ERROR",
+								[
+									{
+										type: "required",
+										field: field.name,
+										message: `The '${field.name}' field is required.`,
+										actual: value
+									}
+								]
+							);
 						}
 					}
 				}
@@ -401,29 +427,6 @@ module.exports = function (mixinOpts) {
 									value = field.default;
 								}
 								return setValue(field, value);
-							}
-						}
-
-						// Required/optional
-						if (field.required) {
-							if ((value === null && !field.nullable) || value === undefined) {
-								this.logger.debug(`Parameter validation error. Field is required`, {
-									field,
-									value
-								});
-
-								throw new ValidationError(
-									"Parameters validation error!",
-									"VALIDATION_ERROR",
-									[
-										{
-											type: "required",
-											field: field.name,
-											message: `The '${field.name}' field is required.`,
-											actual: value
-										}
-									]
-								);
 							}
 						}
 					}
