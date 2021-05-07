@@ -105,7 +105,7 @@ if (process.env.GITHUB_ACTIONS_CI) {
 	Adapters = [
 		{
 			type: "NeDB"
-		},
+		} /*,
 		{ type: "MongoDB", options: { dbName: "db_int_test" } },
 		{
 			name: "Knex-SQLite",
@@ -141,7 +141,7 @@ if (process.env.GITHUB_ACTIONS_CI) {
 					}
 				}
 			}
-		} /*,
+		}*/ /*,
 		{
 			name: "Knex-MySQL",
 			type: "Knex",

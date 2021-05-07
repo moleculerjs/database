@@ -24,8 +24,7 @@
 - [x] limiting the maximum opened adapters (in case of multi-tenancy)
   - [ ] add an `onAdapterConnected` and `onAdapterDisconnected` hooks in mixin options, if string it's a method name.
 - [ ] `findEntity` with sorting
-- [ ] CRUD methods `opts.allowReadonly: false` to disable `readonly` validation to save these fields, as well.
-  - [ ] `skipPermissions` skips the field permission checks.
+- [x] CRUD methods `opts.permissive: true` to disable `readonly`, `immutable` validation to save these fields, and skip permission checks in validation.
 
 ## Features
 - [x] Multi model/tenant solutions

@@ -741,7 +741,7 @@ Resolve an entity based on one or more IDs.
 | `scope` | `String\|Array<String>\|Boolean` | `null` | Scopes for the query. If `false`, the default scopes are disabled. |
 | `populate` | `String\|Array<String>` | `null` | Populated fields. |
 | `mapping` | `boolean` | `false` | Convert the result to `Object` where the key is the ID. |
-| `throwIfNotExist` | `boolean` | `false` | If `true`, th error `EntityNotFound` is thrown if the entity does not exist. |
+| `throwIfNotExist` | `boolean` | `false` | If `true`, the error `EntityNotFound` is thrown if the entity does not exist. |
 
 
 ### REST endpoint
@@ -1149,7 +1149,7 @@ Return entity(ies) by ID(s).
 | `params` | `Object` | `null` | Parameters for search. It's same as [`resolve` action parameters](#parameters-4) |
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
-| `opts.throwIfNotExist` | `boolean` | `false` | If `true`, th error `EntityNotFound` is thrown if the entity does not exist. |
+| `opts.throwIfNotExist` | `boolean` | `false` | If `true`, the error `EntityNotFound` is thrown if the entity does not exist. |
 
 
 ## `createEntity`
@@ -1164,6 +1164,7 @@ Create an entity.
 | `params` | `Object` | `null` | Entity fields. |
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
+| `opts.permissive` | `Boolean` | `false` | If `true`, readonly and immutable fields can be set and update and field permission is not checked. |
 
 
 ## `createEntities`
@@ -1178,6 +1179,7 @@ Create multiple entities.
 | `params` | `Array<Object>` | `null` | Array of entities. |
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
+| `opts.permissive` | `Boolean` | `false` | If `true`, readonly and immutable fields can be set and update and field permission is not checked. |
 
 
 ## `updateEntity`
@@ -1193,6 +1195,7 @@ Update an existing entity. Only the specified fields will be updated.
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.raw` | `Boolean` | `false` | If `true`, the `params` is passed directly to the database client. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
+| `opts.permissive` | `Boolean` | `false` | If `true`, readonly and immutable fields can be set and update and field permission is not checked. |
 
 
 ## `replaceEntity`
@@ -1207,6 +1210,7 @@ Replace an existing entity.
 | `params` | `Object` | `null` | It contains the entire entity that is to be replaced. |
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
+| `opts.permissive` | `Boolean` | `false` | If `true`, readonly and immutable fields can be set and update and field permission is not checked. |
 
 
 ## `removeEntity`
@@ -1248,6 +1252,7 @@ It validates & sanitizes the input data in `params` against the `fields` definit
 | `params` | `Object` | `null` | Values of the entity fields. |
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.type` | `String` | `"create"` | Type of method. |
+| `opts.permissive` | `Boolean` | `false` | If `true`, readonly and immutable fields can be set and update and field permission is not checked. |
 
 
 ## `transformResult`

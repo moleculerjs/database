@@ -72,12 +72,9 @@ module.exports = function (mixinOpts) {
 				selectedFields = this.$fields.filter(f => params.fields.includes(f.name));
 				customFieldList = true;
 			}
-			const authorizedFields = await this._authorizeFields(
-				selectedFields,
-				ctx,
-				params,
-				false
-			);
+			const authorizedFields = await this._authorizeFields(selectedFields, ctx, params, {
+				isWrite: false
+			});
 
 			const res = Array.from(docs).map(() => ({}));
 

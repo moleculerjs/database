@@ -711,6 +711,68 @@ module.exports = (getAdapter, adapterType) => {
 				expect(res2).toStrictEqual(entity);
 			});
 		});
+
+		describe("Test with permissive option", () => {
+			let entity = {
+				name: "John",
+				role: "administrator"
+			};
+
+			it("should update role field at create", async () => {
+				const res = await svc.createEntity(null, entity, { permissive: true });
+				expect(res).toStrictEqual({
+					id: expectedID,
+					name: "John",
+					role: "administrator"
+				});
+				entity = res;
+
+				const res2 = await broker.call("users.get", { id: entity.id });
+				expect(res2).toStrictEqual(entity);
+			});
+
+			it("should update role field at update", async () => {
+				const res = await svc.updateEntity(
+					null,
+					{
+						id: "" + entity.id,
+						name: "John Doe",
+						role: "moderator"
+					},
+					{ permissive: true }
+				);
+				expect(res).toStrictEqual({
+					id: expectedID,
+					name: "John Doe",
+					role: "moderator"
+				});
+				entity = res;
+
+				const res2 = await broker.call("users.get", { id: entity.id });
+				expect(res2).toStrictEqual(entity);
+			});
+
+			it("should update role field at replace", async () => {
+				const res = await svc.replaceEntity(
+					null,
+					{
+						id: "" + entity.id,
+						name: "Jane Doe",
+						role: "guest"
+					},
+					{ permissive: true }
+				);
+				expect(res).toStrictEqual({
+					id: expectedID,
+					name: "Jane Doe",
+					role: "guest"
+				});
+				entity = res;
+
+				const res2 = await broker.call("users.get", { id: entity.id });
+				expect(res2).toStrictEqual(entity);
+			});
+		});
 	});
 
 	describe("Test immutable field", () => {
@@ -870,6 +932,68 @@ module.exports = (getAdapter, adapterType) => {
 					id: expectedID,
 					name: "Jane Doe",
 					role: "moderator"
+				});
+				entity = res;
+
+				const res2 = await broker.call("users.get", { id: entity.id });
+				expect(res2).toStrictEqual(entity);
+			});
+		});
+
+		describe("Test with permissive option", () => {
+			let entity = {
+				name: "John",
+				role: "administrator"
+			};
+
+			it("should store role field at create", async () => {
+				const res = await broker.call("users.create", entity);
+				expect(res).toStrictEqual({
+					id: expectedID,
+					name: "John",
+					role: "administrator"
+				});
+				entity = res;
+
+				const res2 = await broker.call("users.get", { id: entity.id });
+				expect(res2).toStrictEqual(entity);
+			});
+
+			it("should update role field at update", async () => {
+				const res = await svc.updateEntity(
+					null,
+					{
+						id: entity.id,
+						name: "John Doe",
+						role: "moderator"
+					},
+					{ permissive: true }
+				);
+				expect(res).toStrictEqual({
+					id: expectedID,
+					name: "John Doe",
+					role: "moderator"
+				});
+				entity = res;
+
+				const res2 = await broker.call("users.get", { id: entity.id });
+				expect(res2).toStrictEqual(entity);
+			});
+
+			it("should replace role field at replace", async () => {
+				const res = await svc.replaceEntity(
+					null,
+					{
+						id: entity.id,
+						name: "Jane Doe",
+						role: "guest"
+					},
+					{ permissive: true }
+				);
+				expect(res).toStrictEqual({
+					id: expectedID,
+					name: "Jane Doe",
+					role: "guest"
 				});
 				entity = res;
 

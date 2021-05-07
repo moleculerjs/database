@@ -227,7 +227,12 @@ describe("Test validation", () => {
 				const res = await svc._authorizeFields(svc.$fields, ctx, { a: 5 });
 				expect(res).toEqual(svc.$fields);
 
-				const res2 = await svc._authorizeFields(svc.$fields, ctx, { a: 5 }, true);
+				const res2 = await svc._authorizeFields(
+					svc.$fields,
+					ctx,
+					{ a: 5 },
+					{ isWrite: true }
+				);
 				expect(res2).toEqual(svc.$fields);
 			});
 
@@ -267,7 +272,12 @@ describe("Test validation", () => {
 
 			it("should return fields with write permission", async () => {
 				svc.checkFieldAuthority = jest.fn(async () => false);
-				const res = await svc._authorizeFields(svc.$fields, ctx, { a: 5 }, true);
+				const res = await svc._authorizeFields(
+					svc.$fields,
+					ctx,
+					{ a: 5 },
+					{ isWrite: true }
+				);
 				expect(res).toEqual([
 					{
 						columnName: "name",
@@ -297,6 +307,91 @@ describe("Test validation", () => {
 					{ a: 5 },
 					svc.$fields[3]
 				);
+			});
+
+			it("should return fields with write permission", async () => {
+				svc.checkFieldAuthority = jest.fn(async () => false);
+				const res = await svc._authorizeFields(
+					svc.$fields,
+					ctx,
+					{ a: 5 },
+					{ isWrite: true }
+				);
+				expect(res).toEqual([
+					{
+						columnName: "name",
+						name: "name",
+						type: "string",
+						columnType: "string",
+						required: false
+					}
+				]);
+
+				expect(svc.checkFieldAuthority).toBeCalledTimes(3);
+				expect(svc.checkFieldAuthority).toBeCalledWith(
+					ctx,
+					"owner",
+					{ a: 5 },
+					svc.$fields[1]
+				);
+				expect(svc.checkFieldAuthority).toBeCalledWith(
+					ctx,
+					"moderator",
+					{ a: 5 },
+					svc.$fields[2]
+				);
+				expect(svc.checkFieldAuthority).toBeCalledWith(
+					ctx,
+					["admin", "moderator", "owner"],
+					{ a: 5 },
+					svc.$fields[3]
+				);
+			});
+
+			it("should return all fields if permissive", async () => {
+				svc.checkFieldAuthority = jest.fn(async () => false);
+				const res = await svc._authorizeFields(
+					svc.$fields,
+					ctx,
+					{ a: 5 },
+					{ isWrite: true, permissive: true }
+				);
+				expect(res).toEqual([
+					{
+						columnName: "name",
+						columnType: "string",
+						name: "name",
+						required: false,
+						type: "string"
+					},
+					{
+						columnName: "password",
+						columnType: "string",
+						name: "password",
+						permission: "owner",
+						readPermission: "admin",
+						required: false,
+						type: "string"
+					},
+					{
+						columnName: "email",
+						columnType: "string",
+						name: "email",
+						permission: "moderator",
+						required: false,
+						type: "string"
+					},
+					{
+						columnName: "phone",
+						columnType: "string",
+						name: "phone",
+						permission: ["admin", "moderator", "owner"],
+						required: false,
+						type: "string"
+					}
+				]);
+
+				expect(svc.checkFieldAuthority).toBeCalledTimes(0);
 			});
 		});
 	});
@@ -471,6 +566,20 @@ describe("Test validation", () => {
 				const res = await svc.validateParams(ctx, params);
 				expect(res).toEqual({
 					name: "John"
+				});
+			});
+
+			it("should set both if permissive: true", async () => {
+				const params = {
+					name: "John2",
+					password: "pass1234",
+					role: "guest"
+				};
+				const res = await svc.validateParams(ctx, params, { permissive: true });
+				expect(res).toEqual({
+					name: "John2",
+					password: "pass1234",
+					role: "guest"
 				});
 			});
 		});
@@ -729,6 +838,20 @@ describe("Test validation", () => {
 				const res = await svc.validateParams(ctx, params, { type: "update" });
 				expect(res).toEqual({
 					name: "John"
+				});
+			});
+
+			it("should set both if permissive: true", async () => {
+				const params = {
+					name: "John2",
+					password: "pass1234",
+					role: "guest"
+				};
+				const res = await svc.validateParams(ctx, params, { permissive: true });
+				expect(res).toEqual({
+					name: "John2",
+					password: "pass1234",
+					role: "guest"
 				});
 			});
 		});
@@ -1007,6 +1130,20 @@ describe("Test validation", () => {
 					role: "user"
 				});
 			});
+
+			it("should set both if permissive: true", async () => {
+				const params = {
+					name: "John2",
+					password: "pass1234",
+					role: "guest"
+				};
+				const res = await svc.validateParams(ctx, params, { permissive: true });
+				expect(res).toEqual({
+					name: "John2",
+					password: "pass1234",
+					role: "guest"
+				});
+			});
 		});
 
 		describe("Test hook", () => {
@@ -1209,7 +1346,6 @@ describe("Test validation", () => {
 	});
 });
 
-// TODO: it's already not relevant
 function testTypeConversion(ctx, svc, type) {
 	describe("Test type checking", () => {
 		const date1 = new Date();

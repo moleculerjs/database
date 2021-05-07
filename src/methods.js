@@ -424,6 +424,7 @@ module.exports = function (mixinOpts) {
 			const adapter = await this.getAdapter(ctx);
 
 			params = await this.validateParams(ctx, params, {
+				...opts,
 				type: "create",
 				nestedFieldSupport: adapter.hasNestedFieldSupport
 			});
@@ -451,6 +452,7 @@ module.exports = function (mixinOpts) {
 				params.map(
 					async entity =>
 						await this.validateParams(ctx, entity, {
+							...opts,
 							type: "create",
 							nestedFieldSupport: adapter.hasNestedFieldSupport
 						})
@@ -487,6 +489,7 @@ module.exports = function (mixinOpts) {
 			const rawUpdate = opts.raw === true;
 			if (!rawUpdate) {
 				params = await this.validateParams(ctx, params, {
+					...opts,
 					type: "update",
 					oldEntity,
 					nestedFieldSupport: adapter.hasNestedFieldSupport
@@ -538,6 +541,7 @@ module.exports = function (mixinOpts) {
 			const adapter = await this.getAdapter(ctx);
 
 			params = await this.validateParams(ctx, params, {
+				...opts,
 				type: "replace",
 				oldEntity,
 				nestedFieldSupport: adapter.hasNestedFieldSupport
@@ -580,6 +584,7 @@ module.exports = function (mixinOpts) {
 			const adapter = await this.getAdapter(ctx);
 
 			params = await this.validateParams(ctx, params, {
+				...opts,
 				type: "remove",
 				nestedFieldSupport: adapter.hasNestedFieldSupport
 			});

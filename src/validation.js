@@ -168,17 +168,20 @@ module.exports = function (mixinOpts) {
 		 * @param {Array<Object>} fields
 		 * @param {Context} ctx
 		 * @param {Object} params
-		 * @param {boolean} write
+		 * @param {Object} opts
+		 * @param {Boolean} opts.isWrite
+		 * @param {Boolean} opts.permissive
 		 * @returns {Array<Object>}
 		 */
-		async _authorizeFields(fields, ctx, params, write) {
+		async _authorizeFields(fields, ctx, params, opts = {}) {
 			if (!this.$shouldAuthorizeFields) return fields;
+			if (opts.permissive) return fields;
 
 			const res = [];
 			await Promise.all(
 				_.compact(
 					fields.map(field => {
-						if (!write && field.readPermission) {
+						if (!opts.isWrite && field.readPermission) {
 							return this.checkFieldAuthority(
 								ctx,
 								field.readPermission,
@@ -338,11 +341,20 @@ module.exports = function (mixinOpts) {
 				}
 			};
 
-			const authorizedFields = await this._authorizeFields(fields, ctx, params, false);
+			const authorizedFields = await this._authorizeFields(fields, ctx, params, {
+				permission: opts.permissive,
+				isWrite: true
+			});
 
 			await Promise.all(
 				authorizedFields.map(async field => {
 					let value = _.get(params, field.name);
+
+					// Virtual field
+					if (field.virtual) return;
+
+					// Readonly
+					if (field.readonly && !opts.permissive) return;
 
 					// Custom formatter (can be async)
 					// Syntax: `set: (value, entity, field, ctx) => value.toUpperCase()`
@@ -381,9 +393,6 @@ module.exports = function (mixinOpts) {
 						return setValue(field, value);
 					}
 
-					// Readonly
-					if (field.readonly || field.virtual) return;
-
 					if (["create", "replace"].includes(type)) {
 						// Default value
 						if (value === undefined) {
@@ -421,7 +430,11 @@ module.exports = function (mixinOpts) {
 					}
 
 					// Immutable (should check the previous value, if not set yet, we should enable)
-					if (["update", "replace"].includes(type) && field.immutable === true) {
+					if (
+						["update", "replace"].includes(type) &&
+						field.immutable === true &&
+						!opts.permissive
+					) {
 						const prevValue = _.get(oldEntity, field.columnName);
 						if (prevValue != null) {
 							if (type == "update") {
