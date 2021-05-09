@@ -63,6 +63,12 @@ if (process.env.GITHUB_ACTIONS_CI) {
 						user: "root",
 						password: "moleculer",
 						database: "db_int_test"
+					},
+					log: {
+						warn(message) {},
+						error(message) {},
+						deprecate(message) {},
+						debug(message) {}
 					}
 				}
 			}
@@ -78,6 +84,12 @@ if (process.env.GITHUB_ACTIONS_CI) {
 						user: "root",
 						password: "moleculer",
 						database: "db_int_test"
+					},
+					log: {
+						warn(message) {},
+						error(message) {},
+						deprecate(message) {},
+						debug(message) {}
 					}
 				}
 			}
