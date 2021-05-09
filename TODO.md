@@ -26,7 +26,7 @@
 - [x] `findEntity` with sorting
 - [x] CRUD methods 
   - [x] `opts.permissive: true` to disable `readonly`, `immutable` validation to save these fields, and skip permission checks in validation.
-  - [ ] `opts.skipOnHooks` to skip the `onCreate`, `onUpdate` ...etc hooks.
+  - [x] `opts.skipOnHooks` to skip the `onCreate`, `onUpdate` ...etc hooks.
 - [ ] `afterResolveEntity` custom hook (using to check permissions, rights, status, owner...etc)
 
 ## Features
