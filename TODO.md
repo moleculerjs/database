@@ -22,12 +22,12 @@
 - [ ] create methods for `updateMany` and `removeMany`
   - [ ] or find with query validate every entity, clear cache, send notify (batch)
 - [x] limiting the maximum opened adapters (in case of multi-tenancy)
-  - [ ] add an `onAdapterConnected` and `onAdapterDisconnected` hooks in mixin options, if string it's a method name.
+  - [x] add an `adapterConnected` and `adapterDisconnected` hooks.
 - [x] `findEntity` with sorting
 - [x] CRUD methods 
   - [x] `opts.permissive: true` to disable `readonly`, `immutable` validation to save these fields, and skip permission checks in validation.
   - [x] `opts.skipOnHooks` to skip the `onCreate`, `onUpdate` ...etc hooks.
-- [ ] `afterResolveEntity` custom hook (using to check permissions, rights, status, owner...etc)
+- [x] `afterResolveEntities` custom hook (using to check permissions, rights, status, owner...etc)
 
 ## Features
 - [x] Multi model/tenant solutions

@@ -1077,4 +1077,138 @@ module.exports = (getAdapter, adapterType) => {
 			});
 		});
 	});
+
+	describe("Test custom service hooks", () => {
+		const broker = new ServiceBroker({ logger: false });
+
+		const adapterConnected = jest.fn();
+		const adapterDisconnected = jest.fn();
+		const afterResolveEntities1 = jest.fn();
+		const afterResolveEntities2 = jest.fn();
+
+		const DbServiceAdapterDef = getAdapter();
+
+		const svc = broker.createService({
+			name: "users",
+			mixins: [DbService({ adapter: DbServiceAdapterDef })],
+
+			hooks: {
+				customs: {
+					adapterConnected,
+					adapterDisconnected,
+					afterResolveEntities: [afterResolveEntities1, afterResolveEntities2]
+				}
+			},
+
+			settings: {
+				fields: {
+					id: { type: "string", primaryKey: true, columnName: "_id" },
+					name: { type: "string", trim: true, required: true, columnName: "full_name" },
+					status: {
+						type: "boolean",
+						default: true,
+						get: adapterType == "Knex" ? v => !!v : undefined
+					}
+				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
+			}
+		});
+
+		beforeAll(() => broker.start());
+		afterAll(() => broker.stop());
+
+		let docs = {};
+
+		describe("Set up", () => {
+			it("create test entities", async () => {
+				for (const [key, value] of Object.entries(TEST_DOCS)) {
+					docs[key] = await broker.call("users.create", Object.assign({}, value));
+				}
+			});
+		});
+
+		describe("Test hooks", () => {
+			it("should called adapterConnected", async () => {
+				const adapter = await svc.getAdapter();
+
+				expect(adapterConnected).toBeCalledTimes(1);
+				expect(adapterConnected).toBeCalledWith(adapter, "default", DbServiceAdapterDef);
+			});
+
+			it("should call both afterResolveEntities", async () => {
+				const res = await broker.call("users.resolve", { id: docs.janeDoe.id });
+				expect(res).toEqual(docs.janeDoe);
+
+				expect(afterResolveEntities1).toBeCalledTimes(1);
+				expect(afterResolveEntities1).toBeCalledWith(
+					expect.any(Context),
+					docs.janeDoe.id,
+					{ _id: expect.any(String), full_name: "Jane Doe", status: false },
+					{ id: docs.janeDoe.id },
+					{ throwIfNotExist: undefined }
+				);
+
+				expect(afterResolveEntities2).toBeCalledTimes(1);
+				expect(afterResolveEntities2).toBeCalledWith(
+					expect.any(Context),
+					docs.janeDoe.id,
+					{ _id: expect.any(String), full_name: "Jane Doe", status: false },
+					{ id: docs.janeDoe.id },
+					{ throwIfNotExist: undefined }
+				);
+			});
+
+			it("should call both afterResolveEntities with multi ID", async () => {
+				afterResolveEntities1.mockClear();
+				afterResolveEntities2.mockClear();
+
+				const res = await broker.call("users.resolve", {
+					id: [docs.janeDoe.id, docs.kevinJames.id]
+				});
+				expect(res).toEqual(expect.arrayContaining([docs.janeDoe, docs.kevinJames]));
+
+				expect(afterResolveEntities1).toBeCalledTimes(1);
+				expect(afterResolveEntities1).toBeCalledWith(
+					expect.any(Context),
+					[docs.janeDoe.id, docs.kevinJames.id],
+					expect.arrayContaining([
+						{ _id: expect.any(String), full_name: "Jane Doe", status: false },
+						{ _id: expect.any(String), full_name: "Kevin James", status: false }
+					]),
+					{ id: [docs.janeDoe.id, docs.kevinJames.id] },
+					{ throwIfNotExist: undefined }
+				);
+
+				expect(afterResolveEntities2).toBeCalledTimes(1);
+				expect(afterResolveEntities2).toBeCalledWith(
+					expect.any(Context),
+					[docs.janeDoe.id, docs.kevinJames.id],
+					expect.arrayContaining([
+						{ _id: expect.any(String), full_name: "Jane Doe", status: false },
+						{ _id: expect.any(String), full_name: "Kevin James", status: false }
+					]),
+					{ id: [docs.janeDoe.id, docs.kevinJames.id] },
+					{ throwIfNotExist: undefined }
+				);
+			});
+
+			it("should called adapterDisconnected", async () => {
+				const adapter = await svc.getAdapter();
+
+				await svc._disconnectAll();
+
+				expect(adapterDisconnected).toBeCalledTimes(1);
+				expect(adapterDisconnected).toBeCalledWith(adapter, "default");
+			});
+		});
+	});
 };
