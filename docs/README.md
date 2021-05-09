@@ -1253,6 +1253,7 @@ It validates & sanitizes the input data in `params` against the `fields` definit
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.type` | `String` | `"create"` | Type of method. |
 | `opts.permissive` | `Boolean` | `false` | If `true`, readonly and immutable fields can be set and update and field permission is not checked. |
+| `opts.skipOnHooks` | `Boolean` | `false` | If `true`, the `onCreate`, `onUpdate`...etc hooks of fields will be skipped. |
 
 
 ## `transformResult`

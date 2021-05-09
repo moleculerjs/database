@@ -1038,6 +1038,14 @@ module.exports = (getAdapter, adapterType) => {
 				}
 			},
 
+			actions: {
+				updateWithoutHooks: {
+					handler(ctx) {
+						return this.updateEntity(ctx, ctx.params, { skipOnHooks: true });
+					}
+				}
+			},
+
 			async started() {
 				const adapter = await this.getAdapter();
 				if (adapterType == "Knex") {
@@ -1086,6 +1094,36 @@ module.exports = (getAdapter, adapterType) => {
 					svc.$fields[2],
 					expect.any(Context)
 				);
+
+				const res2 = await broker.call("users.get", { id: entity.id });
+				expect(res2).toStrictEqual(entity);
+			});
+
+			it("should skip calling onUpdate hook", async () => {
+				const res = await broker.call("users.updateWithoutHooks", {
+					id: entity.id,
+					name: "John Doe",
+					updatedAt: "Past"
+				});
+				expect(res).toStrictEqual({
+					id: entity.id,
+					name: "John Doe",
+					createdAt: "Created now",
+					createdBy: "Creator",
+					updatedAt: "Past",
+					...(getAdapter.isSQL
+						? {
+								updatedBy: null,
+								replacedAt: null,
+								replacedBy: null,
+								removedAt: null,
+								removedBy: null
+						  }
+						: {})
+				});
+				entity = res;
+
+				expect(onUpdate).toBeCalledTimes(0);
 
 				const res2 = await broker.call("users.get", { id: entity.id });
 				expect(res2).toStrictEqual(entity);

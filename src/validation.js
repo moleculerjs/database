@@ -387,34 +387,36 @@ module.exports = function (mixinOpts) {
 					}
 
 					// Handlers
-					if (type == "create" && field.onCreate) {
-						if (_.isFunction(field.onCreate)) {
-							value = await field.onCreate.call(this, value, params, field, ctx);
-						} else {
-							value = field.onCreate;
+					if (!opts.skipOnHooks) {
+						if (type == "create" && field.onCreate) {
+							if (_.isFunction(field.onCreate)) {
+								value = await field.onCreate.call(this, value, params, field, ctx);
+							} else {
+								value = field.onCreate;
+							}
+							return setValue(field, value);
+						} else if (type == "update" && field.onUpdate) {
+							if (_.isFunction(field.onUpdate)) {
+								value = await field.onUpdate.call(this, value, params, field, ctx);
+							} else {
+								value = field.onUpdate;
+							}
+							return setValue(field, value);
+						} else if (type == "replace" && field.onReplace) {
+							if (_.isFunction(field.onReplace)) {
+								value = await field.onReplace.call(this, value, params, field, ctx);
+							} else {
+								value = field.onReplace;
+							}
+							return setValue(field, value);
+						} else if (type == "remove" && field.onRemove) {
+							if (_.isFunction(field.onRemove)) {
+								value = await field.onRemove.call(this, value, params, field, ctx);
+							} else {
+								value = field.onRemove;
+							}
+							return setValue(field, value);
 						}
-						return setValue(field, value);
-					} else if (type == "update" && field.onUpdate) {
-						if (_.isFunction(field.onUpdate)) {
-							value = await field.onUpdate.call(this, value, params, field, ctx);
-						} else {
-							value = field.onUpdate;
-						}
-						return setValue(field, value);
-					} else if (type == "replace" && field.onReplace) {
-						if (_.isFunction(field.onReplace)) {
-							value = await field.onReplace.call(this, value, params, field, ctx);
-						} else {
-							value = field.onReplace;
-						}
-						return setValue(field, value);
-					} else if (type == "remove" && field.onRemove) {
-						if (_.isFunction(field.onRemove)) {
-							value = await field.onRemove.call(this, value, params, field, ctx);
-						} else {
-							value = field.onRemove;
-						}
-						return setValue(field, value);
 					}
 
 					if (["create", "replace"].includes(type)) {

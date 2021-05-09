@@ -636,6 +636,22 @@ describe("Test validation", () => {
 				expect(onCreate).toBeCalledTimes(1);
 				expect(onCreate).toBeCalledWith("2020-09-19", params, svc.$fields[0], ctx);
 			});
+
+			it("should not if skipOnHooks is true", async () => {
+				onCreate.mockClear();
+
+				const params = {
+					createdAt: "2020-09-19",
+					createdBy: "John"
+				};
+				const res = await svc.validateParams(ctx, params, { skipOnHooks: true });
+				expect(res).toEqual({
+					createdAt: "2020-09-19",
+					createdBy: "John"
+				});
+
+				expect(onCreate).toBeCalledTimes(0);
+			});
 		});
 
 		testTypeConversion(ctx, svc, "create");
