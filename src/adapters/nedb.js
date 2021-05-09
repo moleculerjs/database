@@ -71,17 +71,24 @@ class NeDBAdapter extends BaseAdapter {
 	}
 
 	/**
-	 * Find an entity by query
+	 * Find an entity by query & sort
 	 *
-	 * @param {Object} query
+	 * @param {Object} params
 	 * @returns {Promise<Object>}
 	 */
-	findOne(query) {
+	findOne(params) {
 		return new this.Promise((resolve, reject) => {
-			this.db.findOne(query, (err, docs) => {
-				if (err) return reject(err);
-				resolve(docs);
-			});
+			if (params.sort) {
+				this.createQuery(params).exec((err, docs) => {
+					if (err) return reject(err);
+					resolve(docs.length > 0 ? docs[0] : null);
+				});
+			} else {
+				this.db.findOne(params.query, (err, docs) => {
+					if (err) return reject(err);
+					resolve(docs);
+				});
+			}
 		});
 	}
 

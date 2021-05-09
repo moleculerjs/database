@@ -209,8 +209,13 @@ module.exports = (getAdapter, adapterType) => {
 			});
 
 			it("should find one", async () => {
-				const row = await adapter.findOne({ votes: 10, status: 1 });
+				const row = await adapter.findOne({ query: { votes: 10, status: 1 } });
 				expect(row).toEqual(docs[2]);
+			});
+
+			it("should find one with sort", async () => {
+				const row = await adapter.findOne({ query: { status: 1 }, sort: "votes" });
+				expect(row).toEqual(docs[3]);
 			});
 
 			it("should count by query", async () => {

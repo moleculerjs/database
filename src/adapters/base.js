@@ -126,7 +126,7 @@ class BaseAdapter {
 	/**
 	 * Find all entities by filters.
 	 *
-	 * @param {Object} filters
+	 * @param {Object} params
 	 * @returns {Promise<Array>}
 	 */
 	find(/*params*/) {
@@ -135,12 +135,12 @@ class BaseAdapter {
 	}
 
 	/**
-	 * Find an entity by query
+	 * Find an entity by query & sort
 	 *
-	 * @param {Object} query
+	 * @param {Object} params
 	 * @returns {Promise<Object>}
 	 */
-	findOne(/*query*/) {
+	findOne(/*params*/) {
 		/* istanbul ignore next */
 		throw new Error("This method is not implemented.");
 	}

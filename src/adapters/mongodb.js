@@ -153,13 +153,22 @@ class MongoDBAdapter extends BaseAdapter {
 	}
 
 	/**
-	 * Find an entity by query
+	 * Find an entity by query & sort
 	 *
-	 * @param {Object} query
+	 * @param {Object} params
 	 * @returns {Promise<Object>}
 	 */
-	findOne(query) {
-		return this.collection.findOne(query);
+	async findOne(params) {
+		if (params.sort) {
+			const res = await this.find(params);
+			return res.length > 0 ? res[0] : null;
+		} else {
+			const q = { ...params.query };
+			if (q._id) {
+				q._id = this.stringToObjectID(q._id);
+			}
+			return this.collection.findOne(q);
+		}
 	}
 
 	/**
@@ -344,6 +353,24 @@ class MongoDBAdapter extends BaseAdapter {
 	}
 
 	/**
+	 * Check the IDs in the `query` and convert to ObjectID.
+	 * @param {Object} q
+	 * @returns {Object}
+	 */
+	convertIDToObjectID(query) {
+		if (query && query._id) {
+			const q = { ...query };
+			if (typeof q._id == "object" && Array.isArray(q._id.$in)) {
+				q._id.$in = q._id.$in.map(this.stringToObjectID);
+			} else {
+				q._id = this.stringToObjectID(q._id);
+			}
+			return q;
+		}
+		return query;
+	}
+
+	/**
 	 * Create a query based on filters
 	 *
 	 * Available filters:
@@ -393,19 +420,9 @@ class MongoDBAdapter extends BaseAdapter {
 					}
 				}
 			} else {
-				if (params.query && params.query._id) {
-					// TODO: find better solution
-					if (
-						typeof params.query._id == "object" &&
-						Array.isArray(params.query._id.$in)
-					) {
-						params.query._id.$in = params.query._id.$in.map(this.stringToObjectID);
-					} else {
-						params.query._id = this.stringToObjectID(params.query._id);
-					}
-				}
+				const query = this.convertIDToObjectID(params.query);
 
-				q = fn.call(this.collection, params.query);
+				q = fn.call(this.collection, query);
 
 				// Sort
 				if (!opts.counting && params.sort && q.sort) {

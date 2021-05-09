@@ -1126,13 +1126,13 @@ Return the number of entities by query.
 ## `findEntity`
 `findEntity(ctx?: Context, params: object, opts?: object)`
 
-Find an entity by query. It returns only the first row of the result.
+Find an entity by query & sort. It returns only the first row of the result.
 
 ### Parameters
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
-| `params` | `Object` | `null` | Parameters for search. It's same as [`find` action parameters](#parameters) |
+| `params` | `Object` | `null` | Parameters for search. It's same as [`find` action parameters](#parameters) but only `query` and `sort` are used. |
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
 
@@ -2156,9 +2156,9 @@ Disconnect from the database. Don't call directly!
 Find entities by `params`. The `params` contains the same properties as [`find` action](#find-find-entities).
 
 ## `findOne`
-`findOne(query: object)`
+`findOne(params: object)`
 
-Find only the first entity by `query`.
+Find only the first entity by `params`. The `params` contains `query` and `sort` properties.
 
 ## `findById`
 `findById(id: any)`

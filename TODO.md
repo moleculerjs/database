@@ -5,7 +5,7 @@
 - [x] in Knex if MSSQL and has offset but no sort, if should add a sort to the primary key field
   - [x] https://github.com/knex/knex/issues/1527
 
-- [ ] More integration tests
+- [ ] **More integration tests**
   - [ ] createIndex, removeIndex
   - [ ] Knex createCursor operators `$`
   - [ ] global pool handling
@@ -19,12 +19,15 @@
 
 
 ## Methods
-- [ ] create methods for `updateMany` and `removeMany` (clear cache, send notify event without entities)
+- [ ] create methods for `updateMany` and `removeMany`
   - [ ] or find with query validate every entity, clear cache, send notify (batch)
 - [x] limiting the maximum opened adapters (in case of multi-tenancy)
   - [ ] add an `onAdapterConnected` and `onAdapterDisconnected` hooks in mixin options, if string it's a method name.
-- [ ] `findEntity` with sorting
-- [x] CRUD methods `opts.permissive: true` to disable `readonly`, `immutable` validation to save these fields, and skip permission checks in validation.
+- [x] `findEntity` with sorting
+- [x] CRUD methods 
+  - [x] `opts.permissive: true` to disable `readonly`, `immutable` validation to save these fields, and skip permission checks in validation.
+  - [ ] `opts.skipOnHooks` to skip the `onCreate`, `onUpdate` ...etc hooks.
+- [ ] `afterResolveEntity` custom hook (using to check permissions, rights, status, owner...etc)
 
 ## Features
 - [x] Multi model/tenant solutions
@@ -38,7 +41,7 @@
   - [ ] https://gist.github.com/intech/b6e809c729835cb1da6411c4a940846b
 
 ## Adapters
-- [ ] `findOne` with sorting
+- [x] `findOne` with sorting
 
 - [ ] Cassandra
 - [ ] Couchbase

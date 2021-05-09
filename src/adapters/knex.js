@@ -100,13 +100,13 @@ class KnexAdapter extends BaseAdapter {
 	}
 
 	/**
-	 * Find an entity by query
+	 * Find an entity by query & sort
 	 *
-	 * @param {Object} query
+	 * @param {Object} params
 	 * @returns {Promise<Object>}
 	 */
-	async findOne(query) {
-		return this.createQuery({ query }).first();
+	async findOne(params) {
+		return this.createQuery(params).first();
 	}
 
 	/**
@@ -117,7 +117,7 @@ class KnexAdapter extends BaseAdapter {
 	 *
 	 */
 	findById(id) {
-		return this.findOne({ [this.idFieldName]: id });
+		return this.findOne({ query: { [this.idFieldName]: id } });
 	}
 
 	/**

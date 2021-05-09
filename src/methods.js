@@ -326,7 +326,7 @@ module.exports = function (mixinOpts) {
 
 			this.logger.debug(`Find an entity`, params);
 			const adapter = await this.getAdapter(ctx);
-			let result = await adapter.findOne(params.query);
+			let result = await adapter.findOne(params);
 			if (opts.transform !== false) {
 				result = await this.transformResult(adapter, result, params, ctx);
 			}

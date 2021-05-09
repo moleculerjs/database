@@ -292,6 +292,11 @@ module.exports = (getAdapter, adapterType) => {
 
 		describe("Test findEntity", () => {
 			it("should return the first row by query", async () => {
+				const params = { query: { id: docs.bobSmith.id } };
+				const row = await svc.findEntity(ctx, params);
+				expect(row).toEqual(docs.bobSmith);
+			});
+			it("should return the first row by query", async () => {
 				const params = { query: { name: "Jane Doe" } };
 				const row = await svc.findEntity(ctx, params);
 				expect(row).toEqual(docs.janeDoe);
@@ -301,6 +306,18 @@ module.exports = (getAdapter, adapterType) => {
 				const params = { query: { status: true, age: 58 } };
 				const row = await svc.findEntity(ctx, params);
 				expect(row).toEqual(docs.bobSmith);
+			});
+
+			it("should return the first row by query & sort", async () => {
+				const params = { query: { status: false }, sort: "age" };
+				const row = await svc.findEntity(ctx, params);
+				expect(row).toEqual(docs.joeDoe);
+			});
+
+			it("should return the first row by query & sort desc", async () => {
+				const params = { query: { status: false }, sort: "-age" };
+				const row = await svc.findEntity(ctx, params);
+				expect(row).toEqual(docs.kevinJames);
 			});
 
 			it("should return null if no match", async () => {
