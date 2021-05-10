@@ -10,6 +10,8 @@
   - [ ] Knex createCursor operators `$`
   - [ ] global pool handling
 
+- [ ] `insertMany` improvement.
+  - [ ] `createMany` with `opts.returnEntities` to return entities instead of IDs.
 ## Actions
 - [ ] `aggregate` action with params: `type: "sum", "avg", "count", "min", "max"` & `field: "price"`
 

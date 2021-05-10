@@ -240,7 +240,7 @@ class MongoDBAdapter extends BaseAdapter {
 	 */
 	async insertMany(entities) {
 		const res = await this.collection.insertMany(entities);
-		return res.ops;
+		return Object.values(res.insertedIds);
 	}
 
 	/**

@@ -486,9 +486,9 @@ module.exports = function (mixinOpts) {
 
 			this.logger.debug(`Create multiple entities`, entities);
 			let result = await adapter.insertMany(entities);
-			if (opts.transform !== false) {
+			/* TODO: if (opts.transform !== false) {
 				result = await this.transformResult(adapter, result, {}, ctx);
-			}
+			}*/
 
 			await this._entityChanged("create", result, ctx, { ...opts, batch: true });
 			return result;

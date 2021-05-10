@@ -1145,29 +1145,42 @@ module.exports = (getAdapter, adapterType) => {
 			});
 
 			it("should call both afterResolveEntities", async () => {
+				const rawEntity = await svc.resolveEntities(
+					null,
+					{ id: docs.janeDoe.id },
+					{ transform: false }
+				);
+				afterResolveEntities1.mockClear();
+				afterResolveEntities2.mockClear();
+
 				const res = await broker.call("users.resolve", { id: docs.janeDoe.id });
 				expect(res).toEqual(docs.janeDoe);
 
 				expect(afterResolveEntities1).toBeCalledTimes(1);
 				expect(afterResolveEntities1).toBeCalledWith(
 					expect.any(Context),
-					docs.janeDoe.id,
-					{ _id: expect.any(String), full_name: "Jane Doe", status: false },
-					{ id: docs.janeDoe.id },
+					"" + docs.janeDoe.id,
+					rawEntity,
+					{ id: "" + docs.janeDoe.id },
 					{ throwIfNotExist: undefined }
 				);
 
 				expect(afterResolveEntities2).toBeCalledTimes(1);
 				expect(afterResolveEntities2).toBeCalledWith(
 					expect.any(Context),
-					docs.janeDoe.id,
-					{ _id: expect.any(String), full_name: "Jane Doe", status: false },
-					{ id: docs.janeDoe.id },
+					"" + docs.janeDoe.id,
+					rawEntity,
+					{ id: "" + docs.janeDoe.id },
 					{ throwIfNotExist: undefined }
 				);
 			});
 
 			it("should call both afterResolveEntities with multi ID", async () => {
+				const rawEntities = await svc.resolveEntities(
+					null,
+					{ id: [docs.janeDoe.id, docs.kevinJames.id] },
+					{ transform: false }
+				);
 				afterResolveEntities1.mockClear();
 				afterResolveEntities2.mockClear();
 
@@ -1179,24 +1192,18 @@ module.exports = (getAdapter, adapterType) => {
 				expect(afterResolveEntities1).toBeCalledTimes(1);
 				expect(afterResolveEntities1).toBeCalledWith(
 					expect.any(Context),
-					[docs.janeDoe.id, docs.kevinJames.id],
-					expect.arrayContaining([
-						{ _id: expect.any(String), full_name: "Jane Doe", status: false },
-						{ _id: expect.any(String), full_name: "Kevin James", status: false }
-					]),
-					{ id: [docs.janeDoe.id, docs.kevinJames.id] },
+					["" + docs.janeDoe.id, "" + docs.kevinJames.id],
+					expect.arrayContaining(rawEntities),
+					{ id: ["" + docs.janeDoe.id, "" + docs.kevinJames.id] },
 					{ throwIfNotExist: undefined }
 				);
 
 				expect(afterResolveEntities2).toBeCalledTimes(1);
 				expect(afterResolveEntities2).toBeCalledWith(
 					expect.any(Context),
-					[docs.janeDoe.id, docs.kevinJames.id],
-					expect.arrayContaining([
-						{ _id: expect.any(String), full_name: "Jane Doe", status: false },
-						{ _id: expect.any(String), full_name: "Kevin James", status: false }
-					]),
-					{ id: [docs.janeDoe.id, docs.kevinJames.id] },
+					["" + docs.janeDoe.id, "" + docs.kevinJames.id],
+					expect.arrayContaining(rawEntities),
+					{ id: ["" + docs.janeDoe.id, "" + docs.kevinJames.id] },
 					{ throwIfNotExist: undefined }
 				);
 			});
