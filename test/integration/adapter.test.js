@@ -109,24 +109,26 @@ module.exports = (getAdapter, adapterType) => {
 
 				const entities = await adapter.findByIds(res);
 
-				expect(entities).toEqual([
-					{
-						_id: expectedID,
-						title: "Second post",
-						content: "Content of 2nd post",
-						votes: 0,
-						comments: 5,
-						status: 0
-					},
-					{
-						_id: expectedID,
-						title: "Third post",
-						content: "Content of 3rd post",
-						votes: 10,
-						comments: 2,
-						status: 1
-					}
-				]);
+				expect(entities).toEqual(
+					expect.arrayContaining([
+						{
+							_id: expectedID,
+							title: "Second post",
+							content: "Content of 2nd post",
+							votes: 0,
+							comments: 5,
+							status: 0
+						},
+						{
+							_id: expectedID,
+							title: "Third post",
+							content: "Content of 3rd post",
+							votes: 10,
+							comments: 2,
+							status: 1
+						}
+					])
+				);
 				docs.push(...entities);
 			});
 
@@ -151,24 +153,26 @@ module.exports = (getAdapter, adapterType) => {
 					{ returnEntities: true }
 				);
 
-				expect(res).toEqual([
-					{
-						_id: expectedID,
-						title: "Forth post",
-						content: "Content of 4th post",
-						votes: 3,
-						comments: 13,
-						status: 1
-					},
-					{
-						_id: expectedID,
-						title: "Fifth post",
-						content: "Content of 5th post",
-						votes: 7,
-						comments: 3,
-						status: 0
-					}
-				]);
+				expect(res).toEqual(
+					expect.arrayContaining([
+						{
+							_id: expectedID,
+							title: "Forth post",
+							content: "Content of 4th post",
+							votes: 3,
+							comments: 13,
+							status: 1
+						},
+						{
+							_id: expectedID,
+							title: "Fifth post",
+							content: "Content of 5th post",
+							votes: 7,
+							comments: 3,
+							status: 0
+						}
+					])
+				);
 				docs.push(...res);
 			});
 

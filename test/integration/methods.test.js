@@ -428,9 +428,9 @@ module.exports = (getAdapter, adapterType) => {
 			);
 
 			expect(res.length).toBe(3);
-			docs.janeDoe = res[0];
-			docs.bobSmith = res[1];
-			docs.kevinJames = res[2];
+			docs.janeDoe = res.find(e => e.name == "Jane Doe");
+			docs.bobSmith = res.find(e => e.name == "Bob Smith");
+			docs.kevinJames = res.find(e => e.name == "Kevin James");
 
 			expect(docs.janeDoe).toEqual({ ...TEST_DOCS.janeDoe, id: expectedID });
 			expect(docs.bobSmith).toEqual({ ...TEST_DOCS.bobSmith, id: expectedID });
