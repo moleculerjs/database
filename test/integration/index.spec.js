@@ -115,10 +115,10 @@ if (process.env.GITHUB_ACTIONS_CI) {
 } else {
 	// Local development tests
 	Adapters = [
-		{
+		/*{
 			type: "NeDB"
 		},
-		{ type: "MongoDB", options: { dbName: "db_int_test" } },
+		{ type: "MongoDB", options: { dbName: "db_int_test" } },*/
 		{
 			name: "Knex-SQLite",
 			type: "Knex",
@@ -137,7 +137,7 @@ if (process.env.GITHUB_ACTIONS_CI) {
 					}
 				}
 			}
-		} /*,
+		},
 		{
 			name: "Knex-Postgresql",
 			type: "Knex",
@@ -153,7 +153,7 @@ if (process.env.GITHUB_ACTIONS_CI) {
 					}
 				}
 			}
-		}*/ /*,
+		} /*,
 		{
 			name: "Knex-MySQL",
 			type: "Knex",

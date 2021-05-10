@@ -197,7 +197,7 @@ class KnexAdapter extends BaseAdapter {
 			)
 		);
 
-		res = _.flatten(res);
+		res = _.flatten(res).map(r => (typeof r == "object" ? r[this.idFieldName] : r));
 
 		if (opts.returnEntities) {
 			res = await this.findByIds(res);
