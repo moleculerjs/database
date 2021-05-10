@@ -3,8 +3,6 @@
 const _ = require("lodash");
 const { ServiceBroker, Context } = require("moleculer");
 const DbService = require("../..").Service;
-const { ValidationError } = require("moleculer").Errors;
-//const { EntityNotFoundError } = require("../..").Errors;
 
 module.exports = (getAdapter, adapterType) => {
 	const tenant0Meta = { meta: { tenantId: 1000 } };
@@ -700,11 +698,13 @@ module.exports = (getAdapter, adapterType) => {
 				defaultScopes: ["tenant"]
 			},
 
-			async started() {
-				const adapter = await this.getAdapter(tenant0Meta);
-
-				if (adapterType == "Knex") {
-					await adapter.createTable();
+			hooks: {
+				customs: {
+					async adapterConnected(adapter) {
+						if (adapterType == "Knex") {
+							await adapter.createTable();
+						}
+					}
 				}
 			}
 		});
@@ -736,25 +736,16 @@ module.exports = (getAdapter, adapterType) => {
 							}
 						}
 					];
-				},
-
-				async createTenantTable(ctx, tableName) {
-					const adapter = await this.getAdapter(ctx);
-					if (await adapter.client.schema.hasTable(tableName))
-						await adapter.dropTable(tableName);
-					await adapter.client.schema.createTable(tableName, table => {
-						table.string("_id");
-						table.string("title").index();
-						table.string("content").index();
-					});
 				}
 			},
-			async started() {
-				if (adapterType == "Knex") {
-					await this.createTenantTable(tenant0Meta, "posts-1000");
-					await this.createTenantTable(tenant1Meta, "posts-1001");
-					await this.createTenantTable(tenant2Meta, "posts-1002");
-					await this.createTenantTable(tenant3Meta, "posts-1003");
+
+			hooks: {
+				customs: {
+					async adapterConnected(adapter) {
+						if (adapterType == "Knex") {
+							await adapter.createTable();
+						}
+					}
 				}
 			}
 		});
@@ -794,20 +785,13 @@ module.exports = (getAdapter, adapterType) => {
 				}
 			},
 
-			async started() {
-				let adapter;
-				if (adapterType == "Knex") {
-					adapter = await this.getAdapter(tenant0Meta);
-					await adapter.createTable();
-
-					adapter = await this.getAdapter(tenant1Meta);
-					await adapter.createTable();
-
-					adapter = await this.getAdapter(tenant2Meta);
-					await adapter.createTable();
-
-					adapter = await this.getAdapter(tenant3Meta);
-					await adapter.createTable();
+			hooks: {
+				customs: {
+					async adapterConnected(adapter) {
+						if (adapterType == "Knex") {
+							await adapter.createTable();
+						}
+					}
 				}
 			}
 		});
@@ -861,17 +845,6 @@ module.exports = (getAdapter, adapterType) => {
 								}
 							}
 						];
-					},
-
-					async createTenantTable(ctx, tableName) {
-						const adapter = await this.getAdapter(ctx);
-						if (await adapter.client.schema.hasTable(tableName))
-							await adapter.dropTable(tableName);
-						await adapter.client.schema.createTable(tableName, table => {
-							table.increments("_id").primary();
-							table.string("title").index();
-							table.string("content").index();
-						});
 					}
 				},
 
@@ -881,10 +854,13 @@ module.exports = (getAdapter, adapterType) => {
 					}
 				},
 
-				async started() {
-					if (adapterType == "Knex") {
-						for (let i = 1; i <= 10; i++)
-							await this.createTenantTable({ meta: { tenantId: i } }, "posts_" + i);
+				hooks: {
+					customs: {
+						async adapterConnected(adapter) {
+							if (adapterType == "Knex") {
+								await adapter.createTable();
+							}
+						}
 					}
 				}
 			});
@@ -892,7 +868,7 @@ module.exports = (getAdapter, adapterType) => {
 			beforeAll(() => broker.start());
 			afterAll(() => broker.stop());
 
-			it("should work property with limited adapters", async () => {
+			it("should work properly with limited adapters", async () => {
 				for (let i = 1; i <= 10; i++) {
 					await broker.call(
 						"posts.create",

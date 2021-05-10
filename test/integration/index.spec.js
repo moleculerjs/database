@@ -137,7 +137,7 @@ if (process.env.GITHUB_ACTIONS_CI) {
 					}
 				}
 			}
-		},
+		} /*,
 		{
 			name: "Knex-Postgresql",
 			type: "Knex",
@@ -212,7 +212,7 @@ if (process.env.GITHUB_ACTIONS_CI) {
 					}
 				}
 			}
-		}
+		}*/
 	];
 }
 
