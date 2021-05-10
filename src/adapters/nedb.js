@@ -160,14 +160,18 @@ class NeDBAdapter extends BaseAdapter {
 	 * Insert many entities
 	 *
 	 * @param {Array<Object>} entities
-	 * @returns {Promise<Array<Object>>} Return with the inserted documents in an Array.
+	 * @param {Object?} opts
+	 * @param {Boolean?} opts.returnEntities
+	 * @returns {Promise<Array<Object|any>>} Return with the inserted IDs or entities.
 	 *
 	 */
-	insertMany(entities) {
+	insertMany(entities, opts = {}) {
 		return new this.Promise((resolve, reject) => {
-			this.db.insert(entities, (err, doc) => {
+			this.db.insert(entities, (err, docs) => {
 				if (err) return reject(err);
-				resolve(doc);
+
+				if (opts.returnEntities) resolve(docs);
+				else resolve(docs.map(doc => doc._id));
 			});
 		});
 	}

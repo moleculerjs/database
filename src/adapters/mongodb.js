@@ -235,12 +235,14 @@ class MongoDBAdapter extends BaseAdapter {
 	 * Insert many entities
 	 *
 	 * @param {Array<Object>} entities
-	 * @returns {Promise<Array<Object>>} Return with the inserted documents in an Array.
+	 * @param {Object?} opts
+	 * @param {Boolean?} opts.returnEntities
+	 * @returns {Promise<Array<Object|any>>} Return with the inserted IDs or entities.
 	 *
 	 */
-	async insertMany(entities) {
+	async insertMany(entities, opts = {}) {
 		const res = await this.collection.insertMany(entities);
-		return res.ops;
+		return opts.returnEntities ? res.ops : Object.values(res.insertedIds);
 	}
 
 	/**

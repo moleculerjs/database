@@ -325,7 +325,7 @@ module.exports = function (mixinOpts) {
 			rest: null,
 			// params: {}, generate from `fields` in the `merged`
 			async handler(ctx) {
-				return this.createEntities(ctx);
+				return this.createEntities(ctx, ctx.params, { returnEntities: true });
 			}
 		};
 	}

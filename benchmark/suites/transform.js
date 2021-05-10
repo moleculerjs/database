@@ -79,7 +79,9 @@ const bench2 = benchmark.createSuite("Entity listing");
 		await broker.start();
 
 		await svc.clearEntities(ctx);
-		docs = await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT));
+		docs = await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT), {
+			returnEntities: true
+		});
 	});
 	bench.tearDown(() => broker.stop());
 
@@ -108,7 +110,9 @@ const bench3 = benchmark.createSuite("Entity counting");
 		await broker.start();
 
 		await svc.clearEntities(ctx);
-		docs = await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT));
+		docs = await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT), {
+			returnEntities: true
+		});
 	});
 	bench.tearDown(() => broker.stop());
 
@@ -135,7 +139,9 @@ const bench4 = benchmark.createSuite("Entity getting");
 		await broker.start();
 
 		await svc.clearEntities(ctx);
-		docs = await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT));
+		docs = await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT), {
+			returnEntities: true
+		});
 	});
 	bench.tearDown(() => broker.stop());
 
@@ -172,7 +178,9 @@ const bench5 = benchmark.createSuite("Entity updating");
 		await broker.start();
 
 		await svc.clearEntities(ctx);
-		docs = await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT));
+		docs = await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT), {
+			returnEntities: true
+		});
 	});
 	bench.tearDown(() => broker.stop());
 
@@ -207,7 +215,9 @@ const bench6 = benchmark.createSuite("Entity replacing");
 		await broker.start();
 
 		await svc.clearEntities(ctx);
-		docs = await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT));
+		docs = await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT), {
+			returnEntities: true
+		});
 	});
 	bench.tearDown(() => broker.stop());
 
@@ -238,7 +248,9 @@ const bench7 = benchmark.createSuite("Entity deleting");
 		await broker.start();
 
 		await svc.clearEntities(ctx);
-		docs = await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT));
+		docs = await svc.createEntities(ctx, fakerator.times(fakerator.entity.user, COUNT), {
+			returnEntities: true
+		});
 	});
 	bench.tearDown(async () => {
 		console.log("Remaining record", await svc.countEntities(ctx));

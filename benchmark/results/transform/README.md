@@ -1,7 +1,7 @@
 <!-- THIS PAGE IS GENERATED. DO NOT EDIT MANUALLY! -->
 
 # Moleculer Database benchmark - Transformation benchmark
-This is a tranformation benchmark. It tests all service methods with and without transformation.
+This is a transformation benchmark. It tests all service methods with and without transformation.
 ## Entity creation
 
 ### Result
@@ -9,10 +9,10 @@ This is a tranformation benchmark. It tests all service methods with and without
 
 | Adapter config | Time | Diff | ops/sec |
 | -------------- | ----:| ----:| -------:|
-| Without transform | 41μs | 0% | 24,036.38 |
-| With transform | 50μs | -17.25% | 19,889.77 |
+| Without transform | 55μs | 0% | 18,168.9 |
+| With transform | 52μs | 4.99% | 19,076.02 |
 
-![chart](https://image-charts.com/chart?chs=800x450&chtt=Entity%20creation%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chl=%7C%7C%7C%7C%2033%25%20%21%7Cx2%20&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxl=0%3A%7CWithout%20transform%7CWith%20transform&chd=a%3A24036.377651944746%2C19889.767333258915)
+![chart](https://image-charts.com/chart?chs=800x450&chtt=Entity%20creation%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxl=0%3A%7CWithout%20transform%7CWith%20transform&chd=a%3A18168.900293367842%2C19076.019228229965)
 
 ## Entity listing
 
@@ -21,10 +21,10 @@ This is a tranformation benchmark. It tests all service methods with and without
 
 | Adapter config | Time | Diff | ops/sec |
 | -------------- | ----:| ----:| -------:|
-| Without transform | 109μs | 0% | 9,137.29 |
-| With transform | 138μs | -20.82% | 7,235.03 |
+| Without transform | 131μs | 0% | 7,591.59 |
+| With transform | 148μs | -11.38% | 6,727.93 |
 
-![chart](https://image-charts.com/chart?chs=800x450&chtt=Entity%20listing%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chl=%7C%7C%7C%7C%2033%25%20%21%7Cx2%20&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxl=0%3A%7CWithout%20transform%7CWith%20transform&chd=a%3A9137.28805092012%2C7235.028613951545)
+![chart](https://image-charts.com/chart?chs=800x450&chtt=Entity%20listing%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxl=0%3A%7CWithout%20transform%7CWith%20transform&chd=a%3A7591.591553195681%2C6727.932672707071)
 
 ## Entity counting
 
@@ -33,9 +33,9 @@ This is a tranformation benchmark. It tests all service methods with and without
 
 | Adapter config | Time | Diff | ops/sec |
 | -------------- | ----:| ----:| -------:|
-| Without transform | 520μs | 0% | 1,922.24 |
+| Without transform | 726μs | 0% | 1,376.87 |
 
-![chart](https://image-charts.com/chart?chs=800x450&chtt=Entity%20counting%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chl=%7C%7C%7C%7C%2033%25%20%21%7Cx2%20&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxl=0%3A%7CWithout%20transform&chd=a%3A1922.2377184483805)
+![chart](https://image-charts.com/chart?chs=800x450&chtt=Entity%20counting%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxl=0%3A%7CWithout%20transform&chd=a%3A1376.8735905731837)
 
 ## Entity getting
 
@@ -44,11 +44,11 @@ This is a tranformation benchmark. It tests all service methods with and without
 
 | Adapter config | Time | Diff | ops/sec |
 | -------------- | ----:| ----:| -------:|
-| Without transform | 11μs | 0% | 84,762.82 |
-| With transform | 18μs | -36.45% | 53,868.41 |
-| Direct adapter access | 11μs | 5.91% | 89,775.6 |
+| Without transform | 21μs | 0% | 46,501.41 |
+| With transform | 28μs | -25.63% | 34,581.01 |
+| Direct adapter access | 20μs | 7.33% | 49,908.36 |
 
-![chart](https://image-charts.com/chart?chs=800x450&chtt=Entity%20getting%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chl=%7C%7C%7C%7C%2033%25%20%21%7Cx2%20&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxl=0%3A%7CWithout%20transform%7CWith%20transform%7CDirect%20adapter%20access&chd=a%3A84762.82174102102%2C53868.4102367001%2C89775.60078721806)
+![chart](https://image-charts.com/chart?chs=800x450&chtt=Entity%20getting%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxl=0%3A%7CWithout%20transform%7CWith%20transform%7CDirect%20adapter%20access&chd=a%3A46501.41142760411%2C34581.00678348184%2C49908.36425056682)
 
 ## Entity updating
 
@@ -57,10 +57,10 @@ This is a tranformation benchmark. It tests all service methods with and without
 
 | Adapter config | Time | Diff | ops/sec |
 | -------------- | ----:| ----:| -------:|
-| Without transform | 59μs | 0% | 16,887.58 |
-| With transform | 67μs | -12.81% | 14,724.68 |
+| Without transform | 93μs | 0% | 10,694.34 |
+| With transform | 99μs | -6.38% | 10,011.73 |
 
-![chart](https://image-charts.com/chart?chs=800x450&chtt=Entity%20updating%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chl=%7C%7C%7C%7C%2033%25%20%21%7Cx2%20&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxl=0%3A%7CWithout%20transform%7CWith%20transform&chd=a%3A16887.576367733764%2C14724.682952205807)
+![chart](https://image-charts.com/chart?chs=800x450&chtt=Entity%20updating%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxl=0%3A%7CWithout%20transform%7CWith%20transform&chd=a%3A10694.336321073446%2C10011.729428104494)
 
 ## Entity replacing
 
@@ -69,10 +69,10 @@ This is a tranformation benchmark. It tests all service methods with and without
 
 | Adapter config | Time | Diff | ops/sec |
 | -------------- | ----:| ----:| -------:|
-| Without transform | 60μs | 0% | 16,468.36 |
-| With transform | 68μs | -11.77% | 14,530.44 |
+| Without transform | 93μs | 0% | 10,662.15 |
+| With transform | 100μs | -7.11% | 9,904.25 |
 
-![chart](https://image-charts.com/chart?chs=800x450&chtt=Entity%20replacing%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chl=%7C%7C%7C%7C%2033%25%20%21%7Cx2%20&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxl=0%3A%7CWithout%20transform%7CWith%20transform&chd=a%3A16468.36049305961%2C14530.441610668313)
+![chart](https://image-charts.com/chart?chs=800x450&chtt=Entity%20replacing%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxl=0%3A%7CWithout%20transform%7CWith%20transform&chd=a%3A10662.152232432549%2C9904.24653682173)
 
 ## Entity deleting
 
@@ -81,10 +81,10 @@ This is a tranformation benchmark. It tests all service methods with and without
 
 | Adapter config | Time | Diff | ops/sec |
 | -------------- | ----:| ----:| -------:|
-| Without transform | 47μs | 0% | 20,937.85 |
-| With transform | 111μs | -56.97% | 9,008.74 |
+| Without transform | 51μs | 0% | 19,603.08 |
+| With transform | 183μs | -72.15% | 5,459.5 |
 
-![chart](https://image-charts.com/chart?chs=800x450&chtt=Entity%20deleting%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chl=%7C%7C%7C%7C%2033%25%20%21%7Cx2%20&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxl=0%3A%7CWithout%20transform%7CWith%20transform&chd=a%3A20937.852336436918%2C9008.743135358583)
+![chart](https://image-charts.com/chart?chs=800x450&chtt=Entity%20deleting%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxl=0%3A%7CWithout%20transform%7CWith%20transform&chd=a%3A19603.075297822932%2C5459.497019815262)
 
 --------------------
-_Generated at 2021-04-17T13:38:35.595Z_
+_Generated at 2021-05-10T16:10:04.759Z_

@@ -36,7 +36,7 @@ module.exports = function (mixinOpts) {
 			adapter.init(this);
 			this.adapters.set(hash, { hash, adapter, touched: Date.now() });
 			await this.maintenanceAdapters();
-			await this._connect(adapter);
+			await this._connect(adapter, hash, adapterOpts);
 			this.logger.info(
 				`Adapter '${hash}' connected. Number of adapters:`,
 				this.adapters.size
@@ -68,20 +68,26 @@ module.exports = function (mixinOpts) {
 				this.logger.info(
 					`Close ${closeable.length} old adapter(s). Limit: ${mixinOpts.maximumAdapters}, Current: ${this.adapters.size}`
 				);
-				for (const { adapter } of closeable) {
-					await this._disconnect(adapter);
+				for (const { adapter, hash } of closeable) {
+					await this._disconnect(adapter, hash);
 				}
 			}
 		},
 
 		/**
 		 * Connect to the DB
+		 *
+		 * @param {Adapter} adapter
+		 * @param {String} hash
+		 * @param {Object} adapterOpts
 		 */
-		_connect(adapter) {
+		_connect(adapter, hash, adapterOpts) {
 			return new this.Promise((resolve, reject) => {
 				const connecting = async () => {
 					try {
 						await adapter.connect();
+						if (this.$hooks["adapterConnected"])
+							await this.$hooks["adapterConnected"](adapter, hash, adapterOpts);
 						resolve();
 					} catch (err) {
 						this.logger.error("Connection error!", err);
@@ -101,8 +107,11 @@ module.exports = function (mixinOpts) {
 
 		/**
 		 * Disconnect an adapter
+		 *
+		 * @param {Adapter} adapter
+		 * @param {String} hash
 		 */
-		async _disconnect(adapter) {
+		async _disconnect(adapter, hash) {
 			// Remove from cache
 			const item = Array.from(this.adapters.values()).find(item => item.adapter == adapter);
 			if (item) {
@@ -115,17 +124,22 @@ module.exports = function (mixinOpts) {
 				`Adapter '${item ? item.hash : "unknown"}' diconnected. Number of adapters:`,
 				this.adapters.size
 			);
+
+			if (this.$hooks["adapterDisconnected"])
+				await this.$hooks["adapterDisconnected"](adapter, hash);
 		},
 
 		/**
 		 * Disconnect all adapters
 		 */
 		_disconnectAll() {
-			const adapters = Array.from(this.adapters.values()).map(item => item.adapter);
+			const adapters = Array.from(this.adapters.values());
 			this.adapters.clear();
 
 			this.logger.info(`Disconnect ${adapters.length} adapters...`);
-			return Promise.all(adapters.map(adapter => this._disconnect(adapter)));
+			return Promise.all(
+				adapters.map(({ adapter, hash }) => this._disconnect(adapter, hash))
+			);
 		},
 
 		/**
@@ -349,7 +363,7 @@ module.exports = function (mixinOpts) {
 		},
 
 		/**
-		 * Resolve entities IDs with mapping.
+		 * Resolve entities by IDs with mapping.
 		 *
 		 * @param {Context} ctx
 		 * @param {Object?} params
@@ -359,6 +373,7 @@ module.exports = function (mixinOpts) {
 			// Get ID value from params
 			let id = this._getIDFromParams(params);
 			const origID = id;
+			const origParams = params;
 			const multi = Array.isArray(id);
 			if (!multi) id = [id];
 
@@ -387,6 +402,16 @@ module.exports = function (mixinOpts) {
 			if (!result || result.length == 0) {
 				if (opts.throwIfNotExist) throw new EntityNotFoundError(origID);
 				return params.mapping === true ? {} : multi ? [] : null;
+			}
+
+			if (this.$hooks["afterResolveEntities"]) {
+				await this.$hooks["afterResolveEntities"](
+					ctx,
+					multi ? id : id[0],
+					multi ? result : result[0],
+					origParams,
+					opts
+				);
 			}
 
 			// For mapping
@@ -440,7 +465,7 @@ module.exports = function (mixinOpts) {
 		},
 
 		/**
-		 * Insert entities.
+		 * Insert multiple entities.
 		 *
 		 * @param {Context} ctx
 		 * @param {Array<Object>?} params
@@ -460,12 +485,15 @@ module.exports = function (mixinOpts) {
 			);
 
 			this.logger.debug(`Create multiple entities`, entities);
-			let result = await adapter.insertMany(entities);
-			if (opts.transform !== false) {
+			let result = await adapter.insertMany(entities, {
+				returnEntities: opts.returnEntities
+			});
+			if (opts.returnEntities && opts.transform !== false) {
 				result = await this.transformResult(adapter, result, {}, ctx);
 			}
 
 			await this._entityChanged("create", result, ctx, { ...opts, batch: true });
+
 			return result;
 		},
 

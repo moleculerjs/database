@@ -1,6 +1,8 @@
 "use strict";
 
 const Benchmarkify = require("../benchmarkify");
+const path = require("path");
+const fs = require("fs");
 const _ = require("lodash");
 const { ServiceBroker, Context } = require("moleculer");
 const DbService = require("../..").Service;
@@ -13,8 +15,16 @@ const fakerator = new Fakerator();
 const COUNT = 1000;
 const SUITE_NAME = "common";
 
+const neDBFileName = path.join(__dirname, "tmp", "common.db");
+const sqliteFilename = path.join(__dirname, "tmp", "common.sqlite3");
+
+if (fs.existsSync(neDBFileName)) fs.unlinkSync(neDBFileName);
+if (fs.existsSync(sqliteFilename)) fs.unlinkSync(sqliteFilename);
+if (fs.existsSync(sqliteFilename + "-journal")) fs.unlinkSync(sqliteFilename + "-journal");
+
 const Adapters = [
 	{ name: "NeDB (memory)", type: "NeDB" },
+	{ name: "NeDB (file)", type: "NeDB", options: neDBFileName },
 	{
 		name: "MongoDB",
 		ref: true,
@@ -40,6 +50,29 @@ const Adapters = [
 			}
 		}
 	},
+	{
+		name: "Knex SQLite (file)",
+		type: "Knex",
+		options: {
+			knex: {
+				client: "sqlite3",
+				connection: {
+					filename: sqliteFilename
+				},
+				useNullAsDefault: true,
+				pool: {
+					min: 1,
+					max: 1
+				},
+				log: {
+					warn(message) {},
+					error(message) {},
+					deprecate(message) {},
+					debug(message) {}
+				}
+			}
+		}
+	}
 	{
 		name: "Knex-Postgresql",
 		type: "Knex",

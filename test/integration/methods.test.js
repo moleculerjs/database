@@ -421,16 +421,16 @@ module.exports = (getAdapter, adapterType) => {
 
 		it("create multiple entities", async () => {
 			ctx.broadcast.mockClear();
-			const res = await svc.createEntities(ctx, [
-				TEST_DOCS.janeDoe,
-				TEST_DOCS.bobSmith,
-				TEST_DOCS.kevinJames
-			]);
+			const res = await svc.createEntities(
+				ctx,
+				[TEST_DOCS.janeDoe, TEST_DOCS.bobSmith, TEST_DOCS.kevinJames],
+				{ returnEntities: true }
+			);
 
 			expect(res.length).toBe(3);
-			docs.janeDoe = res[0];
-			docs.bobSmith = res[1];
-			docs.kevinJames = res[2];
+			docs.janeDoe = res.find(e => e.name == "Jane Doe");
+			docs.bobSmith = res.find(e => e.name == "Bob Smith");
+			docs.kevinJames = res.find(e => e.name == "Kevin James");
 
 			expect(docs.janeDoe).toEqual({ ...TEST_DOCS.janeDoe, id: expectedID });
 			expect(docs.bobSmith).toEqual({ ...TEST_DOCS.bobSmith, id: expectedID });
@@ -443,12 +443,12 @@ module.exports = (getAdapter, adapterType) => {
 			expect(ctx.broadcast).toBeCalledWith("cache.clean.users", {
 				type: "create",
 				data: res,
-				opts: { batch: true }
+				opts: { batch: true, returnEntities: true }
 			});
 			expect(ctx.broadcast).toBeCalledWith("users.created", {
 				type: "create",
 				data: res,
-				opts: { batch: true }
+				opts: { batch: true, returnEntities: true }
 			});
 		});
 
@@ -1074,6 +1074,147 @@ module.exports = (getAdapter, adapterType) => {
 				type: "clear",
 				data: null,
 				opts: {}
+			});
+		});
+	});
+
+	describe("Test custom service hooks", () => {
+		const broker = new ServiceBroker({ logger: false });
+
+		const adapterConnected = jest.fn();
+		const adapterDisconnected = jest.fn();
+		const afterResolveEntities1 = jest.fn();
+		const afterResolveEntities2 = jest.fn();
+
+		const DbServiceAdapterDef = getAdapter();
+
+		const svc = broker.createService({
+			name: "users",
+			mixins: [DbService({ adapter: DbServiceAdapterDef })],
+
+			hooks: {
+				customs: {
+					adapterConnected,
+					adapterDisconnected,
+					afterResolveEntities: [afterResolveEntities1, afterResolveEntities2]
+				}
+			},
+
+			settings: {
+				fields: {
+					id: { type: "string", primaryKey: true, columnName: "_id" },
+					name: { type: "string", trim: true, required: true, columnName: "full_name" },
+					status: {
+						type: "boolean",
+						default: true,
+						get: adapterType == "Knex" ? v => !!v : undefined
+					}
+				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
+			}
+		});
+
+		beforeAll(() => broker.start());
+		afterAll(() => broker.stop());
+
+		let docs = {};
+
+		describe("Set up", () => {
+			it("create test entities", async () => {
+				for (const [key, value] of Object.entries(TEST_DOCS)) {
+					docs[key] = await broker.call("users.create", Object.assign({}, value));
+				}
+			});
+		});
+
+		describe("Test hooks", () => {
+			it("should called adapterConnected", async () => {
+				const adapter = await svc.getAdapter();
+
+				expect(adapterConnected).toBeCalledTimes(1);
+				expect(adapterConnected).toBeCalledWith(adapter, "default", DbServiceAdapterDef);
+			});
+
+			it("should call both afterResolveEntities", async () => {
+				const rawEntity = await svc.resolveEntities(
+					null,
+					{ id: docs.janeDoe.id },
+					{ transform: false }
+				);
+				afterResolveEntities1.mockClear();
+				afterResolveEntities2.mockClear();
+
+				const res = await broker.call("users.resolve", { id: docs.janeDoe.id });
+				expect(res).toEqual(docs.janeDoe);
+
+				expect(afterResolveEntities1).toBeCalledTimes(1);
+				expect(afterResolveEntities1).toBeCalledWith(
+					expect.any(Context),
+					"" + docs.janeDoe.id,
+					rawEntity,
+					{ id: "" + docs.janeDoe.id },
+					{ throwIfNotExist: undefined }
+				);
+
+				expect(afterResolveEntities2).toBeCalledTimes(1);
+				expect(afterResolveEntities2).toBeCalledWith(
+					expect.any(Context),
+					"" + docs.janeDoe.id,
+					rawEntity,
+					{ id: "" + docs.janeDoe.id },
+					{ throwIfNotExist: undefined }
+				);
+			});
+
+			it("should call both afterResolveEntities with multi ID", async () => {
+				const rawEntities = await svc.resolveEntities(
+					null,
+					{ id: [docs.janeDoe.id, docs.kevinJames.id] },
+					{ transform: false }
+				);
+				afterResolveEntities1.mockClear();
+				afterResolveEntities2.mockClear();
+
+				const res = await broker.call("users.resolve", {
+					id: [docs.janeDoe.id, docs.kevinJames.id]
+				});
+				expect(res).toEqual(expect.arrayContaining([docs.janeDoe, docs.kevinJames]));
+
+				expect(afterResolveEntities1).toBeCalledTimes(1);
+				expect(afterResolveEntities1).toBeCalledWith(
+					expect.any(Context),
+					["" + docs.janeDoe.id, "" + docs.kevinJames.id],
+					expect.arrayContaining(rawEntities),
+					{ id: ["" + docs.janeDoe.id, "" + docs.kevinJames.id] },
+					{ throwIfNotExist: undefined }
+				);
+
+				expect(afterResolveEntities2).toBeCalledTimes(1);
+				expect(afterResolveEntities2).toBeCalledWith(
+					expect.any(Context),
+					["" + docs.janeDoe.id, "" + docs.kevinJames.id],
+					expect.arrayContaining(rawEntities),
+					{ id: ["" + docs.janeDoe.id, "" + docs.kevinJames.id] },
+					{ throwIfNotExist: undefined }
+				);
+			});
+
+			it("should called adapterDisconnected", async () => {
+				const adapter = await svc.getAdapter();
+
+				await svc._disconnectAll();
+
+				expect(adapterDisconnected).toBeCalledTimes(1);
+				expect(adapterDisconnected).toBeCalledWith(adapter, "default");
 			});
 		});
 	});

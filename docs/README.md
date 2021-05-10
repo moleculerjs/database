@@ -1180,6 +1180,7 @@ Create multiple entities.
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
 | `opts.permissive` | `Boolean` | `false` | If `true`, readonly and immutable fields can be set and update and field permission is not checked. |
+| `opts.returnEntities` | `Boolean` | `false` | If `true`, it returns the inserted entities instead of IDs. |
 
 
 ## `updateEntity`
@@ -1909,7 +1910,7 @@ The [`entityChanged`](#entitychanged) method has a default implementation that s
 | Action | Method | Event | Description |
 | -------- | ---- | ------- | ----------- |
 | `create` | `createEntity` | `{serviceName}.created` | Sent after a new entity is created and stored in the database. |
-| - | `createEntities` | `{serviceName}.created` | Sent after multiple entities have been created and stored in the database. In this case, the `opts.batch == true` |
+| `createMany` | `createEntities` | `{serviceName}.created` | Sent after multiple entities have been created and stored in the database. In this case, the `opts.batch == true` |
 | `update` | `updateEntity` | `{serviceName}.updated` | Sent after an entity has been updated. |
 | `replace` | `replaceEntity` | `{serviceName}.replaced` | Sent after an entity has been replaced. |
 | `remove` | `removeEntity` | `{serviceName}.removed` | Sent after an entity has been deleted. |
@@ -1968,6 +1969,68 @@ module.exports = {
     }
 };
 ```
+
+# Service Hooks
+There are some service hooks that you can use in your service under the `hooks.customs` property in the schema. The hook can be a `Function` or `String`. In the case of `String`, it should be a service method name.
+
+## Adapter hooks
+
+### `adapterConnected`
+`adapterConnected(adapter: Adapter, hash: string, adapterOpts: object)`
+
+It is called when a new adapter is created and connected to the database. You can use it to create data tables or execute migrations.
+
+### `adapterDisconnected`
+`adapterDisconnected(adapter: Adapter, hash: string)`
+
+It is called when a new adapter is disconnected from the database.
+
+**Example**
+```js
+// posts.service.js
+{
+    name: "posts",
+    mixins: [DbService(/*...*/)],
+    hooks: {
+        customs: {
+            adapterConnected: "createTables" // method name
+            async adapterDisconnected(adapter, hash) {
+                // ...
+            }
+        }
+    },
+
+    method: {
+        async createTables(adapter, hash, adapterOpts) {
+            // ...
+        }
+    }
+}
+```
+
+## Entity hooks
+
+### `afterResolveEntities`
+`afterResolveEntities(ctx: Context, id: any|Array<any>, rawEntity: object|Array<object>, params: object, opts: object)`
+
+It is called when an entity or entities resolved and before transforming and returning to the caller. You can use it to check the entity statuses or permissions against the logged-in user. 
+
+**Example**
+```js
+// posts.service.js
+{
+    name: "posts",
+    mixins: [DbService(/*...*/)],
+    hooks: {
+        customs: {
+            async afterResolveEntities(ctx, id, rawEntity, params, opts) {
+                // ...
+            }
+        }
+    }
+}
+```
+
 
 # Multi-tenancy
 The service supports many multi-tenancy methods. But each method has a different configuration.
@@ -2192,7 +2255,7 @@ Insert an entity. It returns the stored entity.
 ## `insertMany`
 `insertMany(entities: Array<object>)`
 
-Insert multiple entities. It returns the stored entities.
+Insert multiple entities. It returns the created entity IDs.
 
 ## `updateById`
 `updateById(id: any, changes: object, opts: object)`

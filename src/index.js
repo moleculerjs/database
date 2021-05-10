@@ -128,6 +128,27 @@ module.exports = function DatabaseMixin(mixinOpts) {
 		 */
 		created() {
 			this.adapters = new Map();
+
+			// Process custom DB hooks
+			this.$hooks = {};
+			if (this.schema.hooks && this.schema.hooks.customs) {
+				_.map(this.schema.hooks.customs, (hooks, name) => {
+					if (!Array.isArray(hooks)) hooks = [hooks];
+
+					hooks = _.compact(
+						hooks.map(h => {
+							return _.isString(h) ? (_.isFunction(this[h]) ? this[h] : null) : h;
+						})
+					);
+
+					this.$hooks[name] = (...args) => {
+						return hooks.reduce(
+							(p, fn) => p.then(() => fn.apply(this, args)),
+							this.Promise.resolve()
+						);
+					};
+				});
+			}
 		},
 
 		/**
@@ -151,6 +172,7 @@ module.exports = function DatabaseMixin(mixinOpts) {
 		 * @param {Object} schema
 		 */
 		merged(schema) {
+			// Generate action `params`
 			if (mixinOpts.createActions && schema.actions && schema.settings.fields) {
 				const fields = schema.settings.fields;
 				const primaryKeyField = getPrimaryKeyFromFields(fields);

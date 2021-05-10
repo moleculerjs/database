@@ -183,18 +183,27 @@ class KnexAdapter extends BaseAdapter {
 	 * Insert many entities
 	 *
 	 * @param {Array<Object>} entities
-	 * @returns {Promise<Array<Object>>} Return with the inserted documents in an Array.
+	 * @param {Object?} opts
+	 * @param {Boolean?} opts.returnEntities
+	 * @returns {Promise<Array<Object|any>>} Return with the inserted IDs or entities.
 	 *
 	 */
-	async insertMany(entities) {
-		return Promise.all(entities.map(entity => this.insert(entity)));
-		/* SQLite doesn't returns with the IDs
-		const res = await this.client
-			.insert(entities)
-			.returning(this.idFieldName)
-			.into(this.opts.tableName);
+	async insertMany(entities, opts = {}) {
+		let res = await this.client.transaction(trx =>
+			Promise.all(
+				entities.map(entity =>
+					trx.insert(entity, [this.idFieldName]).into(this.opts.tableName)
+				)
+			)
+		);
+
+		res = _.flatten(res).map(r => (typeof r == "object" ? r[this.idFieldName] : r));
+
+		if (opts.returnEntities) {
+			res = await this.findByIds(res);
+		}
+
 		return res;
-		*/
 	}
 
 	/**
