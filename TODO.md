@@ -10,10 +10,11 @@
   - [ ] Knex createCursor operators `$`
   - [ ] global pool handling
 
-- [ ] `insertMany` improvement.
-  - [ ] `createMany` with `opts.returnEntities` to return entities instead of IDs.
+- [x] `insertMany` improvement.
+  - [x] `createMany` with `opts.returnEntities` to return entities instead of IDs.
 ## Actions
 - [ ] `aggregate` action with params: `type: "sum", "avg", "count", "min", "max"` & `field: "price"`
+- [x] `createMany` action without REST
 
 ## Fields
 - [x] add option to disable auto value conversion in validator schema.
@@ -34,7 +35,6 @@
 ## Features
 - [x] Multi model/tenant solutions
     - [ ] schema-based for integration tests
-- [ ] `createMany` action without REST
 - [x] option to add other service cache cleaning events in the Mixin options
 - [ ] generate GraphQL types & resolvers
 - [ ] validate `raw: true` update fields (`$set`, `$inc`)

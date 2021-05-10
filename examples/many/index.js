@@ -95,7 +95,7 @@ broker
 		/*for (const post of POSTS) {
 			await broker.call("posts.create", post);
 		}*/
-		const res = await svc.createEntities(null, POSTS);
+		const res = await broker.call("posts.createMany", POSTS);
 		span.finish();
 
 		//broker.logger.info("Inserted result", res);

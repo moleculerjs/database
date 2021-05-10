@@ -465,7 +465,7 @@ module.exports = function (mixinOpts) {
 		},
 
 		/**
-		 * Insert entities.
+		 * Insert multiple entities.
 		 *
 		 * @param {Context} ctx
 		 * @param {Array<Object>?} params
@@ -485,12 +485,15 @@ module.exports = function (mixinOpts) {
 			);
 
 			this.logger.debug(`Create multiple entities`, entities);
-			let result = await adapter.insertMany(entities);
-			/* TODO: if (opts.transform !== false) {
+			let result = await adapter.insertMany(entities, {
+				returnEntities: opts.returnEntities
+			});
+			if (opts.returnEntities && opts.transform !== false) {
 				result = await this.transformResult(adapter, result, {}, ctx);
-			}*/
+			}
 
 			await this._entityChanged("create", result, ctx, { ...opts, batch: true });
+
 			return result;
 		},
 

@@ -1180,6 +1180,7 @@ Create multiple entities.
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
 | `opts.permissive` | `Boolean` | `false` | If `true`, readonly and immutable fields can be set and update and field permission is not checked. |
+| `opts.returnEntities` | `Boolean` | `false` | If `true`, it returns the inserted entities instead of IDs. |
 
 
 ## `updateEntity`
@@ -1909,7 +1910,7 @@ The [`entityChanged`](#entitychanged) method has a default implementation that s
 | Action | Method | Event | Description |
 | -------- | ---- | ------- | ----------- |
 | `create` | `createEntity` | `{serviceName}.created` | Sent after a new entity is created and stored in the database. |
-| - | `createEntities` | `{serviceName}.created` | Sent after multiple entities have been created and stored in the database. In this case, the `opts.batch == true` |
+| `createMany` | `createEntities` | `{serviceName}.created` | Sent after multiple entities have been created and stored in the database. In this case, the `opts.batch == true` |
 | `update` | `updateEntity` | `{serviceName}.updated` | Sent after an entity has been updated. |
 | `replace` | `replaceEntity` | `{serviceName}.replaced` | Sent after an entity has been replaced. |
 | `remove` | `removeEntity` | `{serviceName}.removed` | Sent after an entity has been deleted. |

@@ -183,11 +183,13 @@ class KnexAdapter extends BaseAdapter {
 	 * Insert many entities
 	 *
 	 * @param {Array<Object>} entities
-	 * @returns {Promise<Array<any>>} Return with the inserted IDs.
+	 * @param {Object?} opts
+	 * @param {Boolean?} opts.returnEntities
+	 * @returns {Promise<Array<Object|any>>} Return with the inserted IDs or entities.
 	 *
 	 */
-	async insertMany(entities) {
-		const res = await this.client.transaction(trx =>
+	async insertMany(entities, opts = {}) {
+		let res = await this.client.transaction(trx =>
 			Promise.all(
 				entities.map(entity =>
 					trx.insert(entity, [this.idFieldName]).into(this.opts.tableName)
@@ -195,7 +197,13 @@ class KnexAdapter extends BaseAdapter {
 			)
 		);
 
-		return _.flatten(res);
+		res = _.flatten(res);
+
+		if (opts.returnEntities) {
+			res = await this.findByIds(res);
+		}
+
+		return res;
 	}
 
 	/**

@@ -421,11 +421,11 @@ module.exports = (getAdapter, adapterType) => {
 
 		it("create multiple entities", async () => {
 			ctx.broadcast.mockClear();
-			const res = await svc.createEntities(ctx, [
-				TEST_DOCS.janeDoe,
-				TEST_DOCS.bobSmith,
-				TEST_DOCS.kevinJames
-			]);
+			const res = await svc.createEntities(
+				ctx,
+				[TEST_DOCS.janeDoe, TEST_DOCS.bobSmith, TEST_DOCS.kevinJames],
+				{ returnEntities: true }
+			);
 
 			expect(res.length).toBe(3);
 			docs.janeDoe = res[0];
@@ -443,12 +443,12 @@ module.exports = (getAdapter, adapterType) => {
 			expect(ctx.broadcast).toBeCalledWith("cache.clean.users", {
 				type: "create",
 				data: res,
-				opts: { batch: true }
+				opts: { batch: true, returnEntities: true }
 			});
 			expect(ctx.broadcast).toBeCalledWith("users.created", {
 				type: "create",
 				data: res,
-				opts: { batch: true }
+				opts: { batch: true, returnEntities: true }
 			});
 		});
 

@@ -207,10 +207,12 @@ class BaseAdapter {
 	 * Insert many entities
 	 *
 	 * @param {Array<Object>} entities
-	 * @returns {Promise<Array<Object>>} Return with the inserted documents in an Array.
+	 * @param {Object?} opts
+	 * @param {Boolean?} opts.returnEntities
+	 * @returns {Promise<Array<Object|any>>} Return with the inserted IDs or entities.
 	 *
 	 */
-	insertMany(/*entities*/) {
+	insertMany(/*entities, opts*/) {
 		/* istanbul ignore next */
 		throw new Error("This method is not implemented.");
 	}

@@ -631,7 +631,7 @@ module.exports = (getAdapter, adapterType) => {
 					user.email = user.email.replace(/\./g, ""); // the dot in email adddress can cause different sorting
 				});
 
-				docs = await this.createEntities(null, users);
+				docs = await this.createEntities(null, users, { returnEntities: true });
 
 				emailOrderedDocs = Array.from(docs).sort((a, b) => a.email.localeCompare(b.email));
 
@@ -826,7 +826,7 @@ module.exports = (getAdapter, adapterType) => {
 				async started() {
 					await this.clearEntities();
 					const users = fakerator.times(fakerator.entity.user, 10);
-					docs = await this.createEntities(null, users);
+					docs = await this.createEntities(null, users, { returnEntities: true });
 				}
 			});
 
