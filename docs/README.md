@@ -1969,6 +1969,68 @@ module.exports = {
 };
 ```
 
+# Service Hooks
+There are some service hooks that you can use in your service under the `hooks.customs` property in the schema. The hook can be a `Function` or `String`. In the case of `String`, it should be a service method name.
+
+## Adapter hooks
+
+### `adapterConnected`
+`adapterConnected(adapter: Adapter, hash: string, adapterOpts: object)`
+
+It is called when a new adapter is created and connected to the database. You can use it to create data tables or execute migrations.
+
+### `adapterDisconnected`
+`adapterDisconnected(adapter: Adapter, hash: string)`
+
+It is called when a new adapter is disconnected from the database.
+
+**Example**
+```js
+// posts.service.js
+{
+    name: "posts",
+    mixins: [DbService(/*...*/)],
+    hooks: {
+        customs: {
+            adapterConnected: "createTables" // method name
+            async adapterDisconnected(adapter, hash) {
+                // ...
+            }
+        }
+    },
+
+    method: {
+        async createTables(adapter, hash, adapterOpts) {
+            // ...
+        }
+    }
+}
+```
+
+## Entity hooks
+
+### `afterResolveEntities`
+`afterResolveEntities(ctx: Context, id: any|Array<any>, rawEntity: object|Array<object>, params: object, opts: object)`
+
+It is called when an entity or entities resolved and before transforming and returning to the caller. You can use it to check the entity statuses or permissions against the logged-in user. 
+
+**Example**
+```js
+// posts.service.js
+{
+    name: "posts",
+    mixins: [DbService(/*...*/)],
+    hooks: {
+        customs: {
+            async afterResolveEntities(ctx, id, rawEntity, params, opts) {
+                // ...
+            }
+        }
+    }
+}
+```
+
+
 # Multi-tenancy
 The service supports many multi-tenancy methods. But each method has a different configuration.
 For each method it's mandatory that you store the tenant ID in the `ctx.meta`. The best method is to resolve the logged in user in the `authenticate` or `authorize` method of the API gateway and set the resolved user into the `ctx.meta.user`.
@@ -2192,7 +2254,7 @@ Insert an entity. It returns the stored entity.
 ## `insertMany`
 `insertMany(entities: Array<object>)`
 
-Insert multiple entities. It returns the stored entities.
+Insert multiple entities. It returns the created entity IDs.
 
 ## `updateById`
 `updateById(id: any, changes: object, opts: object)`
