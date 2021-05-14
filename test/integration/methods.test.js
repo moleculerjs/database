@@ -763,6 +763,7 @@ module.exports = (getAdapter, adapterType) => {
 					id: {
 						type: "string",
 						primaryKey: true,
+
 						columnName: "_id",
 						columnType: "integer"
 					},
@@ -873,6 +874,305 @@ module.exports = (getAdapter, adapterType) => {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
 					expect(err.data).toEqual({ id: "123456789" });
 				}
+			});
+		});
+	});
+
+	describe("Test updateMany & removeMany methods", () => {
+		const broker = new ServiceBroker({ logger: false });
+		const svc = broker.createService({
+			name: "users",
+			mixins: [DbService({ adapter: getAdapter(), createActions: false })],
+
+			settings: {
+				fields: {
+					id: {
+						type: "string",
+						primaryKey: true,
+						secure: true,
+						columnName: "_id",
+						columnType: "integer"
+					},
+					name: { type: "string", trim: true, required: true },
+					age: { type: "number", columnType: "integer" },
+					dob: {
+						type: "number",
+						columnType: "bigInteger",
+						get: v => (typeof v == "string" ? Number(v) : v)
+					},
+					height: { type: "number", columnType: "integer" },
+					roles: { type: "array", items: "string", columnType: "string" },
+					status: {
+						type: "boolean",
+						default: true,
+						get: adapterType == "Knex" ? v => !!v : undefined
+					}
+				}
+			},
+
+			methods: {
+				encodeID(id) {
+					return "secured-" + id;
+				},
+
+				decodeID(id) {
+					return id.slice(8);
+				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
+			}
+		});
+
+		beforeAll(() => broker.start());
+		afterAll(() => broker.stop());
+
+		const ctx = Context.create(broker, null, {});
+		let docs = {};
+		jest.spyOn(ctx, "broadcast");
+
+		describe("Test updateEntities method", () => {
+			it("should return empty array", async () => {
+				const rows = await svc.findEntities(ctx);
+				expect(rows).toEqual([]);
+
+				const count = await svc.countEntities(ctx);
+				expect(count).toEqual(0);
+			});
+
+			it("create test entities", async () => {
+				for (const [key, value] of Object.entries(TEST_DOCS)) {
+					docs[key] = await svc.createEntity(ctx, value);
+				}
+			});
+
+			it("should update multiple entities", async () => {
+				ctx.broadcast.mockClear();
+				const rows = await svc.updateEntities(ctx, {
+					query: {
+						status: true,
+						age: { $gt: 40 }
+					},
+					changes: {
+						status: false,
+						age: 88
+					}
+				});
+				expect(rows).toEqual(
+					expect.arrayContaining([
+						{
+							...docs.bobSmith,
+							age: 88,
+							status: false
+						},
+						{
+							...docs.johnDoe,
+							age: 88,
+							status: false
+						}
+					])
+				);
+
+				expect(ctx.broadcast).toBeCalledTimes(4);
+
+				expect(ctx.broadcast).toBeCalledWith("cache.clean.users", {
+					type: "update",
+					data: rows[0],
+					opts: {}
+				});
+				expect(ctx.broadcast).toBeCalledWith("cache.clean.users", {
+					type: "update",
+					data: rows[1],
+					opts: {}
+				});
+
+				expect(ctx.broadcast).toBeCalledWith("users.updated", {
+					type: "update",
+					data: rows[0],
+					opts: {}
+				});
+				expect(ctx.broadcast).toBeCalledWith("users.updated", {
+					type: "update",
+					data: rows[1],
+					opts: {}
+				});
+			});
+
+			it("should return the updated entities", async () => {
+				const rows = await svc.findEntities(ctx, {
+					query: {
+						status: false,
+						age: 88
+					},
+					sort: "name"
+				});
+
+				expect(rows).toEqual([
+					{
+						...docs.bobSmith,
+						age: 88,
+						status: false
+					},
+					{
+						...docs.johnDoe,
+						age: 88,
+						status: false
+					}
+				]);
+			});
+
+			if (adapterType == "MongoDB" || adapterType == "NeDB") {
+				it("should raw update an entity", async () => {
+					ctx.broadcast.mockClear();
+					const rows = await svc.updateEntities(
+						ctx,
+						{
+							query: {
+								age: 88
+							},
+							changes: {
+								$inc: {
+									age: 1
+								}
+							}
+						},
+						{ raw: true }
+					);
+					expect(rows).toEqual(
+						expect.arrayContaining([
+							{
+								...docs.bobSmith,
+								age: 89,
+								status: false
+							},
+							{
+								...docs.johnDoe,
+								age: 89,
+								status: false
+							}
+						])
+					);
+
+					expect(ctx.broadcast).toBeCalledTimes(4);
+
+					expect(ctx.broadcast).toBeCalledWith("cache.clean.users", {
+						type: "update",
+						data: rows[0],
+						opts: { raw: true }
+					});
+					expect(ctx.broadcast).toBeCalledWith("cache.clean.users", {
+						type: "update",
+						data: rows[1],
+						opts: { raw: true }
+					});
+
+					expect(ctx.broadcast).toBeCalledWith("users.updated", {
+						type: "update",
+						data: rows[0],
+						opts: { raw: true }
+					});
+					expect(ctx.broadcast).toBeCalledWith("users.updated", {
+						type: "update",
+						data: rows[1],
+						opts: { raw: true }
+					});
+				});
+			}
+
+			it("should return empty if no updated entities", async () => {
+				ctx.broadcast.mockClear();
+				const rows = await svc.updateEntities(ctx, {
+					query: {
+						status: false,
+						age: { $lt: 10 }
+					},
+					changes: {
+						status: true,
+						age: 33
+					}
+				});
+				expect(rows).toEqual([]);
+
+				expect(ctx.broadcast).toBeCalledTimes(0);
+			});
+		});
+
+		describe("Test removeEntities method", () => {
+			it("should return empty array", async () => {
+				await svc.clearEntities();
+
+				const rows = await svc.findEntities(ctx);
+				expect(rows).toEqual([]);
+
+				const count = await svc.countEntities(ctx);
+				expect(count).toEqual(0);
+			});
+
+			it("create test entities", async () => {
+				for (const [key, value] of Object.entries(TEST_DOCS)) {
+					docs[key] = await svc.createEntity(ctx, value);
+				}
+			});
+
+			it("should remove multiple entities", async () => {
+				ctx.broadcast.mockClear();
+				const rows = await svc.removeEntities(ctx, {
+					query: {
+						status: true,
+						age: { $gt: 40 }
+					}
+				});
+				expect(rows).toEqual(expect.arrayContaining([docs.bobSmith.id, docs.johnDoe.id]));
+				expect(rows[0].startsWith("secured-")).toBeTruthy();
+
+				expect(ctx.broadcast).toBeCalledTimes(4);
+
+				expect(ctx.broadcast).toBeCalledWith("cache.clean.users", {
+					type: "remove",
+					data: docs.bobSmith,
+					opts: { softDelete: false }
+				});
+				expect(ctx.broadcast).toBeCalledWith("cache.clean.users", {
+					type: "remove",
+					data: docs.johnDoe,
+					opts: { softDelete: false }
+				});
+
+				expect(ctx.broadcast).toBeCalledWith("users.removed", {
+					type: "remove",
+					data: docs.bobSmith,
+					opts: { softDelete: false }
+				});
+				expect(ctx.broadcast).toBeCalledWith("users.removed", {
+					type: "remove",
+					data: docs.johnDoe,
+					opts: { softDelete: false }
+				});
+			});
+
+			it("should return the remaining entities", async () => {
+				const rows = await svc.findEntities(ctx, { sort: "name" });
+				expect(rows).toEqual([docs.janeDoe, docs.kevinJames]);
+			});
+
+			it("should return empty if no updated entities", async () => {
+				ctx.broadcast.mockClear();
+				const rows = await svc.removeEntities(ctx, {
+					query: {
+						status: false,
+						age: { $lt: 10 }
+					}
+				});
+				expect(rows).toEqual([]);
+
+				expect(ctx.broadcast).toBeCalledTimes(0);
 			});
 		});
 	});

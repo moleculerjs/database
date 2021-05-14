@@ -1,41 +1,21 @@
 # TODO
 
-- [x] add more debug log messages
-- [x] `sort` fields should be converted to `columnName`
-- [x] in Knex if MSSQL and has offset but no sort, if should add a sort to the primary key field
-  - [x] https://github.com/knex/knex/issues/1527
-
 - [ ] **More integration tests**
   - [ ] createIndex, removeIndex
   - [ ] Knex createCursor operators `$`
   - [ ] global pool handling
 
-- [x] `insertMany` improvement.
-  - [x] `createMany` with `opts.returnEntities` to return entities instead of IDs.
 ## Actions
 - [ ] `aggregate` action with params: `type: "sum", "avg", "count", "min", "max"` & `field: "price"`
-- [x] `createMany` action without REST
 
 ## Fields
-- [x] add option to disable auto value conversion in validator schema.
-- [x] `validate` somehow should return the error message text if not valid. E.g. it's `true` or `"The value is not valid"`
 
 
 ## Methods
-- [ ] create methods for `updateMany` and `removeMany`
-  - [ ] or find with query validate every entity, clear cache, send notify (batch)
-- [x] limiting the maximum opened adapters (in case of multi-tenancy)
-  - [x] add an `adapterConnected` and `adapterDisconnected` hooks.
-- [x] `findEntity` with sorting
-- [x] CRUD methods 
-  - [x] `opts.permissive: true` to disable `readonly`, `immutable` validation to save these fields, and skip permission checks in validation.
-  - [x] `opts.skipOnHooks` to skip the `onCreate`, `onUpdate` ...etc hooks.
-- [x] `afterResolveEntities` custom hook (using to check permissions, rights, status, owner...etc)
 
 ## Features
 - [x] Multi model/tenant solutions
     - [ ] schema-based for integration tests
-- [x] option to add other service cache cleaning events in the Mixin options
 - [ ] generate GraphQL types & resolvers
 - [ ] validate `raw: true` update fields (`$set`, `$inc`)
 - [ ] add custom tracings (validating, transforming)
@@ -43,8 +23,6 @@
   - [ ] https://gist.github.com/intech/b6e809c729835cb1da6411c4a940846b
 
 ## Adapters
-- [x] `findOne` with sorting
-
 - [ ] Cassandra
 - [ ] Couchbase
 - [ ] CouchDB

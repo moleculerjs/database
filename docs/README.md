@@ -1198,6 +1198,26 @@ Update an existing entity. Only the specified fields will be updated.
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
 | `opts.permissive` | `Boolean` | `false` | If `true`, readonly and immutable fields can be set and update and field permission is not checked. |
 
+It returns the updated entity.
+
+## `updateEntities`
+`updateEntities(ctx?: Context, params: object, opts?: object)`
+
+Update multiple entities by a query. Only the specified fields will be updated.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
+| `params` | `Object` | `null` | Parameters for method. |
+| `params.query` | `Object` | `null` | The query for finding entities. |
+| `params.changes` | `Object` | `null` | It contains the changed field values. |
+| `opts` | `Object` | `{}` | Other options for internal methods. |
+| `opts.raw` | `Boolean` | `false` | If `true`, the `params` is passed directly to the database client. |
+| `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
+| `opts.permissive` | `Boolean` | `false` | If `true`, readonly and immutable fields can be set and update and field permission is not checked. |
+
+It returns all updated entities.
 
 ## `replaceEntity`
 `replaceEntity(ctx?: Context, params: object, opts?: object)`
@@ -1213,6 +1233,7 @@ Replace an existing entity.
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
 | `opts.permissive` | `Boolean` | `false` | If `true`, readonly and immutable fields can be set and update and field permission is not checked. |
 
+It returns the replaced entity.
 
 ## `removeEntity`
 `removeEntity(ctx?: Context, params: object, opts?: object)`
@@ -1228,6 +1249,22 @@ Delete an entity by ID.
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
 
 The method returns only the ID of the deleted entity.
+
+## `removeEntities`
+`removeEntities(ctx?: Context, params: object, opts?: object)`
+
+Delete multiple entities by a query.
+
+### Parameters
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
+| `params` | `Object` | `null` | Parameters for method. |
+| `params.query` | `Object` | `null` | The query for finding entities. |
+| `opts` | `Object` | `{}` | Other options for internal methods. |
+| `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
+
+The method returns only the ID of all deleted entities.
 
 ## `clearEntities`
 `clearEntities(ctx?: Context, params: object)`

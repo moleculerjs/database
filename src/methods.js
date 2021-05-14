@@ -505,6 +505,7 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} opts
 		 */
 		async updateEntity(ctx, params = ctx.params, opts = {}) {
+			params = _.cloneDeep(params);
 			const adapter = await this.getAdapter(ctx);
 			let id = this._getIDFromParams(params);
 
@@ -549,6 +550,42 @@ module.exports = function (mixinOpts) {
 			}
 
 			return result;
+		},
+
+		/**
+		 * Update multiple entities (patch).
+		 *
+		 * @param {Context} ctx
+		 * @param {Object} params
+		 * @param {Object} params.query
+		 * @param {Object} params.changes
+		 * @param {Object?} opts
+		 */
+		async updateEntities(ctx, params = ctx.params, opts = {}) {
+			const adapter = await this.getAdapter(ctx);
+
+			const _entities = await this.findEntities(
+				ctx,
+				{ query: params.query },
+				{ transform: false }
+			);
+
+			return this.Promise.all(
+				_entities.map(async _entity => {
+					let entity = adapter.entityToJSON(_entity);
+					let id = entity[this.$primaryField.columnName];
+					id = this.$primaryField.secure ? this.encodeID(id) : id;
+
+					return await this.updateEntity(
+						ctx,
+						{
+							...params.changes,
+							[this.$primaryField.name]: id
+						},
+						opts
+					);
+				})
+			);
 		},
 
 		/**
@@ -622,7 +659,7 @@ module.exports = function (mixinOpts) {
 			if (this.$softDelete) {
 				this.logger.debug(`Soft delete an entity`, id, params);
 				// Soft delete
-				await adapter.updateById(id, params);
+				entity = await adapter.updateById(id, params);
 			} else {
 				// Real delete
 				this.logger.debug(`Delete an entity`, id);
@@ -639,6 +676,40 @@ module.exports = function (mixinOpts) {
 			});
 
 			return origID;
+		},
+
+		/**
+		 * Delete multiple entities.
+		 *
+		 * @param {Context} ctx
+		 * @param {Object?} params
+		 * @param {Object?} params.query
+		 * @param {Object?} opts
+		 */
+		async removeEntities(ctx, params = ctx.params, opts = {}) {
+			const adapter = await this.getAdapter(ctx);
+
+			const _entities = await this.findEntities(
+				ctx,
+				{ query: params.query },
+				{ transform: false }
+			);
+
+			return this.Promise.all(
+				_entities.map(async _entity => {
+					let entity = adapter.entityToJSON(_entity);
+					let id = entity[this.$primaryField.columnName];
+					id = this.$primaryField.secure ? this.encodeID(id) : id;
+
+					return await this.removeEntity(
+						ctx,
+						{
+							[this.$primaryField.name]: id
+						},
+						opts
+					);
+				})
+			);
 		},
 
 		/**
