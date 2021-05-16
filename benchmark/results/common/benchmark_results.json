@@ -11,7 +11,7 @@
       {
         "name": "NeDB (file)",
         "type": "NeDB",
-        "options": "D:\\Work\\moleculer\\database\\benchmark\\suites\\tmp\\common.db"
+        "options": "/home/runner/work/database/database/benchmark/suites/tmp/common.db"
       },
       {
         "name": "MongoDB",
@@ -43,7 +43,7 @@
           "knex": {
             "client": "sqlite3",
             "connection": {
-              "filename": "D:\\Work\\moleculer\\database\\benchmark\\suites\\tmp\\common.sqlite3"
+              "filename": "/home/runner/work/database/database/benchmark/suites/tmp/common.sqlite3"
             },
             "useNullAsDefault": true,
             "pool": {
@@ -51,6 +51,71 @@
               "max": 1
             },
             "log": {}
+          }
+        }
+      },
+      {
+        "name": "Knex-Postgresql",
+        "type": "Knex",
+        "options": {
+          "knex": {
+            "client": "pg",
+            "connection": {
+              "host": "127.0.0.1",
+              "port": 5432,
+              "user": "postgres",
+              "password": "moleculer",
+              "database": "bench_test"
+            }
+          }
+        }
+      },
+      {
+        "name": "Knex-MySQL",
+        "type": "Knex",
+        "options": {
+          "knex": {
+            "client": "mysql",
+            "connection": {
+              "host": "127.0.0.1",
+              "user": "root",
+              "password": "moleculer",
+              "database": "bench_test"
+            },
+            "log": {}
+          }
+        }
+      },
+      {
+        "name": "Knex-MySQL2",
+        "type": "Knex",
+        "options": {
+          "knex": {
+            "client": "mysql2",
+            "connection": {
+              "host": "127.0.0.1",
+              "user": "root",
+              "password": "moleculer",
+              "database": "bench_test"
+            },
+            "log": {}
+          }
+        }
+      },
+      {
+        "name": "Knex-MSSQL",
+        "type": "Knex",
+        "options": {
+          "knex": {
+            "client": "mssql",
+            "connection": {
+              "host": "127.0.0.1",
+              "port": 1433,
+              "user": "sa",
+              "password": "Moleculer@Pass1234",
+              "database": "bench_test",
+              "encrypt": false
+            }
           }
         }
       }
@@ -70,24 +135,24 @@
           "meta": {},
           "fastest": true,
           "stat": {
-            "duration": 5.0343227,
+            "duration": 5.074857152,
             "cycle": 0,
-            "count": 87000,
-            "avg": 0.00005786577816091954,
-            "rps": 17281.371335214568,
-            "percent": 385.1065268422305
+            "count": 51000,
+            "avg": 0.00009950700298039216,
+            "rps": 10049.543952168371,
+            "percent": 512.6761544032785
           }
         },
         {
           "name": "NeDB (file)",
           "meta": {},
           "stat": {
-            "duration": 5.0408435,
+            "duration": 5.183033663,
             "cycle": 0,
-            "count": 11000,
-            "avg": 0.0004582585,
-            "rps": 2182.1744713955113,
-            "percent": -38.7440349351585
+            "count": 19000,
+            "avg": 0.0002727912454210526,
+            "rps": 3665.806791037236,
+            "percent": 123.48799290872412
           }
         },
         {
@@ -95,11 +160,11 @@
           "meta": {},
           "reference": true,
           "stat": {
-            "duration": 5.052792,
+            "duration": 5.486901113,
             "cycle": 0,
-            "count": 18000,
-            "avg": 0.0002807106666666667,
-            "rps": 3562.3868942161084,
+            "count": 9000,
+            "avg": 0.0006096556792222223,
+            "rps": 1640.2701296505031,
             "percent": 0
           }
         },
@@ -107,24 +172,72 @@
           "name": "Knex SQLite (memory)",
           "meta": {},
           "stat": {
-            "duration": 5.011854,
+            "duration": 5.316564436,
             "cycle": 0,
-            "count": 16000,
-            "avg": 0.000313240875,
-            "rps": 3192.4313836755823,
-            "percent": -10.385045800083816
+            "count": 11000,
+            "avg": 0.00048332403963636367,
+            "rps": 2069.005300775781,
+            "percent": 26.13808319588371
           }
         },
         {
           "name": "Knex SQLite (file)",
           "meta": {},
           "stat": {
-            "duration": 157.2999915,
+            "duration": 5.055872934,
             "cycle": 0,
-            "count": 1000,
-            "avg": 0.1572999915,
-            "rps": 6.357279428079308,
-            "percent": -99.82154438535575
+            "count": 2000,
+            "avg": 0.002527936467,
+            "rps": 395.5795618498034,
+            "percent": -75.88326735340291
+          }
+        },
+        {
+          "name": "Knex-Postgresql",
+          "meta": {},
+          "stat": {
+            "duration": 6.477554221,
+            "cycle": 0,
+            "count": 4000,
+            "avg": 0.00161938855525,
+            "rps": 617.5170231739847,
+            "percent": -62.35272398055796
+          }
+        },
+        {
+          "name": "Knex-MySQL",
+          "meta": {},
+          "stat": {
+            "duration": 5.095103921,
+            "cycle": 0,
+            "count": 2000,
+            "avg": 0.0025475519604999997,
+            "rps": 392.5337011786536,
+            "percent": -76.06895997903152
+          }
+        },
+        {
+          "name": "Knex-MySQL2",
+          "meta": {},
+          "stat": {
+            "duration": 7.151838863,
+            "cycle": 0,
+            "count": 3000,
+            "avg": 0.0023839462876666666,
+            "rps": 419.47253810771434,
+            "percent": -74.42661848648719
+          }
+        },
+        {
+          "name": "Knex-MSSQL",
+          "meta": {},
+          "stat": {
+            "duration": 8.443914722,
+            "cycle": 0,
+            "count": 2000,
+            "avg": 0.004221957361,
+            "rps": 236.85696336903388,
+            "percent": -85.55988071187386
           }
         }
       ]
@@ -139,26 +252,26 @@
         {
           "name": "NeDB (memory)",
           "meta": {},
-          "fastest": true,
           "stat": {
-            "duration": 5.0632883,
+            "duration": 5.192621834,
             "cycle": 0,
-            "count": 20000,
-            "avg": 0.00025316441499999997,
-            "rps": 3950.002214963742,
-            "percent": 101.57551763347149
+            "count": 16000,
+            "avg": 0.000324538864625,
+            "rps": 3081.295058930725,
+            "percent": 194.9405018428307
           }
         },
         {
           "name": "NeDB (file)",
           "meta": {},
+          "fastest": true,
           "stat": {
-            "duration": 5.1947435,
+            "duration": 5.188555011,
             "cycle": 0,
-            "count": 20000,
-            "avg": 0.000259737175,
-            "rps": 3850.0457241055306,
-            "percent": 96.47456318103093
+            "count": 16000,
+            "avg": 0.00032428468818750003,
+            "rps": 3083.710197941274,
+            "percent": 195.1716781171466
           }
         },
         {
@@ -166,11 +279,11 @@
           "meta": {},
           "reference": true,
           "stat": {
-            "duration": 5.1031748,
+            "duration": 5.743179336,
             "cycle": 0,
-            "count": 10000,
-            "avg": 0.00051031748,
-            "rps": 1959.5644656342167,
+            "count": 6000,
+            "avg": 0.000957196556,
+            "rps": 1044.7175073204087,
             "percent": 0
           }
         },
@@ -178,24 +291,72 @@
           "name": "Knex SQLite (memory)",
           "meta": {},
           "stat": {
-            "duration": 5.29846,
+            "duration": 5.015626505,
             "cycle": 0,
-            "count": 17000,
-            "avg": 0.00031167411764705883,
-            "rps": 3208.4794449708024,
-            "percent": 63.73431449892985
+            "count": 10000,
+            "avg": 0.0005015626505,
+            "rps": 1993.7688721501004,
+            "percent": 90.84286978820805
           }
         },
         {
           "name": "Knex SQLite (file)",
           "meta": {},
           "stat": {
-            "duration": 5.2192602,
+            "duration": 5.425532178,
             "cycle": 0,
-            "count": 15000,
-            "avg": 0.00034795067999999997,
-            "rps": 2873.9705293865213,
-            "percent": 46.66373981507954
+            "count": 11000,
+            "avg": 0.000493230198,
+            "rps": 2027.4508820727153,
+            "percent": 94.06690017791652
+          }
+        },
+        {
+          "name": "Knex-Postgresql",
+          "meta": {},
+          "stat": {
+            "duration": 5.574688269,
+            "cycle": 0,
+            "count": 8000,
+            "avg": 0.000696836033625,
+            "rps": 1435.057820988268,
+            "percent": 37.36324039108348
+          }
+        },
+        {
+          "name": "Knex-MySQL",
+          "meta": {},
+          "stat": {
+            "duration": 5.6961172,
+            "cycle": 0,
+            "count": 6000,
+            "avg": 0.0009493528666666666,
+            "rps": 1053.3491129712008,
+            "percent": 0.8262143201688303
+          }
+        },
+        {
+          "name": "Knex-MySQL2",
+          "meta": {},
+          "stat": {
+            "duration": 5.214715326,
+            "cycle": 0,
+            "count": 6000,
+            "avg": 0.0008691192210000001,
+            "rps": 1150.5901329042174,
+            "percent": 10.134091258349926
+          }
+        },
+        {
+          "name": "Knex-MSSQL",
+          "meta": {},
+          "stat": {
+            "duration": 5.949250071,
+            "cycle": 0,
+            "count": 4000,
+            "avg": 0.00148731251775,
+            "rps": 672.3536500000657,
+            "percent": -35.64254018059077
           }
         }
       ]
@@ -211,24 +372,24 @@
           "name": "NeDB (memory)",
           "meta": {},
           "stat": {
-            "duration": 5.41852,
+            "duration": 6.568826938,
             "cycle": 0,
-            "count": 5000,
-            "avg": 0.001083704,
-            "rps": 922.7611967843618,
-            "percent": 5.195243350582814
+            "count": 4000,
+            "avg": 0.0016422067344999999,
+            "rps": 608.9367306756712,
+            "percent": 18.63908920455512
           }
         },
         {
           "name": "NeDB (file)",
           "meta": {},
           "stat": {
-            "duration": 5.7843795,
+            "duration": 6.280315853,
             "cycle": 0,
-            "count": 5000,
-            "avg": 0.0011568759,
-            "rps": 864.3969504421348,
-            "percent": -1.4583102647397084
+            "count": 4000,
+            "avg": 0.00157007896325,
+            "rps": 636.9106416979439,
+            "percent": 24.089243806806124
           }
         },
         {
@@ -236,11 +397,11 @@
           "meta": {},
           "reference": true,
           "stat": {
-            "duration": 5.7000253,
+            "duration": 5.844897338,
             "cycle": 0,
-            "count": 5000,
-            "avg": 0.0011400050600000001,
-            "rps": 877.1890889677279,
+            "count": 3000,
+            "avg": 0.0019482991126666667,
+            "rps": 513.2682109736655,
             "percent": 0
           }
         },
@@ -249,24 +410,72 @@
           "meta": {},
           "fastest": true,
           "stat": {
-            "duration": 5.3600016,
+            "duration": 5.581431578,
             "cycle": 0,
-            "count": 12000,
-            "avg": 0.0004466668,
-            "rps": 2238.8053018491637,
-            "percent": 155.2249372462874
+            "count": 8000,
+            "avg": 0.00069767894725,
+            "rps": 1433.324029543447,
+            "percent": 179.2543934923309
           }
         },
         {
           "name": "Knex SQLite (file)",
           "meta": {},
           "stat": {
-            "duration": 5.2304556,
+            "duration": 5.620466878,
             "cycle": 0,
-            "count": 10000,
-            "avg": 0.00052304556,
-            "rps": 1911.8793399183046,
-            "percent": 117.95521216163274
+            "count": 8000,
+            "avg": 0.00070255835975,
+            "rps": 1423.3692989659141,
+            "percent": 177.3149142172266
+          }
+        },
+        {
+          "name": "Knex-Postgresql",
+          "meta": {},
+          "stat": {
+            "duration": 6.063262366,
+            "cycle": 0,
+            "count": 5000,
+            "avg": 0.0012126524732,
+            "rps": 824.6385688400541,
+            "percent": 60.664259194178726
+          }
+        },
+        {
+          "name": "Knex-MySQL",
+          "meta": {},
+          "stat": {
+            "duration": 5.026088467,
+            "cycle": 0,
+            "count": 2000,
+            "avg": 0.0025130442335,
+            "rps": 397.92375584542214,
+            "percent": -22.47254995773767
+          }
+        },
+        {
+          "name": "Knex-MySQL2",
+          "meta": {},
+          "stat": {
+            "duration": 7.091043563,
+            "cycle": 0,
+            "count": 3000,
+            "avg": 0.002363681187666667,
+            "rps": 423.0688999928796,
+            "percent": -17.573523754700986
+          }
+        },
+        {
+          "name": "Knex-MSSQL",
+          "meta": {},
+          "stat": {
+            "duration": 5.03325243,
+            "cycle": 0,
+            "count": 2000,
+            "avg": 0.002516626215,
+            "rps": 397.357380305283,
+            "percent": -22.582896853966588
           }
         }
       ]
@@ -282,24 +491,24 @@
           "name": "NeDB (memory)",
           "meta": {},
           "stat": {
-            "duration": 5.3005301,
+            "duration": 6.076442724,
             "cycle": 0,
-            "count": 6000,
-            "avg": 0.0008834216833333333,
-            "rps": 1131.9622541149233,
-            "percent": -32.35523870842026
+            "count": 5000,
+            "avg": 0.0012152885448,
+            "rps": 822.8498526369061,
+            "percent": -21.406933048656953
           }
         },
         {
           "name": "NeDB (file)",
           "meta": {},
           "stat": {
-            "duration": 5.2853515,
+            "duration": 6.254103422,
             "cycle": 0,
-            "count": 6000,
-            "avg": 0.0008808919166666667,
-            "rps": 1135.2130506362728,
-            "percent": -32.16097485033241
+            "count": 5000,
+            "avg": 0.0012508206844,
+            "rps": 799.4751066014591,
+            "percent": -23.639531103146936
           }
         },
         {
@@ -307,11 +516,11 @@
           "meta": {},
           "reference": true,
           "stat": {
-            "duration": 5.3782964,
+            "duration": 5.730795238,
             "cycle": 0,
-            "count": 9000,
-            "avg": 0.0005975884888888889,
-            "rps": 1673.3923403700844,
+            "count": 6000,
+            "avg": 0.0009551325396666666,
+            "rps": 1046.9751144160493,
             "percent": 0
           }
         },
@@ -320,24 +529,72 @@
           "meta": {},
           "fastest": true,
           "stat": {
-            "duration": 5.0103527,
+            "duration": 5.150977826,
             "cycle": 0,
-            "count": 39000,
-            "avg": 0.00012847058205128206,
-            "rps": 7783.883158564865,
-            "percent": 365.15589744144495
+            "count": 32000,
+            "avg": 0.0001609680570625,
+            "rps": 6212.412687641028,
+            "percent": 493.3677507803998
           }
         },
         {
           "name": "Knex SQLite (file)",
           "meta": {},
           "stat": {
-            "duration": 5.0906436,
+            "duration": 5.146201788,
             "cycle": 0,
-            "count": 30000,
-            "avg": 0.00016968812,
-            "rps": 5893.164471384325,
-            "percent": 252.16872512282464
+            "count": 29000,
+            "avg": 0.00017745523406896552,
+            "rps": 5635.224034087177,
+            "percent": 438.2385843268323
+          }
+        },
+        {
+          "name": "Knex-Postgresql",
+          "meta": {},
+          "stat": {
+            "duration": 5.424823625,
+            "cycle": 0,
+            "count": 12000,
+            "avg": 0.0004520686354166667,
+            "rps": 2212.053484042995,
+            "percent": 111.28042620924839
+          }
+        },
+        {
+          "name": "Knex-MySQL",
+          "meta": {},
+          "stat": {
+            "duration": 5.197591206,
+            "cycle": 0,
+            "count": 3000,
+            "avg": 0.001732530402,
+            "rps": 577.1904486326007,
+            "percent": -44.87066209262015
+          }
+        },
+        {
+          "name": "Knex-MySQL2",
+          "meta": {},
+          "stat": {
+            "duration": 5.180637195,
+            "cycle": 0,
+            "count": 3000,
+            "avg": 0.0017268790650000001,
+            "rps": 579.0793462424655,
+            "percent": -44.6902473354921
+          }
+        },
+        {
+          "name": "Knex-MSSQL",
+          "meta": {},
+          "stat": {
+            "duration": 5.703208202,
+            "cycle": 0,
+            "count": 6000,
+            "avg": 0.0009505347003333333,
+            "rps": 1052.0394464813544,
+            "percent": 0.4837108347250023
           }
         }
       ]
@@ -353,12 +610,12 @@
           "name": "NeDB (memory)",
           "meta": {},
           "stat": {
-            "duration": 5.0038891,
+            "duration": 5.041867287,
             "cycle": 0,
-            "count": 160000,
-            "avg": 0.000031274306875,
-            "rps": 31975.129105079486,
-            "percent": 689.3633278924891
+            "count": 108000,
+            "avg": 0.000046683956361111106,
+            "rps": 21420.635223475292,
+            "percent": 950.1986974796641
           }
         },
         {
@@ -366,12 +623,12 @@
           "meta": {},
           "fastest": true,
           "stat": {
-            "duration": 5.0267698,
+            "duration": 5.035855145,
             "cycle": 0,
-            "count": 162000,
-            "avg": 0.000031029443209876545,
-            "rps": 32227.45549239195,
-            "percent": 695.5924566678414
+            "count": 111000,
+            "avg": 0.00004536806436936937,
+            "rps": 22041.93663318725,
+            "percent": 980.659508954886
           }
         },
         {
@@ -379,11 +636,11 @@
           "meta": {},
           "reference": true,
           "stat": {
-            "duration": 5.1842261,
+            "duration": 5.393017318,
             "cycle": 0,
-            "count": 21000,
-            "avg": 0.0002468679095238095,
-            "rps": 4050.749252622296,
+            "count": 11000,
+            "avg": 0.0004902743016363636,
+            "rps": 2039.6745182489697,
             "percent": 0
           }
         },
@@ -391,24 +648,72 @@
           "name": "Knex SQLite (memory)",
           "meta": {},
           "stat": {
-            "duration": 5.098616,
+            "duration": 5.00383395,
             "cycle": 0,
-            "count": 34000,
-            "avg": 0.00014995929411764706,
-            "rps": 6668.476308080468,
-            "percent": 64.62328058848763
+            "count": 24000,
+            "avg": 0.00020849308125,
+            "rps": 4796.322228078731,
+            "percent": 135.15135307942674
           }
         },
         {
           "name": "Knex SQLite (file)",
           "meta": {},
           "stat": {
-            "duration": 5.0179153,
+            "duration": 5.095334995,
             "cycle": 0,
-            "count": 26000,
-            "avg": 0.00019299674230769233,
-            "rps": 5181.434608910198,
-            "percent": 27.91299302359782
+            "count": 23000,
+            "avg": 0.00022153630413043477,
+            "rps": 4513.932846921677,
+            "percent": 121.30652741579678
+          }
+        },
+        {
+          "name": "Knex-Postgresql",
+          "meta": {},
+          "stat": {
+            "duration": 5.491850472,
+            "cycle": 0,
+            "count": 10000,
+            "avg": 0.0005491850472,
+            "rps": 1820.879874822637,
+            "percent": -10.726939100762252
+          }
+        },
+        {
+          "name": "Knex-MySQL",
+          "meta": {},
+          "stat": {
+            "duration": 4.999728574,
+            "cycle": 0,
+            "count": 9000,
+            "avg": 0.0005555253971111111,
+            "rps": 1800.0977186646774,
+            "percent": -11.745834810446397
+          }
+        },
+        {
+          "name": "Knex-MySQL2",
+          "meta": {},
+          "stat": {
+            "duration": 5.439999842,
+            "cycle": 0,
+            "count": 12000,
+            "avg": 0.00045333332016666666,
+            "rps": 2205.882417009085,
+            "percent": 8.148746149106302
+          }
+        },
+        {
+          "name": "Knex-MSSQL",
+          "meta": {},
+          "stat": {
+            "duration": 5.004088886,
+            "cycle": 0,
+            "count": 5000,
+            "avg": 0.0010008177772,
+            "rps": 999.1828910130994,
+            "percent": -51.01263059015499
           }
         }
       ]
@@ -423,26 +728,26 @@
         {
           "name": "NeDB (memory)",
           "meta": {},
+          "fastest": true,
           "stat": {
-            "duration": 5.0113246,
+            "duration": 5.012290141,
             "cycle": 0,
-            "count": 162000,
-            "avg": 0.0000309341024691358,
-            "rps": 32326.782423952343,
-            "percent": 715.3717575987793
+            "count": 105000,
+            "avg": 0.00004773609658095238,
+            "rps": 20948.50797664548,
+            "percent": 1016.1407655032235
           }
         },
         {
           "name": "NeDB (file)",
           "meta": {},
-          "fastest": true,
           "stat": {
-            "duration": 5.0167763,
+            "duration": 5.033716957,
             "cycle": 0,
-            "count": 164000,
-            "avg": 0.0000305900993902439,
-            "rps": 32690.31549204217,
-            "percent": 724.5410771056305
+            "count": 98000,
+            "avg": 0.00005136445874489796,
+            "rps": 19468.714835807164,
+            "percent": 937.2970859990289
           }
         },
         {
@@ -450,11 +755,11 @@
           "meta": {},
           "reference": true,
           "stat": {
-            "duration": 5.0445587,
+            "duration": 5.328020338,
             "cycle": 0,
-            "count": 20000,
-            "avg": 0.000252227935,
-            "rps": 3964.667910396206,
+            "count": 10000,
+            "avg": 0.0005328020338,
+            "rps": 1876.8697125044646,
             "percent": 0
           }
         },
@@ -462,24 +767,72 @@
           "name": "Knex SQLite (memory)",
           "meta": {},
           "stat": {
-            "duration": 5.0685843,
+            "duration": 5.048684136,
             "cycle": 0,
-            "count": 34000,
-            "avg": 0.0001490760088235294,
-            "rps": 6707.987474924704,
-            "percent": 69.1941828806122
+            "count": 22000,
+            "avg": 0.00022948564254545456,
+            "rps": 4357.571083349707,
+            "percent": 132.1722735636793
           }
         },
         {
           "name": "Knex SQLite (file)",
           "meta": {},
           "stat": {
-            "duration": 5.0584621,
+            "duration": 5.019589501,
             "cycle": 0,
-            "count": 27000,
-            "avg": 0.00018735044814814815,
-            "rps": 5337.590648351404,
-            "percent": 34.62894671089856
+            "count": 22000,
+            "avg": 0.00022816315913636362,
+            "rps": 4382.828515283406,
+            "percent": 133.5179946739633
+          }
+        },
+        {
+          "name": "Knex-Postgresql",
+          "meta": {},
+          "stat": {
+            "duration": 5.432957871,
+            "cycle": 0,
+            "count": 9000,
+            "avg": 0.0006036619856666667,
+            "rps": 1656.5561916171168,
+            "percent": -11.738349200241771
+          }
+        },
+        {
+          "name": "Knex-MySQL",
+          "meta": {},
+          "stat": {
+            "duration": 5.546488466,
+            "cycle": 0,
+            "count": 9000,
+            "avg": 0.0006162764962222222,
+            "rps": 1622.648285517953,
+            "percent": -13.544969333395159
+          }
+        },
+        {
+          "name": "Knex-MySQL2",
+          "meta": {},
+          "stat": {
+            "duration": 5.219390543,
+            "cycle": 0,
+            "count": 11000,
+            "avg": 0.0004744900493636364,
+            "rps": 2107.5257560008954,
+            "percent": 12.289400908315969
+          }
+        },
+        {
+          "name": "Knex-MSSQL",
+          "meta": {},
+          "stat": {
+            "duration": 5.46426935,
+            "cycle": 0,
+            "count": 5000,
+            "avg": 0.0010928538700000002,
+            "rps": 915.0354200603233,
+            "percent": -51.24672671928224
           }
         }
       ]
@@ -496,24 +849,24 @@
           "meta": {},
           "fastest": true,
           "stat": {
-            "duration": 5.0405103,
+            "duration": 5.168702822,
             "cycle": 0,
-            "count": 47000,
-            "avg": 0.0001072449,
-            "rps": 9324.452724558463,
-            "percent": 432.07220110233675
+            "count": 30000,
+            "avg": 0.00017229009406666667,
+            "rps": 5804.1642232376735,
+            "percent": 570.7441101940761
           }
         },
         {
           "name": "NeDB (file)",
           "meta": {},
           "stat": {
-            "duration": 5.2575481,
+            "duration": 5.014159242,
             "cycle": 0,
-            "count": 11000,
-            "avg": 0.0004779589181818182,
-            "rps": 2092.230026388156,
-            "percent": 19.386892532661747
+            "count": 14000,
+            "avg": 0.00035815423157142855,
+            "rps": 2792.0932152956143,
+            "percent": 222.66145602401673
           }
         },
         {
@@ -521,11 +874,11 @@
           "meta": {},
           "reference": true,
           "stat": {
-            "duration": 5.1355827,
+            "duration": 5.778128292,
             "cycle": 0,
-            "count": 9000,
-            "avg": 0.0005706203,
-            "rps": 1752.478837503678,
+            "count": 5000,
+            "avg": 0.0011556256584,
+            "rps": 865.3321192128352,
             "percent": 0
           }
         },
@@ -533,24 +886,72 @@
           "name": "Knex SQLite (memory)",
           "meta": {},
           "stat": {
-            "duration": 5.3041994,
+            "duration": 5.126721733,
             "cycle": 0,
-            "count": 12000,
-            "avg": 0.00044201661666666667,
-            "rps": 2262.3583872054282,
-            "percent": 29.09476216146777
+            "count": 8000,
+            "avg": 0.000640840216625,
+            "rps": 1560.4513793883339,
+            "percent": 80.32976527068317
           }
         },
         {
           "name": "Knex SQLite (file)",
           "meta": {},
           "stat": {
-            "duration": 71.6962933,
+            "duration": 5.213781398,
             "cycle": 0,
-            "count": 1000,
-            "avg": 0.07169629329999999,
-            "rps": 13.947722454990572,
-            "percent": -99.20411464284166
+            "count": 3000,
+            "avg": 0.0017379271326666667,
+            "rps": 575.3981172188761,
+            "percent": -33.50551719468159
+          }
+        },
+        {
+          "name": "Knex-Postgresql",
+          "meta": {},
+          "stat": {
+            "duration": 6.035776536,
+            "cycle": 0,
+            "count": 3000,
+            "avg": 0.002011925512,
+            "rps": 497.0362938565888,
+            "percent": -42.56121056632837
+          }
+        },
+        {
+          "name": "Knex-MySQL",
+          "meta": {},
+          "stat": {
+            "duration": 7.391051997,
+            "cycle": 0,
+            "count": 3000,
+            "avg": 0.002463683999,
+            "rps": 405.896210880087,
+            "percent": -53.09359240596343
+          }
+        },
+        {
+          "name": "Knex-MySQL2",
+          "meta": {},
+          "stat": {
+            "duration": 6.577073282,
+            "cycle": 0,
+            "count": 3000,
+            "avg": 0.0021923577606666666,
+            "rps": 456.1299336910749,
+            "percent": -47.28845450623032
+          }
+        },
+        {
+          "name": "Knex-MSSQL",
+          "meta": {},
+          "stat": {
+            "duration": 7.857271952,
+            "cycle": 0,
+            "count": 2000,
+            "avg": 0.003928635976,
+            "rps": 254.54127236755724,
+            "percent": -70.58455745302679
           }
         }
       ]
@@ -567,24 +968,24 @@
           "meta": {},
           "fastest": true,
           "stat": {
-            "duration": 5.0082163,
+            "duration": 5.144938763,
             "cycle": 0,
-            "count": 48000,
-            "avg": 0.00010433783958333333,
-            "rps": 9584.250584384705,
-            "percent": 461.718113759051
+            "count": 33000,
+            "avg": 0.00015590723524242425,
+            "rps": 6414.07051087189,
+            "percent": 627.9123289149244
           }
         },
         {
           "name": "NeDB (file)",
           "meta": {},
           "stat": {
-            "duration": 5.1665155,
+            "duration": 5.209943444,
             "cycle": 0,
-            "count": 11000,
-            "avg": 0.00046968322727272726,
-            "rps": 2129.0945512502576,
-            "percent": 24.782941014865628
+            "count": 15000,
+            "avg": 0.00034732956293333337,
+            "rps": 2879.1099483574353,
+            "percent": 226.7409711444077
           }
         },
         {
@@ -592,11 +993,11 @@
           "meta": {},
           "reference": true,
           "stat": {
-            "duration": 5.2747609,
+            "duration": 5.674339935,
             "cycle": 0,
-            "count": 9000,
-            "avg": 0.0005860845444444445,
-            "rps": 1706.2384761364253,
+            "count": 5000,
+            "avg": 0.001134867987,
+            "rps": 881.1597573066443,
             "percent": 0
           }
         },
@@ -604,24 +1005,72 @@
           "name": "Knex SQLite (memory)",
           "meta": {},
           "stat": {
-            "duration": 5.0431402,
+            "duration": 5.420350298,
             "cycle": 0,
-            "count": 11000,
-            "avg": 0.00045846729090909087,
-            "rps": 2181.180685795727,
-            "percent": 27.835628858560966
+            "count": 8000,
+            "avg": 0.00067754378725,
+            "rps": 1475.9193705528292,
+            "percent": 67.49736450335965
           }
         },
         {
           "name": "Knex SQLite (file)",
           "meta": {},
           "stat": {
-            "duration": 76.26535,
+            "duration": 5.004654795,
             "cycle": 0,
-            "count": 1000,
-            "avg": 0.07626535,
-            "rps": 13.112114479249096,
-            "percent": -99.23151923587258
+            "count": 3000,
+            "avg": 0.0016682182650000002,
+            "rps": 599.4419441271373,
+            "percent": -31.971252754506935
+          }
+        },
+        {
+          "name": "Knex-Postgresql",
+          "meta": {},
+          "stat": {
+            "duration": 6.188725524,
+            "cycle": 0,
+            "count": 3000,
+            "avg": 0.0020629085079999997,
+            "rps": 484.75247259972036,
+            "percent": -44.98699372274827
+          }
+        },
+        {
+          "name": "Knex-MySQL",
+          "meta": {},
+          "stat": {
+            "duration": 7.367090225,
+            "cycle": 0,
+            "count": 3000,
+            "avg": 0.0024556967416666667,
+            "rps": 407.216405443168,
+            "percent": -53.78631376813361
+          }
+        },
+        {
+          "name": "Knex-MySQL2",
+          "meta": {},
+          "stat": {
+            "duration": 6.631735582,
+            "cycle": 0,
+            "count": 3000,
+            "avg": 0.002210578527333333,
+            "rps": 452.37026761782613,
+            "percent": -48.66194650099064
+          }
+        },
+        {
+          "name": "Knex-MSSQL",
+          "meta": {},
+          "stat": {
+            "duration": 9.155861299,
+            "cycle": 0,
+            "count": 2000,
+            "avg": 0.0045779306495,
+            "rps": 218.43930731218475,
+            "percent": -75.21002230289466
           }
         }
       ]
@@ -636,38 +1085,38 @@
         {
           "name": "NeDB (memory)",
           "meta": {},
+          "fastest": true,
           "stat": {
-            "duration": 23.1245227,
+            "duration": 23.224851345,
             "cycle": 0,
-            "count": 162605,
-            "avg": 0.00014221286368807848,
-            "rps": 7031.712702117739,
-            "percent": -2.0565550910157384
+            "count": 144582,
+            "avg": 0.0001606344589575466,
+            "rps": 6225.314334729921,
+            "percent": 33.87981059559726
           }
         },
         {
           "name": "NeDB (file)",
           "meta": {},
           "stat": {
-            "duration": 17.936728,
+            "duration": 18.541268679,
             "cycle": 0,
-            "count": 68644,
-            "avg": 0.0002613007400501136,
-            "rps": 3827.0079135949436,
-            "percent": -46.69430412898616
+            "count": 70610,
+            "avg": 0.0002625870086248407,
+            "rps": 3808.2615177230828,
+            "percent": -18.100628614540895
           }
         },
         {
           "name": "MongoDB",
           "meta": {},
-          "fastest": true,
           "reference": true,
           "stat": {
-            "duration": 9.5480653,
+            "duration": 7.864853548,
             "cycle": 0,
-            "count": 68549,
-            "avg": 0.000139288177799822,
-            "rps": 7179.360199809275,
+            "count": 36571,
+            "avg": 0.00021505710940362583,
+            "rps": 4649.927653045727,
             "percent": 0
           }
         },
@@ -675,30 +1124,78 @@
           "name": "Knex SQLite (memory)",
           "meta": {},
           "stat": {
-            "duration": 5.5056772,
+            "duration": 6.797074813,
             "cycle": 0,
-            "count": 4826,
-            "avg": 0.001140836552009946,
-            "rps": 876.5497548603104,
-            "percent": -87.79069818946267
+            "count": 16591,
+            "avg": 0.00040968445621119887,
+            "rps": 2440.902955528496,
+            "percent": -47.50664660492746
           }
         },
         {
           "name": "Knex SQLite (file)",
           "meta": {},
           "stat": {
-            "duration": 73.6225822,
+            "duration": 26.904219349999998,
             "cycle": 0,
-            "count": 1003,
-            "avg": 0.07340237507477566,
-            "rps": 13.623537371662577,
-            "percent": -99.81024023043133
+            "count": 21712,
+            "avg": 0.0012391405374907883,
+            "rps": 807.0109642486245,
+            "percent": -82.6446554771658
+          }
+        },
+        {
+          "name": "Knex-Postgresql",
+          "meta": {},
+          "stat": {
+            "duration": 11.813151372,
+            "cycle": 0,
+            "count": 42591,
+            "avg": 0.0002773626205536381,
+            "rps": 3605.3884910804477,
+            "percent": -22.46355728311387
+          }
+        },
+        {
+          "name": "Knex-MySQL",
+          "meta": {},
+          "stat": {
+            "duration": 7.48014698,
+            "cycle": 0,
+            "count": 12612,
+            "avg": 0.0005930976038693307,
+            "rps": 1686.0631259948852,
+            "percent": -63.74001378514986
+          }
+        },
+        {
+          "name": "Knex-MySQL2",
+          "meta": {},
+          "stat": {
+            "duration": 10.584034633,
+            "cycle": 0,
+            "count": 28622,
+            "avg": 0.0003697866897142059,
+            "rps": 2704.2617482334535,
+            "percent": -41.84292853541177
+          }
+        },
+        {
+          "name": "Knex-MSSQL",
+          "meta": {},
+          "stat": {
+            "duration": 5.42763495,
+            "cycle": 0,
+            "count": 4415,
+            "avg": 0.001229362389580974,
+            "rps": 813.4297978164504,
+            "percent": -82.50661389788183
           }
         }
       ]
     }
   ],
-  "timestamp": 1620650598171,
-  "generated": "Mon May 10 2021 14:43:18 GMT+0200 (GMT+02:00)",
-  "elapsedMs": 601562
+  "timestamp": 1621194522417,
+  "generated": "Sun May 16 2021 19:48:42 GMT+0000 (Coordinated Universal Time)",
+  "elapsedMs": 474888
 }
