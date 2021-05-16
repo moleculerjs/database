@@ -5,6 +5,7 @@ const path = require("path");
 const fs = require("fs");
 const _ = require("lodash");
 const { ServiceBroker, Context } = require("moleculer");
+const { makeDirs } = require("moleculer").Utils;
 const DbService = require("../..").Service;
 const { writeResult } = require("../utils");
 const { generateMarkdown } = require("../generate-result");
@@ -14,6 +15,8 @@ const fakerator = new Fakerator();
 
 const COUNT = 1000;
 const SUITE_NAME = "common";
+
+makeDirs(path.join(__dirname, "tmp"));
 
 const neDBFileName = path.join(__dirname, "tmp", "common.db");
 const sqliteFilename = path.join(__dirname, "tmp", "common.sqlite3");
