@@ -22,7 +22,7 @@ if (fs.existsSync(neDBFileName)) fs.unlinkSync(neDBFileName);
 if (fs.existsSync(sqliteFilename)) fs.unlinkSync(sqliteFilename);
 if (fs.existsSync(sqliteFilename + "-journal")) fs.unlinkSync(sqliteFilename + "-journal");
 
-const Adapters = [
+let Adapters = [
 	{ name: "NeDB (memory)", type: "NeDB" },
 	{ name: "NeDB (file)", type: "NeDB", options: neDBFileName },
 	{
@@ -72,7 +72,7 @@ const Adapters = [
 				}
 			}
 		}
-	}
+	},
 	{
 		name: "Knex-Postgresql",
 		type: "Knex",
@@ -150,6 +150,9 @@ const Adapters = [
 		}
 	}
 ];
+
+// In development
+if (!process.env.GITHUB_ACTIONS_CI) Adapters = Adapters.slice(0, 4);
 
 const benchmark = new Benchmarkify("Moleculer Database benchmark - Common", {
 	description:
