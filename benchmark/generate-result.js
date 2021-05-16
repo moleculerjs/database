@@ -71,7 +71,7 @@ async function generateMarkdown(folderName) {
 			rows.push(
 				"![chart](" +
 					createChartURL({
-						chs: "800x450",
+						chs: "1000x500",
 						chtt: `${suite.name}|(ops/sec)`,
 						chf: "b0,lg,90,03a9f4,0,3f51b5,1",
 						chg: "0,50",
