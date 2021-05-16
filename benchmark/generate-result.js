@@ -71,13 +71,14 @@ async function generateMarkdown(folderName) {
 			rows.push(
 				"![chart](" +
 					createChartURL({
-						chs: "1000x500",
+						chs: "999x500",
 						chtt: `${suite.name}|(ops/sec)`,
 						chf: "b0,lg,90,03a9f4,0,3f51b5,1",
 						chg: "0,50",
 						chma: "0,0,10,10",
 						cht: "bvs",
 						chxt: "x,y",
+						chxs: "0,333,10|1,333,10",
 
 						chxl: "0:|" + suite.tests.map(s => s.name).join("|"),
 						chd: "a:" + suite.tests.map(s => s.stat.rps).join(",")
