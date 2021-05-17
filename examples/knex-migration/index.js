@@ -1,5 +1,11 @@
 "use strict";
 
+/**
+ * This example demonstrates how to use the Knex
+ * migration with this service.
+ * The migrations scripts are in the "migration" folder.
+ */
+
 const { ServiceBroker } = require("moleculer");
 const DbService = require("../../index").Service;
 
@@ -44,6 +50,8 @@ broker.createService({
 
 	async started() {
 		const adapter = await this.getAdapter();
+
+		// Migrate to the latest version.
 		await adapter.client.migrate.latest();
 	}
 });

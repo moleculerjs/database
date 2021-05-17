@@ -1,5 +1,14 @@
 "use strict";
 
+/**
+ * Global pool handling.
+ *
+ * As all services are loaded to the same broker and all services use the same adapter,
+ * the service only establish one connection and all services use this one.
+ * The connection remains open even if a service is destroyed. Only the last service destroy
+ * will close the connection.
+ */
+
 const { ServiceBroker } = require("moleculer");
 const DbService = require("../../index").Service;
 

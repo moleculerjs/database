@@ -1,5 +1,9 @@
 "use strict";
 
+/**
+ * This example demonstrates the multi-tenant feature.
+ */
+
 const { ServiceBroker } = require("moleculer");
 const { inspect } = require("util");
 const DbService = require("../../index").Service;

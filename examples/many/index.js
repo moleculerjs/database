@@ -1,5 +1,10 @@
 "use strict";
 
+/**
+ * This example created a lot of (1000) entities
+ * and measure the exection times.
+ */
+
 const { ServiceBroker } = require("moleculer");
 const DbService = require("../../index").Service;
 const path = require("path");

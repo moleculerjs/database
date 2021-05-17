@@ -1,5 +1,12 @@
 "use strict";
 
+/**
+ * In collection-based or database-based multi-tenant mode each tenant
+ * opens a DB connection to the own database/collection. It can generates
+ * a lot of connections. This example demonstrates how to work the `maximumAdapters`
+ * mixin option which limits the number of connections.
+ */
+
 const _ = require("lodash");
 const { ServiceBroker } = require("moleculer");
 const DbService = require("../../index").Service;

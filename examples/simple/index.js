@@ -1,5 +1,10 @@
 "use strict";
 
+/**
+ * It's a simple example which demonstrates how to
+ * use this services and make CRUD actions.
+ */
+
 const { ServiceBroker } = require("moleculer");
 const { inspect } = require("util");
 const DbService = require("../../index").Service;
