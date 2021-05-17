@@ -17,8 +17,8 @@
 - [x] Multi model/tenant solutions
     - [ ] schema-based for integration tests
 - [ ] generate GraphQL types & resolvers
-- [ ] add custom tracing spans (validating, transforming)
-- [ ] add custom metrics (for all basic functions (create, update, replace, remove))
+- [x] add custom tracing spans (validating, transforming)
+- [x] add custom metrics (for all basic functions (create, update, replace, remove))
   - [ ] https://gist.github.com/intech/b6e809c729835cb1da6411c4a940846b
 
 ## Adapters

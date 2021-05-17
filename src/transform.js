@@ -47,12 +47,16 @@ module.exports = function (mixinOpts) {
 				}
 			}
 
+			const span = this.startSpan(ctx, "Transforming result", { params });
+
 			if (!adapter) adapter = await this.getAdapter(ctx);
 			docs = docs.map(doc => adapter.entityToJSON(doc));
 
 			if (this.$fields) {
 				docs = await this._transformFields(adapter, docs, params, ctx);
 			}
+
+			this.finishSpan(ctx, span);
 
 			return isDoc ? docs[0] : docs;
 		},

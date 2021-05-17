@@ -224,8 +224,12 @@ module.exports = function (mixinOpts) {
 				return Object.assign({}, params);
 			}
 
+			const span = this.startSpan(ctx, "Validating", { params });
+
 			const fields = Array.from(this.$fields);
 			const entity = await this._validateObject(ctx, fields, params, opts);
+
+			this.finishSpan(ctx, span);
 
 			return entity;
 		},

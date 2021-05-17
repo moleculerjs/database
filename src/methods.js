@@ -12,6 +12,7 @@ const { EntityNotFoundError } = require("./errors");
 const { MoleculerClientError } = require("moleculer").Errors;
 const { Transform } = require("stream");
 const _ = require("lodash");
+const C = require("./constants");
 
 module.exports = function (mixinOpts) {
 	const cacheOpts = mixinOpts.cache && mixinOpts.cache.enabled ? mixinOpts.cache : null;
@@ -88,6 +89,10 @@ module.exports = function (mixinOpts) {
 						await adapter.connect();
 						if (this.$hooks["adapterConnected"])
 							await this.$hooks["adapterConnected"](adapter, hash, adapterOpts);
+
+						this._metricInc(C.METRIC_ADAPTER_TOTAL);
+						this._metricInc(C.METRIC_ADAPTER_ACTIVE);
+
 						resolve();
 					} catch (err) {
 						this.logger.error("Connection error!", err);
@@ -124,6 +129,8 @@ module.exports = function (mixinOpts) {
 				`Adapter '${item ? item.hash : "unknown"}' diconnected. Number of adapters:`,
 				this.adapters.size
 			);
+
+			this._metricDec(C.METRIC_ADAPTER_ACTIVE);
 
 			if (this.$hooks["adapterDisconnected"])
 				await this.$hooks["adapterDisconnected"](adapter, hash);
@@ -260,6 +267,10 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} opts
 		 */
 		async findEntities(ctx, params = ctx.params, opts = {}) {
+			this._metricInc(C.METRIC_ENTITIES_FIND_TOTAL);
+			const timeEnd = this._metricTime(C.METRIC_ENTITIES_FIND_TIME);
+			const span = this.startSpan(ctx, "Find entities", { params, opts });
+
 			params = this.sanitizeParams(params);
 			params = await this._applyScopes(params, ctx);
 			params = this.paramsFieldNameConversion(params);
@@ -271,6 +282,9 @@ module.exports = function (mixinOpts) {
 			if (opts.transform !== false) {
 				result = await this.transformResult(adapter, result, params, ctx);
 			}
+			timeEnd();
+			this.finishSpan(ctx, span);
+
 			return result;
 		},
 
@@ -283,6 +297,10 @@ module.exports = function (mixinOpts) {
 		 * @returns {Promise<Stream>}
 		 */
 		async streamEntities(ctx, params = ctx.params, opts = {}) {
+			this._metricInc(C.METRIC_ENTITIES_STREAM_TOTAL);
+			const timeEnd = this._metricTime(C.METRIC_ENTITIES_STREAM_TIME);
+			const span = this.startSpan(ctx, "Stream entities", { params, opts });
+
 			params = this.sanitizeParams(params);
 			params = await this._applyScopes(params, ctx);
 			params = this.paramsFieldNameConversion(params);
@@ -304,6 +322,8 @@ module.exports = function (mixinOpts) {
 				stream.pipe(transform);
 				return transform;
 			}
+			timeEnd();
+			this.finishSpan(ctx, span);
 
 			return stream;
 		},
@@ -315,6 +335,10 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} params
 		 */
 		async countEntities(ctx, params = ctx.params) {
+			this._metricInc(C.METRIC_ENTITIES_COUNT_TOTAL);
+			const timeEnd = this._metricTime(C.METRIC_ENTITIES_COUNT_TIME);
+			const span = this.startSpan(ctx, "Count entities", { params });
+
 			params = this.sanitizeParams(params, { removeLimit: true });
 			params = await this._applyScopes(params, ctx);
 			params = this.paramsFieldNameConversion(params);
@@ -322,6 +346,9 @@ module.exports = function (mixinOpts) {
 			this.logger.debug(`Count entities`, params);
 			const adapter = await this.getAdapter(ctx);
 			const result = await adapter.count(params);
+			timeEnd();
+			this.finishSpan(ctx, span);
+
 			return result;
 		},
 
@@ -333,6 +360,10 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} opts
 		 */
 		async findEntity(ctx, params = ctx.params, opts = {}) {
+			this._metricInc(C.METRIC_ENTITIES_FINDONE_TOTAL);
+			const timeEnd = this._metricTime(C.METRIC_ENTITIES_FINDONE_TIME);
+			const span = this.startSpan(ctx, "Find entity", { params, opts });
+
 			params = this.sanitizeParams(params, { removeLimit: true });
 			params = await this._applyScopes(params, ctx);
 			params = this.paramsFieldNameConversion(params);
@@ -344,6 +375,9 @@ module.exports = function (mixinOpts) {
 			if (opts.transform !== false) {
 				result = await this.transformResult(adapter, result, params, ctx);
 			}
+			timeEnd();
+			this.finishSpan(ctx, span);
+
 			return result;
 		},
 
@@ -370,6 +404,10 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} opts
 		 */
 		async resolveEntities(ctx, params = ctx.params, opts = {}) {
+			this._metricInc(C.METRIC_ENTITIES_RESOLVE_TOTAL);
+			const timeEnd = this._metricTime(C.METRIC_ENTITIES_RESOLVE_TIME);
+			const span = this.startSpan(ctx, "Resolve entities", { params, opts });
+
 			// Get ID value from params
 			let id = this._getIDFromParams(params);
 			const origID = id;
@@ -400,6 +438,8 @@ module.exports = function (mixinOpts) {
 			// Find the entities
 			let result = await adapter.find(params);
 			if (!result || result.length == 0) {
+				timeEnd();
+				this.finishSpan(ctx, span);
 				if (opts.throwIfNotExist) throw new EntityNotFoundError(origID);
 				return params.mapping === true ? {} : multi ? [] : null;
 			}
@@ -434,6 +474,8 @@ module.exports = function (mixinOpts) {
 			} else if (!multi) {
 				result = result[0];
 			}
+			timeEnd();
+			this.finishSpan(ctx, span);
 
 			return result;
 		},
@@ -446,6 +488,10 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} opts
 		 */
 		async createEntity(ctx, params = ctx.params, opts = {}) {
+			this._metricInc(C.METRIC_ENTITIES_CREATEONE_TOTAL);
+			const timeEnd = this._metricTime(C.METRIC_ENTITIES_CREATEONE_TIME);
+			const span = this.startSpan(ctx, "Create entity", { params, opts });
+
 			const adapter = await this.getAdapter(ctx);
 
 			params = await this.validateParams(ctx, params, {
@@ -461,6 +507,9 @@ module.exports = function (mixinOpts) {
 			}
 
 			await this._entityChanged("create", result, ctx, opts);
+			timeEnd();
+			this.finishSpan(ctx, span);
+
 			return result;
 		},
 
@@ -472,6 +521,10 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} opts
 		 */
 		async createEntities(ctx, params = ctx.params, opts = {}) {
+			this._metricInc(C.METRIC_ENTITIES_CREATEMANY_TOTAL);
+			const timeEnd = this._metricTime(C.METRIC_ENTITIES_CREATEMANY_TIME);
+			const span = this.startSpan(ctx, "Create entities", { params, opts });
+
 			const adapter = await this.getAdapter(ctx);
 			const entities = await Promise.all(
 				params.map(
@@ -494,6 +547,9 @@ module.exports = function (mixinOpts) {
 
 			await this._entityChanged("create", result, ctx, { ...opts, batch: true });
 
+			timeEnd();
+			this.finishSpan(ctx, span);
+
 			return result;
 		},
 
@@ -505,6 +561,10 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} opts
 		 */
 		async updateEntity(ctx, params = ctx.params, opts = {}) {
+			this._metricInc(C.METRIC_ENTITIES_UPDATEONE_TOTAL);
+			const timeEnd = this._metricTime(C.METRIC_ENTITIES_UPDATEONE_TIME);
+			const span = this.startSpan(ctx, "Update entity", { params, opts });
+
 			params = _.cloneDeep(params);
 			const adapter = await this.getAdapter(ctx);
 			let id = this._getIDFromParams(params);
@@ -548,6 +608,8 @@ module.exports = function (mixinOpts) {
 			if (hasChanges) {
 				await this._entityChanged("update", result, ctx, opts);
 			}
+			timeEnd();
+			this.finishSpan(ctx, span);
 
 			return result;
 		},
@@ -562,6 +624,10 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} opts
 		 */
 		async updateEntities(ctx, params = ctx.params, opts = {}) {
+			this._metricInc(C.METRIC_ENTITIES_UPDATEMANY_TOTAL);
+			const timeEnd = this._metricTime(C.METRIC_ENTITIES_UPDATEMANY_TIME);
+			const span = this.startSpan(ctx, "Update entities", { params, opts });
+
 			const adapter = await this.getAdapter(ctx);
 
 			const _entities = await this.findEntities(
@@ -570,7 +636,7 @@ module.exports = function (mixinOpts) {
 				{ transform: false }
 			);
 
-			return this.Promise.all(
+			const res = await this.Promise.all(
 				_entities.map(async _entity => {
 					let entity = adapter.entityToJSON(_entity);
 					let id = entity[this.$primaryField.columnName];
@@ -586,6 +652,10 @@ module.exports = function (mixinOpts) {
 					);
 				})
 			);
+			timeEnd();
+			this.finishSpan(ctx, span);
+
+			return res;
 		},
 
 		/**
@@ -596,6 +666,10 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} opts
 		 */
 		async replaceEntity(ctx, params = ctx.params, opts = {}) {
+			this._metricInc(C.METRIC_ENTITIES_REPLACEONE_TOTAL);
+			const timeEnd = this._metricTime(C.METRIC_ENTITIES_REPLACEONE_TIME);
+			const span = this.startSpan(ctx, "Replace entity", { params, opts });
+
 			let id = this._getIDFromParams(params);
 
 			// Call because it throws error if entity is not exist
@@ -627,6 +701,10 @@ module.exports = function (mixinOpts) {
 			}
 
 			await this._entityChanged("replace", result, ctx, opts);
+
+			timeEnd();
+			this.finishSpan(ctx, span);
+
 			return result;
 		},
 
@@ -638,6 +716,10 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} opts
 		 */
 		async removeEntity(ctx, params = ctx.params, opts = {}) {
+			this._metricInc(C.METRIC_ENTITIES_REMOVEONE_TOTAL);
+			const timeEnd = this._metricTime(C.METRIC_ENTITIES_REMOVEONE_TIME);
+			const span = this.startSpan(ctx, "Remove entity", { params, opts });
+
 			let id = this._getIDFromParams(params);
 			const origID = id;
 
@@ -675,6 +757,9 @@ module.exports = function (mixinOpts) {
 				softDelete: !!this.$softDelete
 			});
 
+			timeEnd();
+			this.finishSpan(ctx, span);
+
 			return origID;
 		},
 
@@ -687,6 +772,10 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} opts
 		 */
 		async removeEntities(ctx, params = ctx.params, opts = {}) {
+			this._metricInc(C.METRIC_ENTITIES_REMOVEMANY_TOTAL);
+			const timeEnd = this._metricTime(C.METRIC_ENTITIES_REMOVEMANY_TIME);
+			const span = this.startSpan(ctx, "Remove entities", { params, opts });
+
 			const adapter = await this.getAdapter(ctx);
 
 			const _entities = await this.findEntities(
@@ -695,7 +784,7 @@ module.exports = function (mixinOpts) {
 				{ transform: false }
 			);
 
-			return this.Promise.all(
+			const res = await this.Promise.all(
 				_entities.map(async _entity => {
 					let entity = adapter.entityToJSON(_entity);
 					let id = entity[this.$primaryField.columnName];
@@ -710,6 +799,10 @@ module.exports = function (mixinOpts) {
 					);
 				})
 			);
+			timeEnd();
+			this.finishSpan(ctx, span);
+
+			return res;
 		},
 
 		/**
@@ -719,11 +812,18 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} params
 		 */
 		async clearEntities(ctx, params) {
+			this._metricInc(C.METRIC_ENTITIES_CLEAR_TOTAL);
+			const timeEnd = this._metricTime(C.METRIC_ENTITIES_CLEAR_TIME);
+			const span = this.startSpan(ctx, "Clear all entities", { params });
+
 			this.logger.debug(`Clear all entities`, params);
 			const adapter = await this.getAdapter(ctx);
 			const result = await adapter.clear(params);
 
 			await this._entityChanged("clear", null, ctx);
+
+			timeEnd();
+			this.finishSpan(ctx, span);
 
 			return result;
 		},

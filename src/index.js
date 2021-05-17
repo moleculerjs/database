@@ -13,6 +13,7 @@ const Actions = require("./actions");
 const DbMethods = require("./methods");
 const Validation = require("./validation");
 const Transform = require("./transform");
+const Monitoring = require("./monitoring");
 const {
 	generateValidatorSchemaFromFields,
 	getPrimaryKeyFromFields,
@@ -120,7 +121,8 @@ module.exports = function DatabaseMixin(mixinOpts) {
 		methods: {
 			...DbMethods(mixinOpts),
 			...Transform(mixinOpts),
-			...Validation(mixinOpts)
+			...Validation(mixinOpts),
+			...Monitoring(mixinOpts)
 		},
 
 		/**
@@ -155,6 +157,7 @@ module.exports = function DatabaseMixin(mixinOpts) {
 		 * Start lifecycle hook of service
 		 */
 		async started() {
+			this._registerMoleculerMetrics();
 			this._processFields();
 		},
 

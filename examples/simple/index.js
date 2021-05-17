@@ -25,6 +25,22 @@ const broker = new ServiceBroker({
 					depth: 3
 				})
 		}
+	},
+	metrics: {
+		enabled: false,
+		reporter: {
+			type: "Console",
+			options: {
+				includes: ["moleculer.database.**"]
+			}
+		}
+	},
+
+	tracing: {
+		enabled: false,
+		exporter: {
+			type: "Console"
+		}
 	}
 });
 
@@ -105,4 +121,5 @@ broker
 		const res = await broker.call("posts.remove", { id: post.id });
 		// console.log("Deleted:", res);
 	})
+	.then(() => broker.repl())
 	.catch(err => broker.logger.error(err));
