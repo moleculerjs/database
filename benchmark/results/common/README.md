@@ -22,17 +22,17 @@ This is a common benchmark which create, list, get, update, replace and delete e
 
 | Adapter config | Time | Diff | ops/sec |
 | -------------- | ----:| ----:| -------:|
-| NeDB (memory) | 88μs | 608.85% | 11,238.84 |
-| NeDB (file) | 257μs | 145.22% | 3,887.96 |
-| MongoDB | 630μs | 0% | 1,585.5 |
-| Knex SQLite (memory) | 491μs | 28.39% | 2,035.56 |
-| Knex SQLite (file) | 2ms | -76.32% | 375.43 |
-| Knex-Postgresql | 1ms | -63.91% | 572.28 |
-| Knex-MySQL | 2ms | -76.91% | 366.06 |
-| Knex-MySQL2 | 2ms | -74.1% | 410.69 |
-| Knex-MSSQL | 4ms | -85.54% | 229.29 |
+| NeDB (memory) | 65μs | 647.25% | 15,235.96 |
+| NeDB (file) | 202μs | 141.94% | 4,932.94 |
+| MongoDB | 490μs | 0% | 2,038.93 |
+| Knex SQLite (memory) | 374μs | 31.03% | 2,671.71 |
+| Knex SQLite (file) | 1ms | -70.94% | 592.5 |
+| Knex-Postgresql | 1ms | -65.02% | 713.31 |
+| Knex-MySQL | 1ms | -75.31% | 503.35 |
+| Knex-MySQL2 | 1ms | -72.65% | 557.69 |
+| Knex-MSSQL | 3ms | -86.53% | 274.7 |
 
-![chart](https://image-charts.com/chart?chs=999x500&chtt=Entity%20creation%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxs=0%2C333%2C10%7C1%2C333%2C10&chxl=0%3A%7CNeDB%20%28memory%29%7CNeDB%20%28file%29%7CMongoDB%7CKnex%20SQLite%20%28memory%29%7CKnex%20SQLite%20%28file%29%7CKnex-Postgresql%7CKnex-MySQL%7CKnex-MySQL2%7CKnex-MSSQL&chd=a%3A11238.840150410913%2C3887.9614795053208%2C1585.5045047706765%2C2035.5570596438822%2C375.4258757222224%2C572.2816468261207%2C366.0614530748943%2C410.6902366889712%2C229.2866478362913)
+![chart](https://image-charts.com/chart?chs=999x500&chtt=Entity%20creation%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxs=0%2C333%2C10%7C1%2C333%2C10&chxl=0%3A%7CNeDB%20%28memory%29%7CNeDB%20%28file%29%7CMongoDB%7CKnex%20SQLite%20%28memory%29%7CKnex%20SQLite%20%28file%29%7CKnex-Postgresql%7CKnex-MySQL%7CKnex-MySQL2%7CKnex-MSSQL&chd=a%3A15235.964640799868%2C4932.936510109271%2C2038.9295000364384%2C2671.711059688502%2C592.503531206989%2C713.3052728763712%2C503.3538442312358%2C557.691187483759%2C274.6987939879344)
 
 ## Entity finding
 
@@ -41,17 +41,17 @@ This is a common benchmark which create, list, get, update, replace and delete e
 
 | Adapter config | Time | Diff | ops/sec |
 | -------------- | ----:| ----:| -------:|
-| NeDB (memory) | 339μs | 188.62% | 2,942.97 |
-| NeDB (file) | 340μs | 187.89% | 2,935.49 |
-| MongoDB | 980μs | 0% | 1,019.67 |
-| Knex SQLite (memory) | 516μs | 89.81% | 1,935.46 |
-| Knex SQLite (file) | 521μs | 87.89% | 1,915.89 |
-| Knex-Postgresql | 720μs | 36.06% | 1,387.31 |
-| Knex-MySQL | 1ms | -6.61% | 952.29 |
-| Knex-MySQL2 | 901μs | 8.79% | 1,109.29 |
-| Knex-MSSQL | 1ms | -34.54% | 667.48 |
+| NeDB (memory) | 312μs | 171.19% | 3,199.58 |
+| NeDB (file) | 294μs | 187.6% | 3,393.1 |
+| MongoDB | 847μs | 0% | 1,179.82 |
+| Knex SQLite (memory) | 395μs | 114.06% | 2,525.54 |
+| Knex SQLite (file) | 401μs | 111.01% | 2,489.5 |
+| Knex-Postgresql | 615μs | 37.75% | 1,625.16 |
+| Knex-MySQL | 855μs | -0.89% | 1,169.37 |
+| Knex-MySQL2 | 740μs | 14.51% | 1,350.98 |
+| Knex-MSSQL | 1ms | -33.37% | 786.12 |
 
-![chart](https://image-charts.com/chart?chs=999x500&chtt=Entity%20finding%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxs=0%2C333%2C10%7C1%2C333%2C10&chxl=0%3A%7CNeDB%20%28memory%29%7CNeDB%20%28file%29%7CMongoDB%7CKnex%20SQLite%20%28memory%29%7CKnex%20SQLite%20%28file%29%7CKnex-Postgresql%7CKnex-MySQL%7CKnex-MySQL2%7CKnex-MSSQL&chd=a%3A2942.9662597552983%2C2935.4856167231333%2C1019.6663015793395%2C1935.4640024932414%2C1915.8900466502598%2C1387.3117381281918%2C952.2935218592373%2C1109.2880098249284%2C667.4806975349571)
+![chart](https://image-charts.com/chart?chs=999x500&chtt=Entity%20finding%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxs=0%2C333%2C10%7C1%2C333%2C10&chxl=0%3A%7CNeDB%20%28memory%29%7CNeDB%20%28file%29%7CMongoDB%7CKnex%20SQLite%20%28memory%29%7CKnex%20SQLite%20%28file%29%7CKnex-Postgresql%7CKnex-MySQL%7CKnex-MySQL2%7CKnex-MSSQL&chd=a%3A3199.5769090667527%2C3393.102599435842%2C1179.8154513282732%2C2525.539662137815%2C2489.4995827972125%2C1625.1633579898448%2C1169.372243290934%2C1350.9751144318043%2C786.1233265133388)
 
 ## Entity listing
 
@@ -60,17 +60,17 @@ This is a common benchmark which create, list, get, update, replace and delete e
 
 | Adapter config | Time | Diff | ops/sec |
 | -------------- | ----:| ----:| -------:|
-| NeDB (memory) | 1ms | 15.92% | 598.56 |
-| NeDB (file) | 1ms | 24.8% | 644.42 |
-| MongoDB | 1ms | 0% | 516.34 |
-| Knex SQLite (memory) | 725μs | 167.07% | 1,379 |
-| Knex SQLite (file) | 735μs | 163.46% | 1,360.34 |
-| Knex-Postgresql | 1ms | 58.63% | 819.05 |
-| Knex-MySQL | 2ms | -23.96% | 392.61 |
-| Knex-MySQL2 | 2ms | -16.45% | 431.39 |
-| Knex-MSSQL | 2ms | -21.83% | 403.64 |
+| NeDB (memory) | 1ms | 13.54% | 652.74 |
+| NeDB (file) | 1ms | 17.1% | 673.18 |
+| MongoDB | 1ms | 0% | 574.88 |
+| Knex SQLite (memory) | 543μs | 220.28% | 1,841.26 |
+| Knex SQLite (file) | 559μs | 211.12% | 1,788.58 |
+| Knex-Postgresql | 1ms | 68.41% | 968.14 |
+| Knex-MySQL | 2ms | -17.94% | 471.74 |
+| Knex-MySQL2 | 2ms | -13.75% | 495.85 |
+| Knex-MSSQL | 2ms | -16.04% | 482.69 |
 
-![chart](https://image-charts.com/chart?chs=999x500&chtt=Entity%20listing%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxs=0%2C333%2C10%7C1%2C333%2C10&chxl=0%3A%7CNeDB%20%28memory%29%7CNeDB%20%28file%29%7CMongoDB%7CKnex%20SQLite%20%28memory%29%7CKnex%20SQLite%20%28file%29%7CKnex-Postgresql%7CKnex-MySQL%7CKnex-MySQL2%7CKnex-MSSQL&chd=a%3A598.5610804713214%2C644.4181396325141%2C516.3413277383102%2C1379.003163245712%2C1360.3412796218154%2C819.0499709878331%2C392.6100465942399%2C431.3930462457245%2C403.63802319336213)
+![chart](https://image-charts.com/chart?chs=999x500&chtt=Entity%20listing%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxs=0%2C333%2C10%7C1%2C333%2C10&chxl=0%3A%7CNeDB%20%28memory%29%7CNeDB%20%28file%29%7CMongoDB%7CKnex%20SQLite%20%28memory%29%7CKnex%20SQLite%20%28file%29%7CKnex-Postgresql%7CKnex-MySQL%7CKnex-MySQL2%7CKnex-MSSQL&chd=a%3A652.7362190803428%2C673.1781593466063%2C574.8820527187748%2C1841.259914856437%2C1788.5755139686169%2C968.1376896218852%2C471.73696564205136%2C495.85136312730526%2C482.6859403595997)
 
 ## Entity counting
 
@@ -79,17 +79,17 @@ This is a common benchmark which create, list, get, update, replace and delete e
 
 | Adapter config | Time | Diff | ops/sec |
 | -------------- | ----:| ----:| -------:|
-| NeDB (memory) | 1ms | -18.76% | 827.73 |
-| NeDB (file) | 1ms | -17.69% | 838.61 |
-| MongoDB | 981μs | 0% | 1,018.83 |
-| Knex SQLite (memory) | 170μs | 474.45% | 5,852.62 |
-| Knex SQLite (file) | 187μs | 423.88% | 5,337.46 |
-| Knex-Postgresql | 487μs | 101.35% | 2,051.45 |
-| Knex-MySQL | 1ms | -36.77% | 644.24 |
-| Knex-MySQL2 | 1ms | -27.63% | 737.35 |
-| Knex-MSSQL | 984μs | -0.32% | 1,015.54 |
+| NeDB (memory) | 1ms | -28.9% | 835.89 |
+| NeDB (file) | 1ms | -23.66% | 897.43 |
+| MongoDB | 850μs | 0% | 1,175.61 |
+| Knex SQLite (memory) | 127μs | 568.37% | 7,857.41 |
+| Knex SQLite (file) | 135μs | 527.98% | 7,382.58 |
+| Knex-Postgresql | 385μs | 120.53% | 2,592.59 |
+| Knex-MySQL | 1ms | -39.68% | 709.16 |
+| Knex-MySQL2 | 1ms | -28.81% | 836.89 |
+| Knex-MSSQL | 861μs | -1.29% | 1,160.47 |
 
-![chart](https://image-charts.com/chart?chs=999x500&chtt=Entity%20counting%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxs=0%2C333%2C10%7C1%2C333%2C10&chxl=0%3A%7CNeDB%20%28memory%29%7CNeDB%20%28file%29%7CMongoDB%7CKnex%20SQLite%20%28memory%29%7CKnex%20SQLite%20%28file%29%7CKnex-Postgresql%7CKnex-MySQL%7CKnex-MySQL2%7CKnex-MSSQL&chd=a%3A827.7295777426242%2C838.609486428367%2C1018.8269627056053%2C5852.622782229436%2C5337.460870634512%2C2051.447090917805%2C644.2377877151907%2C737.3494242726385%2C1015.5351549569084)
+![chart](https://image-charts.com/chart?chs=999x500&chtt=Entity%20counting%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxs=0%2C333%2C10%7C1%2C333%2C10&chxl=0%3A%7CNeDB%20%28memory%29%7CNeDB%20%28file%29%7CMongoDB%7CKnex%20SQLite%20%28memory%29%7CKnex%20SQLite%20%28file%29%7CKnex-Postgresql%7CKnex-MySQL%7CKnex-MySQL2%7CKnex-MSSQL&chd=a%3A835.8877746088025%2C897.4310482707779%2C1175.6127519086695%2C7857.408056591191%2C7382.577184288274%2C2592.5887242434%2C709.1627079404809%2C836.8920170370372%2C1160.4674429780605)
 
 ## Entity getting
 
@@ -98,17 +98,17 @@ This is a common benchmark which create, list, get, update, replace and delete e
 
 | Adapter config | Time | Diff | ops/sec |
 | -------------- | ----:| ----:| -------:|
-| NeDB (memory) | 46μs | 1,048.83% | 21,599.35 |
-| NeDB (file) | 49μs | 966.03% | 20,042.69 |
-| MongoDB | 531μs | 0% | 1,880.12 |
-| Knex SQLite (memory) | 222μs | 138.99% | 4,493.3 |
-| Knex SQLite (file) | 219μs | 142% | 4,549.93 |
-| Knex-Postgresql | 579μs | -8.2% | 1,725.88 |
-| Knex-MySQL | 589μs | -9.84% | 1,695.12 |
-| Knex-MySQL2 | 465μs | 14.3% | 2,149.04 |
-| Knex-MSSQL | 1ms | -48.42% | 969.71 |
+| NeDB (memory) | 33μs | 1,178.96% | 29,876.15 |
+| NeDB (file) | 32μs | 1,228.77% | 31,039.7 |
+| MongoDB | 428μs | 0% | 2,335.97 |
+| Knex SQLite (memory) | 160μs | 166.67% | 6,229.29 |
+| Knex SQLite (file) | 166μs | 156.37% | 5,988.63 |
+| Knex-Postgresql | 465μs | -8.1% | 2,146.85 |
+| Knex-MySQL | 486μs | -11.93% | 2,057.4 |
+| Knex-MySQL2 | 393μs | 8.87% | 2,543.15 |
+| Knex-MSSQL | 860μs | -50.25% | 1,162.1 |
 
-![chart](https://image-charts.com/chart?chs=999x500&chtt=Entity%20getting%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxs=0%2C333%2C10%7C1%2C333%2C10&chxl=0%3A%7CNeDB%20%28memory%29%7CNeDB%20%28file%29%7CMongoDB%7CKnex%20SQLite%20%28memory%29%7CKnex%20SQLite%20%28file%29%7CKnex-Postgresql%7CKnex-MySQL%7CKnex-MySQL2%7CKnex-MSSQL&chd=a%3A21599.346930785938%2C20042.68560207525%2C1880.11959479849%2C4493.302624501237%2C4549.930251596929%2C1725.881035172123%2C1695.121735068522%2C2149.035093773168%2C969.7084779385968)
+![chart](https://image-charts.com/chart?chs=999x500&chtt=Entity%20getting%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxs=0%2C333%2C10%7C1%2C333%2C10&chxl=0%3A%7CNeDB%20%28memory%29%7CNeDB%20%28file%29%7CMongoDB%7CKnex%20SQLite%20%28memory%29%7CKnex%20SQLite%20%28file%29%7CKnex-Postgresql%7CKnex-MySQL%7CKnex-MySQL2%7CKnex-MSSQL&chd=a%3A29876.147010463526%2C31039.697845700855%2C2335.9701972561757%2C6229.28984019911%2C5988.62583170325%2C2146.8486139863376%2C2057.3966079116326%2C2543.1544917053684%2C1162.104535078608)
 
 ## Entity resolving
 
@@ -117,17 +117,17 @@ This is a common benchmark which create, list, get, update, replace and delete e
 
 | Adapter config | Time | Diff | ops/sec |
 | -------------- | ----:| ----:| -------:|
-| NeDB (memory) | 49μs | 998.05% | 20,038.41 |
-| NeDB (file) | 52μs | 951.47% | 19,188.52 |
-| MongoDB | 547μs | 0% | 1,824.91 |
-| Knex SQLite (memory) | 225μs | 143.37% | 4,441.3 |
-| Knex SQLite (file) | 251μs | 118.29% | 3,983.61 |
-| Knex-Postgresql | 669μs | -18.19% | 1,492.89 |
-| Knex-MySQL | 600μs | -8.76% | 1,664.99 |
-| Knex-MySQL2 | 495μs | 10.6% | 2,018.34 |
-| Knex-MSSQL | 1ms | -58.96% | 749.01 |
+| NeDB (memory) | 33μs | 1,203.95% | 29,781.45 |
+| NeDB (file) | 33μs | 1,219.81% | 30,143.7 |
+| MongoDB | 437μs | 0% | 2,283.94 |
+| Knex SQLite (memory) | 162μs | 169.72% | 6,160.35 |
+| Knex SQLite (file) | 181μs | 141.72% | 5,520.68 |
+| Knex-Postgresql | 480μs | -8.84% | 2,082.02 |
+| Knex-MySQL | 518μs | -15.54% | 1,929.02 |
+| Knex-MySQL2 | 423μs | 3.28% | 2,358.88 |
+| Knex-MSSQL | 1ms | -68.24% | 725.37 |
 
-![chart](https://image-charts.com/chart?chs=999x500&chtt=Entity%20resolving%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxs=0%2C333%2C10%7C1%2C333%2C10&chxl=0%3A%7CNeDB%20%28memory%29%7CNeDB%20%28file%29%7CMongoDB%7CKnex%20SQLite%20%28memory%29%7CKnex%20SQLite%20%28file%29%7CKnex-Postgresql%7CKnex-MySQL%7CKnex-MySQL2%7CKnex-MSSQL&chd=a%3A20038.40745685249%2C19188.517169178587%2C1824.9148821193276%2C4441.295723689086%2C3983.6119058233726%2C1492.8931514786118%2C1664.9945998480896%2C2018.3422458917141%2C749.0071510897868)
+![chart](https://image-charts.com/chart?chs=999x500&chtt=Entity%20resolving%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxs=0%2C333%2C10%7C1%2C333%2C10&chxl=0%3A%7CNeDB%20%28memory%29%7CNeDB%20%28file%29%7CMongoDB%7CKnex%20SQLite%20%28memory%29%7CKnex%20SQLite%20%28file%29%7CKnex-Postgresql%7CKnex-MySQL%7CKnex-MySQL2%7CKnex-MSSQL&chd=a%3A29781.44892104065%2C30143.697691882193%2C2283.942273222769%2C6160.350712549713%2C5520.680863567685%2C2082.0212360582477%2C1929.019339118337%2C2358.876180632394%2C725.36607103456)
 
 ## Entity updating
 
@@ -136,17 +136,17 @@ This is a common benchmark which create, list, get, update, replace and delete e
 
 | Adapter config | Time | Diff | ops/sec |
 | -------------- | ----:| ----:| -------:|
-| NeDB (memory) | 182μs | 562.98% | 5,489.59 |
-| NeDB (file) | 357μs | 237.52% | 2,794.75 |
-| MongoDB | 1ms | 0% | 828.02 |
-| Knex SQLite (memory) | 684μs | 76.42% | 1,460.77 |
-| Knex SQLite (file) | 1ms | -32.58% | 558.28 |
-| Knex-Postgresql | 2ms | -41.64% | 483.25 |
-| Knex-MySQL | 2ms | -53.18% | 387.7 |
-| Knex-MySQL2 | 2ms | -46.6% | 442.17 |
-| Knex-MSSQL | 4ms | -70.79% | 241.87 |
+| NeDB (memory) | 131μs | 651.85% | 7,597.49 |
+| NeDB (file) | 271μs | 264.51% | 3,683.35 |
+| MongoDB | 989μs | 0% | 1,010.5 |
+| Knex SQLite (memory) | 497μs | 99.05% | 2,011.45 |
+| Knex SQLite (file) | 1ms | -20.86% | 799.74 |
+| Knex-Postgresql | 1ms | -43.71% | 568.78 |
+| Knex-MySQL | 2ms | -52.66% | 478.4 |
+| Knex-MySQL2 | 1ms | -45.27% | 553.06 |
+| Knex-MSSQL | 3ms | -71.41% | 288.94 |
 
-![chart](https://image-charts.com/chart?chs=999x500&chtt=Entity%20updating%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxs=0%2C333%2C10%7C1%2C333%2C10&chxl=0%3A%7CNeDB%20%28memory%29%7CNeDB%20%28file%29%7CMongoDB%7CKnex%20SQLite%20%28memory%29%7CKnex%20SQLite%20%28file%29%7CKnex-Postgresql%7CKnex-MySQL%7CKnex-MySQL2%7CKnex-MSSQL&chd=a%3A5489.591948837403%2C2794.747959835387%2C828.0227247160377%2C1460.77149745342%2C558.2777864831687%2C483.2529262991531%2C387.704846247169%2C442.17293095740473%2C241.86580538501687)
+![chart](https://image-charts.com/chart?chs=999x500&chtt=Entity%20updating%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxs=0%2C333%2C10%7C1%2C333%2C10&chxl=0%3A%7CNeDB%20%28memory%29%7CNeDB%20%28file%29%7CMongoDB%7CKnex%20SQLite%20%28memory%29%7CKnex%20SQLite%20%28file%29%7CKnex-Postgresql%7CKnex-MySQL%7CKnex-MySQL2%7CKnex-MSSQL&chd=a%3A7597.494960039772%2C3683.3499655711853%2C1010.5047695302186%2C2011.4465759673308%2C799.7435016256463%2C568.7753056973221%2C478.4019301183279%2C553.0619087921671%2C288.9433738332764)
 
 ## Entity replacing
 
@@ -155,17 +155,17 @@ This is a common benchmark which create, list, get, update, replace and delete e
 
 | Adapter config | Time | Diff | ops/sec |
 | -------------- | ----:| ----:| -------:|
-| NeDB (memory) | 168μs | 594.48% | 5,926.15 |
-| NeDB (file) | 349μs | 235.31% | 2,861.27 |
-| MongoDB | 1ms | 0% | 853.32 |
-| Knex SQLite (memory) | 696μs | 68.21% | 1,435.42 |
-| Knex SQLite (file) | 1ms | -34.74% | 556.92 |
-| Knex-Postgresql | 2ms | -45.18% | 467.77 |
-| Knex-MySQL | 2ms | -54.44% | 388.75 |
-| Knex-MySQL2 | 2ms | -51.37% | 415.01 |
-| Knex-MSSQL | 5ms | -76.65% | 199.25 |
+| NeDB (memory) | 119μs | 713.92% | 8,348.3 |
+| NeDB (file) | 262μs | 271.78% | 3,813.35 |
+| MongoDB | 974μs | 0% | 1,025.69 |
+| Knex SQLite (memory) | 519μs | 87.61% | 1,924.32 |
+| Knex SQLite (file) | 1ms | -20.17% | 818.78 |
+| Knex-Postgresql | 1ms | -45.5% | 559.05 |
+| Knex-MySQL | 2ms | -53.28% | 479.23 |
+| Knex-MySQL2 | 1ms | -46.78% | 545.92 |
+| Knex-MSSQL | 3ms | -75.28% | 253.56 |
 
-![chart](https://image-charts.com/chart?chs=999x500&chtt=Entity%20replacing%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxs=0%2C333%2C10%7C1%2C333%2C10&chxl=0%3A%7CNeDB%20%28memory%29%7CNeDB%20%28file%29%7CMongoDB%7CKnex%20SQLite%20%28memory%29%7CKnex%20SQLite%20%28file%29%7CKnex-Postgresql%7CKnex-MySQL%7CKnex-MySQL2%7CKnex-MSSQL&chd=a%3A5926.146078887291%2C2861.2738487847696%2C853.3249733518046%2C1435.4174163765856%2C556.9164159862582%2C467.77426075254937%2C388.7468002056502%2C415.0082611461462%2C199.25029704657692)
+![chart](https://image-charts.com/chart?chs=999x500&chtt=Entity%20replacing%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxs=0%2C333%2C10%7C1%2C333%2C10&chxl=0%3A%7CNeDB%20%28memory%29%7CNeDB%20%28file%29%7CMongoDB%7CKnex%20SQLite%20%28memory%29%7CKnex%20SQLite%20%28file%29%7CKnex-Postgresql%7CKnex-MySQL%7CKnex-MySQL2%7CKnex-MSSQL&chd=a%3A8348.296108679517%2C3813.345998853623%2C1025.6940373661878%2C1924.3190362290418%2C818.7813795558544%2C559.0525448647387%2C479.22670123922256%2C545.9177574658174%2C253.55959327579214)
 
 ## Entity deleting
 
@@ -174,17 +174,17 @@ This is a common benchmark which create, list, get, update, replace and delete e
 
 | Adapter config | Time | Diff | ops/sec |
 | -------------- | ----:| ----:| -------:|
-| NeDB (memory) | 164μs | 60.3% | 6,069.24 |
-| NeDB (file) | 265μs | -0.47% | 3,768.4 |
-| MongoDB | 264μs | 0% | 3,786.09 |
-| Knex SQLite (memory) | 737μs | -64.17% | 1,356.67 |
-| Knex SQLite (file) | 1ms | -81.72% | 692.12 |
-| Knex-Postgresql | 290μs | -9.12% | 3,440.79 |
-| Knex-MySQL | 675μs | -60.92% | 1,479.51 |
-| Knex-MySQL2 | 390μs | -32.39% | 2,559.68 |
-| Knex-MSSQL | 1ms | -74.19% | 977.01 |
+| NeDB (memory) | 136μs | 1% | 7,337.2 |
+| NeDB (file) | 214μs | -35.69% | 4,671.79 |
+| MongoDB | 137μs | 0% | 7,264.65 |
+| Knex SQLite (memory) | 341μs | -59.73% | 2,925.4 |
+| Knex SQLite (file) | 886μs | -84.48% | 1,127.64 |
+| Knex-Postgresql | 267μs | -48.48% | 3,742.54 |
+| Knex-MySQL | 515μs | -73.31% | 1,938.79 |
+| Knex-MySQL2 | 330μs | -58.35% | 3,025.95 |
+| Knex-MSSQL | 864μs | -84.08% | 1,156.66 |
 
-![chart](https://image-charts.com/chart?chs=999x500&chtt=Entity%20deleting%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxs=0%2C333%2C10%7C1%2C333%2C10&chxl=0%3A%7CNeDB%20%28memory%29%7CNeDB%20%28file%29%7CMongoDB%7CKnex%20SQLite%20%28memory%29%7CKnex%20SQLite%20%28file%29%7CKnex-Postgresql%7CKnex-MySQL%7CKnex-MySQL2%7CKnex-MSSQL&chd=a%3A6069.242358517202%2C3768.3960384764064%2C3786.0934233606527%2C1356.6658754280197%2C692.1212134541507%2C3440.78962295301%2C1479.5129561587353%2C2559.675085674019%2C977.0065247856913)
+![chart](https://image-charts.com/chart?chs=999x500&chtt=Entity%20deleting%7C%28ops%2Fsec%29&chf=b0%2Clg%2C90%2C03a9f4%2C0%2C3f51b5%2C1&chg=0%2C50&chma=0%2C0%2C10%2C10&cht=bvs&chxt=x%2Cy&chxs=0%2C333%2C10%7C1%2C333%2C10&chxl=0%3A%7CNeDB%20%28memory%29%7CNeDB%20%28file%29%7CMongoDB%7CKnex%20SQLite%20%28memory%29%7CKnex%20SQLite%20%28file%29%7CKnex-Postgresql%7CKnex-MySQL%7CKnex-MySQL2%7CKnex-MSSQL&chd=a%3A7337.200527421774%2C4671.788448818547%2C7264.649109240327%2C2925.3987780282587%2C1127.638638041463%2C3742.5397471848337%2C1938.7946093874375%2C3025.9527053640018%2C1156.656176649516)
 
 --------------------
-_Generated at 2021-05-16T20:12:20.812Z_
+_Generated at 2021-05-17T19:23:30.266Z_
