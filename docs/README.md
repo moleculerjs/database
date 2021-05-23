@@ -280,18 +280,47 @@ The response contains the `name` and `createdAt` fields.
 
 
 ### `validate`: \<Function\> _(Default: `null`)_
-With `validate`, you can configure your validation function. _It can be asynchronous._
+With `validate`, you can configure your custom validation function. _It can be asynchronous._
+
+### Callback parameters
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `ctx` | `Context` | Moleculer `Context` instance. It can be `null`. |
+| `value` | `any` | Value of the field. |
+| `params` | `Object` | The whole received object (`ctx.params`). |
+| `field` | `Object` | Field schema. |
+| `id` | `any` | ID of the entity. It's `null` at entity creating. |
+| `operation` | `String` | Type of operation. Available values: `create`, `update`, `replace`, `remove`. |
+| `entity` | `Object` | At updating, replacing and removing, it contains the original raw (not transformed) entity. |
+| `root` | `Object` | The root received object. Useful for nested object validations. |
+
 
 **Example**
 ```js
 {
     username: { 
         type: "string", 
-        validate: (value, entity, field, ctx) => /^[a-zA-Z0-9]+$/.test(value) || "Wrong input value"
+        validate: ({ value }) => /^[a-zA-Z0-9]+$/.test(value) || "Wrong input value"
     }
 }
 ```
 
+**Example to check the username is unique**
+```js
+{
+    username: { 
+        type: "string", 
+        validate: async ({ ctx, value, operation, entity }) => {
+            if (operation == "create" || (entity && entity.username != value)) {
+                const found = await ctx.call("users.find", { username: value });
+                if (found.length > 0)
+                    return `Username '${value}' is not available.`
+            }
+            return true;
+        }
+    }
+}
+```
 
 ### `get`: \<Function\> _(Default: `null`)_
 The `get` function is called when transforming entities. With this function, you can modify an entity value before sending it back to the caller or calculate a value from other fields of the entity in virtual fields.

@@ -657,7 +657,7 @@ describe("Test validation", () => {
 		testTypeConversion(ctx, svc, "create");
 
 		describe("Test custom validation", () => {
-			const customValidate = jest.fn(value => (value.length < 3 ? "Too short" : true));
+			const customValidate = jest.fn(({ value }) => (value.length < 3 ? "Too short" : true));
 			beforeAll(() => {
 				svc.settings.fields = {
 					name: { type: "string", required: true, validate: customValidate }
@@ -670,13 +670,25 @@ describe("Test validation", () => {
 				const params = {
 					name: "John Doe"
 				};
-				const res = await svc.validateParams(ctx, params);
+				const res = await svc.validateParams(ctx, params, {
+					entity: { a: 5 },
+					id: 1234
+				});
 				expect(res).toEqual({
 					name: "John Doe"
 				});
 
 				expect(customValidate).toBeCalledTimes(1);
-				expect(customValidate).toBeCalledWith("John Doe", params, svc.$fields[0], ctx);
+				expect(customValidate).toBeCalledWith({
+					value: "John Doe",
+					params,
+					field: svc.$fields[0],
+					ctx,
+					entity: { a: 5 },
+					id: 1234,
+					operation: "create",
+					root: params
+				});
 			});
 
 			it("should throw error if not valid", async () => {
@@ -839,7 +851,7 @@ describe("Test validation", () => {
 			});
 
 			it("should remove password & role fields", async () => {
-				const oldEntity = {
+				const entity = {
 					name: "John",
 					password: "pass1234",
 					role: "user"
@@ -850,7 +862,7 @@ describe("Test validation", () => {
 					password: "pass1234",
 					role: "admin"
 				};
-				const res = await svc.validateParams(ctx, params, { type: "update", oldEntity });
+				const res = await svc.validateParams(ctx, params, { type: "update", entity });
 				expect(res).toEqual({
 					name: "John"
 				});
@@ -930,7 +942,7 @@ describe("Test validation", () => {
 		});
 
 		describe("Test custom validation", () => {
-			const customValidate = jest.fn(value => (value.length < 3 ? "Too short" : true));
+			const customValidate = jest.fn(({ value }) => (value.length < 3 ? "Too short" : true));
 			beforeAll(() => {
 				svc.settings.fields = {
 					name: { type: "string", required: true, validate: customValidate }
@@ -943,13 +955,26 @@ describe("Test validation", () => {
 				const params = {
 					name: "John Doe"
 				};
-				const res = await svc.validateParams(ctx, params, { type: "update" });
+				const res = await svc.validateParams(ctx, params, {
+					type: "update",
+					entity: { a: 5 },
+					id: 1234
+				});
 				expect(res).toEqual({
 					name: "John Doe"
 				});
 
 				expect(customValidate).toBeCalledTimes(1);
-				expect(customValidate).toBeCalledWith("John Doe", params, svc.$fields[0], ctx);
+				expect(customValidate).toBeCalledWith({
+					value: "John Doe",
+					params,
+					field: svc.$fields[0],
+					ctx,
+					entity: { a: 5 },
+					id: 1234,
+					operation: "update",
+					root: params
+				});
 			});
 
 			it("should throw error if not valid", async () => {
@@ -1123,7 +1148,7 @@ describe("Test validation", () => {
 			});
 
 			it("should remove password & use the previous role value", async () => {
-				const oldEntity = {
+				const entity = {
 					name: "John",
 					password: "pass1234",
 					role: "user"
@@ -1133,7 +1158,7 @@ describe("Test validation", () => {
 					password: "pass1234",
 					role: "admin"
 				};
-				const res = await svc.validateParams(ctx, params, { type: "replace", oldEntity });
+				const res = await svc.validateParams(ctx, params, { type: "replace", entity });
 				expect(res).toEqual({
 					name: "John",
 					role: "user"
@@ -1141,7 +1166,7 @@ describe("Test validation", () => {
 			});
 
 			it("should not touch immutable field if not exist", async () => {
-				const oldEntity = {
+				const entity = {
 					name: "John",
 					password: "pass1234",
 					role: "user"
@@ -1150,7 +1175,7 @@ describe("Test validation", () => {
 					name: "John",
 					password: "pass1234"
 				};
-				const res = await svc.validateParams(ctx, params, { type: "replace", oldEntity });
+				const res = await svc.validateParams(ctx, params, { type: "replace", entity });
 				expect(res).toEqual({
 					name: "John",
 					role: "user"
@@ -1220,7 +1245,7 @@ describe("Test validation", () => {
 		testTypeConversion(ctx, svc, "replace");
 
 		describe("Test custom validation", () => {
-			const customValidate = jest.fn(value => (value.length < 3 ? "Too short" : true));
+			const customValidate = jest.fn(({ value }) => (value.length < 3 ? "Too short" : true));
 			beforeAll(() => {
 				svc.settings.fields = {
 					name: { type: "string", required: true, validate: customValidate }
@@ -1233,13 +1258,26 @@ describe("Test validation", () => {
 				const params = {
 					name: "John Doe"
 				};
-				const res = await svc.validateParams(ctx, params, { type: "replace" });
+				const res = await svc.validateParams(ctx, params, {
+					type: "replace",
+					entity: { a: 5 },
+					id: 1234
+				});
 				expect(res).toEqual({
 					name: "John Doe"
 				});
 
 				expect(customValidate).toBeCalledTimes(1);
-				expect(customValidate).toBeCalledWith("John Doe", params, svc.$fields[0], ctx);
+				expect(customValidate).toBeCalledWith({
+					value: "John Doe",
+					params,
+					field: svc.$fields[0],
+					ctx,
+					entity: { a: 5 },
+					id: 1234,
+					operation: "replace",
+					root: params
+				});
 			});
 
 			it("should throw error if not valid", async () => {

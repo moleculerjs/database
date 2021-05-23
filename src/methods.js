@@ -572,7 +572,7 @@ module.exports = function (mixinOpts) {
 			let id = this._getIDFromParams(params);
 
 			// Call because it throws error if entity is not exist
-			const oldEntity = await this.resolveEntities(ctx, params, {
+			const entity = await this.resolveEntities(ctx, params, {
 				transform: false,
 				throwIfNotExist: true
 			});
@@ -582,7 +582,8 @@ module.exports = function (mixinOpts) {
 				params = await this.validateParams(ctx, params, {
 					...opts,
 					type: "update",
-					oldEntity,
+					entity,
+					id,
 					nestedFieldSupport: adapter.hasNestedFieldSupport
 				});
 			}
@@ -600,7 +601,7 @@ module.exports = function (mixinOpts) {
 				result = await adapter.updateById(id, params, { raw: rawUpdate });
 			} else {
 				// Nothing to update
-				result = oldEntity;
+				result = entity;
 			}
 
 			if (opts.transform !== false) {
@@ -675,7 +676,7 @@ module.exports = function (mixinOpts) {
 			let id = this._getIDFromParams(params);
 
 			// Call because it throws error if entity is not exist
-			const oldEntity = await this.resolveEntities(ctx, params, {
+			const entity = await this.resolveEntities(ctx, params, {
 				transform: false,
 				throwIfNotExist: true
 			});
@@ -684,7 +685,8 @@ module.exports = function (mixinOpts) {
 			params = await this.validateParams(ctx, params, {
 				...opts,
 				type: "replace",
-				oldEntity,
+				entity,
+				id,
 				nestedFieldSupport: adapter.hasNestedFieldSupport
 			});
 
@@ -735,6 +737,8 @@ module.exports = function (mixinOpts) {
 			params = await this.validateParams(ctx, params, {
 				...opts,
 				type: "remove",
+				entity,
+				id,
 				nestedFieldSupport: adapter.hasNestedFieldSupport
 			});
 

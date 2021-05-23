@@ -245,7 +245,7 @@ module.exports = function (mixinOpts) {
 		 */
 		async _validateObject(ctx, fields, params, opts) {
 			const type = opts.type || "create";
-			const oldEntity = opts.oldEntity;
+			const oldEntity = opts.entity;
 
 			let entity = {};
 
@@ -272,7 +272,16 @@ module.exports = function (mixinOpts) {
 					// Custom validator
 					// Syntax: `validate: (value, entity, field, ctx) => value.length > 6 || "Too short"`
 					if (field.validate) {
-						const res = await field.validate.call(this, value, params, field, ctx);
+						const res = await field.validate.call(this, {
+							ctx,
+							value,
+							params,
+							field,
+							id: opts.id,
+							operation: type,
+							entity: oldEntity,
+							root: opts.root || params
+						});
 						if (res !== true) {
 							this.logger.debug(`Parameter validation error`, { res, field, value });
 							throw new ValidationError(res, "VALIDATION_ERROR", {
@@ -286,7 +295,8 @@ module.exports = function (mixinOpts) {
 					if (field.type == "object" && field.itemProperties) {
 						value = await this._validateObject(ctx, field.itemProperties, value, {
 							...opts,
-							nested: true
+							nested: true,
+							root: params
 						});
 					}
 
@@ -313,7 +323,8 @@ module.exports = function (mixinOpts) {
 										value[i],
 										{
 											...opts,
-											nested: true
+											nested: true,
+											root: params
 										}
 									);
 								}

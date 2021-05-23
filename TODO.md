@@ -12,8 +12,15 @@
 
 
 ## Methods
-- [ ] add `entityID` to custom functions: `(value, entity, entityID, field, ctx)`
-- [ ] wrap the args to obj in custom functions: `({ entityID, ctx })`
+- [x] wrap the args to obj in custom functions: `({ ctx, id, field })`
+  - [x] add `id` to custom functions
+  - [x] add `operation` _(create|update|remove)_ to custom functions
+  - [x] add `root` _(for nested properties)_ to custom functions
+  - [ ] same for `get`
+  - [ ] same for `set`
+  - [ ] same for `onXXXX` hooks
+- [ ] multiple get option for `get` in transform (same as populating to avoid hundreds sub-calls)
+- [ ] if `field.validate` is string, call the method by name
 
 ## Features
 - [x] Multi model/tenant solutions
@@ -47,5 +54,5 @@
 - [ ] validate `raw: true` update fields (`$set`, `$inc`)
 - [ ] client-side (Vue) module which can communicate with service via REST or GraphQL.
 - [ ] ad-hoc populate in find/list actions `populate: ["author", { key: "createdBy", action: "users.resolve", fields: ["name", "avatar"] }]` { }
-- [ ] auto revision handling (`_rev: 1`). Auto increment on every update/replace and always checks the rev value to avoid concurrent updating.
+- [ ] auto revision handling (`_rev: 1`). Autoincrement on every update/replace and always checks the rev value to avoid concurrent updating.
 - [ ] 
