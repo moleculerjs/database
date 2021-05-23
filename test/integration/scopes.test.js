@@ -130,6 +130,17 @@ module.exports = (getAdapter, adapterType) => {
 				expect(count).toEqual(3);
 			});
 
+			it("should filtered by default scope", async () => {
+				const params = { scope: true };
+				const rows = await svc.findEntities(ctx, params);
+				expect(rows).toEqual(
+					expect.arrayContaining([docs.johnDoe, docs.bobSmith, docs.kevinJames])
+				);
+
+				const count = await svc.countEntities(ctx);
+				expect(count).toEqual(3);
+			});
+
 			it("should filtered by default scope & custom query", async () => {
 				const params = { query: { name: "Bob Smith" } };
 				const rows = await svc.findEntities(ctx, params);

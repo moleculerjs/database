@@ -41,6 +41,13 @@ describe("Test scoping", () => {
 			expect(res).toEqual({ query: { status: true } });
 		});
 
+		it("should add default scope", async () => {
+			const params = { scope: true };
+
+			const res = await svc._applyScopes(params, ctx);
+			expect(res).toEqual({ query: { status: true }, scope: true });
+		});
+
 		it("should add desired scope", async () => {
 			const params = { scope: "public" };
 

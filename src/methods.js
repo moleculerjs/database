@@ -157,7 +157,9 @@ module.exports = function (mixinOpts) {
 		 */
 		async _applyScopes(params, ctx) {
 			let scopes = null;
-			if (params.scope) {
+			if (params.scope === true) {
+				scopes = this.settings.defaultScopes;
+			} else if (params.scope) {
 				scopes = Array.isArray(params.scope) ? params.scope : [params.scope];
 			} else if (params.scope === false) {
 				// Disable default scopes, check the permission for this

@@ -12,6 +12,8 @@
 
 
 ## Methods
+- [ ] add `entityID` to custom functions: `(value, entity, entityID, field, ctx)`
+- [ ] wrap the args to obj in custom functions: `({ entityID, ctx })`
 
 ## Features
 - [x] Multi model/tenant solutions
@@ -30,6 +32,10 @@
 - [ ] Mongoose
 - [x] NeDB
 - [ ] Sequelize
+- [ ] OrientDB
+  - [ ] https://orientdb.org/docs/3.0.x/orientjs/OrientJS.html
+- [ ] ArangoDB
+  - [ ] https://www.arangodb.com/docs/stable/aql/tutorial-crud.html
 
 
 
