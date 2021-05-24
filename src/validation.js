@@ -272,7 +272,11 @@ module.exports = function (mixinOpts) {
 					// Custom validator
 					// Syntax: `validate: (value, entity, field, ctx) => value.length > 6 || "Too short"`
 					if (field.validate) {
-						const res = await field.validate.call(this, {
+						const fn =
+							typeof field.validate == "string"
+								? this[field.validate]
+								: field.validate;
+						const res = await fn.call(this, {
 							ctx,
 							value,
 							params,

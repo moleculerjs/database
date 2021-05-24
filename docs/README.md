@@ -279,8 +279,9 @@ const res = broker.call("users.find", {
 The response contains the `name` and `createdAt` fields.
 
 
-### `validate`: \<Function\> _(Default: `null`)_
-With `validate`, you can configure your custom validation function. _It can be asynchronous._
+### `validate`: \<Function|String\> _(Default: `null`)_
+With `validate`, you can configure your custom validation function. If it is a `String`, it should be a service method name that will be called.
+_It can be asynchronous._
 
 ### Callback parameters
 | Property | Type | Description |
@@ -305,12 +306,19 @@ With `validate`, you can configure your custom validation function. _It can be a
 }
 ```
 
-**Example to check the username is unique**
+**Example with method name to check the username is unique**
 ```js
-{
-    username: { 
-        type: "string", 
-        validate: async ({ ctx, value, operation, entity }) => {
+module.exports = {
+    // ...
+    settings: {
+        fields: {
+            username: { type: "string", validate: "validateUsername" }
+        }
+    },
+
+    // ...
+    methods: {
+        async validateUsername({ ctx, value, operation, entity }) {
             if (operation == "create" || (entity && entity.username != value)) {
                 const found = await ctx.call("users.find", { username: value });
                 if (found.length > 0)
@@ -319,7 +327,7 @@ With `validate`, you can configure your custom validation function. _It can be a
             return true;
         }
     }
-}
+};
 ```
 
 ### `get`: \<Function\> _(Default: `null`)_

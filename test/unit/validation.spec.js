@@ -1244,7 +1244,7 @@ describe("Test validation", () => {
 
 		testTypeConversion(ctx, svc, "replace");
 
-		describe("Test custom validation", () => {
+		describe("Test custom validation with fn", () => {
 			const customValidate = jest.fn(({ value }) => (value.length < 3 ? "Too short" : true));
 			beforeAll(() => {
 				svc.settings.fields = {
@@ -1281,6 +1281,66 @@ describe("Test validation", () => {
 			});
 
 			it("should throw error if not valid", async () => {
+				const params = {
+					name: "Al"
+				};
+				expect.assertions(6);
+				try {
+					await svc.validateParams(ctx, params, { type: "replace" });
+				} catch (err) {
+					expect(err).toBeInstanceOf(ValidationError);
+					expect(err.name).toBe("ValidationError");
+					expect(err.message).toBe("Too short");
+					expect(err.type).toBe("VALIDATION_ERROR");
+					expect(err.code).toBe(422);
+					expect(err.data).toEqual({
+						field: "name",
+						value: "Al"
+					});
+				}
+			});
+		});
+
+		describe("Test custom validation with fn", () => {
+			beforeAll(() => {
+				svc.settings.fields = {
+					name: { type: "string", required: true, validate: "customFn" }
+				};
+
+				svc.customFn = jest.fn(() => true);
+
+				svc._processFields();
+			});
+
+			it("should call custom validate", async () => {
+				const params = {
+					name: "John Doe"
+				};
+				const res = await svc.validateParams(ctx, params, {
+					type: "replace",
+					entity: { a: 5 },
+					id: 1234
+				});
+				expect(res).toEqual({
+					name: "John Doe"
+				});
+
+				expect(svc.customFn).toBeCalledTimes(1);
+				expect(svc.customFn).toBeCalledWith({
+					value: "John Doe",
+					params,
+					field: svc.$fields[0],
+					ctx,
+					entity: { a: 5 },
+					id: 1234,
+					operation: "replace",
+					root: params
+				});
+			});
+
+			it("should throw error if not valid", async () => {
+				svc.customFn = jest.fn(() => "Too short");
+
 				const params = {
 					name: "Al"
 				};

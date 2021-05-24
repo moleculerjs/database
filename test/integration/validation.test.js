@@ -1268,7 +1268,14 @@ module.exports = (getAdapter, adapterType) => {
 						columnName: "_id",
 						columnType: getAdapter.IdColumnType
 					},
-					name: { type: "string", required: true, validate: customValidate }
+					name: { type: "string", required: true, validate: customValidate },
+					age: { type: "number", validate: "checkAge" }
+				}
+			},
+
+			methods: {
+				checkAge({ value }) {
+					return value > 99 ? "Too old" : true;
 				}
 			},
 
@@ -1288,7 +1295,7 @@ module.exports = (getAdapter, adapterType) => {
 		});
 		afterAll(() => broker.stop());
 
-		describe("Test create, update, replace", () => {
+		describe("Test with custom function", () => {
 			let entity;
 
 			it("should throw error at create", async () => {
@@ -1374,6 +1381,102 @@ module.exports = (getAdapter, adapterType) => {
 				expect(res).toStrictEqual({
 					id: entity.id,
 					name: "Jane Doe"
+				});
+				entity = res;
+			});
+		});
+
+		describe("Test with method name", () => {
+			let entity;
+
+			it("should throw error at create", async () => {
+				expect.assertions(6);
+				try {
+					await broker.call("users.create", { name: "John", age: 120 });
+				} catch (err) {
+					expect(err).toBeInstanceOf(ValidationError);
+					expect(err.name).toBe("ValidationError");
+					expect(err.message).toBe("Too old");
+					expect(err.type).toBe("VALIDATION_ERROR");
+					expect(err.code).toBe(422);
+					expect(err.data).toEqual({
+						field: "age",
+						value: 120
+					});
+				}
+			});
+
+			it("should create entity", async () => {
+				const res = await broker.call("users.create", { name: "John", age: 33 });
+				expect(res).toStrictEqual({
+					id: expectedID,
+					name: "John",
+					age: 33
+				});
+				entity = res;
+			});
+
+			it("should throw error at update", async () => {
+				expect.assertions(6);
+				try {
+					await broker.call("users.update", { id: entity.id, age: 130 });
+				} catch (err) {
+					expect(err).toBeInstanceOf(ValidationError);
+					expect(err.name).toBe("ValidationError");
+					expect(err.message).toBe("Too old");
+					expect(err.type).toBe("VALIDATION_ERROR");
+					expect(err.code).toBe(422);
+					expect(err.data).toEqual({
+						field: "age",
+						value: 130
+					});
+				}
+			});
+
+			it("should update entity", async () => {
+				const res = await broker.call("users.update", {
+					id: entity.id,
+					age: 80
+				});
+				expect(res).toStrictEqual({
+					id: entity.id,
+					name: "John",
+					age: 80
+				});
+				entity = res;
+			});
+
+			it("should throw error at replace", async () => {
+				expect.assertions(6);
+				try {
+					await broker.call("users.replace", {
+						...entity,
+						name: "John",
+						age: 150
+					});
+				} catch (err) {
+					expect(err).toBeInstanceOf(ValidationError);
+					expect(err.name).toBe("ValidationError");
+					expect(err.message).toBe("Too old");
+					expect(err.type).toBe("VALIDATION_ERROR");
+					expect(err.code).toBe(422);
+					expect(err.data).toEqual({
+						field: "age",
+						value: 150
+					});
+				}
+			});
+
+			it("should replace entity", async () => {
+				const res = await broker.call("users.replace", {
+					...entity,
+					name: "Jane",
+					age: 22
+				});
+				expect(res).toStrictEqual({
+					id: entity.id,
+					name: "Jane",
+					age: 22
 				});
 				entity = res;
 			});
