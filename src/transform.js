@@ -141,7 +141,11 @@ module.exports = function (mixinOpts) {
 					// Virtual or formatted field
 					if (_.isFunction(field.get)) {
 						values = await Promise.all(
-							values.map(async (v, i) => field.get.call(this, v, docs[i], field, ctx))
+							values.map(async (value, i) =>
+								this._callCustomFunction(field.get, [
+									{ value, entity: docs[i], field, ctx }
+								])
+							)
 						);
 					}
 

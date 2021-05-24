@@ -1586,7 +1586,7 @@ module.exports = (getAdapter, adapterType) => {
 	});
 
 	describe("Test custom formatters", () => {
-		const getter = jest.fn((value, entity) => `${entity.firstName} ${entity.lastName}`);
+		const getter = jest.fn(({ entity }) => `${entity.firstName} ${entity.lastName}`);
 		const setter = jest.fn(({ value, params }) => {
 			[params.firstName, params.lastName] = value.split(" ");
 			return null;
@@ -1665,10 +1665,10 @@ module.exports = (getAdapter, adapterType) => {
 				});
 
 				expect(getter).toBeCalledTimes(1);
-				expect(getter).toBeCalledWith(
-					undefined,
-					{ _id: entity.id, firstName: "John", lastName: "Doe", name: null },
-					{
+				expect(getter).toBeCalledWith({
+					value: undefined,
+					entity: { _id: entity.id, firstName: "John", lastName: "Doe", name: null },
+					field: {
 						columnName: "fullName",
 						columnType: "string",
 						get: expect.any(Function),
@@ -1677,8 +1677,8 @@ module.exports = (getAdapter, adapterType) => {
 						type: "string",
 						virtual: true
 					},
-					expect.any(Context)
-				);
+					ctx: expect.any(Context)
+				});
 
 				const res2 = await broker.call("users.get", { id: entity.id });
 				expect(res2).toStrictEqual(entity);

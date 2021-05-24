@@ -25,7 +25,7 @@ module.exports = (getAdapter, adapterType) => {
 						type: "string",
 						primaryKey: true,
 						columnName: "_id",
-						get: adapterType == "Knex" ? v => String(v) : undefined
+						get: adapterType == "Knex" ? ({ value }) => String(value) : undefined
 					},
 					title: { type: "string", trim: true, required: true },
 					content: { type: "string" },
@@ -34,7 +34,7 @@ module.exports = (getAdapter, adapterType) => {
 					status: {
 						type: "boolean",
 						default: true,
-						get: adapterType == "Knex" ? v => !!v : undefined
+						get: adapterType == "Knex" ? ({ value }) => !!value : undefined
 					},
 					createdAt: {
 						type: "number",
@@ -42,7 +42,7 @@ module.exports = (getAdapter, adapterType) => {
 						onCreate: Date.now,
 						columnType: "bigInteger",
 						columnName: "created_at",
-						get: v => (v != null ? Number(v) : v)
+						get: ({ value }) => (value != null ? Number(value) : value)
 					},
 					updatedAt: {
 						type: "number",
@@ -50,7 +50,7 @@ module.exports = (getAdapter, adapterType) => {
 						onUpdate: Date.now,
 						columnType: "bigInteger",
 						columnName: "updated_at",
-						get: v => (v != null ? Number(v) : v)
+						get: ({ value }) => (value != null ? Number(value) : value)
 					}
 				}
 			},
@@ -594,7 +594,7 @@ module.exports = (getAdapter, adapterType) => {
 					fullName: {
 						type: "string",
 						virtual: true,
-						get: (v, entity) => entity.firstName + " " + entity.lastName
+						get: ({ entity }) => entity.firstName + " " + entity.lastName
 					},
 					userName: { type: "string", trim: true, required: true },
 					email: {
@@ -610,7 +610,7 @@ module.exports = (getAdapter, adapterType) => {
 						type: "boolean",
 						trim: true,
 						default: true,
-						get: adapterType == "Knex" ? v => !!v : undefined
+						get: adapterType == "Knex" ? ({ value }) => !!value : undefined
 					}
 				}
 			},
@@ -806,7 +806,7 @@ module.exports = (getAdapter, adapterType) => {
 						fullName: {
 							type: "string",
 							readonly: true,
-							get: (v, entity) => entity.firstName + " " + entity.lastName
+							get: ({ entity }) => entity.firstName + " " + entity.lastName
 						},
 						userName: { type: "string", trim: true, required: true },
 						email: { type: "string", trim: true, required: true },

@@ -36,13 +36,13 @@ module.exports = (getAdapter, adapterType) => {
 						type: "number",
 						onCreate: Date.now,
 						columnType: "bigInteger",
-						get: v => (v != null ? Number(v) : v)
+						get: ({ value }) => (value != null ? Number(value) : value)
 					},
 					updatedAt: {
 						type: "number",
 						onUpdate: Date.now,
 						columnType: "bigInteger",
-						get: v => (v != null ? Number(v) : v)
+						get: ({ value }) => (value != null ? Number(value) : value)
 					}
 				},
 				defaultPopulates: ["author"]

@@ -539,7 +539,7 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 							primaryKey: true,
 							columnName: "_id",
 							columnType: "integer",
-							get: adapterType == "Knex" ? v => String(v) : undefined
+							get: adapterType == "Knex" ? ({ value }) => String(value) : undefined
 						},
 						title: { type: "string", trim: true, required: true },
 						content: { type: "string" },
@@ -557,21 +557,21 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 						status: {
 							type: "boolean",
 							default: true,
-							get: adapterType == "Knex" ? v => !!v : undefined
+							get: adapterType == "Knex" ? ({ value }) => !!value : undefined
 						},
 						createdAt: {
 							type: "number",
 							readonly: true,
 							onCreate: Date.now,
 							columnType: "bigInteger",
-							get: v => (v != null ? Number(v) : v)
+							get: ({ value }) => (value != null ? Number(value) : value)
 						},
 						updatedAt: {
 							type: "number",
 							readonly: true,
 							onUpdate: Date.now,
 							columnType: "bigInteger",
-							get: v => (v != null ? Number(v) : v)
+							get: ({ value }) => (value != null ? Number(value) : value)
 						}
 				  },
 
@@ -620,14 +620,14 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 					primaryKey: true,
 					columnName: "_id",
 					columnType: "integer",
-					get: adapterType == "Knex" ? v => String(v) : undefined
+					get: adapterType == "Knex" ? ({ value }) => String(value) : undefined
 				},
 				name: { type: "string", trim: true, required: true },
 				age: { type: "number", columnType: "integer", columnName: "ages" },
 				status: {
 					type: "boolean",
 					default: true,
-					get: adapterType == "Knex" ? v => !!v : undefined
+					get: adapterType == "Knex" ? ({ value }) => !!value : undefined
 				},
 				postCount: {
 					type: "number",
@@ -645,7 +645,7 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 					onCreate: Date.now,
 					columnType: "bigInteger",
 					columnName: "created_at",
-					get: v => (v != null ? Number(v) : v)
+					get: ({ value }) => (value != null ? Number(value) : value)
 				},
 				updatedAt: {
 					type: "number",
@@ -653,7 +653,7 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 					onUpdate: Date.now,
 					columnType: "bigInteger",
 					columnName: "updated_at",
-					get: v => (v != null ? Number(v) : v)
+					get: ({ value }) => (value != null ? Number(value) : value)
 				},
 				deletedAt: {
 					type: "number",
@@ -661,7 +661,7 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 					onRemove: Date.now,
 					columnType: "bigInteger",
 					columnName: "deleted_at",
-					get: v => (v != null ? Number(v) : v)
+					get: ({ value }) => (value != null ? Number(value) : value)
 				}
 			},
 

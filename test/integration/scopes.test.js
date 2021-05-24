@@ -64,7 +64,7 @@ module.exports = (getAdapter, adapterType) => {
 					status: {
 						type: "boolean",
 						default: true,
-						get: adapterType == "Knex" ? v => !!v : undefined
+						get: adapterType == "Knex" ? ({ value }) => !!value : undefined
 					}
 				},
 				scopes: {

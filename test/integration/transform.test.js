@@ -33,7 +33,7 @@ module.exports = (getAdapter, adapterType) => {
 						type: "string",
 						readonly: true,
 						virtual: true,
-						get: (v, entity) => (entity.name ? entity.name.toUpperCase() : entity.name)
+						get: ({ entity }) => (entity.name ? entity.name.toUpperCase() : entity.name)
 					},
 					password: { type: "string", hidden: true },
 					token: { type: "string", hidden: "byDefault" },

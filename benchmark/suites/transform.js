@@ -33,7 +33,7 @@ const UserServiceSchema = {
 			lastName: { type: "string" },
 			fullName: {
 				type: "string",
-				get: (_, entity) => entity.firstName + " " + entity.lastName
+				get: ({ entity }) => entity.firstName + " " + entity.lastName
 			},
 			username: { type: "string" },
 			email: { type: "string" },

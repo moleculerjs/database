@@ -63,13 +63,13 @@ module.exports = (getAdapter, adapterType) => {
 					dob: {
 						type: "number",
 						columnType: "bigInteger",
-						get: v => (typeof v == "string" ? Number(v) : v)
+						get: ({ value }) => (typeof value == "string" ? Number(value) : value)
 					},
 					roles: { type: "array", items: "string", columnType: "string" },
 					status: {
 						type: "boolean",
 						default: true,
-						get: adapterType == "Knex" ? v => !!v : undefined
+						get: adapterType == "Knex" ? ({ value }) => !!value : undefined
 					},
 					_score: { type: "number", readonly: true, virtual: true }
 				}
@@ -364,13 +364,13 @@ module.exports = (getAdapter, adapterType) => {
 					dob: {
 						type: "number",
 						columnType: "bigInteger",
-						get: v => (typeof v == "string" ? Number(v) : v)
+						get: ({ value }) => (typeof value == "string" ? Number(value) : value)
 					},
 					roles: { type: "array", items: "string", columnType: "string" },
 					status: {
 						type: "boolean",
 						default: true,
-						get: adapterType == "Knex" ? v => !!v : undefined
+						get: adapterType == "Knex" ? ({ value }) => !!value : undefined
 					}
 				}
 			},
@@ -551,14 +551,14 @@ module.exports = (getAdapter, adapterType) => {
 					dob: {
 						type: "number",
 						columnType: "bigInteger",
-						get: v => (typeof v == "string" ? Number(v) : v)
+						get: ({ value }) => (typeof value == "string" ? Number(value) : value)
 					},
 					height: { type: "number", columnType: "integer" },
 					roles: { type: "array", items: "string", columnType: "string" },
 					status: {
 						type: "boolean",
 						default: true,
-						get: adapterType == "Knex" ? v => !!v : undefined
+						get: adapterType == "Knex" ? ({ value }) => !!value : undefined
 					}
 				}
 			},
@@ -772,14 +772,14 @@ module.exports = (getAdapter, adapterType) => {
 					dob: {
 						type: "number",
 						columnType: "bigInteger",
-						get: v => (typeof v == "string" ? Number(v) : v)
+						get: ({ value }) => (typeof value == "string" ? Number(value) : value)
 					},
 					height: { type: "number", columnType: "integer" },
 					roles: { type: "array", items: "string", columnType: "string" },
 					status: {
 						type: "boolean",
 						default: true,
-						get: adapterType == "Knex" ? v => !!v : undefined
+						get: adapterType == "Knex" ? ({ value }) => !!value : undefined
 					}
 				}
 			},
@@ -898,14 +898,14 @@ module.exports = (getAdapter, adapterType) => {
 					dob: {
 						type: "number",
 						columnType: "bigInteger",
-						get: v => (typeof v == "string" ? Number(v) : v)
+						get: ({ value }) => (typeof value == "string" ? Number(value) : value)
 					},
 					height: { type: "number", columnType: "integer" },
 					roles: { type: "array", items: "string", columnType: "string" },
 					status: {
 						type: "boolean",
 						default: true,
-						get: adapterType == "Knex" ? v => !!v : undefined
+						get: adapterType == "Knex" ? ({ value }) => !!value : undefined
 					}
 				}
 			},
@@ -1407,7 +1407,7 @@ module.exports = (getAdapter, adapterType) => {
 					status: {
 						type: "boolean",
 						default: true,
-						get: adapterType == "Knex" ? v => !!v : undefined
+						get: adapterType == "Knex" ? ({ value }) => !!value : undefined
 					}
 				}
 			},

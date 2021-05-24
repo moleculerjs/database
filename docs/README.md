@@ -257,7 +257,7 @@ The virtual field returns a value that does not exist in the database. It's mand
     fullName: { 
         type: "string", 
         virtual: true, 
-        get: ({ ctx }) => `${entity.firstName} ${entity.lastName}` 
+        get: ({ entity }) => `${entity.firstName} ${entity.lastName}` 
     }
 }
 ```
@@ -347,6 +347,16 @@ module.exports = {
 
 ### `get`: \<Function\> _(Default: `null`)_
 The `get` function is called when transforming entities. With this function, you can modify an entity value before sending it back to the caller or calculate a value from other fields of the entity in virtual fields.
+_It can be asynchronous._
+
+### Callback parameters
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `ctx` | `Context` | Moleculer `Context` instance. It can be `null`. |
+| `value` | `any` | Value of the field. |
+| `params` | `Object` | The whole received object (`ctx.params`). |
+| `field` | `Object` | Field schema. |
+| `entity` | `Object` | The entity object. |
 
 **Example**
 ```js
@@ -354,7 +364,7 @@ The `get` function is called when transforming entities. With this function, you
     creditCardNumber: { 
         type: "string", 
         // Mask the credit card number
-        get: ({ ctx }) => value.replace(/(\d{4}-){3}/g, "****-****-****-")
+        get: ({ value }) => value.replace(/(\d{4}-){3}/g, "****-****-****-")
     }
 }
 ```

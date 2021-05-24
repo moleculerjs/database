@@ -178,7 +178,7 @@ const UserServiceSchema = (serviceName, adapterDef) => {
 					type: "string",
 					readonly: true,
 					virtual: true,
-					get: (_, entity) => entity.firstName + " " + entity.lastName
+					get: ({ entity }) => entity.firstName + " " + entity.lastName
 				},
 				userName: { type: "string", columnName: "username" },
 				email: { type: "string" },
