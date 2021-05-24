@@ -235,6 +235,18 @@ module.exports = function (mixinOpts) {
 		},
 
 		/**
+		 * Call a custom function what can be a method name or a `Function`.
+		 *
+		 * @param {String|Function} fn
+		 * @param {Array<any>} args
+		 * @returns {any}
+		 */
+		_callCustomFunction(fn, args) {
+			fn = typeof fn == "string" ? this[fn] : fn;
+			return fn.apply(this, args);
+		},
+
+		/**
 		 * Validate an object against field definitions.
 		 *
 		 * @param {Context} ctx
@@ -272,20 +284,18 @@ module.exports = function (mixinOpts) {
 					// Custom validator
 					// Syntax: `validate: (value, entity, field, ctx) => value.length > 6 || "Too short"`
 					if (field.validate) {
-						const fn =
-							typeof field.validate == "string"
-								? this[field.validate]
-								: field.validate;
-						const res = await fn.call(this, {
-							ctx,
-							value,
-							params,
-							field,
-							id: opts.id,
-							operation: type,
-							entity: oldEntity,
-							root: opts.root || params
-						});
+						const res = await this._callCustomFunction(field.validate, [
+							{
+								ctx,
+								value,
+								params,
+								field,
+								id: opts.id,
+								operation: type,
+								entity: oldEntity,
+								root: opts.root || params
+							}
+						]);
 						if (res !== true) {
 							this.logger.debug(`Parameter validation error`, { res, field, value });
 							throw new ValidationError(res, "VALIDATION_ERROR", {
@@ -401,7 +411,18 @@ module.exports = function (mixinOpts) {
 					// Custom formatter (can be async)
 					// Syntax: `set: (value, entity, field, ctx) => value.toUpperCase()`
 					if (field.set) {
-						value = await field.set.call(this, value, params, field, ctx);
+						value = await this._callCustomFunction(field.set, [
+							{
+								ctx,
+								value,
+								params,
+								field,
+								id: opts.id,
+								operation: type,
+								entity: oldEntity,
+								root: opts.root || params
+							}
+						]);
 						return setValue(field, value);
 					}
 
@@ -409,28 +430,72 @@ module.exports = function (mixinOpts) {
 					if (!opts.skipOnHooks) {
 						if (type == "create" && field.onCreate) {
 							if (_.isFunction(field.onCreate)) {
-								value = await field.onCreate.call(this, value, params, field, ctx);
+								value = await this._callCustomFunction(field.onCreate, [
+									{
+										ctx,
+										value,
+										params,
+										field,
+										id: opts.id,
+										operation: type,
+										entity: oldEntity,
+										root: opts.root || params
+									}
+								]);
 							} else {
 								value = field.onCreate;
 							}
 							return setValue(field, value);
 						} else if (type == "update" && field.onUpdate) {
 							if (_.isFunction(field.onUpdate)) {
-								value = await field.onUpdate.call(this, value, params, field, ctx);
+								value = await this._callCustomFunction(field.onUpdate, [
+									{
+										ctx,
+										value,
+										params,
+										field,
+										id: opts.id,
+										operation: type,
+										entity: oldEntity,
+										root: opts.root || params
+									}
+								]);
 							} else {
 								value = field.onUpdate;
 							}
 							return setValue(field, value);
 						} else if (type == "replace" && field.onReplace) {
 							if (_.isFunction(field.onReplace)) {
-								value = await field.onReplace.call(this, value, params, field, ctx);
+								value = await this._callCustomFunction(field.onReplace, [
+									{
+										ctx,
+										value,
+										params,
+										field,
+										id: opts.id,
+										operation: type,
+										entity: oldEntity,
+										root: opts.root || params
+									}
+								]);
 							} else {
 								value = field.onReplace;
 							}
 							return setValue(field, value);
 						} else if (type == "remove" && field.onRemove) {
 							if (_.isFunction(field.onRemove)) {
-								value = await field.onRemove.call(this, value, params, field, ctx);
+								value = await this._callCustomFunction(field.onRemove, [
+									{
+										ctx,
+										value,
+										params,
+										field,
+										id: opts.id,
+										operation: type,
+										entity: oldEntity,
+										root: opts.root || params
+									}
+								]);
 							} else {
 								value = field.onRemove;
 							}
@@ -443,7 +508,18 @@ module.exports = function (mixinOpts) {
 						if (value === undefined) {
 							if (field.default !== undefined) {
 								if (_.isFunction(field.default)) {
-									value = await field.default.call(this, params, field, ctx);
+									value = await this._callCustomFunction(field.default, [
+										{
+											ctx,
+											value,
+											params,
+											field,
+											id: opts.id,
+											operation: type,
+											entity: oldEntity,
+											root: opts.root || params
+										}
+									]);
 								} else {
 									value = field.default;
 								}

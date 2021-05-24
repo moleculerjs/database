@@ -213,11 +213,24 @@ With the `columnType` property you can use another field type in the database co
 ### `default`: \<string|Function\> _(Default: `null`)_
 For the non-required fields, you can set default values. If the field value is `null` or `undefined` in the `create` and `replace` actions, the service will set the defined default value. If the `default` is a Function, the service will call it to get the default value. _The function may be asynchronous._
 
+### Callback parameters
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `ctx` | `Context` | Moleculer `Context` instance. It can be `null`. |
+| `value` | `any` | Value of the field. |
+| `params` | `Object` | The whole received object (`ctx.params`). |
+| `field` | `Object` | Field schema. |
+| `id` | `any` | ID of the entity. It's `null` at entity creating. |
+| `operation` | `String` | Type of operation. Available values: `create`, `update`, `replace`, `remove`. |
+| `entity` | `Object` | At updating, replacing and removing, it contains the original raw (not transformed) entity. |
+| `root` | `Object` | The root received object. Useful for nested object validations. |
+
+
 **Example**
 ```js
 {
     votes: { type: "number", default: 0 },
-    role: { type: "string", default: async (entity, field, ctx) => await ctx.call("config.getDefaultRole") }
+    role: { type: "string", default: async ({ ctx }) => await ctx.call("config.getDefaultRole") }
     status: { type: "boolean", default: true },
 }
 ```
@@ -244,7 +257,7 @@ The virtual field returns a value that does not exist in the database. It's mand
     fullName: { 
         type: "string", 
         virtual: true, 
-        get: (value, entity, field, ctx) => `${entity.firstName} ${entity.lastName}` 
+        get: ({ ctx }) => `${entity.firstName} ${entity.lastName}` 
     }
 }
 ```
@@ -282,6 +295,8 @@ The response contains the `name` and `createdAt` fields.
 ### `validate`: \<Function|String\> _(Default: `null`)_
 With `validate`, you can configure your custom validation function. If it is a `String`, it should be a service method name that will be called.
 _It can be asynchronous._
+
+The function should return `true` if the input value is valid or with a `String` if not valid. The returned text will be used in the `ValidationError` as the message of error.
 
 ### Callback parameters
 | Property | Type | Description |
@@ -339,14 +354,28 @@ The `get` function is called when transforming entities. With this function, you
     creditCardNumber: { 
         type: "string", 
         // Mask the credit card number
-        get: (value, entity, field, ctx) => value.replace(/(\d{4}-){3}/g, "****-****-****-")
+        get: ({ ctx }) => value.replace(/(\d{4}-){3}/g, "****-****-****-")
     }
 }
 ```
 
 
 ### `set`: \<Function\> _(Default: `null`)_
-The `set` function is called when creating or updating entities. You can change the input value or calculate a new one from other values of the entity. _It can be asynchronous._
+The `set` function is called when creating or updating entities. You can change the input value or calculate a new one from other values of the entity. If it is a `String`, it should be a service method name that will be called. 
+_It can be asynchronous._
+
+### Callback parameters
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `ctx` | `Context` | Moleculer `Context` instance. It can be `null`. |
+| `value` | `any` | Value of the field. |
+| `params` | `Object` | The whole received object (`ctx.params`). |
+| `field` | `Object` | Field schema. |
+| `id` | `any` | ID of the entity. It's `null` at entity creating. |
+| `operation` | `String` | Type of operation. Available values: `create`, `update`, `replace`, `remove`. |
+| `entity` | `Object` | At updating, replacing and removing, it contains the original raw (not transformed) entity. |
+| `root` | `Object` | The root received object. Useful for nested object validations. |
+
 
 **Example**
 ```js
@@ -356,7 +385,7 @@ The `set` function is called when creating or updating entities. You can change 
     fullName: { 
         type: "string", 
         readonly: true, 
-        set: (value, entity, field, ctx) => `${entity.firstName} ${entity.lastName}` 
+        set: ({ params }) => `${params.firstName} ${params.lastName}` 
     },
     email: { type: "string", set: value => value.toLowerCase() }
 }
@@ -376,6 +405,19 @@ This is an operations hook that is called when creating a new entity (`create` a
 
 _It can be asynchronous._
 
+### Callback parameters
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `ctx` | `Context` | Moleculer `Context` instance. It can be `null`. |
+| `value` | `any` | Value of the field. |
+| `params` | `Object` | The whole received object (`ctx.params`). |
+| `field` | `Object` | Field schema. |
+| `id` | `any` | ID of the entity. It's `null` at entity creating. |
+| `operation` | `String` | Type of operation. Available values: `create`, `update`, `replace`, `remove`. |
+| `entity` | `Object` | At updating, replacing and removing, it contains the original raw (not transformed) entity. |
+| `root` | `Object` | The root received object. Useful for nested object validations. |
+
+
 **Example**
 ```js
 {
@@ -387,7 +429,7 @@ _It can be asynchronous._
     createdBy: { 
         type: "string", 
         readonly: true, 
-        onCreate: (value, entity, field, ctx) => ctx.meta.user.id 
+        onCreate: ({ ctx }) => ctx.meta.user.id 
     }
 }
 ```
@@ -396,6 +438,19 @@ _It can be asynchronous._
 This is an operations hook that is called when updating entities (`update` action, `updateEntity`). You can use it to set the `updatedAt` timestamp for entity.
 
 _It can be asynchronous._
+
+### Callback parameters
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `ctx` | `Context` | Moleculer `Context` instance. It can be `null`. |
+| `value` | `any` | Value of the field. |
+| `params` | `Object` | The whole received object (`ctx.params`). |
+| `field` | `Object` | Field schema. |
+| `id` | `any` | ID of the entity. It's `null` at entity creating. |
+| `operation` | `String` | Type of operation. Available values: `create`, `update`, `replace`, `remove`. |
+| `entity` | `Object` | At updating, replacing and removing, it contains the original raw (not transformed) entity. |
+| `root` | `Object` | The root received object. Useful for nested object validations. |
+
 
 **Example**
 ```js
@@ -408,7 +463,7 @@ _It can be asynchronous._
     updatedBy: { 
         type: "string", 
         readonly: true, 
-        onUpdate: (value, entity, field, ctx) => ctx.meta.user.id 
+        onUpdate: ({ ctx }) => ctx.meta.user.id 
     }
 }
 ```
@@ -417,6 +472,19 @@ _It can be asynchronous._
 This is an operations hook that is called when replacing entities (`replace` action, `replaceEntity`).
 
 _It can be asynchronous._
+
+### Callback parameters
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `ctx` | `Context` | Moleculer `Context` instance. It can be `null`. |
+| `value` | `any` | Value of the field. |
+| `params` | `Object` | The whole received object (`ctx.params`). |
+| `field` | `Object` | Field schema. |
+| `id` | `any` | ID of the entity. It's `null` at entity creating. |
+| `operation` | `String` | Type of operation. Available values: `create`, `update`, `replace`, `remove`. |
+| `entity` | `Object` | At updating, replacing and removing, it contains the original raw (not transformed) entity. |
+| `root` | `Object` | The root received object. Useful for nested object validations. |
+
 
 **Example**
 ```js
@@ -429,7 +497,7 @@ _It can be asynchronous._
     updatedBy: { 
         type: "string", 
         readonly: true, 
-        onReplace: (value, entity, field, ctx) => ctx.meta.user.id 
+        onReplace: ({ ctx }) => ctx.meta.user.id 
     }
 }
 ```
@@ -439,6 +507,19 @@ This is an operations hook that is called when removing entities (`remove` actio
 If you define it, the service will switch to **soft delete mode**. This means that the record won't be deleted in the table/collection. [Read more about the soft delete feature.](#soft-delete)
 
 _It can be asynchronous._
+
+### Callback parameters
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `ctx` | `Context` | Moleculer `Context` instance. It can be `null`. |
+| `value` | `any` | Value of the field. |
+| `params` | `Object` | The whole received object (`ctx.params`). |
+| `field` | `Object` | Field schema. |
+| `id` | `any` | ID of the entity. It's `null` at entity creating. |
+| `operation` | `String` | Type of operation. Available values: `create`, `update`, `replace`, `remove`. |
+| `entity` | `Object` | At updating, replacing and removing, it contains the original raw (not transformed) entity. |
+| `root` | `Object` | The root received object. Useful for nested object validations. |
+
 
 **Example**
 ```js
@@ -451,7 +532,7 @@ _It can be asynchronous._
     removeBy: { 
         type: "string", 
         readonly: true, 
-        onReplace: (value, entity, field, ctx) => ctx.meta.user.id 
+        onReplace: ({ ctx }) => ctx.meta.user.id 
     }
 }
 ```
@@ -2132,7 +2213,7 @@ module.exports = {
             tenantId: {
                 type: "string",
                 required: true,
-                set: (value, entity, field, ctx) => ctx.meta.user.tenantId
+                set: ({ ctx }) => ctx.meta.user.tenantId
             }
         },
         scopes: {

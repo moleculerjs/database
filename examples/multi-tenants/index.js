@@ -48,7 +48,7 @@ broker.createService({
 			content: { type: "string", required: false },
 			tenantId: {
 				type: "number",
-				set: (value, entity, field, ctx) => ctx.meta.tenantId,
+				set: ({ ctx }) => ctx.meta.tenantId,
 				required: true
 			}
 		},

@@ -683,7 +683,7 @@ module.exports = (getAdapter, adapterType) => {
 						type: "number",
 						required: true,
 						columnType: "integer",
-						set: (value, entity, field, ctx) => ctx.meta.tenantId
+						set: ({ ctx }) => ctx.meta.tenantId
 					}
 				},
 				scopes: {

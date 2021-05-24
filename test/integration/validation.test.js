@@ -1,6 +1,7 @@
 "use strict";
 
 const { ServiceBroker, Context } = require("moleculer");
+const ObjectID = require("mongodb").ObjectID;
 const { ValidationError } = require("moleculer").Errors;
 const DbService = require("../..").Service;
 
@@ -1088,12 +1089,16 @@ module.exports = (getAdapter, adapterType) => {
 				entity = res;
 
 				expect(onCreate).toBeCalledTimes(1);
-				expect(onCreate).toBeCalledWith(
-					undefined,
-					{ name: "John" },
-					svc.$fields[2],
-					expect.any(Context)
-				);
+				expect(onCreate).toBeCalledWith({
+					operation: "create",
+					ctx: expect.any(Context),
+					value: undefined,
+					params: { name: "John" },
+					root: { name: "John" },
+					entity: undefined,
+					field: svc.$fields[2],
+					id: undefined
+				});
 
 				const res2 = await broker.call("users.get", { id: entity.id });
 				expect(res2).toStrictEqual(entity);
@@ -1154,12 +1159,39 @@ module.exports = (getAdapter, adapterType) => {
 				entity = res;
 
 				expect(onUpdate).toBeCalledTimes(1);
-				expect(onUpdate).toBeCalledWith(
-					"Past",
-					{ id: "" + entity.id, name: "John Doe", updatedAt: "Past" },
-					svc.$fields[4],
-					expect.any(Context)
-				);
+				expect(onUpdate).toBeCalledWith({
+					operation: "update",
+					ctx: expect.any(Context),
+					value: "Past",
+					params: {
+						id: "" + entity.id,
+						name: "John Doe",
+						updatedAt: "Past"
+					},
+					root: {
+						id: "" + entity.id,
+						name: "John Doe",
+						updatedAt: "Past"
+					},
+					entity: {
+						_id: ["MongoDB"].includes(adapterType) ? expect.any(ObjectID) : entity.id,
+						name: "John Doe",
+						createdAt: "Created now",
+						createdBy: "Creator",
+						updatedAt: "Past",
+						...(getAdapter.isSQL
+							? {
+									updatedBy: null,
+									replacedAt: null,
+									replacedBy: null,
+									removedAt: null,
+									removedBy: null
+							  }
+							: {})
+					},
+					field: svc.$fields[4],
+					id: "" + entity.id
+				});
 
 				const res2 = await broker.call("users.get", { id: entity.id });
 				expect(res2).toStrictEqual(entity);
@@ -1189,9 +1221,11 @@ module.exports = (getAdapter, adapterType) => {
 				entity = res;
 
 				expect(onReplace).toBeCalledTimes(1);
-				expect(onReplace).toBeCalledWith(
-					getAdapter.isSQL ? null : undefined,
-					{
+				expect(onReplace).toBeCalledWith({
+					operation: "replace",
+					ctx: expect.any(Context),
+					value: getAdapter.isSQL ? null : undefined,
+					params: {
 						id: "" + entity.id,
 						name: "Jane Doe",
 						createdAt: "Created now",
@@ -1207,9 +1241,41 @@ module.exports = (getAdapter, adapterType) => {
 							  }
 							: {})
 					},
-					svc.$fields[6],
-					expect.any(Context)
-				);
+					root: {
+						id: "" + entity.id,
+						name: "Jane Doe",
+						createdAt: "Created now",
+						createdBy: "Creator",
+						updatedAt: "Updated now",
+						updatedBy: "Updater",
+						...(getAdapter.isSQL
+							? {
+									replacedAt: null,
+									replacedBy: null,
+									removedAt: null,
+									removedBy: null
+							  }
+							: {})
+					},
+					entity: {
+						_id: ["MongoDB"].includes(adapterType) ? expect.any(ObjectID) : entity.id,
+						name: "John Doe",
+						createdAt: "Created now",
+						createdBy: "Creator",
+						updatedAt: "Updated now",
+						updatedBy: "Updater",
+						...(getAdapter.isSQL
+							? {
+									replacedAt: null,
+									replacedBy: null,
+									removedAt: null,
+									removedBy: null
+							  }
+							: {})
+					},
+					field: svc.$fields[6],
+					id: "" + entity.id
+				});
 
 				const res2 = await broker.call("users.get", { id: entity.id });
 				expect(res2).toStrictEqual(entity);
@@ -1222,14 +1288,35 @@ module.exports = (getAdapter, adapterType) => {
 				expect(res).toBe("" + entity.id);
 
 				expect(onRemove).toBeCalledTimes(1);
-				expect(onRemove).toBeCalledWith(
-					undefined,
-					{
+				expect(onRemove).toBeCalledWith({
+					operation: "remove",
+					ctx: expect.any(Context),
+					value: undefined,
+					params: {
 						id: "" + entity.id
 					},
-					svc.$fields[8],
-					expect.any(Context)
-				);
+					root: {
+						id: "" + entity.id
+					},
+					entity: {
+						_id: ["MongoDB"].includes(adapterType) ? expect.any(ObjectID) : entity.id,
+						name: "Jane Doe",
+						createdAt: "Created now",
+						createdBy: "Creator",
+						updatedAt: "Updated now",
+						updatedBy: "Updater",
+						replacedAt: "Replaced now",
+						replacedBy: "Replacer",
+						...(getAdapter.isSQL
+							? {
+									removedAt: null,
+									removedBy: null
+							  }
+							: {})
+					},
+					field: svc.$fields[8],
+					id: "" + entity.id
+				});
 
 				const res2 = await broker.call("users.get", { id: entity.id });
 				expect(res2).toStrictEqual({
@@ -1269,7 +1356,7 @@ module.exports = (getAdapter, adapterType) => {
 						columnType: getAdapter.IdColumnType
 					},
 					name: { type: "string", required: true, validate: customValidate },
-					age: { type: "number", validate: "checkAge" }
+					age: { type: "number", columnType: "integer", validate: "checkAge" }
 				}
 			},
 
@@ -1319,7 +1406,12 @@ module.exports = (getAdapter, adapterType) => {
 				const res = await broker.call("users.create", { name: "John" });
 				expect(res).toStrictEqual({
 					id: expectedID,
-					name: "John"
+					name: "John",
+					...(getAdapter.isSQL
+						? {
+								age: null
+						  }
+						: {})
 				});
 				entity = res;
 			});
@@ -1348,7 +1440,12 @@ module.exports = (getAdapter, adapterType) => {
 				});
 				expect(res).toStrictEqual({
 					id: entity.id,
-					name: "John Doe"
+					name: "John Doe",
+					...(getAdapter.isSQL
+						? {
+								age: null
+						  }
+						: {})
 				});
 				entity = res;
 			});
@@ -1380,7 +1477,12 @@ module.exports = (getAdapter, adapterType) => {
 				});
 				expect(res).toStrictEqual({
 					id: entity.id,
-					name: "Jane Doe"
+					name: "Jane Doe",
+					...(getAdapter.isSQL
+						? {
+								age: null
+						  }
+						: {})
 				});
 				entity = res;
 			});
@@ -1485,8 +1587,8 @@ module.exports = (getAdapter, adapterType) => {
 
 	describe("Test custom formatters", () => {
 		const getter = jest.fn((value, entity) => `${entity.firstName} ${entity.lastName}`);
-		const setter = jest.fn((value, entity) => {
-			[entity.firstName, entity.lastName] = value.split(" ");
+		const setter = jest.fn(({ value, params }) => {
+			[params.firstName, params.lastName] = value.split(" ");
 			return null;
 		});
 
@@ -1545,19 +1647,22 @@ module.exports = (getAdapter, adapterType) => {
 				entity = res;
 
 				expect(setter).toBeCalledTimes(1);
-				expect(setter).toBeCalledWith(
-					"John Doe",
-					{ firstName: "John", lastName: "Doe", name: "John Doe" },
-					{
+				expect(setter).toBeCalledWith({
+					ctx: expect.any(Context),
+					operation: "create",
+					id: undefined,
+					value: "John Doe",
+					params: { firstName: "John", lastName: "Doe", name: "John Doe" },
+					root: { firstName: "John", lastName: "Doe", name: "John Doe" },
+					field: {
 						columnName: "name",
 						columnType: "string",
 						name: "name",
 						required: false,
 						set: expect.any(Function),
 						type: "string"
-					},
-					expect.any(Context)
-				);
+					}
+				});
 
 				expect(getter).toBeCalledTimes(1);
 				expect(getter).toBeCalledWith(
@@ -1718,14 +1823,22 @@ module.exports = (getAdapter, adapterType) => {
 				expect(res2).toStrictEqual(entity);
 
 				expect(getDefaultRole).toBeCalledTimes(1);
-				expect(getDefaultRole).toBeCalledWith(
-					{
+				expect(getDefaultRole).toBeCalledWith({
+					operation: "create",
+					ctx: expect.any(Context),
+					value: undefined,
+					params: {
 						name: "John Doe",
 						status: 5
 					},
-					svc.$fields[2],
-					expect.any(Context)
-				);
+					root: {
+						name: "John Doe",
+						status: 5
+					},
+					id: undefined,
+					entity: undefined,
+					field: svc.$fields[2]
+				});
 			});
 
 			it("should replace entity with default fields", async () => {
@@ -1746,15 +1859,29 @@ module.exports = (getAdapter, adapterType) => {
 				expect(res2).toStrictEqual(entity);
 
 				expect(getDefaultRole).toBeCalledTimes(1);
-				expect(getDefaultRole).toBeCalledWith(
-					{
+				expect(getDefaultRole).toBeCalledWith({
+					operation: "replace",
+					ctx: expect.any(Context),
+					value: undefined,
+					params: {
 						id: "" + entity.id,
 						name: "Jane Doe",
 						status: 5
 					},
-					svc.$fields[2],
-					expect.any(Context)
-				);
+					root: {
+						id: "" + entity.id,
+						name: "Jane Doe",
+						status: 5
+					},
+					id: "" + entity.id,
+					entity: {
+						_id: ["MongoDB"].includes(adapterType) ? expect.any(ObjectID) : entity.id,
+						name: "John Doe",
+						role: "member",
+						status: 5
+					},
+					field: svc.$fields[2]
+				});
 			});
 		});
 	});

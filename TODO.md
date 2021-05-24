@@ -17,10 +17,13 @@
   - [x] add `operation` _(create|update|remove)_ to custom functions
   - [x] add `root` _(for nested properties)_ to custom functions
   - [ ] same for `get`
-  - [ ] same for `set`
-  - [ ] same for `onXXXX` hooks
+  - [x] same for `set`
+  - [x] same for `default`
+  - [x] same for `onXXXX` hooks
 - [ ] multiple get option for `get` in transform (same as populating to avoid hundreds sub-calls)
-- [ ] if `field.validate` is string, call the method by name
+- [x] if `field.validate` is string, call the method by name
+  - [ ] same for `get`
+  - [x] same for `set`
 
 ## Features
 - [x] Multi model/tenant solutions
@@ -28,7 +31,6 @@
 - [ ] generate GraphQL types & resolvers
 - [x] add custom tracing spans (validating, transforming)
 - [x] add custom metrics (for all basic functions (create, update, replace, remove))
-  - [ ] https://gist.github.com/intech/b6e809c729835cb1da6411c4a940846b
 
 ## Adapters
 - [ ] Cassandra

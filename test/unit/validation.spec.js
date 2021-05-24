@@ -610,14 +610,23 @@ describe("Test validation", () => {
 
 			it("should call hook if value not exists", async () => {
 				const params = {};
-				const res = await svc.validateParams(ctx, params, { type: "create" });
+				const res = await svc.validateParams(ctx, params, { entity: { a: 5 }, id: 1234 });
 				expect(res).toEqual({
 					createdAt: "Now",
 					createdBy: "Owner"
 				});
 
 				expect(onCreate).toBeCalledTimes(1);
-				expect(onCreate).toBeCalledWith(undefined, {}, svc.$fields[0], ctx);
+				expect(onCreate).toBeCalledWith({
+					value: undefined,
+					params,
+					field: svc.$fields[0],
+					ctx,
+					entity: { a: 5 },
+					id: 1234,
+					operation: "create",
+					root: params
+				});
 			});
 
 			it("should call if value exists", async () => {
@@ -627,14 +636,26 @@ describe("Test validation", () => {
 					createdAt: "2020-09-19",
 					createdBy: "John"
 				};
-				const res = await svc.validateParams(ctx, params);
+				const res = await svc.validateParams(ctx, params, {
+					entity: { a: 5 },
+					id: 1234
+				});
 				expect(res).toEqual({
 					createdAt: "Now",
 					createdBy: "Owner"
 				});
 
 				expect(onCreate).toBeCalledTimes(1);
-				expect(onCreate).toBeCalledWith("2020-09-19", params, svc.$fields[0], ctx);
+				expect(onCreate).toBeCalledWith({
+					value: "2020-09-19",
+					params,
+					field: svc.$fields[0],
+					ctx,
+					entity: { a: 5 },
+					id: 1234,
+					operation: "create",
+					root: params
+				});
 			});
 
 			it("should not if skipOnHooks is true", async () => {
@@ -712,8 +733,8 @@ describe("Test validation", () => {
 			});
 		});
 
-		describe("Test custom formatter", () => {
-			const customSet = jest.fn(v => (v ? v.toUpperCase() : v));
+		describe("Test custom formatter with function", () => {
+			const customSet = jest.fn(({ value }) => (value ? value.toUpperCase() : value));
 			beforeAll(() => {
 				svc.settings.fields = {
 					name: { type: "string", set: customSet }
@@ -726,13 +747,25 @@ describe("Test validation", () => {
 				const params = {
 					name: null
 				};
-				const res = await svc.validateParams(ctx, params);
+				const res = await svc.validateParams(ctx, params, {
+					entity: { a: 5 },
+					id: 1234
+				});
 				expect(res).toEqual({
 					name: null
 				});
 
 				expect(customSet).toBeCalledTimes(1);
-				expect(customSet).toBeCalledWith(null, params, svc.$fields[0], ctx);
+				expect(customSet).toBeCalledWith({
+					value: null,
+					params,
+					field: svc.$fields[0],
+					ctx,
+					entity: { a: 5 },
+					id: 1234,
+					operation: "create",
+					root: params
+				});
 			});
 
 			it("should call custom formatter", async () => {
@@ -740,13 +773,89 @@ describe("Test validation", () => {
 				const params = {
 					name: "John Doe"
 				};
-				const res = await svc.validateParams(ctx, params);
+				const res = await svc.validateParams(ctx, params, {
+					entity: { a: 5 },
+					id: 1234
+				});
 				expect(res).toEqual({
 					name: "JOHN DOE"
 				});
 
 				expect(customSet).toBeCalledTimes(1);
-				expect(customSet).toBeCalledWith("John Doe", params, svc.$fields[0], ctx);
+				expect(customSet).toBeCalledWith({
+					value: "John Doe",
+					params,
+					field: svc.$fields[0],
+					ctx,
+					entity: { a: 5 },
+					id: 1234,
+					operation: "create",
+					root: params
+				});
+			});
+		});
+
+		describe("Test custom formatter with method name", () => {
+			const customSet = jest.fn(({ value }) => (value ? value.toUpperCase() : value));
+			beforeAll(() => {
+				svc.settings.fields = {
+					name: { type: "string", set: "customSet" }
+				};
+
+				svc.customSet = customSet;
+
+				svc._processFields();
+			});
+
+			it("should untouch null values", async () => {
+				const params = {
+					name: null
+				};
+				const res = await svc.validateParams(ctx, params, {
+					entity: { a: 5 },
+					id: 1234
+				});
+				expect(res).toEqual({
+					name: null
+				});
+
+				expect(customSet).toBeCalledTimes(1);
+				expect(customSet).toBeCalledWith({
+					value: null,
+					params,
+					field: svc.$fields[0],
+					ctx,
+					entity: { a: 5 },
+					id: 1234,
+					operation: "create",
+					root: params
+				});
+			});
+
+			it("should call custom formatter", async () => {
+				customSet.mockClear();
+				const params = {
+					name: "John Doe"
+				};
+				const res = await svc.validateParams(ctx, params, {
+					entity: { a: 5 },
+					id: 1234
+				});
+				expect(res).toEqual({
+					name: "JOHN DOE"
+				});
+
+				expect(customSet).toBeCalledTimes(1);
+				expect(customSet).toBeCalledWith({
+					value: "John Doe",
+					params,
+					field: svc.$fields[0],
+					ctx,
+					entity: { a: 5 },
+					id: 1234,
+					operation: "create",
+					root: params
+				});
 			});
 		});
 	});
@@ -913,14 +1022,27 @@ describe("Test validation", () => {
 
 			it("should call hook if value not exists", async () => {
 				const params = {};
-				const res = await svc.validateParams(ctx, params, { type: "update" });
+				const res = await svc.validateParams(ctx, params, {
+					type: "update",
+					entity: { a: 5 },
+					id: 1234
+				});
 				expect(res).toEqual({
 					updatedAt: "Now",
 					updatedBy: "updated"
 				});
 
 				expect(onUpdate).toBeCalledTimes(1);
-				expect(onUpdate).toBeCalledWith(undefined, {}, svc.$fields[2], ctx);
+				expect(onUpdate).toBeCalledWith({
+					value: undefined,
+					params,
+					field: svc.$fields[2],
+					ctx,
+					entity: { a: 5 },
+					id: 1234,
+					operation: "update",
+					root: params
+				});
 			});
 
 			it("should call if value exists", async () => {
@@ -930,14 +1052,27 @@ describe("Test validation", () => {
 					updatedAt: "2020-09-19",
 					updatedBy: "John"
 				};
-				const res = await svc.validateParams(ctx, params, { type: "update" });
+				const res = await svc.validateParams(ctx, params, {
+					type: "update",
+					entity: { a: 5 },
+					id: 1234
+				});
 				expect(res).toEqual({
 					updatedAt: "Now",
 					updatedBy: "updated"
 				});
 
 				expect(onUpdate).toBeCalledTimes(1);
-				expect(onUpdate).toBeCalledWith("2020-09-19", params, svc.$fields[2], ctx);
+				expect(onUpdate).toBeCalledWith({
+					value: "2020-09-19",
+					params,
+					field: svc.$fields[2],
+					ctx,
+					entity: { a: 5 },
+					id: 1234,
+					operation: "update",
+					root: params
+				});
 			});
 		});
 
@@ -1214,14 +1349,27 @@ describe("Test validation", () => {
 
 			it("should call hook if value not exists", async () => {
 				const params = {};
-				const res = await svc.validateParams(ctx, params, { type: "replace" });
+				const res = await svc.validateParams(ctx, params, {
+					type: "replace",
+					entity: { a: 5 },
+					id: 1234
+				});
 				expect(res).toEqual({
 					replacedAt: "Now",
 					replacedBy: "replaced"
 				});
 
 				expect(onReplace).toBeCalledTimes(1);
-				expect(onReplace).toBeCalledWith(undefined, {}, svc.$fields[3], ctx);
+				expect(onReplace).toBeCalledWith({
+					value: undefined,
+					params,
+					field: svc.$fields[3],
+					ctx,
+					entity: { a: 5 },
+					id: 1234,
+					operation: "replace",
+					root: params
+				});
 			});
 
 			it("should call if value exists", async () => {
@@ -1231,14 +1379,27 @@ describe("Test validation", () => {
 					replacedAt: "2020-09-19",
 					replacedBy: "John"
 				};
-				const res = await svc.validateParams(ctx, params, { type: "replace" });
+				const res = await svc.validateParams(ctx, params, {
+					type: "replace",
+					entity: { a: 5 },
+					id: 1234
+				});
 				expect(res).toEqual({
 					replacedAt: "Now",
 					replacedBy: "replaced"
 				});
 
 				expect(onReplace).toBeCalledTimes(1);
-				expect(onReplace).toBeCalledWith("2020-09-19", params, svc.$fields[3], ctx);
+				expect(onReplace).toBeCalledWith({
+					value: "2020-09-19",
+					params,
+					field: svc.$fields[3],
+					ctx,
+					entity: { a: 5 },
+					id: 1234,
+					operation: "replace",
+					root: params
+				});
 			});
 		});
 
@@ -1440,14 +1601,27 @@ describe("Test validation", () => {
 
 			it("should call hook if value not exists", async () => {
 				const params = {};
-				const res = await svc.validateParams(ctx, params, { type: "remove" });
+				const res = await svc.validateParams(ctx, params, {
+					type: "remove",
+					entity: { a: 5 },
+					id: 1234
+				});
 				expect(res).toEqual({
 					deletedAt: "Now",
 					deletedBy: "deleted"
 				});
 
 				expect(onRemove).toBeCalledTimes(1);
-				expect(onRemove).toBeCalledWith(undefined, {}, svc.$fields[3], ctx);
+				expect(onRemove).toBeCalledWith({
+					value: undefined,
+					params,
+					field: svc.$fields[3],
+					ctx,
+					entity: { a: 5 },
+					id: 1234,
+					operation: "remove",
+					root: params
+				});
 			});
 
 			it("should call if value exists", async () => {
@@ -1457,14 +1631,27 @@ describe("Test validation", () => {
 					deletedAt: "2020-09-19",
 					deletedBy: "John"
 				};
-				const res = await svc.validateParams(ctx, params, { type: "remove" });
+				const res = await svc.validateParams(ctx, params, {
+					type: "remove",
+					entity: { a: 5 },
+					id: 1234
+				});
 				expect(res).toEqual({
 					deletedAt: "Now",
 					deletedBy: "deleted"
 				});
 
 				expect(onRemove).toBeCalledTimes(1);
-				expect(onRemove).toBeCalledWith("2020-09-19", params, svc.$fields[3], ctx);
+				expect(onRemove).toBeCalledWith({
+					value: "2020-09-19",
+					params,
+					field: svc.$fields[3],
+					ctx,
+					entity: { a: 5 },
+					id: 1234,
+					operation: "remove",
+					root: params
+				});
 			});
 		});
 	});
