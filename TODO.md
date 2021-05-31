@@ -9,7 +9,7 @@
 - [ ] `aggregate` action with params: `type: "sum", "avg", "count", "min", "max"` & `field: "price"`
 
 ## Fields
-
+- [ ] `hidden: "inLists"`
 
 ## Methods
 - [x] wrap the args to obj in custom functions: `({ ctx, id, field })`
