@@ -7,6 +7,7 @@
 
 ## Actions
 - [ ] `aggregate` action with params: `type: "sum", "avg", "count", "min", "max"` & `field: "price"`
+- [ ] option to add additional cache keys (e.g. `#userID`)
 
 ## Fields
 - [ ] `hidden: "inLists"`
