@@ -7,7 +7,6 @@
 "use strict";
 
 const _ = require("lodash");
-const { ServiceSchemaError } = require("moleculer").Errors;
 const { flatten } = require("../utils");
 const BaseAdapter = require("./base");
 

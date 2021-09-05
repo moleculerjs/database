@@ -7,9 +7,10 @@
 "use strict";
 
 const _ = require("lodash");
-const Datastore = require("nedb");
 const { flatten } = require("../utils");
 const BaseAdapter = require("./base");
+
+let Datastore;
 
 class NeDBAdapter extends BaseAdapter {
 	/**
@@ -31,6 +32,28 @@ class NeDBAdapter extends BaseAdapter {
 	 */
 	get hasNestedFieldSupport() {
 		return true;
+	}
+
+	/**
+	 * Initialize the adapter.
+	 *
+	 * @param {Service} service
+	 */
+	init(service) {
+		super.init(service);
+
+		try {
+			Datastore = require("nedb");
+		} catch (err) {
+			/* istanbul ignore next */
+			this.broker.fatal(
+				"The 'nedb' package is missing! Please install it with 'npm install nedb --save' command.",
+				err,
+				true
+			);
+		}
+
+		this.checkClientLibVersion("nedb", "^1.8.0");
 	}
 
 	/**
