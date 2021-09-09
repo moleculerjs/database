@@ -43,6 +43,7 @@
 - [ ] Mongoose
 - [x] NeDB
 - [ ] Sequelize
+  - [ ] https://gitlab.com/caiofilus1/moleculer-sequelize/-/blob/master/index.js
 - [ ] OrientDB
   - [ ] https://orientdb.org/docs/3.0.x/orientjs/OrientJS.html
 - [ ] ArangoDB
