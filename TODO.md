@@ -38,6 +38,7 @@
 - [ ] Couchbase
 - [ ] CouchDB
 - [x] Knex
+  - [ ] support schemas like https://github.com/ltv/moleculer-db-adapter-knex/blob/master/src/index.js#L23
 - [x] MongoDB
 - [ ] Mongoose
 - [x] NeDB
