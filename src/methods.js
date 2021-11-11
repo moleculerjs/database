@@ -173,13 +173,16 @@ module.exports = function (mixinOpts) {
 			if (scopes && scopes.length > 0) {
 				this.logger.debug(`Applying scopes...`, scopes);
 				scopes = await this._filterScopeNamesByPermission(ctx, scopes);
-				params.query = scopes.reduce((query, scopeName) => {
-					const scope = this.settings.scopes[scopeName];
-					if (!scope) return query;
 
-					if (_.isFunction(scope)) return scope.call(this, query, ctx);
-					else return _.defaultsDeep(query, scope);
-				}, _.cloneDeep(params.query || {}));
+				let q = _.cloneDeep(params.query || {});
+				for (const scopeName of scopes) {
+					const scope = this.settings.scopes[scopeName];
+					if (!scope) continue;
+
+					if (_.isFunction(scope)) q = await scope.call(this, q, ctx);
+					else q = _.defaultsDeep(q, scope);
+				}
+				params.query = q;
 			}
 
 			return params;

@@ -77,7 +77,7 @@ module.exports = (getAdapter, adapterType) => {
 					young: {
 						age: { $lt: 50 }
 					},
-					myScope(q, ctx) {
+					async myScope(q, ctx) {
 						q.age = ctx.meta.age;
 						return q;
 					}

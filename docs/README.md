@@ -1547,7 +1547,7 @@ In this example, we'll create some scopes and show how you can use them when cal
             public: {
                 visibility: "public"
             },
-            // It's a custom Function to modify the query object directly.
+            // It's a custom Function to modify the query object directly. It can be async, as well.
             topVotes: q => {
                 q.votes = {
                     $gt: 100
