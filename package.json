@@ -51,7 +51,7 @@
     "moleculer": "^0.14.18",
     "moleculer-repl": "^0.6.6",
     "moleculer-web": "^0.10.3",
-    "mongodb": "^4.1.4",
+    "mongodb": "^3.7.3",
     "mongoose": "^6.0.12",
     "mysql": "^2.18.1",
     "mysql2": "^2.3.2",

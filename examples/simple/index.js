@@ -50,7 +50,7 @@ broker.createService({
 	mixins: [
 		DbService({
 			adapter: {
-				type: "NeDB"
+				type: "MongoDB"
 			}
 		})
 	],
