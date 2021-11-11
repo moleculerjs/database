@@ -10,7 +10,7 @@ const _ = require("lodash");
 const { flatten } = require("../utils");
 const BaseAdapter = require("./base");
 
-let MongoClient, ObjectID;
+let MongoClient, ObjectId;
 
 class MongoDBAdapter extends BaseAdapter {
 	/**
@@ -52,7 +52,7 @@ class MongoDBAdapter extends BaseAdapter {
 
 		try {
 			MongoClient = require("mongodb").MongoClient;
-			ObjectID = require("mongodb").ObjectID;
+			ObjectId = require("mongodb").ObjectId;
 		} catch (err) {
 			/* istanbul ignore next */
 			this.broker.fatal(
@@ -120,20 +120,20 @@ class MongoDBAdapter extends BaseAdapter {
 	}
 
 	/**
-	 * Convert the param to ObjectID.
-	 * @param {String|ObjectID} id
-	 * @returns {ObjectID}
+	 * Convert the param to ObjectId.
+	 * @param {String|ObjectId} id
+	 * @returns {ObjectId}
 	 */
 	stringToObjectID(id) {
-		if (typeof id == "string" && ObjectID.isValid(id))
-			return new ObjectID.createFromHexString(id);
+		if (typeof id == "string" && ObjectId.isValid(id))
+			return new ObjectId.createFromHexString(id);
 
 		return id;
 	}
 
 	/**
 	 * Convert ObjectID to hex string ID
-	 * @param {ObjectID} id
+	 * @param {ObjectId} id
 	 * @returns {String}
 	 */
 	objectIDToString(id) {

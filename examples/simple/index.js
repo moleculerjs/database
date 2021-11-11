@@ -50,7 +50,7 @@ broker.createService({
 	mixins: [
 		DbService({
 			adapter: {
-				type: "NeDB"
+				type: "MongoDB"
 			}
 		})
 	],
@@ -98,7 +98,7 @@ broker
 			content: "Content of my 3rd post...",
 			status: false
 		});
-		// console.log("3rd post:", post);
+		//console.log("3rd post:", post);
 
 		// Get all posts
 		//let posts = await broker.call("posts.find", { limit: 2, sort: "-createdAt" });
@@ -122,4 +122,7 @@ broker
 		// console.log("Deleted:", res);
 	})
 	.then(() => broker.repl())
-	.catch(err => broker.logger.error(err));
+	.catch(err => {
+		broker.logger.error(err);
+		process.exit(1);
+	});

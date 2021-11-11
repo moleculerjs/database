@@ -1,7 +1,7 @@
 "use strict";
 
 const { ServiceBroker, Context } = require("moleculer");
-const ObjectID = require("mongodb").ObjectID;
+const ObjectId = require("mongodb").ObjectId;
 const { ValidationError } = require("moleculer").Errors;
 const DbService = require("../..").Service;
 
@@ -1174,7 +1174,7 @@ module.exports = (getAdapter, adapterType) => {
 						updatedAt: "Past"
 					},
 					entity: {
-						_id: ["MongoDB"].includes(adapterType) ? expect.any(ObjectID) : entity.id,
+						_id: ["MongoDB"].includes(adapterType) ? expect.any(ObjectId) : entity.id,
 						name: "John Doe",
 						createdAt: "Created now",
 						createdBy: "Creator",
@@ -1258,7 +1258,7 @@ module.exports = (getAdapter, adapterType) => {
 							: {})
 					},
 					entity: {
-						_id: ["MongoDB"].includes(adapterType) ? expect.any(ObjectID) : entity.id,
+						_id: ["MongoDB"].includes(adapterType) ? expect.any(ObjectId) : entity.id,
 						name: "John Doe",
 						createdAt: "Created now",
 						createdBy: "Creator",
@@ -1299,7 +1299,7 @@ module.exports = (getAdapter, adapterType) => {
 						id: "" + entity.id
 					},
 					entity: {
-						_id: ["MongoDB"].includes(adapterType) ? expect.any(ObjectID) : entity.id,
+						_id: ["MongoDB"].includes(adapterType) ? expect.any(ObjectId) : entity.id,
 						name: "Jane Doe",
 						createdAt: "Created now",
 						createdBy: "Creator",
@@ -1875,7 +1875,7 @@ module.exports = (getAdapter, adapterType) => {
 					},
 					id: "" + entity.id,
 					entity: {
-						_id: ["MongoDB"].includes(adapterType) ? expect.any(ObjectID) : entity.id,
+						_id: ["MongoDB"].includes(adapterType) ? expect.any(ObjectId) : entity.id,
 						name: "John Doe",
 						role: "member",
 						status: 5
