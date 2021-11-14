@@ -245,12 +245,7 @@ class MongoDBAdapter extends BaseAdapter {
 	async insertMany(entities, opts = {}) {
 		const res = await this.collection.insertMany(entities);
 		if (!res.acknowledged) throw new Error("MongoDB insertMany failed.");
-		return opts.returnEntities
-			? entities.map((entity, i) => {
-					entity._id = res.insertedIds[i];
-					return entity;
-			  })
-			: Object.values(res.insertedIds);
+		return opts.returnEntities ? entities : Object.values(res.insertedIds);
 	}
 
 	/**

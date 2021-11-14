@@ -99,11 +99,25 @@ broker
 			content: "Content of my 3rd post...",
 			status: false
 		});
-		//console.log("3rd post:", post);
+		console.log("3rd post:", post);
+
+		let posts = await broker.call("posts.createMany", [
+			{
+				title: "Forth post",
+				content: "Content of my 4th post...",
+				status: true
+			},
+			{
+				title: "Fifth post",
+				content: "Content of my 5th post...",
+				status: true
+			}
+		]);
+		console.log("4. & 5. posts:", posts);
 
 		// Get all posts
 		//let posts = await broker.call("posts.find", { limit: 2, sort: "-createdAt" });
-		let posts = await broker.call("posts.find", { query: { status: false } });
+		posts = await broker.call("posts.find", { query: { status: false } });
 		console.log("Find:", posts);
 
 		// List posts with pagination
