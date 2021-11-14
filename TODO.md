@@ -14,13 +14,7 @@
 
 ## Methods
 - [x] wrap the args to obj in custom functions: `({ ctx, id, field })`
-  - [x] add `id` to custom functions
-  - [x] add `operation` _(create|update|remove)_ to custom functions
-  - [x] add `root` _(for nested properties)_ to custom functions
   - [ ] same for `get`
-  - [x] same for `set`
-  - [x] same for `default`
-  - [x] same for `onXXXX` hooks
 - [ ] multiple get option for `get` in transform (same as populating to avoid hundreds sub-calls)
 - [x] if `field.validate` is string, call the method by name
   - [ ] same for `get`
@@ -29,9 +23,6 @@
 ## Features
 - [x] Multi model/tenant solutions
     - [ ] schema-based for integration tests
-- [ ] generate GraphQL types & resolvers
-- [x] add custom tracing spans (validating, transforming)
-- [x] add custom metrics (for all basic functions (create, update, replace, remove))
 
 ## Adapters
 - [ ] Cassandra
@@ -40,6 +31,7 @@
 - [x] Knex
   - [ ] support schemas like https://github.com/ltv/moleculer-db-adapter-knex/blob/master/src/index.js#L23
 - [x] MongoDB
+  - [ ] upgrade to v4
 - [ ] Mongoose
 - [x] NeDB
 - [ ] Sequelize
