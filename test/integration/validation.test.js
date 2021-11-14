@@ -2387,7 +2387,10 @@ module.exports = (getAdapter, adapterType) => {
 			mixins: [
 				DbService({
 					adapter: getAdapter(),
-					createActions: true
+					createActions: true,
+					cache: {
+						additionalKeys: ["#userID"]
+					}
 				})
 			],
 			settings: {
@@ -2638,7 +2641,7 @@ module.exports = (getAdapter, adapterType) => {
 		it("check 'get' action", async () => {
 			expect(svc.schema.actions.get).toEqual({
 				handler: expect.any(Function),
-				cache: { keys: ["key", "populate", "fields"] },
+				cache: { enabled: true, keys: ["key", "populate", "fields", "#userID"] },
 				rest: "GET /:key",
 				visibility: "published",
 				params: {
@@ -2663,7 +2666,7 @@ module.exports = (getAdapter, adapterType) => {
 		it("check 'resolve' action", async () => {
 			expect(svc.schema.actions.resolve).toEqual({
 				handler: expect.any(Function),
-				cache: { keys: ["key", "populate", "fields", "mapping"] },
+				cache: { enabled: true, keys: ["key", "populate", "fields", "mapping", "#userID"] },
 				visibility: "published",
 				params: {
 					fields: [
@@ -2709,6 +2712,7 @@ module.exports = (getAdapter, adapterType) => {
 				rest: "GET /all",
 				visibility: "published",
 				cache: {
+					enabled: true,
 					keys: [
 						"limit",
 						"offset",
@@ -2718,7 +2722,8 @@ module.exports = (getAdapter, adapterType) => {
 						"searchFields",
 						"scope",
 						"populate",
-						"query"
+						"query",
+						"#userID"
 					]
 				},
 				params: {
@@ -2771,6 +2776,7 @@ module.exports = (getAdapter, adapterType) => {
 				rest: "GET /",
 				visibility: "published",
 				cache: {
+					enabled: true,
 					keys: [
 						"page",
 						"pageSize",
@@ -2780,7 +2786,8 @@ module.exports = (getAdapter, adapterType) => {
 						"searchFields",
 						"scope",
 						"populate",
-						"query"
+						"query",
+						"#userID"
 					]
 				},
 				params: {
@@ -2824,7 +2831,10 @@ module.exports = (getAdapter, adapterType) => {
 		it("check 'count' action", async () => {
 			expect(svc.schema.actions.count).toEqual({
 				handler: expect.any(Function),
-				cache: { keys: ["search", "searchFields", "scope", "query"] },
+				cache: {
+					enabled: true,
+					keys: ["search", "searchFields", "scope", "query", "#userID"]
+				},
 				rest: "GET /count",
 				visibility: "published",
 				params: {

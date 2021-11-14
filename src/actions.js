@@ -38,6 +38,15 @@ module.exports = function (mixinOpts) {
 	const cacheOpts = mixinOpts.cache && mixinOpts.cache.enabled ? mixinOpts.cache : null;
 	const maxLimit = mixinOpts.maxLimit > 0 ? mixinOpts.maxLimit : null;
 
+	const generateCacheOptions = minimalCacheKeys => {
+		if (cacheOpts && cacheOpts.enabled) {
+			const keys = Array.from(minimalCacheKeys);
+			if (cacheOpts.additionalKeys) keys.push(...cacheOpts.additionalKeys);
+			return { enabled: true, keys };
+		}
+		return null;
+	};
+
 	const actionEnabled = name => {
 		return (
 			mixinOpts.createActions ||
@@ -67,21 +76,17 @@ module.exports = function (mixinOpts) {
 		res.find = {
 			visibility: mixinOpts.actionVisibility,
 			rest: mixinOpts.rest ? "GET /all" : null,
-			cache: cacheOpts
-				? {
-						keys: [
-							"limit",
-							"offset",
-							"fields",
-							"sort",
-							"search",
-							"searchFields",
-							"scope",
-							"populate",
-							"query"
-						]
-				  }
-				: null,
+			cache: generateCacheOptions([
+				"limit",
+				"offset",
+				"fields",
+				"sort",
+				"search",
+				"searchFields",
+				"scope",
+				"populate",
+				"query"
+			]),
 			params: {
 				limit: {
 					type: "number",
@@ -124,11 +129,7 @@ module.exports = function (mixinOpts) {
 		res.count = {
 			visibility: mixinOpts.actionVisibility,
 			rest: mixinOpts.rest ? "GET /count" : null,
-			cache: cacheOpts
-				? {
-						keys: ["search", "searchFields", "scope", "query"]
-				  }
-				: null,
+			cache: generateCacheOptions(["search", "searchFields", "scope", "query"]),
 			params: {
 				search: { type: "string", optional: true },
 				searchFields: PARAMS_SEARCHFIELDS,
@@ -163,21 +164,17 @@ module.exports = function (mixinOpts) {
 		res.list = {
 			visibility: mixinOpts.actionVisibility,
 			rest: mixinOpts.rest ? "GET /" : null,
-			cache: cacheOpts
-				? {
-						keys: [
-							"page",
-							"pageSize",
-							"fields",
-							"sort",
-							"search",
-							"searchFields",
-							"scope",
-							"populate",
-							"query"
-						]
-				  }
-				: null,
+			cache: generateCacheOptions([
+				"page",
+				"pageSize",
+				"fields",
+				"sort",
+				"search",
+				"searchFields",
+				"scope",
+				"populate",
+				"query"
+			]),
 			params: {
 				page: { type: "number", integer: true, min: 1, optional: true, convert: true },
 				pageSize: {
@@ -237,11 +234,7 @@ module.exports = function (mixinOpts) {
 		res.get = {
 			visibility: mixinOpts.actionVisibility,
 			rest: mixinOpts.rest ? "GET /:id" : null,
-			cache: cacheOpts
-				? {
-						keys: ["id", "populate", "fields"]
-				  }
-				: null,
+			cache: generateCacheOptions(["id", "populate", "fields"]),
 			params: {
 				// The "id" field get from `fields`
 				fields: PARAMS_FIELDS,
@@ -273,11 +266,7 @@ module.exports = function (mixinOpts) {
 	if (actionEnabled("resolve")) {
 		res.resolve = {
 			visibility: mixinOpts.actionVisibility,
-			cache: cacheOpts
-				? {
-						keys: ["id", "populate", "fields", "mapping"]
-				  }
-				: null,
+			cache: generateCacheOptions(["id", "populate", "fields", "mapping"]),
 			params: {
 				// The "id" field get from `fields`
 				fields: PARAMS_FIELDS,

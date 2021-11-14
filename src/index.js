@@ -48,7 +48,9 @@ module.exports = function DatabaseMixin(mixinOpts) {
 			/** @type {String} Type of event for clearing cache */
 			eventType: "broadcast",
 			/** @type {Boolean|Array<String>} Subscribe to cache clean event of service dependencies and clear the local cache entries */
-			cacheCleanOnDeps: true
+			cacheCleanOnDeps: true,
+			/** @type {Array<String>?} Additional cache keys */
+			additionalKeys: null
 		},
 		/** @type {Boolean} Set auto-aliasing fields */
 		rest: true,

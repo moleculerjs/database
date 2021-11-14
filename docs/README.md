@@ -15,6 +15,7 @@ The options of the Mixin.
 | `cache.eventName` | `String` | `cache.clean.{serviceName}` | Name of the broadcasted event for clearing the cache in case of changes (update, replace, remove). |
 | `cache.eventType` | `String` | `"broadcast"` | Type of the broadcasted event. It can be `"broadcast"`, or `"emit"`. If `null`, the sending of the event is disabled. |
 | `cache.cacheCleanOnDeps` | `Boolean\|Array<String>` | `true` | Subscribe to the cache clean event of the service dependencies and clear the local cache entries. If it's an `Array<String>`, it should be the exact event names. |
+| `cache.additionalKeys` | `Array<String>` | `null` | Additional cache keys. |
 | `rest` | `Boolean` | `true` | Set the API Gateway auto-aliasing REST properties in the service & actions. |
 | `entityChangedEventType` | `String` | `"broadcast"` | Type of the entity changed event. Values: `null`, `"broadcast"`, `"emit"`. The value `null` disables the sending of events. |
 | `autoReconnect` | `Boolean` | `true` | Automatic reconnect if the DB server is not available when connecting for the first time. |
