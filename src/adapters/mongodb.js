@@ -19,8 +19,8 @@ class MongoDBAdapter extends BaseAdapter {
 	 * @param  {Object?} opts
 	 * @param  {String?} opts.dbName
 	 * @param  {String?} opts.collection
-	 * @param  {Object?} opts.mongoClientOptions More Info: https://docs.mongodb.com/drivers/node/current/fundamentals/connection/#connection-options
-	 * @param  {Object?} opts.dbOptions More Info: http://mongodb.github.io/node-mongodb-native/3.6/api/MongoClient.html#db
+	 * @param  {Object?} opts.mongoClientOptions More Info: https://mongodb.github.io/node-mongodb-native/4.1/interfaces/MongoClientOptions.html
+	 * @param  {Object?} opts.dbOptions More Info: https://mongodb.github.io/node-mongodb-native/4.1/interfaces/DbOptions.html
 	 */
 	constructor(opts) {
 		if (_.isString(opts)) opts = { uri: opts };
@@ -62,7 +62,7 @@ class MongoDBAdapter extends BaseAdapter {
 			);
 		}
 
-		this.checkClientLibVersion("mongodb", "^3.6.5");
+		this.checkClientLibVersion("mongodb", "^4.0.0");
 	}
 
 	/**
@@ -94,6 +94,9 @@ class MongoDBAdapter extends BaseAdapter {
 			await this.client.connect();
 		} else {
 			this.logger.debug("Using an existing MongoDB client", this.storeKey);
+			if (!this.client.topology.isConnected()) {
+				await this.client.connect();
+			}
 		}
 
 		if (this.opts.dbName) {
@@ -101,6 +104,7 @@ class MongoDBAdapter extends BaseAdapter {
 			this.logger.debug("Selecting database:", this.opts.dbName);
 			this.db = this.client.db(this.opts.dbName, this.opts.dbOptions);
 		} else {
+			// Using database from connection URI
 			this.db = this.client.db();
 		}
 		await this.db.command({ ping: 1 });
@@ -173,7 +177,7 @@ class MongoDBAdapter extends BaseAdapter {
 	/**
 	 * Find an entities by ID.
 	 *
-	 * @param {String|ObjectID} id
+	 * @param {String|ObjectId} id
 	 * @returns {Promise<Object>} Return with the found document.
 	 *
 	 */
@@ -182,9 +186,9 @@ class MongoDBAdapter extends BaseAdapter {
 	}
 
 	/**
-	 * Find any entities by IDs.
+	 * Find entities by IDs.
 	 *
-	 * @param {Array<String|ObjectID>} idList
+	 * @param {Array<String|ObjectId>} idList
 	 * @returns {Promise<Array>} Return with the found documents in an Array.
 	 *
 	 */
@@ -205,11 +209,12 @@ class MongoDBAdapter extends BaseAdapter {
 	 * @returns {Promise<Stream>}
 	 */
 	findStream(params) {
-		return this.createQuery(params).transformStream();
+		return this.createQuery(params).stream();
 	}
 
 	/**
 	 * Get count of filtered entites.
+	 *
 	 * @param {Object} [params]
 	 * @returns {Promise<Number>} Return with the count of documents.
 	 *
@@ -227,7 +232,8 @@ class MongoDBAdapter extends BaseAdapter {
 	 */
 	async insert(entity) {
 		const res = await this.collection.insertOne(entity);
-		if (res.insertedCount > 0) return res.ops[0];
+		if (!res.acknowledged) throw new Error("MongoDB insertOne failed.");
+		return entity;
 	}
 
 	/**
@@ -241,7 +247,13 @@ class MongoDBAdapter extends BaseAdapter {
 	 */
 	async insertMany(entities, opts = {}) {
 		const res = await this.collection.insertMany(entities);
-		return opts.returnEntities ? res.ops : Object.values(res.insertedIds);
+		if (!res.acknowledged) throw new Error("MongoDB insertMany failed.");
+		return opts.returnEntities
+			? entities.map((entity, i) => {
+					entity._id = res.insertedIds[i];
+					return entity;
+			  })
+			: Object.values(res.insertedIds);
 	}
 
 	/**
@@ -263,7 +275,7 @@ class MongoDBAdapter extends BaseAdapter {
 		const res = await this.collection.findOneAndUpdate(
 			{ _id: this.stringToObjectID(id) },
 			raw ? changes : { $set: changes },
-			{ returnOriginal: false }
+			{ returnDocument: "after" }
 		);
 		return res.value;
 	}
@@ -300,7 +312,7 @@ class MongoDBAdapter extends BaseAdapter {
 		const res = await this.collection.findOneAndReplace(
 			{ _id: this.stringToObjectID(id) },
 			entity,
-			{ returnOriginal: false }
+			{ returnDocument: "after" }
 		);
 		return res.value;
 	}
