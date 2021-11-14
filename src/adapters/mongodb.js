@@ -75,13 +75,7 @@ class MongoDBAdapter extends BaseAdapter {
 		this.client = this.getClientFromGlobalStore(this.storeKey);
 		if (!this.client) {
 			this.logger.debug(`MongoDB adapter is connecting to '${uri}'...`);
-			this.client = new MongoClient(
-				uri,
-				_.defaultsDeep(this.opts.mongoClientOptions, {
-					useUnifiedTopology: true,
-					useNewUrlParser: true
-				})
-			);
+			this.client = new MongoClient(uri, this.opts.mongoClientOptions);
 
 			this.logger.debug("Store the created MongoDB client", this.storeKey);
 			this.setClientToGlobalStore(this.storeKey, this.client);
@@ -95,7 +89,10 @@ class MongoDBAdapter extends BaseAdapter {
 		} else {
 			this.logger.debug("Using an existing MongoDB client", this.storeKey);
 			if (!this.client.topology.isConnected()) {
-				await this.client.connect();
+				this.logger.debug("Waiting for the connected state of MongoDB client...");
+				await new this.Promise(resolve => {
+					this.client.once("open", resolve);
+				});
 			}
 		}
 
