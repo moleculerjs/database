@@ -667,7 +667,10 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 
 			scopes: {
 				notDeleted: { deletedAt: { $exists: false } },
-				onlyActive: { status: true }
+				onlyActive: async q => {
+					q.status = true;
+					return q;
+				}
 			},
 			defaultScopes: ["notDeleted"]
 		},

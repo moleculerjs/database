@@ -6,7 +6,7 @@ const DbService = require("../..").Service;
 describe("Test scoping", () => {
 	describe("Test applyScopes method", () => {
 		const broker = new ServiceBroker({ logger: false });
-		const scopeFn = jest.fn(q => {
+		const scopeFn = jest.fn(async q => {
 			q.a = 5;
 			q.b = "Yes";
 			return q;
