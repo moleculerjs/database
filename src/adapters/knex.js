@@ -112,7 +112,7 @@ class KnexAdapter extends BaseAdapter {
 	/**
 	 * Find an entities by ID.
 	 *
-	 * @param {String|ObjectID} id
+	 * @param {String} id
 	 * @returns {Promise<Object>} Return with the found document.
 	 *
 	 */
@@ -123,7 +123,7 @@ class KnexAdapter extends BaseAdapter {
 	/**
 	 * Find any entities by IDs.
 	 *
-	 * @param {Array<String|ObjectID>} idList
+	 * @param {Array<String>} idList
 	 * @returns {Promise<Array>} Return with the found documents in an Array.
 	 *
 	 */

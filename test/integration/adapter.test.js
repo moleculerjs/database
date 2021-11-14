@@ -1,7 +1,7 @@
 "use strict";
 
 const { ServiceBroker } = require("moleculer");
-const ObjectID = require("mongodb").ObjectID;
+const ObjectId = require("mongodb").ObjectId;
 const { Stream } = require("stream");
 const DbService = require("../..").Service;
 const { addExpectAnyFields } = require("./utils");
@@ -11,7 +11,7 @@ module.exports = (getAdapter, adapterType) => {
 	if (["Knex"].includes(adapterType)) {
 		expectedID = expect.any(Number);
 	} else if (["MongoDB"].includes(adapterType)) {
-		expectedID = expect.any(ObjectID);
+		expectedID = expect.any(ObjectId);
 	} else {
 		expectedID = expect.any(String);
 	}

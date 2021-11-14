@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 "use strict";
 
 /**
@@ -82,7 +83,7 @@ broker
 			title: "My first post",
 			content: "Content of my first post..."
 		});
-		// console.log("First post:", post);
+		console.log("First post:", post);
 
 		await broker.Promise.delay(500);
 
@@ -91,35 +92,52 @@ broker
 			content: "Content of my second post...",
 			votes: 3
 		});
-		// console.log("Second post:", post);
+		console.log("Second post:", post);
 
 		post = await broker.call("posts.create", {
 			title: "Third post",
 			content: "Content of my 3rd post...",
 			status: false
 		});
-		// console.log("3rd post:", post);
+		console.log("3rd post:", post);
+
+		let posts = await broker.call("posts.createMany", [
+			{
+				title: "Forth post",
+				content: "Content of my 4th post...",
+				status: true
+			},
+			{
+				title: "Fifth post",
+				content: "Content of my 5th post...",
+				status: true
+			}
+		]);
+		console.log("4. & 5. posts:", posts);
 
 		// Get all posts
 		//let posts = await broker.call("posts.find", { limit: 2, sort: "-createdAt" });
-		let posts = await broker.call("posts.find", { query: { status: false } });
-		// console.log("Find:", posts);
+		posts = await broker.call("posts.find", { query: { status: false } });
+		console.log("Find:", posts);
 
 		// List posts with pagination
 		posts = await broker.call("posts.list", { page: 1, pageSize: 10 });
-		// console.log("List:", posts);
+		console.log("List:", posts);
 
 		// Get a post by ID
 		post = await broker.call("posts.get", { id: post.id });
-		// console.log("Get:", post);
+		console.log("Get:", post);
 
 		// Update the post
 		post = await broker.call("posts.update", { id: post.id, title: "Modified post" });
-		// console.log("Updated:", post);
+		console.log("Updated:", post);
 
 		// Delete a user
 		const res = await broker.call("posts.remove", { id: post.id });
-		// console.log("Deleted:", res);
+		console.log("Deleted:", res);
 	})
 	.then(() => broker.repl())
-	.catch(err => broker.logger.error(err));
+	.catch(err => {
+		broker.logger.error(err);
+		process.exit(1);
+	});

@@ -1,11 +1,11 @@
 # MongoDB adapter
-This adapter gives access to MongoDB databases. It uses the official [`mongodb`](https://mongodb.github.io/node-mongodb-native/) library.
+This adapter gives access to MongoDB databases. It uses the official [`mongodb`](https://docs.mongodb.com/drivers/node/current/) library.
 
 ## Install
 This module contains the source code of the adapter. You just need to install the dependent library.
 
 ```bash
-npm install mongodb@^3.6.5
+npm install mongodb@^4.1.4
 ```
 
 ## Usage
@@ -36,10 +36,12 @@ module.exports = {
         adapter: { 
             type: "MongoDB",
             options: {
-                uri: "mongodb+srv://server_name:27017/?poolSize=20",
+                uri: "mongodb+srv://server_name:27017/?maxPoolSize=20",
                 mongoClientOptions: {
-                    useUnifiedTopology: true,
-                    useNewUrlParser: true
+                    auth: {
+                        username: "user",
+                        password: "secret"
+                    }
                 }
             }
         }
@@ -51,8 +53,8 @@ module.exports = {
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `uri` | `String` | `"mongodb://localhost:27017"` | MongoDB connection URI. |
-| `mongoClientOptions` | `Object` | `null` | Available options: https://docs.mongodb.com/drivers/node/current/fundamentals/connection/#connection-options |
-| `dbOptions` | `Object` | `null` | Available options: http://mongodb.github.io/node-mongodb-native/3.6/api/MongoClient.html#db |
+| `mongoClientOptions` | `Object` | `null` | Available options: https://mongodb.github.io/node-mongodb-native/4.1/interfaces/MongoClientOptions.html |
+| `dbOptions` | `Object` | `null` | Available options: https://mongodb.github.io/node-mongodb-native/4.1/interfaces/DbOptions.html |
 
 
 ## Raw update
