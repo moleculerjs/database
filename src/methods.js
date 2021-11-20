@@ -423,6 +423,8 @@ module.exports = function (mixinOpts) {
 			// Decode ID if need
 			id = id.map(id => this._sanitizeID(id, opts));
 
+			params = this.sanitizeParams(params);
+
 			// Apply scopes & set ID filtering
 			params = Object.assign({}, params);
 			if (!params.query) params.query = {};
