@@ -179,7 +179,7 @@ module.exports = function (mixinOpts) {
 					const scope = this.settings.scopes[scopeName];
 					if (!scope) continue;
 
-					if (_.isFunction(scope)) q = await scope.call(this, q, ctx);
+					if (_.isFunction(scope)) q = await scope.call(this, q, ctx, params);
 					else q = _.defaultsDeep(q, scope);
 				}
 				params.query = q;

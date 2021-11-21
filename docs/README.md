@@ -2228,7 +2228,7 @@ module.exports = {
             }
         },
         scopes: {
-            tenant(q, ctx) {
+            tenant(q, ctx, params) {
                 const tenantId = ctx.meta.user.tenantId;
                 if (!tenantId) throw new Error("Missing tenantId!");
 
