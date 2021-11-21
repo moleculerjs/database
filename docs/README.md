@@ -589,7 +589,7 @@ Find entitites by query.
 | `limit` | `Number` | `null` | Max count of rows. |
 | `offset` | `Number` | `null` | Number of skipped rows. |
 | `fields` | `String\|Array<String>` | `null` | Fields to return. |
-| `sort` | `String` | `null` | Sorted fields. |
+| `sort` | `String\|Array<String>` | `null` | Sorted fields. |
 | `search` | `String` | `null` | Search text. |
 | `searchFields` | `String\|Array<String>` | `null` | Fields for search. |
 | `collation` | `Object` | `null` | Collation settings. Passed for adapter directly. |
@@ -714,7 +714,7 @@ List entities with pagination. It returns also the total number of rows.
 | `page` | `Number` | `null` | Page number. |
 | `pageSize` | `Number` | `null` | Size of a page. |
 | `fields` | `String\|Array<String>` | `null` | Fields to return. |
-| `sort` | `String` | `null` | Sorted fields. |
+| `sort` | `String\|Array<String>` | `null` | Sorted fields. |
 | `search` | `String` | `null` | Search text. |
 | `searchFields` | `String\|Array<String>` | `null` | Fields for search. |
 | `collation` | `Object` | `null` | Collaction settings. Passed for adapter directly. |

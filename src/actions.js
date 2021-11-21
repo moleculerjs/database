@@ -16,6 +16,11 @@ const PARAMS_SEARCHFIELDS = [
 	{ type: "array", optional: true, items: "string" }
 ];
 
+const PARAMS_SORT = [
+	{ type: "string", optional: true },
+	{ type: "array", optional: true, items: "string" }
+];
+
 const PARAMS_POPULATE = [
 	{ type: "string", optional: true },
 	{ type: "array", optional: true, items: "string" }
@@ -98,7 +103,7 @@ module.exports = function (mixinOpts) {
 				},
 				offset: { type: "number", integer: true, min: 0, optional: true, convert: true },
 				fields: PARAMS_FIELDS,
-				sort: { type: "string", optional: true },
+				sort: PARAMS_SORT,
 				search: { type: "string", optional: true },
 				searchFields: PARAMS_SEARCHFIELDS,
 				collation: { type: "object", optional: true },
@@ -186,7 +191,7 @@ module.exports = function (mixinOpts) {
 					convert: true
 				},
 				fields: PARAMS_FIELDS,
-				sort: { type: "string", optional: true },
+				sort: PARAMS_SORT,
 				search: { type: "string", optional: true },
 				searchFields: PARAMS_SEARCHFIELDS,
 				collation: { type: "object", optional: true },

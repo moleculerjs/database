@@ -679,7 +679,7 @@ module.exports = (getAdapter, adapterType) => {
 
 		it("should list the second page 5 with descendent sort", async () => {
 			const rows = await broker.call("users.list", {
-				sort: "-email",
+				sort: ["-email"],
 				page: 2,
 				pageSize: 5
 			});
