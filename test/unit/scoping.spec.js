@@ -69,7 +69,10 @@ describe("Test scoping", () => {
 			expect(res).toEqual({ query: { a: 5, b: "Yes" }, scope: "custom" });
 
 			expect(scopeFn).toBeCalledTimes(1);
-			expect(scopeFn).toBeCalledWith({ a: 5, b: "Yes" }, ctx);
+			expect(scopeFn).toBeCalledWith({ a: 5, b: "Yes" }, ctx, {
+				query: { a: 5, b: "Yes" },
+				scope: "custom"
+			});
 		});
 
 		it("should add multiple scope", async () => {
@@ -166,7 +169,10 @@ describe("Test scoping", () => {
 			expect(res).toEqual({ query: { a: 5, b: "Yes" }, scope: "custom" });
 
 			expect(scopeFn).toBeCalledTimes(1);
-			expect(scopeFn).toBeCalledWith({ a: 5, b: "Yes" }, ctx);
+			expect(scopeFn).toBeCalledWith({ a: 5, b: "Yes" }, ctx, {
+				query: { a: 5, b: "Yes" },
+				scope: "custom"
+			});
 
 			expect(checkScopeAuthority).toBeCalledTimes(1);
 			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "custom", scopeFn);
