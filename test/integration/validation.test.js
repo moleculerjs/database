@@ -2765,7 +2765,10 @@ module.exports = (getAdapter, adapterType) => {
 						{ optional: true, type: "string" },
 						{ items: "string", optional: true, type: "array" }
 					],
-					sort: { optional: true, type: "string" }
+					sort: [
+						{ optional: true, type: "string" },
+						{ items: "string", optional: true, type: "array" }
+					]
 				}
 			});
 		});
@@ -2823,7 +2826,10 @@ module.exports = (getAdapter, adapterType) => {
 						{ optional: true, type: "string" },
 						{ items: "string", optional: true, type: "array" }
 					],
-					sort: { optional: true, type: "string" }
+					sort: [
+						{ optional: true, type: "string" },
+						{ items: "string", optional: true, type: "array" }
+					]
 				}
 			});
 		});
