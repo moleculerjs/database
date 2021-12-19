@@ -21,7 +21,7 @@ jobs:
         git config user.email "hello@moleculer.services"
         git checkout -b update-deps-$GITHUB_RUN_ID
 
-    - run: ncu -u
+    - run: npm run ci-update-deps
     - run: npm i
     - run: npm audit fix
 

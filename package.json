@@ -16,6 +16,7 @@
     "bench": "node benchmark/index.js",
     "bench:watch": "nodemon benchmark/index.js",
     "deps": "npm-check -u && npm audit fix",
+    "ci-update-deps": "ncu -u",
     "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
   "keywords": [
