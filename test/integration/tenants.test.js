@@ -4,7 +4,7 @@ const _ = require("lodash");
 const { ServiceBroker, Context } = require("moleculer");
 const DbService = require("../..").Service;
 
-module.exports = (getAdapter, adapterType, adapterName) => {
+module.exports = (getAdapter, adapterType) => {
 	const tenant0Meta = { meta: { tenantId: 1000 } };
 	const tenant1Meta = { meta: { tenantId: 1001 } };
 	const tenant2Meta = { meta: { tenantId: 1002 } };

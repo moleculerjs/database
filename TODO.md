@@ -20,10 +20,6 @@
   - [ ] same for `get`
   - [x] same for `set`
 
-## Features
-- [x] Multi model/tenant solutions
-    - [ ] schema-based for integration tests
-
 ## Adapters
 - [ ] Cassandra
 - [ ] Couchbase
