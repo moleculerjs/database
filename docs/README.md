@@ -2334,29 +2334,14 @@ If the `adapter` is not defined in the Mixin options, the service will use the N
 
 >Note: The adapter connects to the database only on the first request. This means that your service will start properly even if the database server is not available. The reason for this is that the service cannot connect in multi-tenancy mode without a tenant ID.
 
-## Cassandra
-*Not yet implemented.*
-
-## Couchbase
-*Not yet implemented.*
-
-## CouchDB
-*Not yet implemented.*
-
 ## Knex
 [Knex adapter documentation](/docs/adapters/Knex.md)
 
 ## MongoDB
 [MongoDB adapter documentation](/docs/adapters/MongoDB.md)
 
-## Mongoose
-*Not yet implemented.*
-
 ## NeDB
 [NeDB adapter documentation](/docs/adapters/NeDB.md)
-
-## Sequelize
-*Not yet implemented.*
 
 ## Adapter common methods
 
