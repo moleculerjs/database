@@ -18,15 +18,15 @@ services:
     volumes:
         - ./scripts/pg-create-databases.sql:/docker-entrypoint-initdb.d/pg-create-databases.sql
 
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-        PGADMIN_DEFAULT_EMAIL: "admin@example.com"
-        PGADMIN_DEFAULT_PASSWORD: "admin"
-    ports:
-        - "8080:80"
-    depends_on:
-        - postgres
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   environment:
+  #       PGADMIN_DEFAULT_EMAIL: "admin@example.com"
+  #       PGADMIN_DEFAULT_PASSWORD: "admin"
+  #   ports:
+  #       - "8080:80"
+  #   depends_on:
+  #       - postgres
 
   mysql:
     image: mysql:8
@@ -41,10 +41,10 @@ services:
     volumes:
       - ./scripts/mysql-create-databases.sql:/docker-entrypoint-initdb.d/mysql-create-databases.sql
 
-  adminer:
-    image: adminer
-    ports:
-      - 8081:8080
+  # adminer:
+  #   image: adminer
+  #   ports:
+  #     - 8081:8080
 
   mssql:
     image: mcr.microsoft.com/mssql/server:2019-latest
@@ -55,8 +55,9 @@ services:
       - SA_PASSWORD=Moleculer@Pass1234
     healthcheck:
       test: /opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P 'Moleculer@Pass1234' -Q 'select 1'
-  waitmssql:
-    image: mcr.microsoft.com/mssql/server:2017-latest
+
+  mssql-create-db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
     links:
       - mssql
     depends_on:
