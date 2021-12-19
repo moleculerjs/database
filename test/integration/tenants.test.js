@@ -4,7 +4,7 @@ const _ = require("lodash");
 const { ServiceBroker, Context } = require("moleculer");
 const DbService = require("../..").Service;
 
-module.exports = (getAdapter, adapterType) => {
+module.exports = (getAdapter, adapterType, adapterName) => {
 	const tenant0Meta = { meta: { tenantId: 1000 } };
 	const tenant1Meta = { meta: { tenantId: 1001 } };
 	const tenant2Meta = { meta: { tenantId: 1002 } };
@@ -755,6 +755,57 @@ module.exports = (getAdapter, adapterType) => {
 
 		runTenantTestcases(broker, svc, "collection");
 	});
+
+	if (adapterType == "Knex" && getAdapter.adapterName != "Knex-SQLite") {
+		describe("Test schema-level tenancy", () => {
+			const broker = new ServiceBroker({ logger: false });
+			const svc = broker.createService(baseServiceSchema, {
+				methods: {
+					getAdapterByContext(ctx, adapterDef) {
+						const tenantId = ctx.meta.tenantId;
+						if (!tenantId) throw new Error("Missing tenantId!");
+
+						return [
+							tenantId,
+							{
+								type: adapterType,
+								options: _.defaultsDeep(
+									{
+										schema: "tenant_" + tenantId
+									},
+									adapterDef.options
+								)
+							}
+						];
+					}
+				},
+
+				hooks: {
+					customs: {
+						async adapterConnected(adapter) {
+							if (getAdapter.adapterName == "Knex-MSSQL") {
+								await adapter.client.schema.raw(`
+								IF NOT EXISTS ( SELECT  * FROM sys.schemas WHERE name = N'${adapter.opts.schema}' )
+								EXEC('CREATE SCHEMA [${adapter.opts.schema}]');
+							`);
+							} else {
+								await adapter.client.schema.raw(
+									`CREATE SCHEMA IF NOT EXISTS ${adapter.opts.schema}`
+								);
+							}
+
+							await adapter.createTable();
+						}
+					}
+				}
+			});
+
+			beforeAll(() => broker.start());
+			afterAll(() => broker.stop());
+
+			runTenantTestcases(broker, svc, "schema");
+		});
+	}
 
 	describe("Test database-level tenancy", () => {
 		const broker = new ServiceBroker({ logger: false });
