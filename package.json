@@ -44,7 +44,7 @@
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-security": "^1.4.0",
     "fakerator": "^0.3.5",
-    "globby": "^11.0.3",
+    "globby": "^11.0.4",
     "jest": "^27.4.5",
     "jest-cli": "^27.4.5",
     "kleur": "^4.1.4",
