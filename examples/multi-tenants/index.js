@@ -33,21 +33,36 @@ broker.createService({
 	mixins: [
 		DbService({
 			adapter: {
-				type: "MongoDB",
+				//type: "MongoDB",
+				type: "Knex",
 				options: {
-					uri: "mongodb://localhost:27017",
-					dbName: "tenants",
-					collection: "posts"
+					//uri: "mongodb://localhost:27017",
+					//dbName: "tenants",
+					//collection: "posts",
+					tableName: "tenant_posts",
+					knex: {
+						client: "mssql",
+						connection: {
+							host: "127.0.0.1",
+							port: 1433,
+							user: "sa",
+							password: "Moleculer@Pass1234",
+							database: "db_int_test",
+							encrypt: false
+						}
+					}
 				}
 			}
 		})
 	],
 	settings: {
 		fields: {
+			id: { type: "number", increment: true, primaryKey: true, columnType: "bigint" },
 			title: { type: "string", required: true },
 			content: { type: "string", required: false },
 			tenantId: {
 				type: "number",
+				columnType: "integer",
 				set: ({ ctx }) => ctx.meta.tenantId,
 				required: true
 			}
@@ -64,23 +79,47 @@ broker.createService({
 		defaultScopes: ["tenant"]
 	},
 	methods: {
-		/*getAdapterByContext(ctx) {
+		getAdapterByContext(ctx) {
 			const tenantId = ctx.meta.tenantId;
 			if (!tenantId) throw new Error("Missing tenantId!");
 
 			return [
 				tenantId,
 				{
-					type: "MongoDB",
+					//type: "MongoDB",
+					type: "Knex",
 					options: {
-						uri: "mongodb://localhost:27017",
-						dbName: `tenant-posts-${tenantId}`,
-						collection: `posts`
+						//uri: "mongodb://localhost:27017",
+						//dbName: `tenant-posts-${tenantId}`,
+						//collection: `posts`
+
+						tableName: "tenant_posts",
+						schema: "tenant_" + tenantId,
+						knex: {
+							client: "mssql",
+							connection: {
+								host: "127.0.0.1",
+								port: 1433,
+								user: "sa",
+								password: "Moleculer@Pass1234",
+								database: "db_int_test",
+								encrypt: false
+							}
+						}
 					}
 				}
 			];
-		}*/
+		}
 	},
+
+	hooks: {
+		customs: {
+			async adapterConnected(adapter) {
+				await adapter.createTable();
+			}
+		}
+	},
+
 	async started() {
 		await this.clearEntities(tenant1Meta);
 		await this.clearEntities(tenant2Meta);

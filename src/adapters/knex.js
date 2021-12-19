@@ -23,6 +23,7 @@ class KnexAdapter extends BaseAdapter {
 		if (_.isString(opts))
 			opts = {
 				tableName: null,
+				schema: null,
 				knex: {
 					client: "pg",
 					connection: opts,
@@ -90,6 +91,32 @@ class KnexAdapter extends BaseAdapter {
 	}
 
 	/**
+	 * Get the table instance
+	 *
+	 * @param {any?} trx
+	 * @returns
+	 */
+	getTable(trx) {
+		const c = trx || this.client;
+		if (this.opts.schema) {
+			return c.withSchema(this.opts.schema).table(this.opts.tableName);
+		} else {
+			return c.table(this.opts.tableName);
+		}
+	}
+
+	/**
+	 * Get Knex client with schema.
+	 *
+	 * @returns
+	 */
+	getSchemaClient() {
+		return this.opts.schema
+			? this.client.schema.withSchema(this.opts.schema)
+			: this.client.schema;
+	}
+
+	/**
 	 * Find all entities by filters.
 	 *
 	 * @param {Object} params
@@ -128,7 +155,7 @@ class KnexAdapter extends BaseAdapter {
 	 *
 	 */
 	findByIds(idList) {
-		return this.client.table(this.opts.tableName).select().whereIn(this.idFieldName, idList);
+		return this.getTable().select().whereIn(this.idFieldName, idList);
 	}
 
 	/**
@@ -162,10 +189,7 @@ class KnexAdapter extends BaseAdapter {
 	 *
 	 */
 	async insert(entity) {
-		const res = await this.client
-			.insert(entity, [this.idFieldName])
-			//.returning(this.idFieldName)
-			.into(this.opts.tableName);
+		const res = await this.getTable().insert(entity, [this.idFieldName]);
 
 		if (res && res.length > 0) {
 			// Sqlite returns only a single value which is the ID
@@ -191,9 +215,7 @@ class KnexAdapter extends BaseAdapter {
 	async insertMany(entities, opts = {}) {
 		let res = await this.client.transaction(trx =>
 			Promise.all(
-				entities.map(entity =>
-					trx.insert(entity, [this.idFieldName]).into(this.opts.tableName)
-				)
+				entities.map(entity => this.getTable(trx).insert(entity, [this.idFieldName]))
 			)
 		);
 
@@ -217,7 +239,7 @@ class KnexAdapter extends BaseAdapter {
 	 */
 	async updateById(id, changes, opts) {
 		const raw = opts && opts.raw ? true : false;
-		let p = this.client.table(this.opts.tableName).where(this.idFieldName, id);
+		let p = this.getTable().where(this.idFieldName, id);
 		if (raw) {
 			// Handle $set, $inc
 			if (changes.$set) {
@@ -245,7 +267,7 @@ class KnexAdapter extends BaseAdapter {
 	 */
 	async updateMany(query, changes, opts) {
 		const raw = opts && opts.raw ? true : false;
-		let p = this.client.table(this.opts.tableName).where(query);
+		let p = this.getTable().where(query);
 		if (raw) {
 			// Handle $set, $inc
 			if (changes.$set) {
@@ -280,7 +302,7 @@ class KnexAdapter extends BaseAdapter {
 	 *
 	 */
 	async removeById(id) {
-		await this.client.table(this.opts.tableName).where(this.idFieldName, id).del();
+		await this.getTable().where(this.idFieldName, id).del();
 		return id;
 	}
 
@@ -292,7 +314,7 @@ class KnexAdapter extends BaseAdapter {
 	 *
 	 */
 	async removeMany(query) {
-		const res = await this.client.table(this.opts.tableName).where(query).del();
+		const res = await this.getTable().where(query).del();
 		return res;
 	}
 
@@ -304,7 +326,7 @@ class KnexAdapter extends BaseAdapter {
 	 */
 	async clear() {
 		const count = await this.count();
-		await this.client.table(this.opts.tableName).truncate();
+		await this.getTable().truncate();
 		return count;
 	}
 
@@ -336,7 +358,7 @@ class KnexAdapter extends BaseAdapter {
 	 * @memberof MemoryDbAdapter
 	 */
 	createQuery(params, opts = {}) {
-		let q = this.client.table(this.opts.tableName);
+		let q = this.getTable();
 		if (opts.counting) q = q.count({ count: "*" });
 		if (params) {
 			const query = params.query ? Object.assign({}, params.query) : {};
@@ -422,15 +444,17 @@ class KnexAdapter extends BaseAdapter {
 	async createTable(fields, opts = {}) {
 		if (!fields) fields = this.service.$fields;
 
+		const c = this.getSchemaClient();
+
 		if (opts && opts.dropTableIfExists !== false) {
-			const exists = await this.client.schema.hasTable(this.opts.tableName);
+			const exists = await c.hasTable(this.opts.tableName);
 			if (exists) {
 				await this.dropTable(this.opts.tableName);
 			}
 		}
 
 		this.logger.info(`Creating '${this.opts.tableName}' table...`);
-		await this.client.schema.createTable(this.opts.tableName, table => {
+		await c.createTable(this.opts.tableName, table => {
 			for (const field of fields) {
 				if (field.virtual) continue;
 
@@ -475,7 +499,7 @@ class KnexAdapter extends BaseAdapter {
 	 */
 	async dropTable(tableName = this.opts.tableName) {
 		this.logger.info(`Dropping '${tableName}' table...`);
-		await this.client.schema.dropTable(tableName);
+		await this.getSchemaClient().dropTable(tableName);
 	}
 
 	/**
@@ -489,7 +513,7 @@ class KnexAdapter extends BaseAdapter {
 	 * @returns {Promise<void>}
 	 */
 	async createIndex(def) {
-		await this.client.schema.alterTable(this.opts.tableName, table =>
+		await this.getSchemaClient().alterTable(this.opts.tableName, table =>
 			this.createTableIndex(table, def)
 		);
 	}
@@ -524,7 +548,7 @@ class KnexAdapter extends BaseAdapter {
 			fields = Object.keys(fields);
 		}
 
-		await this.client.schema.alterTable(this.opts.tableName, function (table) {
+		await this.getSchemaClient().alterTable(this.opts.tableName, function (table) {
 			return table.dropIndex(fields, def.name);
 		});
 	}
