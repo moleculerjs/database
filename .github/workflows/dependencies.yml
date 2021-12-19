@@ -21,10 +21,9 @@ jobs:
         git config user.email "hello@moleculer.services"
         git checkout -b update-deps-$GITHUB_RUN_ID
 
-    - run: |
-        npx ncu -u
-        npm i
-        npm audit fix
+    - run: ncu -u
+    - run: npm i
+    - run: npm audit fix
 
     - run: |
         git commit -am "Update dependencies (auto)"
