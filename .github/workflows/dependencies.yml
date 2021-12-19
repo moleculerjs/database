@@ -23,7 +23,7 @@ jobs:
 
     - run: npm run ci-update-deps
     - run: npm i
-    - run: npm audit fix
+    - run: npm audit fix && true
 
     - run: |
         git commit -am "Update dependencies (auto)"
