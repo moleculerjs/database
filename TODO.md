@@ -7,10 +7,11 @@
 
 ## Actions
 - [ ] `aggregate` action with params: `type: "sum", "avg", "count", "min", "max"` & `field: "price"`
-- [x] option to add additional cache keys (e.g. `#userID`)
 
 ## Fields
 - [ ] `hidden: "inLists"`
+- [ ] using projections, get only required fields in adapters.
+- [ ] `projection: []` for getter/setters
 
 ## Methods
 - [x] wrap the args to obj in custom functions: `({ ctx, id, field })`
@@ -19,24 +20,6 @@
 - [x] if `field.validate` is string, call the method by name
   - [ ] same for `get`
   - [x] same for `set`
-
-## Adapters
-- [ ] Cassandra
-- [ ] Couchbase
-- [ ] CouchDB
-- [x] Knex
-  - [ ] support schemas like https://github.com/ltv/moleculer-db-adapter-knex/blob/master/src/index.js#L23
-- [x] MongoDB
-  - [ ] upgrade to v4
-- [ ] Mongoose
-- [x] NeDB
-- [ ] Sequelize
-  - [ ] https://gitlab.com/caiofilus1/moleculer-sequelize/-/blob/master/index.js
-- [ ] OrientDB
-  - [ ] https://orientdb.org/docs/3.0.x/orientjs/OrientJS.html
-- [ ] ArangoDB
-  - [ ] https://www.arangodb.com/docs/stable/aql/tutorial-crud.html
-
 
 
 ## Just if I bored to death
