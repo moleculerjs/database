@@ -877,9 +877,9 @@ module.exports = function (mixinOpts) {
 		 * @param {Object?} opts
 		 */
 		async _entityChanged(type, data, ctx, opts = {}) {
-			if (cacheOpts.eventType) {
+			if (cacheOpts && cacheOpts.eventType) {
 				const eventName = cacheOpts.eventName || `cache.clean.${this.name}`;
-				if (cacheOpts && eventName) {
+				if (eventName) {
 					// Cache cleaning event
 					(ctx || this.broker)[cacheOpts.eventType](eventName, {
 						type,
