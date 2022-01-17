@@ -54,7 +54,7 @@ module.exports = function (mixinOpts) {
 
 	const actionEnabled = name => {
 		return (
-			mixinOpts.createActions ||
+			mixinOpts.createActions === true ||
 			(typeof mixinOpts.createActions == "object" && mixinOpts.createActions[name] === true)
 		);
 	};
