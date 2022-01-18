@@ -157,8 +157,9 @@ module.exports = function (mixinOpts) {
 		 * @param {Context} ctx
 		 * @param {String?} name
 		 * @param {Object?} scope
+		 * @param {Boolean} operation Values: "add", "remove"
 		 */
-		async checkScopeAuthority(/*ctx, name, scope*/) {
+		async checkScopeAuthority(/*ctx, name, scope, operation*/) {
 			return true;
 		},
 

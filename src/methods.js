@@ -156,33 +156,36 @@ module.exports = function (mixinOpts) {
 		 * @param {Context?} ctx
 		 */
 		async _applyScopes(params, ctx) {
-			let scopes = null;
-			if (params.scope === true) {
-				scopes = this.settings.defaultScopes;
-			} else if (params.scope) {
-				scopes = Array.isArray(params.scope) ? params.scope : [params.scope];
+			let scopes = this.settings.defaultScopes ? Array.from(this.settings.defaultScopes) : [];
+			if (params.scope && params.scope !== true) {
+				(Array.isArray(params.scope) ? params.scope : [params.scope]).forEach(scope => {
+					if (scope.startsWith("-")) {
+						scopes = scopes.filter(s => s !== scope.substring(1));
+					}
+					scopes.push(scope);
+				});
 			} else if (params.scope === false) {
-				// Disable default scopes, check the permission for this
-				if (!(await this.checkScopeAuthority(ctx, null, null))) {
-					scopes = this.settings.defaultScopes;
-				}
-			} else {
-				scopes = this.settings.defaultScopes;
+				// Disable default scopes
+				scopes = scopes.map(s => `-${s}`);
 			}
 
 			if (scopes && scopes.length > 0) {
-				this.logger.debug(`Applying scopes...`, scopes);
 				scopes = await this._filterScopeNamesByPermission(ctx, scopes);
+				if (scopes && scopes.length > 0) {
+					this.logger.debug(`Applying scopes...`, scopes);
 
-				let q = _.cloneDeep(params.query || {});
-				for (const scopeName of scopes) {
-					const scope = this.settings.scopes[scopeName];
-					if (!scope) continue;
+					let q = _.cloneDeep(params.query || {});
+					for (const scopeName of scopes) {
+						const scope = this.settings.scopes[scopeName];
+						if (!scope) continue;
 
-					if (_.isFunction(scope)) q = await scope.call(this, q, ctx, params);
-					else q = _.defaultsDeep(q, scope);
+						if (_.isFunction(scope)) q = await scope.call(this, q, ctx, params);
+						else q = _.defaultsDeep(q, scope);
+					}
+					params.query = q;
+
+					this.logger.debug(`Applied scopes into the query...`, params.query);
 				}
-				params.query = q;
 			}
 
 			return params;
@@ -197,12 +200,17 @@ module.exports = function (mixinOpts) {
 		 */
 		async _filterScopeNamesByPermission(ctx, scopeNames) {
 			const res = [];
-			for (const scopeName of scopeNames) {
+			for (let scopeName of scopeNames) {
+				let operation = "add";
+				if (scopeName.startsWith("-")) {
+					operation = "remove";
+					scopeName = scopeName.substring(1);
+				}
 				const scope = this.settings.scopes[scopeName];
 				if (!scope) continue;
 
-				const has = await this.checkScopeAuthority(ctx, scopeName, scope);
-				if (has) {
+				const has = await this.checkScopeAuthority(ctx, scopeName, scope, operation);
+				if ((operation == "add" && has) || (operation == "remove" && !has)) {
 					res.push(scopeName);
 				}
 			}
