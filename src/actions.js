@@ -53,10 +53,10 @@ module.exports = function (mixinOpts) {
 	};
 
 	const actionEnabled = name => {
-		return (
-			mixinOpts.createActions === true ||
-			(typeof mixinOpts.createActions == "object" && mixinOpts.createActions[name] === true)
-		);
+		if (typeof mixinOpts.createActions == "object") {
+			return mixinOpts.createActions[name] !== false;
+		}
+		return mixinOpts.createActions !== false;
 	};
 
 	/**
