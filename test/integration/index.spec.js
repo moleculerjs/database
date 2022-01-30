@@ -115,7 +115,7 @@ if (process.env.GITHUB_ACTIONS_CI) {
 } else {
 	// Local development tests
 	Adapters = [
-		/*{
+		{
 			type: "NeDB"
 		}
 		/*{ type: "MongoDB", options: { dbName: "db_int_test" } },
@@ -195,7 +195,7 @@ if (process.env.GITHUB_ACTIONS_CI) {
 					}
 				}
 			}
-		},*/
+		},
 		{
 			name: "Knex-MSSQL",
 			type: "Knex",
@@ -212,7 +212,7 @@ if (process.env.GITHUB_ACTIONS_CI) {
 					}
 				}
 			}
-		}
+		}*/
 	];
 }
 

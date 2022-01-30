@@ -19,13 +19,19 @@ describe("Test scoping", () => {
 					onlyActive: {
 						status: true
 					},
+					tenant: {
+						tenantId: 1001
+					},
 					public: {
 						visibility: "public"
 					},
-					custom: scopeFn
+					custom: scopeFn,
+					private: {
+						visibility: "private"
+					}
 				},
 
-				defaultScopes: ["onlyActive"]
+				defaultScopes: ["tenant", "onlyActive"]
 			}
 		});
 
@@ -38,21 +44,37 @@ describe("Test scoping", () => {
 			const params = {};
 
 			const res = await svc._applyScopes(params, ctx);
-			expect(res).toEqual({ query: { status: true } });
+			expect(res).toEqual({ query: { tenantId: 1001, status: true } });
 		});
 
-		it("should add default scope", async () => {
-			const params = { scope: true };
-
-			const res = await svc._applyScopes(params, ctx);
-			expect(res).toEqual({ query: { status: true }, scope: true });
-		});
-
-		it("should add desired scope", async () => {
+		it("should add desired scope besides default scopes", async () => {
 			const params = { scope: "public" };
 
 			const res = await svc._applyScopes(params, ctx);
-			expect(res).toEqual({ query: { visibility: "public" }, scope: "public" });
+			expect(res).toEqual({
+				query: { tenantId: 1001, status: true, visibility: "public" },
+				scope: "public"
+			});
+		});
+
+		it("should remove a default scope", async () => {
+			const params = { scope: "-onlyActive" };
+
+			const res = await svc._applyScopes(params, ctx);
+			expect(res).toEqual({
+				query: { tenantId: 1001 },
+				scope: "-onlyActive"
+			});
+		});
+
+		it("should remove a default scope abd add a desired scope", async () => {
+			const params = { scope: ["public", "-onlyActive"] };
+
+			const res = await svc._applyScopes(params, ctx);
+			expect(res).toEqual({
+				query: { tenantId: 1001, visibility: "public" },
+				scope: ["public", "-onlyActive"]
+			});
 		});
 
 		it("should add nothing", async () => {
@@ -66,11 +88,14 @@ describe("Test scoping", () => {
 			const params = { scope: "custom" };
 
 			const res = await svc._applyScopes(params, ctx);
-			expect(res).toEqual({ query: { a: 5, b: "Yes" }, scope: "custom" });
+			expect(res).toEqual({
+				query: { status: true, tenantId: 1001, a: 5, b: "Yes" },
+				scope: "custom"
+			});
 
 			expect(scopeFn).toBeCalledTimes(1);
-			expect(scopeFn).toBeCalledWith({ a: 5, b: "Yes" }, ctx, {
-				query: { a: 5, b: "Yes" },
+			expect(scopeFn).toBeCalledWith({ status: true, tenantId: 1001, a: 5, b: "Yes" }, ctx, {
+				query: { status: true, tenantId: 1001, a: 5, b: "Yes" },
 				scope: "custom"
 			});
 		});
@@ -80,8 +105,18 @@ describe("Test scoping", () => {
 
 			const res = await svc._applyScopes(params, ctx);
 			expect(res).toEqual({
-				query: { a: 5, b: "Yes", visibility: "public" },
+				query: { status: true, tenantId: 1001, a: 5, b: "Yes", visibility: "public" },
 				scope: ["custom", "notExist", "public"]
+			});
+		});
+
+		it("should overwrite previos scope", async () => {
+			const params = { scope: ["public", "custom", "private"] };
+
+			const res = await svc._applyScopes(params, ctx);
+			expect(res).toEqual({
+				query: { status: true, tenantId: 1001, a: 5, b: "Yes", visibility: "private" },
+				scope: ["public", "custom", "private"]
 			});
 		});
 	});
@@ -95,8 +130,8 @@ describe("Test scoping", () => {
 		});
 
 		let checkScopeAuthorityReturnValue = () => true;
-		const checkScopeAuthority = jest.fn(async (ctx, name, scope) =>
-			checkScopeAuthorityReturnValue(name, scope)
+		const checkScopeAuthority = jest.fn(async (ctx, name, operation, scope) =>
+			checkScopeAuthorityReturnValue(name, scope, operation)
 		);
 		const svc = broker.createService({
 			name: "posts",
@@ -106,13 +141,16 @@ describe("Test scoping", () => {
 					onlyActive: {
 						status: true
 					},
+					tenant: {
+						tenantId: 1001
+					},
 					public: {
 						visibility: "public"
 					},
 					custom: scopeFn
 				},
 
-				defaultScopes: ["onlyActive"]
+				defaultScopes: ["tenant", "onlyActive"]
 			},
 
 			methods: {
@@ -130,11 +168,14 @@ describe("Test scoping", () => {
 			const params = {};
 
 			const res = await svc._applyScopes(params, ctx);
-			expect(res).toEqual({ query: { status: true } });
+			expect(res).toEqual({ query: { status: true, tenantId: 1001 } });
 
-			expect(checkScopeAuthority).toBeCalledTimes(1);
-			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "onlyActive", {
+			expect(checkScopeAuthority).toBeCalledTimes(2);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "onlyActive", "add", {
 				status: true
+			});
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "tenant", "add", {
+				tenantId: 1001
 			});
 		});
 
@@ -143,11 +184,47 @@ describe("Test scoping", () => {
 			const params = { scope: "public" };
 
 			const res = await svc._applyScopes(params, ctx);
-			expect(res).toEqual({ query: { visibility: "public" }, scope: "public" });
+			expect(res).toEqual({
+				query: { tenantId: 1001, status: true, visibility: "public" },
+				scope: "public"
+			});
 
-			expect(checkScopeAuthority).toBeCalledTimes(1);
-			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "public", {
+			expect(checkScopeAuthority).toBeCalledTimes(3);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "onlyActive", "add", {
+				status: true
+			});
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "public", "add", {
 				visibility: "public"
+			});
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "tenant", "add", {
+				tenantId: 1001
+			});
+		});
+
+		it("should add desired scope and remove default scope", async () => {
+			checkScopeAuthority.mockClear();
+			const params = { scope: ["public", "-onlyActive"] };
+
+			const res = await svc._applyScopes(params, ctx);
+			expect(res).toEqual({
+				query: { tenantId: 1001, visibility: "public" },
+				scope: ["public", "-onlyActive"]
+			});
+
+			expect(checkScopeAuthority).toBeCalledTimes(3);
+			expect(checkScopeAuthority).toBeCalledWith(
+				expect.any(Context),
+				"onlyActive",
+				"remove",
+				{
+					status: true
+				}
+			);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "public", "add", {
+				visibility: "public"
+			});
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "tenant", "add", {
+				tenantId: 1001
 			});
 		});
 
@@ -157,8 +234,18 @@ describe("Test scoping", () => {
 
 			const res = await svc._applyScopes(params, ctx);
 			expect(res).toEqual({ scope: false });
-			expect(checkScopeAuthority).toBeCalledTimes(1);
-			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), null, null);
+			expect(checkScopeAuthority).toBeCalledTimes(2);
+			expect(checkScopeAuthority).toBeCalledWith(
+				expect.any(Context),
+				"onlyActive",
+				"remove",
+				{
+					status: true
+				}
+			);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "tenant", "remove", {
+				tenantId: 1001
+			});
 		});
 
 		it("should add the custom scope", async () => {
@@ -166,16 +253,30 @@ describe("Test scoping", () => {
 			const params = { scope: "custom" };
 
 			const res = await svc._applyScopes(params, ctx);
-			expect(res).toEqual({ query: { a: 5, b: "Yes" }, scope: "custom" });
-
-			expect(scopeFn).toBeCalledTimes(1);
-			expect(scopeFn).toBeCalledWith({ a: 5, b: "Yes" }, ctx, {
-				query: { a: 5, b: "Yes" },
+			expect(res).toEqual({
+				query: { tenantId: 1001, status: true, a: 5, b: "Yes" },
 				scope: "custom"
 			});
 
-			expect(checkScopeAuthority).toBeCalledTimes(1);
-			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "custom", scopeFn);
+			expect(scopeFn).toBeCalledTimes(1);
+			expect(scopeFn).toBeCalledWith({ tenantId: 1001, status: true, a: 5, b: "Yes" }, ctx, {
+				query: { tenantId: 1001, status: true, a: 5, b: "Yes" },
+				scope: "custom"
+			});
+
+			expect(checkScopeAuthority).toBeCalledTimes(3);
+			expect(checkScopeAuthority).toBeCalledWith(
+				expect.any(Context),
+				"custom",
+				"add",
+				scopeFn
+			);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "onlyActive", "add", {
+				status: true
+			});
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "tenant", "add", {
+				tenantId: 1001
+			});
 		});
 
 		it("should add multiple scope", async () => {
@@ -184,14 +285,25 @@ describe("Test scoping", () => {
 
 			const res = await svc._applyScopes(params, ctx);
 			expect(res).toEqual({
-				query: { a: 5, b: "Yes", visibility: "public" },
+				query: { tenantId: 1001, status: true, a: 5, b: "Yes", visibility: "public" },
 				scope: ["custom", "notExist", "public"]
 			});
 
-			expect(checkScopeAuthority).toBeCalledTimes(2);
-			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "custom", scopeFn);
-			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "public", {
+			expect(checkScopeAuthority).toBeCalledTimes(4);
+			expect(checkScopeAuthority).toBeCalledWith(
+				expect.any(Context),
+				"custom",
+				"add",
+				scopeFn
+			);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "public", "add", {
 				visibility: "public"
+			});
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "onlyActive", "add", {
+				status: true
+			});
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "tenant", "add", {
+				tenantId: 1001
 			});
 		});
 
@@ -201,25 +313,65 @@ describe("Test scoping", () => {
 			const params = { scope: "public" };
 
 			const res = await svc._applyScopes(params, ctx);
-			expect(res).toEqual({ query: {}, scope: "public" });
+			expect(res).toEqual({ scope: "public" });
 
-			expect(checkScopeAuthority).toBeCalledTimes(1);
-			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "public", {
+			expect(checkScopeAuthority).toBeCalledTimes(3);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "public", "add", {
 				visibility: "public"
+			});
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "onlyActive", "add", {
+				status: true
+			});
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "tenant", "add", {
+				tenantId: 1001
 			});
 		});
 
-		it("should not disable the default scope", async () => {
-			checkScopeAuthorityReturnValue = scopeName => scopeName != null;
+		it("should not disable the tenant scope", async () => {
+			checkScopeAuthorityReturnValue = scopeName => scopeName != "tenant";
 			checkScopeAuthority.mockClear();
 			const params = { scope: false };
 
 			const res = await svc._applyScopes(params, ctx);
-			expect(res).toEqual({ query: { status: true }, scope: false });
+			expect(res).toEqual({ query: { tenantId: 1001 }, scope: false });
 			expect(checkScopeAuthority).toBeCalledTimes(2);
-			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), null, null);
-			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "onlyActive", {
-				status: true
+			expect(checkScopeAuthority).toBeCalledWith(
+				expect.any(Context),
+				"onlyActive",
+				"remove",
+				{
+					status: true
+				}
+			);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "tenant", "remove", {
+				tenantId: 1001
+			});
+		});
+
+		it("should not disable the tenant scope", async () => {
+			checkScopeAuthorityReturnValue = scopeName => scopeName != "tenant";
+			checkScopeAuthority.mockClear();
+			const params = { scope: ["public", "-tenant", "-onlyActive"] };
+
+			const res = await svc._applyScopes(params, ctx);
+			expect(res).toEqual({
+				query: { tenantId: 1001, visibility: "public" },
+				scope: ["public", "-tenant", "-onlyActive"]
+			});
+			expect(checkScopeAuthority).toBeCalledTimes(3);
+			expect(checkScopeAuthority).toBeCalledWith(
+				expect.any(Context),
+				"onlyActive",
+				"remove",
+				{
+					status: true
+				}
+			);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "tenant", "remove", {
+				tenantId: 1001
+			});
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "public", "add", {
+				visibility: "public"
 			});
 		});
 	});
