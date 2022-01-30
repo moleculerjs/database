@@ -25,7 +25,10 @@ describe("Test scoping", () => {
 					public: {
 						visibility: "public"
 					},
-					custom: scopeFn
+					custom: scopeFn,
+					private: {
+						visibility: "private"
+					}
 				},
 
 				defaultScopes: ["tenant", "onlyActive"]
@@ -104,6 +107,16 @@ describe("Test scoping", () => {
 			expect(res).toEqual({
 				query: { status: true, tenantId: 1001, a: 5, b: "Yes", visibility: "public" },
 				scope: ["custom", "notExist", "public"]
+			});
+		});
+
+		it("should overwrite previos scope", async () => {
+			const params = { scope: ["public", "custom", "private"] };
+
+			const res = await svc._applyScopes(params, ctx);
+			expect(res).toEqual({
+				query: { status: true, tenantId: 1001, a: 5, b: "Yes", visibility: "private" },
+				scope: ["public", "custom", "private"]
 			});
 		});
 	});

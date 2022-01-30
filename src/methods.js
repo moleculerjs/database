@@ -180,7 +180,7 @@ module.exports = function (mixinOpts) {
 						if (!scope) continue;
 
 						if (_.isFunction(scope)) q = await scope.call(this, q, ctx, params);
-						else q = _.defaultsDeep(q, scope);
+						else q = _.merge(q, scope);
 					}
 					params.query = q;
 
@@ -239,7 +239,11 @@ module.exports = function (mixinOpts) {
 				p.populate = p.populate.replace(/,/g, " ").split(" ");
 			if (typeof p.searchFields === "string")
 				p.searchFields = p.searchFields.replace(/,/g, " ").split(" ");
-			if (typeof p.scope === "string") p.scope = p.scope.replace(/,/g, " ").split(" ");
+			if (typeof p.scope === "string") {
+				if (p.scope === "true") p.scope = true;
+				else if (p.scope === "false") p.scope = false;
+				else p.scope = p.scope.replace(/,/g, " ").split(" ");
+			}
 
 			if (opts && opts.removeLimit) {
 				if (p.limit) delete p.limit;

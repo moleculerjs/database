@@ -150,9 +150,6 @@ module.exports = function (mixinOpts) {
 
 		/**
 		 * Check the scope authority. Should be implemented in the service.
-		 * If `name and `scope` are null, it means you should check the permissions
-		 * when somebody wants turning off the default scopes (e.g. list
-		 * deleted records, as well).
 		 *
 		 * @param {Context} ctx
 		 * @param {String?} name

@@ -153,6 +153,15 @@ module.exports = (getAdapter, adapterType) => {
 			it("should filtered by desired scope", async () => {
 				const params = { scope: "young" };
 				const rows = await svc.findEntities(ctx, params);
+				expect(rows).toEqual(expect.arrayContaining([docs.johnDoe, docs.kevinJames]));
+
+				const count = await svc.countEntities(ctx, params);
+				expect(count).toEqual(2);
+			});
+
+			it("should filtered by desired scope without default scope", async () => {
+				const params = { scope: ["young", "-onlyActive"] };
+				const rows = await svc.findEntities(ctx, params);
 				expect(rows).toEqual(
 					expect.arrayContaining([docs.johnDoe, docs.janeDoe, docs.kevinJames])
 				);

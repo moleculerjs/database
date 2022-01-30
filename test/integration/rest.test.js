@@ -5,11 +5,6 @@ const ApiGateway = require("moleculer-web");
 const axios = require("axios");
 const DbService = require("../..").Service;
 
-const Fakerator = require("fakerator");
-const fakerator = new Fakerator();
-const fs = require("fs");
-const { Stream, Readable } = require("stream");
-
 module.exports = (getAdapter, adapterType) => {
 	describe("Test REST API with populates", () => {
 		const env = createEnvironment(getAdapter, adapterType);
