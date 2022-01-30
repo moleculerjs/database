@@ -209,7 +209,7 @@ module.exports = function (mixinOpts) {
 				const scope = this.settings.scopes[scopeName];
 				if (!scope) continue;
 
-				const has = await this.checkScopeAuthority(ctx, scopeName, scope, operation);
+				const has = await this.checkScopeAuthority(ctx, scopeName, operation, scope);
 				if ((operation == "add" && has) || (operation == "remove" && !has)) {
 					res.push(scopeName);
 				}

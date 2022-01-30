@@ -130,7 +130,7 @@ describe("Test scoping", () => {
 		});
 
 		let checkScopeAuthorityReturnValue = () => true;
-		const checkScopeAuthority = jest.fn(async (ctx, name, scope, operation) =>
+		const checkScopeAuthority = jest.fn(async (ctx, name, operation, scope) =>
 			checkScopeAuthorityReturnValue(name, scope, operation)
 		);
 		const svc = broker.createService({

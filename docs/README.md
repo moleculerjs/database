@@ -1508,7 +1508,7 @@ _It can be asynchronous._
 
 
 ## `checkScopeAuthority`
-`checkScopeAuthority(ctx?: Context, name?: string, scope?: any)`
+`checkScopeAuthority(ctx?: Context, name: string, operation: string, scope: any)`
 
 You should implement it if you want to check the authorization of scopes.
 
@@ -1518,10 +1518,9 @@ _It can be asynchronous._
 | Property | Type | Description |
 | -------- | ---- | ----------- |
 | `ctx` | `Context` | Moleculer `Context` instance. It can be `null`. |
-| `name` | `String?` | Name of the scope. |
-| `scope` | `any?` | Scope definition. |
-
-_If `name` and `scope` are `null`, it means that you should check the authority of default scope disabling._
+| `name` | `String` | Name of the scope. |
+| `operation` | `String` | Type of operation. Available values: `add`, `remove`. |
+| `scope` | `any` | Scope definition. |
 
 # Scopes
 The scopes allow you to add constraints for all query methods, like `find`, `list` or `count`. You can use them with soft-delete feature if you want to list only non-deleted entities.
@@ -1922,17 +1921,15 @@ module.exports = {
     methods: {
         /**
          * Check the scope authority. Should be implemented in the service.
-         * If `name and `scope` are null, it means you should check the permissions
-         * when somebody wants to turn off the default scopes (e.g. list
-         * deleted records, as well).
          *
          * @param {Context} ctx
-         * @param {String?} name
-         * @param {Object?} scope
+         * @param {String} name
+         * @param {String} operation
+         * @param {Object} scope
          */        
-        async checkScopeAuthority(ctx, name, scope) {
+        async checkScopeAuthority(ctx, name, operation, scope) {
             // We enable default scope disabling only for administrators.
-            if (scope == null) {
+            if (operation == "remove") {
                 return ctx.meta.user.roles.includes("admin");
             }
 

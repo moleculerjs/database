@@ -152,11 +152,11 @@ module.exports = function (mixinOpts) {
 		 * Check the scope authority. Should be implemented in the service.
 		 *
 		 * @param {Context} ctx
-		 * @param {String?} name
-		 * @param {Object?} scope
-		 * @param {Boolean} operation Values: "add", "remove"
+		 * @param {String} name
+		 * @param {String} operation Values: "add", "remove"
+		 * @param {Object} scope
 		 */
-		async checkScopeAuthority(/*ctx, name, scope, operation*/) {
+		async checkScopeAuthority(/*ctx, name, operation, scope*/) {
 			return true;
 		},
 
