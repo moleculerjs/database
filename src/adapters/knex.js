@@ -7,7 +7,6 @@
 "use strict";
 
 const _ = require("lodash");
-const { ServiceSchemaError } = require("moleculer").Errors;
 let Knex;
 
 const BaseAdapter = require("./base");
@@ -72,7 +71,7 @@ class KnexAdapter extends BaseAdapter {
 			);
 		}
 
-		this.checkClientLibVersion("knex", "^0.95.4");
+		this.checkClientLibVersion("knex", "^0.95.4 || ^1.0.1");
 	}
 
 	/**

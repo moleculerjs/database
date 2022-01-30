@@ -7,13 +7,13 @@ This adapter gives access to SQL database engines using the [Knex.js](https://kn
 This module contains the source code of the adapter. You just need to install the dependent library.
 
 ```bash
-npm install knex@^0.95.4
+npm install knex@^1.0.1
 ```
 
 ## Usage
 
 ### Connect to SQLite memory database
-> To connect SQLite database, you should install the `sqlite3` module with `npm install sqlite3` command.
+> To connect SQLite database, you should install the `@vscode/sqlite3` module with `npm install @vscode/sqlite3` command (or `better-sqlite3`).
 
 ```js
 // posts.service.js

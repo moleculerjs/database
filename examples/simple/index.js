@@ -51,7 +51,15 @@ broker.createService({
 	mixins: [
 		DbService({
 			adapter: {
-				type: "MongoDB"
+				type: "Knex",
+				options: {
+					knex: {
+						client: "sqlite3",
+						connection: {
+							filename: ":memory:"
+						}
+					}
+				}
 			}
 		})
 	],
@@ -66,11 +74,28 @@ broker.createService({
 				required: true
 			},
 			content: { type: "string" },
-			votes: { type: "number", integer: true, min: 0, default: 0 },
+			votes: { type: "number", integer: true, min: 0, default: 0, columnType: "int" },
 			status: { type: "boolean", default: true },
-			createdAt: { type: "number", readonly: true, onCreate: () => Date.now() },
-			updatedAt: { type: "number", readonly: true, onUpdate: () => Date.now() }
+			createdAt: {
+				type: "number",
+				readonly: true,
+				onCreate: () => Date.now(),
+				columnType: "double"
+			},
+			updatedAt: {
+				type: "number",
+				readonly: true,
+				onUpdate: () => Date.now(),
+				columnType: "double"
+			}
 		}
+	},
+
+	async started() {
+		const adapter = await this.getAdapter();
+		await adapter.createTable();
+
+		await this.clearEntities();
 	}
 });
 
