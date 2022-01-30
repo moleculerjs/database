@@ -8,7 +8,7 @@ const { generateMarkdown } = require("../generate-result");
 const Fakerator = require("fakerator");
 const fakerator = new Fakerator();
 
-const Benchmarkify = require("../benchmarkify");
+const Benchmarkify = require("benchmarkify");
 const benchmark = new Benchmarkify("Moleculer Database benchmark - Transformation benchmark", {
 	description:
 		"This is a transformation benchmark. It tests all service methods with and without transformation."

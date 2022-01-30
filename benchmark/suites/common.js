@@ -1,6 +1,6 @@
 "use strict";
 
-const Benchmarkify = require("../benchmarkify");
+const Benchmarkify = require("benchmarkify");
 const path = require("path");
 const fs = require("fs");
 const _ = require("lodash");

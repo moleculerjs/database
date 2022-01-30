@@ -5,7 +5,7 @@ const Datastore = require("nedb");
 const Fakerator = require("fakerator");
 const fakerator = new Fakerator();
 
-const Benchmarkify = require("../benchmarkify");
+const Benchmarkify = require("benchmarkify");
 const benchmark = new Benchmarkify("NeDB benchmark").printHeader();
 
 const COUNT = 1000;
