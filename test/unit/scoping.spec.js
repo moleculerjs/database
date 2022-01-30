@@ -171,22 +171,12 @@ describe("Test scoping", () => {
 			expect(res).toEqual({ query: { status: true, tenantId: 1001 } });
 
 			expect(checkScopeAuthority).toBeCalledTimes(2);
-			expect(checkScopeAuthority).toBeCalledWith(
-				expect.any(Context),
-				"onlyActive",
-				{
-					status: true
-				},
-				"add"
-			);
-			expect(checkScopeAuthority).toBeCalledWith(
-				expect.any(Context),
-				"tenant",
-				{
-					tenantId: 1001
-				},
-				"add"
-			);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "onlyActive", "add", {
+				status: true
+			});
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "tenant", "add", {
+				tenantId: 1001
+			});
 		});
 
 		it("should add desired scope", async () => {
@@ -200,30 +190,15 @@ describe("Test scoping", () => {
 			});
 
 			expect(checkScopeAuthority).toBeCalledTimes(3);
-			expect(checkScopeAuthority).toBeCalledWith(
-				expect.any(Context),
-				"onlyActive",
-				{
-					status: true
-				},
-				"add"
-			);
-			expect(checkScopeAuthority).toBeCalledWith(
-				expect.any(Context),
-				"public",
-				{
-					visibility: "public"
-				},
-				"add"
-			);
-			expect(checkScopeAuthority).toBeCalledWith(
-				expect.any(Context),
-				"tenant",
-				{
-					tenantId: 1001
-				},
-				"add"
-			);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "onlyActive", "add", {
+				status: true
+			});
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "public", "add", {
+				visibility: "public"
+			});
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "tenant", "add", {
+				tenantId: 1001
+			});
 		});
 
 		it("should add desired scope and remove default scope", async () => {
@@ -240,27 +215,17 @@ describe("Test scoping", () => {
 			expect(checkScopeAuthority).toBeCalledWith(
 				expect.any(Context),
 				"onlyActive",
+				"remove",
 				{
 					status: true
-				},
-				"remove"
+				}
 			);
-			expect(checkScopeAuthority).toBeCalledWith(
-				expect.any(Context),
-				"public",
-				{
-					visibility: "public"
-				},
-				"add"
-			);
-			expect(checkScopeAuthority).toBeCalledWith(
-				expect.any(Context),
-				"tenant",
-				{
-					tenantId: 1001
-				},
-				"add"
-			);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "public", "add", {
+				visibility: "public"
+			});
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "tenant", "add", {
+				tenantId: 1001
+			});
 		});
 
 		it("should add nothing", async () => {
@@ -273,19 +238,14 @@ describe("Test scoping", () => {
 			expect(checkScopeAuthority).toBeCalledWith(
 				expect.any(Context),
 				"onlyActive",
+				"remove",
 				{
 					status: true
-				},
-				"remove"
+				}
 			);
-			expect(checkScopeAuthority).toBeCalledWith(
-				expect.any(Context),
-				"tenant",
-				{
-					tenantId: 1001
-				},
-				"remove"
-			);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "tenant", "remove", {
+				tenantId: 1001
+			});
 		});
 
 		it("should add the custom scope", async () => {
@@ -308,25 +268,15 @@ describe("Test scoping", () => {
 			expect(checkScopeAuthority).toBeCalledWith(
 				expect.any(Context),
 				"custom",
-				scopeFn,
-				"add"
+				"add",
+				scopeFn
 			);
-			expect(checkScopeAuthority).toBeCalledWith(
-				expect.any(Context),
-				"onlyActive",
-				{
-					status: true
-				},
-				"add"
-			);
-			expect(checkScopeAuthority).toBeCalledWith(
-				expect.any(Context),
-				"tenant",
-				{
-					tenantId: 1001
-				},
-				"add"
-			);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "onlyActive", "add", {
+				status: true
+			});
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "tenant", "add", {
+				tenantId: 1001
+			});
 		});
 
 		it("should add multiple scope", async () => {
@@ -343,33 +293,18 @@ describe("Test scoping", () => {
 			expect(checkScopeAuthority).toBeCalledWith(
 				expect.any(Context),
 				"custom",
-				scopeFn,
-				"add"
+				"add",
+				scopeFn
 			);
-			expect(checkScopeAuthority).toBeCalledWith(
-				expect.any(Context),
-				"public",
-				{
-					visibility: "public"
-				},
-				"add"
-			);
-			expect(checkScopeAuthority).toBeCalledWith(
-				expect.any(Context),
-				"onlyActive",
-				{
-					status: true
-				},
-				"add"
-			);
-			expect(checkScopeAuthority).toBeCalledWith(
-				expect.any(Context),
-				"tenant",
-				{
-					tenantId: 1001
-				},
-				"add"
-			);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "public", "add", {
+				visibility: "public"
+			});
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "onlyActive", "add", {
+				status: true
+			});
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "tenant", "add", {
+				tenantId: 1001
+			});
 		});
 
 		it("should not add desired scope if not permission", async () => {
@@ -381,30 +316,15 @@ describe("Test scoping", () => {
 			expect(res).toEqual({ scope: "public" });
 
 			expect(checkScopeAuthority).toBeCalledTimes(3);
-			expect(checkScopeAuthority).toBeCalledWith(
-				expect.any(Context),
-				"public",
-				{
-					visibility: "public"
-				},
-				"add"
-			);
-			expect(checkScopeAuthority).toBeCalledWith(
-				expect.any(Context),
-				"onlyActive",
-				{
-					status: true
-				},
-				"add"
-			);
-			expect(checkScopeAuthority).toBeCalledWith(
-				expect.any(Context),
-				"tenant",
-				{
-					tenantId: 1001
-				},
-				"add"
-			);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "public", "add", {
+				visibility: "public"
+			});
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "onlyActive", "add", {
+				status: true
+			});
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "tenant", "add", {
+				tenantId: 1001
+			});
 		});
 
 		it("should not disable the tenant scope", async () => {
@@ -418,19 +338,14 @@ describe("Test scoping", () => {
 			expect(checkScopeAuthority).toBeCalledWith(
 				expect.any(Context),
 				"onlyActive",
+				"remove",
 				{
 					status: true
-				},
-				"remove"
+				}
 			);
-			expect(checkScopeAuthority).toBeCalledWith(
-				expect.any(Context),
-				"tenant",
-				{
-					tenantId: 1001
-				},
-				"remove"
-			);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "tenant", "remove", {
+				tenantId: 1001
+			});
 		});
 
 		it("should not disable the tenant scope", async () => {
@@ -447,27 +362,17 @@ describe("Test scoping", () => {
 			expect(checkScopeAuthority).toBeCalledWith(
 				expect.any(Context),
 				"onlyActive",
+				"remove",
 				{
 					status: true
-				},
-				"remove"
+				}
 			);
-			expect(checkScopeAuthority).toBeCalledWith(
-				expect.any(Context),
-				"tenant",
-				{
-					tenantId: 1001
-				},
-				"remove"
-			);
-			expect(checkScopeAuthority).toBeCalledWith(
-				expect.any(Context),
-				"public",
-				{
-					visibility: "public"
-				},
-				"add"
-			);
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "tenant", "remove", {
+				tenantId: 1001
+			});
+			expect(checkScopeAuthority).toBeCalledWith(expect.any(Context), "public", "add", {
+				visibility: "public"
+			});
 		});
 	});
 
