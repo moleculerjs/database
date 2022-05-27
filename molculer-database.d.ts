@@ -7,16 +7,15 @@
  * Version: v1.0.0
  */
 
-
- import { Context, Service as BaseService, ServiceSchema, Errors as BaseErrors } from "moleculer";
- import Stream from "stream";
-declare module "moleculer-database" {
-  export type DataFieldHandler = (payload: { ctx: Context; entity: any; field: string; value: any }) => any;
-  export type DataFieldCreateHandler = DataFieldHandler;
-  export type DataFieldUpdateHandler = DataFieldHandler;
-  export type DataFieldReplaceHandler = DataFieldHandler;
-  export type DataFieldRemoveHandler = DataFieldHandler;
-  export interface Field {
+declare module "@moleculer/database" {
+  import { Context, Service as BaseService, ServiceSchema, Errors as BaseErrors } from "moleculer";
+  import Stream from "stream";
+  type DataFieldHandler = (payload: { ctx: Context; entity: any; field: string; value: any }) => any;
+  type DataFieldCreateHandler = DataFieldHandler;
+  type DataFieldUpdateHandler = DataFieldHandler;
+  type DataFieldReplaceHandler = DataFieldHandler;
+  type DataFieldRemoveHandler = DataFieldHandler;
+  interface Field {
     name: string;
     required?: boolean;
     optional?: boolean;
@@ -41,29 +40,27 @@ declare module "moleculer-database" {
 
     [key: string]: any;
   }
-  export type Schema = {
+  type Schema = {
     getPrimaryKeyFromFields(fields: any[]): string;
     generateValidatorSchemaFromFields(fields: any[]): any;
     generateFieldValidatorSchema(field: any, options?: any): any;
   };
 
-  export interface DbService extends BaseService {}
+  interface DbService extends BaseService {}
 
-  export interface QueryParams {
+  interface QueryParams {
     [key: string]: any;
   }
-  export interface FindParams {
-    [key: string]: any;
-  }
-
-  export interface FilterParams {
+  interface FindParams {
     [key: string]: any;
   }
 
-  namespace Adapters {
-      
+  interface FilterParams {
+    [key: string]: any;
+  }
+
+  export namespace Adapters {
     export interface Adapter {
-      
       get hasNestedFieldSupport(): boolean;
 
       /**
@@ -232,28 +229,27 @@ declare module "moleculer-database" {
       removeIndex(def: any): Promise<void>;
     }
     export abstract class BaseAdapter implements Adapter {
-        constructor(options?: any);
-        get hasNestedFieldSupport(): boolean;
-        connect(): Promise<void>;
-        disconnect(): Promise<void>;
-        find<R>(params: any): Promise<R[]>;
-        findOne<R>(params: any): Promise<R>;
-        findById<R>(id: string): Promise<R>;
-        findByIds<R>(idList: any[]): Promise<R[]>;
-        findStream<F extends FindParams>(params: F): Promise<Stream>;
-        count<F extends FilterParams>(params: F): Promise<number>;
-        insert<E, R>(entity: E): Promise<R>;
-        insertMany<E, R>(entities: E[], opts?: { returnEntities?: boolean; }): Promise<R[]>;
-        updateById<T, R>(id: string, changes: Partial<T>): Promise<R>;
-        updateMany<Q extends QueryParams, T>(query: Q, changes: Partial<T>): Promise<number>;
-        replaceById<E, R>(id: string, entity: E): Promise<R>;
-        removeById<T>(id: string): Promise<T>;
-        removeMany<Q extends QueryParams>(query: Q): Promise<number>;
-        clear(): Promise<number>;
-        entityToJSON<E, J>(entity: E): J;
-        createIndex(def: any): Promise<void>;
-        removeIndex(def: any): Promise<void>;
-
+      constructor(options?: any);
+      get hasNestedFieldSupport(): boolean;
+      connect(): Promise<void>;
+      disconnect(): Promise<void>;
+      find<R>(params: any): Promise<R[]>;
+      findOne<R>(params: any): Promise<R>;
+      findById<R>(id: string): Promise<R>;
+      findByIds<R>(idList: any[]): Promise<R[]>;
+      findStream<F extends FindParams>(params: F): Promise<Stream>;
+      count<F extends FilterParams>(params: F): Promise<number>;
+      insert<E, R>(entity: E): Promise<R>;
+      insertMany<E, R>(entities: E[], opts?: { returnEntities?: boolean }): Promise<R[]>;
+      updateById<T, R>(id: string, changes: Partial<T>): Promise<R>;
+      updateMany<Q extends QueryParams, T>(query: Q, changes: Partial<T>): Promise<number>;
+      replaceById<E, R>(id: string, entity: E): Promise<R>;
+      removeById<T>(id: string): Promise<T>;
+      removeMany<Q extends QueryParams>(query: Q): Promise<number>;
+      clear(): Promise<number>;
+      entityToJSON<E, J>(entity: E): J;
+      createIndex(def: any): Promise<void>;
+      removeIndex(def: any): Promise<void>;
     }
     export class MongoDBAdapter extends BaseAdapter {
       constructor(opts?: any);
@@ -267,13 +263,13 @@ declare module "moleculer-database" {
     export function resolve<T extends Adapter>(opt: any): T;
     export function register(name: string, value?: Adapter): void;
   }
-  namespace Errors {
+  export namespace Errors {
     class EntityNotFoundError extends BaseErrors.MoleculerClientError {
       constructor(id: string);
     }
   }
-  export type DbServiceOptions = {
-      [key: string]: any;
+  type DbServiceOptions = {
+    [key: string]: any;
   };
   export function Service(options?: DbServiceOptions): DbService;
   export type generateFieldValidatorSchema = Schema["generateFieldValidatorSchema"];
