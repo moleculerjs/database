@@ -10,12 +10,12 @@
 declare module "@moleculer/database" {
   import { Context, Service as BaseService, ServiceSchema, Errors as BaseErrors } from "moleculer";
   import Stream from "stream";
-  type DataFieldHandler = (payload: { ctx: Context; entity: any; field: string; value: any }) => any;
-  type DataFieldCreateHandler = DataFieldHandler;
-  type DataFieldUpdateHandler = DataFieldHandler;
-  type DataFieldReplaceHandler = DataFieldHandler;
-  type DataFieldRemoveHandler = DataFieldHandler;
-  interface Field {
+  export  type DataFieldHandler = (payload: { ctx: Context; entity: any; field: string; value: any }) => any;
+  export  type DataFieldCreateHandler = DataFieldHandler;
+  export  type DataFieldUpdateHandler = DataFieldHandler;
+  export  type DataFieldReplaceHandler = DataFieldHandler;
+  export  type DataFieldRemoveHandler = DataFieldHandler;
+  export interface Field {
     name: string;
     required?: boolean;
     optional?: boolean;
@@ -40,22 +40,22 @@ declare module "@moleculer/database" {
 
     [key: string]: any;
   }
-  type Schema = {
+  export  type Schema = {
     getPrimaryKeyFromFields(fields: any[]): string;
     generateValidatorSchemaFromFields(fields: any[]): any;
     generateFieldValidatorSchema(field: any, options?: any): any;
   };
 
-  interface DbService extends BaseService {}
+  export  interface DbService extends BaseService {}
 
-  interface QueryParams {
+  export interface QueryParams {
     [key: string]: any;
   }
-  interface FindParams {
+  export  interface FindParams {
     [key: string]: any;
   }
 
-  interface FilterParams {
+  export  interface FilterParams {
     [key: string]: any;
   }
 
@@ -268,7 +268,7 @@ declare module "@moleculer/database" {
       constructor(id: string);
     }
   }
-  type DbServiceOptions = {
+  export  type DbServiceOptions = {
     [key: string]: any;
   };
   export function Service(options?: DbServiceOptions): DbService;
