@@ -20,6 +20,7 @@
 - [x] if `field.validate` is string, call the method by name
   - [ ] same for `get`
   - [x] same for `set`
+- [ ] option to disable validators `opts.validation: false`
 
 
 ## Just if I bored to death
