@@ -21,6 +21,8 @@
   - [ ] same for `get`
   - [x] same for `set`
 - [ ] option to disable validators `opts.validation: false`
+- [ ] add `scope` param for `removeEntities` and `updateEntities` and pass to the `findEntities` call inside the method.
+- [ ] skipping softDelete in methods `opts.softDelete: false` to make real delete in maintenance processes
 
 
 ## Just if I bored to death
