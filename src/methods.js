@@ -786,7 +786,10 @@ module.exports = function (mixinOpts) {
 
 			id = this._sanitizeID(id, opts);
 
-			if (this.$softDelete) {
+			let softDelete = this.$softDelete;
+			if (opts.softDelete === false) softDelete = false;
+
+			if (softDelete) {
 				this.logger.debug(`Soft delete an entity`, id, params);
 				// Soft delete
 				entity = await adapter.updateById(id, params);
@@ -802,7 +805,7 @@ module.exports = function (mixinOpts) {
 
 			await this._entityChanged("remove", entity, ctx, {
 				...opts,
-				softDelete: !!this.$softDelete
+				softDelete: !!softDelete
 			});
 
 			timeEnd();

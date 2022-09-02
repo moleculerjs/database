@@ -1380,6 +1380,7 @@ Delete an entity by ID.
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
 | `opts.scope` | `String|Array<String>|Boolean` | `null` |Scopes for the query. If false, the default scopes are disabled. |
+| `opts.softDelete` | `Boolean` | `null` | Disable the enabled soft-delete feature. Only `false` value is acceptable. |
 
 The method returns only the ID of the deleted entity.
 
@@ -1397,13 +1398,14 @@ Delete multiple entities by a query.
 | `params.scope` | `String|Array<String>|Boolean` | `null` |Scopes for the query. If false, the default scopes are disabled. |
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
+| `opts.softDelete` | `Boolean` | `null` | Disable the enabled soft-delete feature. Only `false` value is acceptable. |
 
 The method returns only the ID of all deleted entities.
 
 ## `clearEntities`
 `clearEntities(ctx?: Context, params: object)`
 
-Delete all entities in the table/collection. _Please note, it doesn't take into account the scopes._
+Delete all entities in the table/collection. _Please note, it doesn't take into account the scopes and soft delete features._
 
 ### Parameters
 | Property | Type | Default | Description |

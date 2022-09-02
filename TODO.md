@@ -4,6 +4,7 @@
   - [ ] createIndex, removeIndex
   - [ ] Knex createCursor operators `$`
   - [ ] global pool handling
+  - [x] soft delete
 
 ## Actions
 - [ ] `aggregate` action with params: `type: "sum", "avg", "count", "min", "max"` & `field: "price"`
@@ -11,7 +12,7 @@
 ## Fields
 - [ ] `hidden: "inLists"`
 - [ ] using projections, get only required fields in adapters.
-- [ ] `projection: []` for getter/setters
+  - [ ] `projection: []` for getter/setters
 
 ## Methods
 - [x] wrap the args to obj in custom functions: `({ ctx, id, field })`
@@ -22,7 +23,7 @@
   - [x] same for `set`
 - [ ] option to disable validators `opts.validation: false`
 - [x] add `scope` param for `removeEntities` and `updateEntities` and pass to the `findEntities` call inside the method.
-- [ ] skipping softDelete in methods `opts.softDelete: false` to make real delete in maintenance processes
+- [x] skipping softDelete in methods `opts.softDelete: false` to make real delete in maintenance processes
 
 
 ## Just if I bored to death

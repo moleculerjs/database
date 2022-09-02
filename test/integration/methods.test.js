@@ -1177,6 +1177,288 @@ module.exports = (getAdapter, adapterType) => {
 		});
 	});
 
+	describe("Test soft delete feature", () => {
+		const broker = new ServiceBroker({ logger: false });
+		const svc = broker.createService({
+			name: "users",
+			mixins: [DbService({ adapter: getAdapter(), createActions: false })],
+
+			settings: {
+				fields: {
+					id: {
+						type: "string",
+						primaryKey: true,
+
+						columnName: "_id",
+						columnType: "integer"
+					},
+					name: { type: "string", trim: true, required: true },
+					age: { type: "number", columnType: "integer" },
+					status: {
+						type: "boolean",
+						default: true,
+						get: adapterType == "Knex" ? ({ value }) => !!value : undefined
+					},
+					createdAt: {
+						type: "number",
+						readonly: true,
+						columnType: "bigInteger",
+						onCreate: () => Date.now()
+					},
+					updatedAt: {
+						type: "number",
+						readonly: true,
+						columnType: "bigInteger",
+						onUpdate: () => Date.now()
+					},
+					deletedAt: {
+						type: "number",
+						readonly: true,
+						columnType: "bigInteger",
+						hidden: "byDefault",
+						default: null,
+						onRemove: () => Date.now()
+					}
+				},
+
+				scopes: {
+					notDeleted: { deletedAt: null }
+				},
+
+				defaultScopes: ["notDeleted"]
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
+			}
+		});
+
+		beforeAll(() => broker.start());
+		afterAll(() => broker.stop());
+
+		const ctx = Context.create(broker, null, {});
+		let docs = {};
+		jest.spyOn(ctx, "broadcast");
+
+		describe("Set up", () => {
+			it("should return empty array", async () => {
+				const rows = await svc.findEntities(ctx);
+				expect(rows).toEqual([]);
+
+				const count = await svc.countEntities(ctx);
+				expect(count).toEqual(0);
+
+				expect(svc.$softDelete).toBe(true);
+			});
+
+			it("create test entities", async () => {
+				for (const [key, value] of Object.entries(TEST_DOCS)) {
+					docs[key] = await svc.createEntity(ctx, value);
+				}
+			});
+		});
+
+		describe("Test removeEntity", () => {
+			it("should return all rows", async () => {
+				const rows = await svc.findEntities(ctx, {});
+				expect(rows).toEqual(expect.arrayContaining(Object.values(docs)));
+
+				const count = await svc.countEntities(ctx, {});
+				expect(count).toEqual(4);
+			});
+
+			it("should soft delete a record", async () => {
+				ctx.broadcast.mockClear();
+
+				const res = await svc.removeEntity(ctx, { id: docs.janeDoe.id });
+				expect(res).toBe(docs.janeDoe.id);
+
+				const rows = await svc.findEntities(ctx, {});
+				expect(rows).toEqual(
+					expect.arrayContaining([docs.johnDoe, docs.bobSmith, docs.kevinJames])
+				);
+
+				const count = await svc.countEntities(ctx, {});
+				expect(count).toEqual(3);
+
+				expect(ctx.broadcast).toBeCalledTimes(2);
+				expect(ctx.broadcast).toBeCalledWith("cache.clean.users", {
+					type: "remove",
+					data: docs.janeDoe,
+					opts: { softDelete: true }
+				});
+				expect(ctx.broadcast).toBeCalledWith("users.removed", {
+					type: "remove",
+					data: docs.janeDoe,
+					opts: { softDelete: true }
+				});
+			});
+
+			it("should find the deleted record if scope is disabled", async () => {
+				const rows = await svc.findEntities(ctx, { scope: false });
+				expect(rows).toEqual(
+					expect.arrayContaining([
+						docs.johnDoe,
+						docs.janeDoe,
+						docs.bobSmith,
+						docs.kevinJames
+					])
+				);
+
+				const count = await svc.countEntities(ctx, { scope: false });
+				expect(count).toEqual(4);
+			});
+		});
+
+		describe("Test removeEntities", () => {
+			it("should soft delete multiple records", async () => {
+				ctx.broadcast.mockClear();
+
+				const res = await svc.removeEntities(ctx, { query: { status: true } });
+				expect(res).toEqual(expect.arrayContaining([docs.johnDoe.id, docs.bobSmith.id]));
+
+				const rows = await svc.findEntities(ctx, {});
+				expect(rows).toEqual(expect.arrayContaining([docs.kevinJames]));
+
+				const count = await svc.countEntities(ctx, {});
+				expect(count).toEqual(1);
+
+				expect(ctx.broadcast).toBeCalledTimes(4);
+				expect(ctx.broadcast).toBeCalledWith("cache.clean.users", {
+					type: "remove",
+					data: docs.johnDoe,
+					opts: { softDelete: true }
+				});
+				expect(ctx.broadcast).toBeCalledWith("cache.clean.users", {
+					type: "remove",
+					data: docs.bobSmith,
+					opts: { softDelete: true }
+				});
+
+				expect(ctx.broadcast).toBeCalledWith("users.removed", {
+					type: "remove",
+					data: docs.johnDoe,
+					opts: { softDelete: true }
+				});
+				expect(ctx.broadcast).toBeCalledWith("users.removed", {
+					type: "remove",
+					data: docs.bobSmith,
+					opts: { softDelete: true }
+				});
+			});
+
+			it("should find the deleted record if scope is disabled", async () => {
+				const rows = await svc.findEntities(ctx, { scope: false });
+				expect(rows).toEqual(
+					expect.arrayContaining([
+						docs.johnDoe,
+						docs.janeDoe,
+						docs.bobSmith,
+						docs.kevinJames
+					])
+				);
+
+				const count = await svc.countEntities(ctx, { scope: false });
+				expect(count).toEqual(4);
+			});
+		});
+
+		describe("Test softDelete disabling", () => {
+			it("should real delete a record", async () => {
+				ctx.broadcast.mockClear();
+
+				const res = await svc.removeEntity(
+					ctx,
+					{ id: docs.janeDoe.id },
+					{ softDelete: false, scope: false }
+				);
+				expect(res).toBe(docs.janeDoe.id);
+
+				const rows = await svc.findEntities(ctx, {});
+				expect(rows).toEqual(expect.arrayContaining([docs.kevinJames]));
+
+				const count = await svc.countEntities(ctx, {});
+				expect(count).toEqual(1);
+
+				expect(ctx.broadcast).toBeCalledTimes(2);
+				expect(ctx.broadcast).toBeCalledWith("cache.clean.users", {
+					type: "remove",
+					data: docs.janeDoe,
+					opts: { scope: false, softDelete: false }
+				});
+				expect(ctx.broadcast).toBeCalledWith("users.removed", {
+					type: "remove",
+					data: docs.janeDoe,
+					opts: { scope: false, softDelete: false }
+				});
+			});
+
+			it("should not find the deleted record if scope is disabled", async () => {
+				const rows = await svc.findEntities(ctx, { scope: false });
+				expect(rows).toEqual(
+					expect.arrayContaining([docs.johnDoe, docs.bobSmith, docs.kevinJames])
+				);
+
+				const count = await svc.countEntities(ctx, { scope: false });
+				expect(count).toEqual(3);
+			});
+
+			it("should real delete multiple records", async () => {
+				ctx.broadcast.mockClear();
+
+				const res = await svc.removeEntities(
+					ctx,
+					{ query: { status: true }, scope: false },
+					{ softDelete: false }
+				);
+				expect(res).toEqual(expect.arrayContaining([docs.johnDoe.id, docs.bobSmith.id]));
+
+				const rows = await svc.findEntities(ctx, {});
+				expect(rows).toEqual(expect.arrayContaining([docs.kevinJames]));
+
+				const count = await svc.countEntities(ctx, {});
+				expect(count).toEqual(1);
+
+				expect(ctx.broadcast).toBeCalledTimes(4);
+				expect(ctx.broadcast).toBeCalledWith("cache.clean.users", {
+					type: "remove",
+					data: docs.johnDoe,
+					opts: { scope: false, softDelete: false }
+				});
+				expect(ctx.broadcast).toBeCalledWith("cache.clean.users", {
+					type: "remove",
+					data: docs.bobSmith,
+					opts: { scope: false, softDelete: false }
+				});
+
+				expect(ctx.broadcast).toBeCalledWith("users.removed", {
+					type: "remove",
+					data: docs.johnDoe,
+					opts: { scope: false, softDelete: false }
+				});
+				expect(ctx.broadcast).toBeCalledWith("users.removed", {
+					type: "remove",
+					data: docs.bobSmith,
+					opts: { scope: false, softDelete: false }
+				});
+			});
+
+			it("should find the deleted record if scope is disabled", async () => {
+				const rows = await svc.findEntities(ctx, { scope: false });
+				expect(rows).toEqual(expect.arrayContaining([docs.kevinJames]));
+
+				const count = await svc.countEntities(ctx, { scope: false });
+				expect(count).toEqual(1);
+			});
+		});
+	});
+
 	describe("Test methods withouth 'ctx'", () => {
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({

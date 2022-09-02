@@ -67,7 +67,7 @@ describe("Test scoping", () => {
 			});
 		});
 
-		it("should remove a default scope abd add a desired scope", async () => {
+		it("should remove a default scope and add a desired scope", async () => {
 			const params = { scope: ["public", "-onlyActive"] };
 
 			const res = await svc._applyScopes(params, ctx);
@@ -110,7 +110,7 @@ describe("Test scoping", () => {
 			});
 		});
 
-		it("should overwrite previos scope", async () => {
+		it("should overwrite previous scope", async () => {
 			const params = { scope: ["public", "custom", "private"] };
 
 			const res = await svc._applyScopes(params, ctx);
