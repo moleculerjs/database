@@ -363,7 +363,7 @@ class KnexAdapter extends BaseAdapter {
 			const query = params.query ? Object.assign({}, params.query) : {};
 
 			Object.entries(query).forEach(([key, value]) => {
-				if (typeof value == "object") {
+				if (typeof value == "object" && value != null) {
 					if (value.$in && Array.isArray(value.$in)) {
 						q = q.whereIn(key, value.$in);
 					} else if (value.$nin && Array.isArray(value.$nin)) {
