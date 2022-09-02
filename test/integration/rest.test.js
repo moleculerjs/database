@@ -510,7 +510,7 @@ function createEnvironment(getAdapter, adapterType, opts = {}) {
 		started() {
 			const addr = this.server.address();
 			env.port = addr.port;
-			env.baseURL = `http://localhost:${env.port}/api`;
+			env.baseURL = `http://127.0.0.1:${env.port}/api`;
 		}
 	});
 	env.brokers.push(apiBroker);
