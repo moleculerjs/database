@@ -589,10 +589,17 @@ module.exports = function (mixinOpts) {
 			let id = this._getIDFromParams(params);
 
 			// Call because it throws error if entity is not exist
-			const entity = await this.resolveEntities(ctx, params, {
-				transform: false,
-				throwIfNotExist: true
-			});
+			const entity = await this.resolveEntities(
+				ctx,
+				{
+					[this.$primaryField.name]: id,
+					scope: opts.scope
+				},
+				{
+					transform: false,
+					throwIfNotExist: true
+				}
+			);
 
 			const rawUpdate = opts.raw === true;
 			if (!rawUpdate) {
@@ -641,6 +648,7 @@ module.exports = function (mixinOpts) {
 		 * @param {Object} params
 		 * @param {Object} params.query
 		 * @param {Object} params.changes
+		 * @param {String|Array<String>|Boolean} params.scope
 		 * @param {Object?} opts
 		 */
 		async updateEntities(ctx, params = ctx.params, opts = {}) {
@@ -652,7 +660,7 @@ module.exports = function (mixinOpts) {
 
 			const _entities = await this.findEntities(
 				ctx,
-				{ query: params.query },
+				{ query: params.query, scope: params.scope },
 				{ transform: false }
 			);
 
@@ -668,7 +676,10 @@ module.exports = function (mixinOpts) {
 							...params.changes,
 							[this.$primaryField.name]: id
 						},
-						opts
+						{
+							scope: params.scope,
+							...opts
+						}
 					);
 				})
 			);
@@ -693,10 +704,17 @@ module.exports = function (mixinOpts) {
 			let id = this._getIDFromParams(params);
 
 			// Call because it throws error if entity is not exist
-			const entity = await this.resolveEntities(ctx, params, {
-				transform: false,
-				throwIfNotExist: true
-			});
+			const entity = await this.resolveEntities(
+				ctx,
+				{
+					[this.$primaryField.name]: id,
+					scope: opts.scope
+				},
+				{
+					transform: false,
+					throwIfNotExist: true
+				}
+			);
 			const adapter = await this.getAdapter(ctx);
 
 			params = await this.validateParams(ctx, params, {
@@ -744,10 +762,17 @@ module.exports = function (mixinOpts) {
 			let id = this._getIDFromParams(params);
 			const origID = id;
 
-			let entity = await this.resolveEntities(ctx, params, {
-				transform: false,
-				throwIfNotExist: true
-			});
+			let entity = await this.resolveEntities(
+				ctx,
+				{
+					[this.$primaryField.name]: id,
+					scope: opts.scope
+				},
+				{
+					transform: false,
+					throwIfNotExist: true
+				}
+			);
 
 			const adapter = await this.getAdapter(ctx);
 
@@ -792,6 +817,7 @@ module.exports = function (mixinOpts) {
 		 * @param {Context} ctx
 		 * @param {Object?} params
 		 * @param {Object?} params.query
+		 * @param {String|Array<String>|Boolean} params.scope
 		 * @param {Object?} opts
 		 */
 		async removeEntities(ctx, params = ctx.params, opts = {}) {
@@ -803,7 +829,7 @@ module.exports = function (mixinOpts) {
 
 			const _entities = await this.findEntities(
 				ctx,
-				{ query: params.query },
+				{ query: params.query, scope: params.scope },
 				{ transform: false }
 			);
 
@@ -818,7 +844,10 @@ module.exports = function (mixinOpts) {
 						{
 							[this.$primaryField.name]: id
 						},
-						opts
+						{
+							scope: params.scope,
+							...opts
+						}
 					);
 				})
 			);

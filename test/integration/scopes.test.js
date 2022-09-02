@@ -242,42 +242,155 @@ module.exports = (getAdapter, adapterType) => {
 		});
 
 		describe("Test updateEntity & removeEntity", () => {
+			it("setup", async () => {
+				docs.kevinJames = await svc.updateEntity(ctx, {
+					id: docs.kevinJames.id,
+					status: false
+				});
+			});
+
 			it("should throw error because entity is not in the scope", async () => {
 				expect.assertions(2);
 				try {
 					await svc.updateEntity(ctx, {
-						id: docs.janeDoe.id,
+						id: docs.kevinJames.id,
 						age: 99
 					});
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
-					expect(err.data).toEqual({ id: docs.janeDoe.id });
+					expect(err.data).toEqual({ id: docs.kevinJames.id });
 				}
+			});
+
+			it("should update because scope is disabled", async () => {
+				const res = await svc.updateEntity(
+					ctx,
+					{
+						id: docs.kevinJames.id,
+						age: 88
+					},
+					{ scope: false }
+				);
+				expect(res).toEqual({ ...docs.kevinJames, age: 88 });
+
+				const kevin = await svc.findEntity(ctx, {
+					query: { id: docs.kevinJames.id },
+					scope: false
+				});
+				expect(kevin.age).toBe(88);
 			});
 
 			it("should throw error because entity is not in the scope", async () => {
 				expect.assertions(2);
 				try {
 					await svc.replaceEntity(ctx, {
-						id: docs.janeDoe.id,
+						id: docs.kevinJames.id,
 						age: 99
 					});
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
-					expect(err.data).toEqual({ id: docs.janeDoe.id });
+					expect(err.data).toEqual({ id: docs.kevinJames.id });
 				}
+			});
+
+			it("should replace because scope is disabled", async () => {
+				const res = await svc.replaceEntity(
+					ctx,
+					{
+						id: docs.kevinJames.id,
+						name: "Kevin James",
+						age: 77,
+						status: false,
+						dob: Date.parse("1976-12-10T00:00:00"),
+						roles: ["guest"]
+					},
+					{ scope: false }
+				);
+				expect(res).toEqual({ ...docs.kevinJames, age: 77 });
+
+				const kevin = await svc.findEntity(ctx, {
+					query: { id: docs.kevinJames.id },
+					scope: false
+				});
+				expect(kevin.age).toBe(77);
 			});
 
 			it("should throw error because entity is not in the scope", async () => {
 				expect.assertions(2);
 				try {
 					await svc.removeEntity(ctx, {
-						id: docs.janeDoe.id
+						id: docs.kevinJames.id
 					});
 				} catch (err) {
 					expect(err).toBeInstanceOf(EntityNotFoundError);
-					expect(err.data).toEqual({ id: docs.janeDoe.id });
+					expect(err.data).toEqual({ id: docs.kevinJames.id });
 				}
+			});
+
+			it("should remove because scope is disabled", async () => {
+				const res = await svc.removeEntity(
+					ctx,
+					{
+						id: docs.kevinJames.id
+					},
+					{ scope: false }
+				);
+				expect(res).toEqual(docs.kevinJames.id);
+
+				const count = await svc.countEntities(ctx, { scope: false });
+				expect(count).toEqual(3);
+			});
+		});
+
+		describe("Test updateEntities & removeEntities", () => {
+			it("should not update because entities is not in the scope", async () => {
+				const res = await svc.updateEntities(ctx, {
+					query: { name: "Jane Doe" },
+					changes: { age: 99 }
+				});
+				expect(res).toEqual([]);
+
+				const jane = await svc.findEntity(ctx, {
+					query: { id: docs.janeDoe.id },
+					scope: false
+				});
+				expect(jane.age).toBe(35);
+			});
+
+			it("should update because scope is disabled", async () => {
+				const res = await svc.updateEntities(ctx, {
+					query: { name: "Jane Doe" },
+					changes: { age: 99 },
+					scope: false
+				});
+				expect(res).toEqual([{ ...docs.janeDoe, age: 99 }]);
+
+				const jane = await svc.findEntity(ctx, {
+					query: { id: docs.janeDoe.id },
+					scope: false
+				});
+				expect(jane.age).toBe(99);
+			});
+
+			it("should not remove because entity is not in the scope", async () => {
+				const res = await svc.removeEntities(ctx, {
+					query: { name: "Jane Doe" }
+				});
+				expect(res).toEqual([]);
+
+				const count = await svc.countEntities(ctx, { scope: false });
+				expect(count).toEqual(3);
+			});
+
+			it("should remove because scope is disabled", async () => {
+				const res = await svc.removeEntities(ctx, {
+					query: { name: "Jane Doe" },
+					scope: false
+				});
+				expect(res).toEqual([docs.janeDoe.id]);
+
+				const count = await svc.countEntities(ctx, { scope: false });
+				expect(count).toEqual(2);
 			});
 		});
 	});
