@@ -88,7 +88,7 @@ class MongoDBAdapter extends BaseAdapter {
 			await this.client.connect();
 		} else {
 			this.logger.debug("Using an existing MongoDB client", this.storeKey);
-			if (!this.client.topology.isConnected()) {
+			if (!this.client.topology || !this.client.topology.isConnected()) {
 				this.logger.debug("Waiting for the connected state of MongoDB client...");
 				await new this.Promise(resolve => {
 					this.client.once("open", resolve);
