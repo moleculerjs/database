@@ -117,9 +117,9 @@ if (process.env.GITHUB_ACTIONS_CI) {
 	Adapters = [
 		{
 			type: "NeDB"
-		},
+		}
 		/*{ type: "MongoDB", options: { dbName: "db_int_test" } },*/
-		{
+		/*{
 			name: "Knex-SQLite",
 			type: "Knex",
 			options: {
@@ -137,7 +137,7 @@ if (process.env.GITHUB_ACTIONS_CI) {
 					}
 				}
 			}
-		}
+		}*/
 		/*{
 			name: "Knex-Postgresql",
 			type: "Knex",
@@ -230,15 +230,15 @@ describe("Integration tests", () => {
 		getAdapter.IdColumnType = ["Knex"].includes(adapter.type) ? "integer" : "string";
 
 		describe(`Adapter: ${adapter.name || adapter.type}`, () => {
-			describe("Test adapter", () => AdapterTests(getAdapter, adapter.type));
+			//describe("Test adapter", () => AdapterTests(getAdapter, adapter.type));
 			describe("Test methods", () => MethodTests(getAdapter, adapter.type));
-			describe("Test scopes", () => ScopeTests(getAdapter, adapter.type));
-			describe("Test actions", () => ActionsTests(getAdapter, adapter.type));
-			describe("Test transformations", () => TransformTests(getAdapter, adapter.type));
-			describe("Test populating", () => PopulateTests(getAdapter, adapter.type));
-			describe("Test Validations", () => ValidationTests(getAdapter, adapter.type));
-			describe("Test REST", () => RESTTests(getAdapter, adapter.type));
-			describe("Test Tenants", () => TenantTests(getAdapter, adapter.type));
+			// describe("Test scopes", () => ScopeTests(getAdapter, adapter.type));
+			// describe("Test actions", () => ActionsTests(getAdapter, adapter.type));
+			// describe("Test transformations", () => TransformTests(getAdapter, adapter.type));
+			// describe("Test populating", () => PopulateTests(getAdapter, adapter.type));
+			// describe("Test Validations", () => ValidationTests(getAdapter, adapter.type));
+			// describe("Test REST", () => RESTTests(getAdapter, adapter.type));
+			// describe("Test Tenants", () => TenantTests(getAdapter, adapter.type));
 		});
 	}
 });

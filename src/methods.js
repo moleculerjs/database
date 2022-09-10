@@ -495,7 +495,7 @@ module.exports = function (mixinOpts) {
 				const tmp = [];
 				id.forEach(id => {
 					const idx = unTransformedRes.findIndex(doc => doc[idField] == id);
-					tmp.push(idx ? result[idx] : null);
+					tmp.push(idx != -1 ? result[idx] : null);
 				});
 				result = tmp;
 			} else if (!multi) {
