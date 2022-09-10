@@ -415,6 +415,7 @@ module.exports = (getAdapter, adapterType) => {
 			expect(ctx.broadcast).toBeCalledWith("users.created", {
 				type: "create",
 				data: docs.johnDoe,
+				oldData: null,
 				opts: {}
 			});
 		});
@@ -448,6 +449,7 @@ module.exports = (getAdapter, adapterType) => {
 			expect(ctx.broadcast).toBeCalledWith("users.created", {
 				type: "create",
 				data: res,
+				oldData: null,
 				opts: { batch: true, returnEntities: true }
 			});
 		});
@@ -673,6 +675,7 @@ module.exports = (getAdapter, adapterType) => {
 				expect(ctx.broadcast).toBeCalledWith("users.updated", {
 					type: "update",
 					data: row,
+					oldData: expect.any(Object),
 					opts: {}
 				});
 			});
@@ -716,6 +719,14 @@ module.exports = (getAdapter, adapterType) => {
 					expect(ctx.broadcast).toBeCalledWith("users.updated", {
 						type: "update",
 						data: row,
+						oldData: {
+							_id: docs.johnDoe.id,
+							name: "John Doe",
+							age: 42,
+							dob: docs.johnDoe.dob,
+							roles: ["admin", "user"],
+							status: true
+						},
 						opts: { raw: true }
 					});
 				});
@@ -771,6 +782,14 @@ module.exports = (getAdapter, adapterType) => {
 					expect(ctx.broadcast).toBeCalledWith("users.replaced", {
 						type: "replace",
 						data: row,
+						oldData: {
+							_id: docs.kevinJames.id,
+							name: "Kevin James",
+							age: 49,
+							roles: ["guest"],
+							dob: TEST_DOCS.kevinJames.dob,
+							status: false
+						},
 						opts: {}
 					});
 				});
@@ -898,6 +917,7 @@ module.exports = (getAdapter, adapterType) => {
 				expect(ctx.broadcast).toBeCalledWith("users.removed", {
 					type: "remove",
 					data: docs.janeDoe,
+					oldData: null,
 					opts: { softDelete: false }
 				});
 			});
@@ -1044,11 +1064,13 @@ module.exports = (getAdapter, adapterType) => {
 				expect(ctx.broadcast).toBeCalledWith("users.updated", {
 					type: "update",
 					data: rows[0],
+					oldData: expect.any(Object),
 					opts: {}
 				});
 				expect(ctx.broadcast).toBeCalledWith("users.updated", {
 					type: "update",
 					data: rows[1],
+					oldData: expect.any(Object),
 					opts: {}
 				});
 			});
@@ -1124,11 +1146,13 @@ module.exports = (getAdapter, adapterType) => {
 					expect(ctx.broadcast).toBeCalledWith("users.updated", {
 						type: "update",
 						data: rows[0],
+						oldData: expect.any(Object),
 						opts: { raw: true }
 					});
 					expect(ctx.broadcast).toBeCalledWith("users.updated", {
 						type: "update",
 						data: rows[1],
+						oldData: expect.any(Object),
 						opts: { raw: true }
 					});
 				});
@@ -1196,11 +1220,13 @@ module.exports = (getAdapter, adapterType) => {
 				expect(ctx.broadcast).toBeCalledWith("users.removed", {
 					type: "remove",
 					data: docs.bobSmith,
+					oldData: null,
 					opts: { softDelete: false }
 				});
 				expect(ctx.broadcast).toBeCalledWith("users.removed", {
 					type: "remove",
 					data: docs.johnDoe,
+					oldData: null,
 					opts: { softDelete: false }
 				});
 			});
@@ -1344,6 +1370,7 @@ module.exports = (getAdapter, adapterType) => {
 				expect(ctx.broadcast).toBeCalledWith("users.removed", {
 					type: "remove",
 					data: docs.janeDoe,
+					oldData: null,
 					opts: { softDelete: true }
 				});
 			});
@@ -1392,11 +1419,13 @@ module.exports = (getAdapter, adapterType) => {
 				expect(ctx.broadcast).toBeCalledWith("users.removed", {
 					type: "remove",
 					data: docs.johnDoe,
+					oldData: null,
 					opts: { softDelete: true }
 				});
 				expect(ctx.broadcast).toBeCalledWith("users.removed", {
 					type: "remove",
 					data: docs.bobSmith,
+					oldData: null,
 					opts: { softDelete: true }
 				});
 			});
@@ -1443,6 +1472,7 @@ module.exports = (getAdapter, adapterType) => {
 				expect(ctx.broadcast).toBeCalledWith("users.removed", {
 					type: "remove",
 					data: docs.janeDoe,
+					oldData: null,
 					opts: { scope: false, softDelete: false }
 				});
 			});
@@ -1488,11 +1518,13 @@ module.exports = (getAdapter, adapterType) => {
 				expect(ctx.broadcast).toBeCalledWith("users.removed", {
 					type: "remove",
 					data: docs.johnDoe,
+					oldData: null,
 					opts: { scope: false, softDelete: false }
 				});
 				expect(ctx.broadcast).toBeCalledWith("users.removed", {
 					type: "remove",
 					data: docs.bobSmith,
+					oldData: null,
 					opts: { scope: false, softDelete: false }
 				});
 			});
@@ -1603,6 +1635,7 @@ module.exports = (getAdapter, adapterType) => {
 			expect(broker.emit).toBeCalledWith("users.created", {
 				type: "create",
 				data: entity,
+				oldData: null,
 				opts: {}
 			});
 		});
@@ -1627,6 +1660,12 @@ module.exports = (getAdapter, adapterType) => {
 			expect(broker.emit).toBeCalledWith("users.updated", {
 				type: "update",
 				data: res,
+				oldData: {
+					_id: expectedID,
+					name: "John Doe",
+					email: "john.doe@moleculer.services",
+					age: 30
+				},
 				opts: {}
 			});
 
@@ -1671,6 +1710,12 @@ module.exports = (getAdapter, adapterType) => {
 			expect(broker.emit).toBeCalledWith("users.replaced", {
 				type: "replace",
 				data: res,
+				oldData: {
+					_id: expectedID,
+					name: "Dr. John Doe",
+					email: "john.doe@moleculer.services",
+					age: 33
+				},
 				opts: {}
 			});
 
@@ -1688,6 +1733,7 @@ module.exports = (getAdapter, adapterType) => {
 			expect(broker.emit).toBeCalledWith("users.removed", {
 				type: "remove",
 				data: entity,
+				oldData: null,
 				opts: { softDelete: false }
 			});
 		});
@@ -1703,6 +1749,7 @@ module.exports = (getAdapter, adapterType) => {
 			expect(broker.emit).toBeCalledWith("users.cleared", {
 				type: "clear",
 				data: null,
+				oldData: null,
 				opts: {}
 			});
 		});

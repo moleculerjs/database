@@ -18,6 +18,7 @@ The options of the Mixin.
 | `cache.additionalKeys` | `Array<String>` | `null` | Additional cache keys. |
 | `rest` | `Boolean` | `true` | Set the API Gateway auto-aliasing REST properties in the service & actions. |
 | `entityChangedEventType` | `String` | `"broadcast"` | Type of the entity changed event. Values: `null`, `"broadcast"`, `"emit"`. The value `null` disables the sending of events. |
+| `entityChangedOldEntity` | `Boolean` | `false` | Add previous entity data to the entity changed event payload in case of update or replace. |
 | `autoReconnect` | `Boolean` | `true` | Automatic reconnect if the DB server is not available when connecting for the first time. |
 | `maximumAdapters` | `Number` | `null` | Maximum number of connected adapters. In case of multi-tenancy. |
 | `maxLimit` | `Number` | `-1` | Maximum value of `limit` in `find` action and `pageSize` in `list` action. Default: `-1` (no limit) |
@@ -1473,7 +1474,7 @@ Please note that if you have many tenants, the service will open many connection
 _It can be asynchronous._
 
 ## `entityChanged`
-`entityChanged(type: String, data?: any, ctx?: Context, opts?: object)`
+`entityChanged(type: String, data?: any, oldData?: any ctx?: Context, opts?: object)`
 
 It's a method that is called when an entity is created, updated, replaced or removed. You can use it to clear the cache or send an event.
 
@@ -1484,6 +1485,7 @@ There is a default implementation that sends an entity change events. [Read more
 | -------- | ---- | ----------- |
 | `type` | `String` | Type of changes. Available values: `create`, `update`, `replace`, `remove`, `clear`. |
 | `data` | `Object\|Array<Object>` | Changed entity or entities. |
+| `oldData` | `Object` | Previous entity in case of update/replace. |
 | `ctx` | `Context` | Moleculer `Context` instance. It can be `null`. |
 | `opts` | `Object` | Additional options. |
 | `opts.batch` | `Boolean` | It's true when the operation has affected more entities. |

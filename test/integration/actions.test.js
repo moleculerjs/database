@@ -122,7 +122,7 @@ module.exports = (getAdapter, adapterType) => {
 				});
 
 				expect(entityChanged).toBeCalledTimes(1);
-				expect(entityChanged).toBeCalledWith("create", doc, expect.any(Context), {});
+				expect(entityChanged).toBeCalledWith("create", doc, null, expect.any(Context), {});
 			});
 
 			it("should get the newly created entity", async () => {
@@ -248,9 +248,23 @@ module.exports = (getAdapter, adapterType) => {
 					});
 
 					expect(entityChanged).toBeCalledTimes(1);
-					expect(entityChanged).toBeCalledWith("update", doc, expect.any(Context), {
-						raw: true
-					});
+					expect(entityChanged).toBeCalledWith(
+						"update",
+						doc,
+						{
+							_id: expectedID,
+							author: "John Doe",
+							content: "Content of first post",
+							created_at: expect.any(Number),
+							status: true,
+							title: "First post",
+							votes: 0
+						},
+						expect.any(Context),
+						{
+							raw: true
+						}
+					);
 				});
 
 				it("should get the newly created entity", async () => {
@@ -301,7 +315,22 @@ module.exports = (getAdapter, adapterType) => {
 				});
 
 				expect(entityChanged).toBeCalledTimes(1);
-				expect(entityChanged).toBeCalledWith("update", doc, expect.any(Context), {});
+				expect(entityChanged).toBeCalledWith(
+					"update",
+					doc,
+					/*{
+						_id: expectedID,
+						author: "John Doe",
+						content: "Updated content of first title",
+						created_at: expect.any(Number),
+						status: true,
+						title: "Updated title",
+						votes: 1
+					},*/
+					expect.any(Object),
+					expect.any(Context),
+					{}
+				);
 			});
 
 			it("should get the newly created entity", async () => {
@@ -332,7 +361,7 @@ module.exports = (getAdapter, adapterType) => {
 				expect(res).toEqual(docs[0].id);
 
 				expect(entityChanged).toBeCalledTimes(1);
-				expect(entityChanged).toBeCalledWith("remove", docs[0], expect.any(Context), {
+				expect(entityChanged).toBeCalledWith("remove", docs[0], null, expect.any(Context), {
 					softDelete: false
 				});
 			});
@@ -918,6 +947,7 @@ module.exports = (getAdapter, adapterType) => {
 				{
 					type: "create",
 					data: row,
+					oldData: null,
 					opts: {}
 				},
 				{ parentCtx: expect.any(Context) }
@@ -1069,6 +1099,11 @@ module.exports = (getAdapter, adapterType) => {
 				{
 					type: "update",
 					data: row,
+					oldData: {
+						_id: row.id,
+						title: "First post",
+						content: "First content"
+					},
 					opts: {}
 				},
 				{ parentCtx: expect.any(Context) }
@@ -1161,6 +1196,7 @@ module.exports = (getAdapter, adapterType) => {
 				{
 					type: "create",
 					data: row,
+					oldData: null,
 					opts: {}
 				},
 				{ parentCtx: expect.any(Context) }
@@ -1205,6 +1241,11 @@ module.exports = (getAdapter, adapterType) => {
 				{
 					type: "update",
 					data: row,
+					oldData: {
+						_id: row.id,
+						title: "First post",
+						content: "First content"
+					},
 					opts: {}
 				},
 				{ parentCtx: expect.any(Context) }

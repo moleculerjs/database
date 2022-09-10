@@ -533,7 +533,7 @@ module.exports = function (mixinOpts) {
 				result = await this.transformResult(adapter, result, {}, ctx);
 			}
 
-			await this._entityChanged("create", result, ctx, opts);
+			await this._entityChanged("create", result, null, ctx, opts);
 			timeEnd();
 			this.finishSpan(ctx, span);
 
@@ -572,7 +572,7 @@ module.exports = function (mixinOpts) {
 				result = await this.transformResult(adapter, result, {}, ctx);
 			}
 
-			await this._entityChanged("create", result, ctx, { ...opts, batch: true });
+			await this._entityChanged("create", result, null, ctx, { ...opts, batch: true });
 
 			timeEnd();
 			this.finishSpan(ctx, span);
@@ -641,7 +641,7 @@ module.exports = function (mixinOpts) {
 			}
 
 			if (hasChanges) {
-				await this._entityChanged("update", result, ctx, opts);
+				await this._entityChanged("update", result, entity, ctx, opts);
 			}
 			timeEnd();
 			this.finishSpan(ctx, span);
@@ -747,7 +747,7 @@ module.exports = function (mixinOpts) {
 				result = await this.transformResult(adapter, result, {}, ctx);
 			}
 
-			await this._entityChanged("replace", result, ctx, opts);
+			await this._entityChanged("replace", result, entity, ctx, opts);
 
 			timeEnd();
 			this.finishSpan(ctx, span);
@@ -811,7 +811,7 @@ module.exports = function (mixinOpts) {
 				entity = await this.transformResult(adapter, entity, params, ctx);
 			}
 
-			await this._entityChanged("remove", entity, ctx, {
+			await this._entityChanged("remove", entity, null, ctx, {
 				...opts,
 				softDelete: !!softDelete
 			});
@@ -883,7 +883,7 @@ module.exports = function (mixinOpts) {
 			const adapter = await this.getAdapter(ctx);
 			const result = await adapter.clear(params);
 
-			await this._entityChanged("clear", null, ctx);
+			await this._entityChanged("clear", null, null, ctx);
 
 			timeEnd();
 			this.finishSpan(ctx, span);
@@ -923,44 +923,53 @@ module.exports = function (mixinOpts) {
 
 		/**
 		 * Called when an entity changed.
+		 *
 		 * @param {String} type
 		 * @param {any} data
+		 * @param {any} oldData
 		 * @param {Context?} ctx
 		 * @param {Object?} opts
 		 */
-		async _entityChanged(type, data, ctx, opts = {}) {
+		async _entityChanged(type, data, oldData, ctx, opts = {}) {
 			if (cacheOpts && cacheOpts.eventType) {
 				const eventName = cacheOpts.eventName || `cache.clean.${this.name}`;
 				if (eventName) {
-					// Cache cleaning event
-					(ctx || this.broker)[cacheOpts.eventType](eventName, {
+					const payload = {
 						type,
 						data,
 						opts
-					});
+					};
+
+					// Cache cleaning event
+					(ctx || this.broker)[cacheOpts.eventType](eventName, payload);
 				}
 			}
 
-			await this.entityChanged(type, data, ctx, opts);
+			await this.entityChanged(type, data, oldData, ctx, opts);
 		},
 
 		/**
 		 * Send entity lifecycle events
+		 *
 		 * @param {String} type
 		 * @param {any} data
+		 * @param {any} oldData
 		 * @param {Context?} ctx
 		 * @param {Object?} opts
 		 */
-		async entityChanged(type, data, ctx, opts) {
+		async entityChanged(type, data, oldData, ctx, opts) {
 			if (mixinOpts.entityChangedEventType) {
 				const op = type + (type == "clear" ? "ed" : "d");
 				const eventName = `${this.name}.${op}`;
 
-				(ctx || this.broker)[mixinOpts.entityChangedEventType](eventName, {
+				const payload = {
 					type,
 					data,
+					oldData,
 					opts
-				});
+				};
+
+				(ctx || this.broker)[mixinOpts.entityChangedEventType](eventName, payload);
 			}
 		},
 
