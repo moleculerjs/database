@@ -871,6 +871,7 @@ Resolve an entity based on one or more IDs.
 | `populate` | `String\|Array<String>` | `null` | Populated fields. |
 | `mapping` | `boolean` | `false` | Convert the result to `Object` where the key is the ID. |
 | `throwIfNotExist` | `boolean` | `false` | If `true`, the error `EntityNotFound` is thrown if the entity does not exist. |
+| `reorderResult` | `boolean` | `false` | If `true` and the ID is an array, the result will be reordered according to the order of IDs. |
 
 
 ### REST endpoint
@@ -1279,6 +1280,7 @@ Return entity(ies) by ID(s).
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
 | `opts.throwIfNotExist` | `boolean` | `false` | If `true`, the error `EntityNotFound` is thrown if the entity does not exist. |
+| `opts.reorderResult` | `boolean` | `false` | If `true` and the ID is an array, the result will be reordered according to the order of IDs. |
 
 
 ## `createEntity`
