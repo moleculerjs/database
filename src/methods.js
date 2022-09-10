@@ -490,6 +490,14 @@ module.exports = function (mixinOpts) {
 					map[id] = doc;
 					return map;
 				}, {});
+			} else if (multi && opts.reorderResult) {
+				// Reorder result to the same as ID array (it needs for DataLoader)
+				const tmp = [];
+				id.forEach(id => {
+					const idx = unTransformedRes.findIndex(doc => doc[idField] == id);
+					tmp.push(idx ? result[idx] : null);
+				});
+				result = tmp;
 			} else if (!multi) {
 				result = result[0];
 			}
