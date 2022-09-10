@@ -88,6 +88,7 @@ module.exports = function (mixinOpts) {
 				"sort",
 				"search",
 				"searchFields",
+				"collation",
 				"scope",
 				"populate",
 				"query"
@@ -176,6 +177,7 @@ module.exports = function (mixinOpts) {
 				"sort",
 				"search",
 				"searchFields",
+				"collation",
 				"scope",
 				"populate",
 				"query"
@@ -239,7 +241,7 @@ module.exports = function (mixinOpts) {
 		res.get = {
 			visibility: mixinOpts.actionVisibility,
 			rest: mixinOpts.rest ? "GET /:id" : null,
-			cache: generateCacheOptions(["id", "populate", "fields"]),
+			cache: generateCacheOptions(["id", "fields", "scope", "populate"]),
 			params: {
 				// The "id" field get from `fields`
 				fields: PARAMS_FIELDS,
@@ -271,7 +273,14 @@ module.exports = function (mixinOpts) {
 	if (actionEnabled("resolve")) {
 		res.resolve = {
 			visibility: mixinOpts.actionVisibility,
-			cache: generateCacheOptions(["id", "populate", "fields", "mapping"]),
+			cache: generateCacheOptions([
+				"id",
+				"fields",
+				"scope",
+				"populate",
+				"mapping",
+				"throwIfNotExist"
+			]),
 			params: {
 				// The "id" field get from `fields`
 				fields: PARAMS_FIELDS,
