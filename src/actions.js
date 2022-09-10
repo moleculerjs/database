@@ -279,7 +279,8 @@ module.exports = function (mixinOpts) {
 				"scope",
 				"populate",
 				"mapping",
-				"throwIfNotExist"
+				"throwIfNotExist",
+				"reorderResult"
 			]),
 			params: {
 				// The "id" field get from `fields`
@@ -287,11 +288,13 @@ module.exports = function (mixinOpts) {
 				scope: PARAMS_SCOPE,
 				populate: PARAMS_POPULATE,
 				mapping: { type: "boolean", optional: true },
-				throwIfNotExist: { type: "boolean", optional: true }
+				throwIfNotExist: { type: "boolean", optional: true },
+				reorderResult: { type: "boolean", optional: true }
 			},
 			async handler(ctx) {
 				return this.resolveEntities(ctx, ctx.params, {
-					throwIfNotExist: ctx.params.throwIfNotExist
+					throwIfNotExist: ctx.params.throwIfNotExist,
+					reorderResult: ctx.params.reorderResult
 				});
 			}
 		};

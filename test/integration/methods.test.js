@@ -480,6 +480,54 @@ module.exports = (getAdapter, adapterType) => {
 				});
 			});
 
+			it("resolve entities by IDs with reordering", async () => {
+				const res = await svc.resolveEntities(
+					ctx,
+					{
+						id: [
+							docs.johnDoe.id,
+							docs.bobSmith.id,
+							docs.kevinJames.id,
+							null,
+							docs.janeDoe.id,
+							"123456879"
+						]
+					},
+					{ reorderResult: true }
+				);
+				expect(res).toEqual([
+					docs.johnDoe,
+					docs.bobSmith,
+					docs.kevinJames,
+					null,
+					docs.janeDoe,
+					null
+				]);
+
+				const res2 = await svc.resolveEntities(
+					ctx,
+					{
+						id: [
+							"123456879",
+							docs.janeDoe.id,
+							null,
+							docs.kevinJames.id,
+							docs.bobSmith.id,
+							docs.johnDoe.id
+						]
+					},
+					{ reorderResult: true }
+				);
+				expect(res2).toEqual([
+					null,
+					docs.janeDoe,
+					null,
+					docs.kevinJames,
+					docs.bobSmith,
+					docs.johnDoe
+				]);
+			});
+
 			it("throw Missing ID", async () => {
 				expect.assertions(4);
 				try {

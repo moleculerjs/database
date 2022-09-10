@@ -2641,7 +2641,7 @@ module.exports = (getAdapter, adapterType) => {
 		it("check 'get' action", async () => {
 			expect(svc.schema.actions.get).toEqual({
 				handler: expect.any(Function),
-				cache: { enabled: true, keys: ["key", "populate", "fields", "#userID"] },
+				cache: { enabled: true, keys: ["key", "fields", "scope", "populate", "#userID"] },
 				rest: "GET /:key",
 				visibility: "published",
 				params: {
@@ -2666,7 +2666,19 @@ module.exports = (getAdapter, adapterType) => {
 		it("check 'resolve' action", async () => {
 			expect(svc.schema.actions.resolve).toEqual({
 				handler: expect.any(Function),
-				cache: { enabled: true, keys: ["key", "populate", "fields", "mapping", "#userID"] },
+				cache: {
+					enabled: true,
+					keys: [
+						"key",
+						"fields",
+						"scope",
+						"populate",
+						"mapping",
+						"throwIfNotExist",
+						"reorderResult",
+						"#userID"
+					]
+				},
 				visibility: "published",
 				params: {
 					fields: [
@@ -2687,7 +2699,8 @@ module.exports = (getAdapter, adapterType) => {
 						{ optional: true, type: "string" },
 						{ items: "string", optional: true, type: "array" }
 					],
-					throwIfNotExist: { optional: true, type: "boolean" }
+					throwIfNotExist: { optional: true, type: "boolean" },
+					reorderResult: { optional: true, type: "boolean" }
 				}
 			});
 		});
@@ -2720,6 +2733,7 @@ module.exports = (getAdapter, adapterType) => {
 						"sort",
 						"search",
 						"searchFields",
+						"collation",
 						"scope",
 						"populate",
 						"query",
@@ -2787,6 +2801,7 @@ module.exports = (getAdapter, adapterType) => {
 						"sort",
 						"search",
 						"searchFields",
+						"collation",
 						"scope",
 						"populate",
 						"query",
