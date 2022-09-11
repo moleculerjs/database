@@ -597,7 +597,7 @@ module.exports = function (mixinOpts) {
 			let id = this._getIDFromParams(params);
 
 			// Call because it throws error if entity is not exist
-			const entity = await this.resolveEntities(
+			let entity = await this.resolveEntities(
 				ctx,
 				{
 					[this.$primaryField.name]: id,
@@ -638,6 +638,7 @@ module.exports = function (mixinOpts) {
 
 			if (opts.transform !== false) {
 				result = await this.transformResult(adapter, result, {}, ctx);
+				entity = await this.transformResult(adapter, entity, {}, ctx);
 			}
 
 			if (hasChanges) {
@@ -712,7 +713,7 @@ module.exports = function (mixinOpts) {
 			let id = this._getIDFromParams(params);
 
 			// Call because it throws error if entity is not exist
-			const entity = await this.resolveEntities(
+			let entity = await this.resolveEntities(
 				ctx,
 				{
 					[this.$primaryField.name]: id,
@@ -745,6 +746,7 @@ module.exports = function (mixinOpts) {
 
 			if (opts.transform !== false) {
 				result = await this.transformResult(adapter, result, {}, ctx);
+				entity = await this.transformResult(adapter, entity, {}, ctx);
 			}
 
 			await this._entityChanged("replace", result, entity, ctx, opts);
@@ -965,9 +967,12 @@ module.exports = function (mixinOpts) {
 				const payload = {
 					type,
 					data,
-					oldData,
 					opts
 				};
+
+				if (mixinOpts.entityChangedOldEntity) {
+					payload.oldData = oldData;
+				}
 
 				(ctx || this.broker)[mixinOpts.entityChangedEventType](eventName, payload);
 			}

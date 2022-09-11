@@ -252,13 +252,13 @@ module.exports = (getAdapter, adapterType) => {
 						"update",
 						doc,
 						{
-							_id: expectedID,
-							author: "John Doe",
-							content: "Content of first post",
-							created_at: expect.any(Number),
-							status: true,
+							id: expectedID,
 							title: "First post",
-							votes: 0
+							content: "Content of first post",
+							author: "John Doe",
+							votes: 0,
+							status: true,
+							createdAt: expect.any(Number)
 						},
 						expect.any(Context),
 						{
@@ -318,16 +318,26 @@ module.exports = (getAdapter, adapterType) => {
 				expect(entityChanged).toBeCalledWith(
 					"update",
 					doc,
-					/*{
-						_id: expectedID,
-						author: "John Doe",
-						content: "Updated content of first title",
-						created_at: expect.any(Number),
-						status: true,
-						title: "Updated title",
-						votes: 1
-					},*/
-					expect.any(Object),
+					adapterType == "MongoDB" || adapterType == "NeDB"
+						? {
+								id: expectedID,
+								author: "John Doe",
+								content: "Updated content of first title",
+								createdAt: expect.any(Number),
+								status: true,
+								title: "Updated title",
+								votes: 1
+						  }
+						: {
+								id: expectedID,
+								author: "John Doe",
+								content: "Content of first post",
+								createdAt: expect.any(Number),
+								updatedAt: null,
+								status: true,
+								title: "First post",
+								votes: 0
+						  },
 					expect.any(Context),
 					{}
 				);
@@ -947,7 +957,6 @@ module.exports = (getAdapter, adapterType) => {
 				{
 					type: "create",
 					data: row,
-					oldData: null,
 					opts: {}
 				},
 				{ parentCtx: expect.any(Context) }
@@ -1099,11 +1108,6 @@ module.exports = (getAdapter, adapterType) => {
 				{
 					type: "update",
 					data: row,
-					oldData: {
-						_id: row.id,
-						title: "First post",
-						content: "First content"
-					},
 					opts: {}
 				},
 				{ parentCtx: expect.any(Context) }
@@ -1196,7 +1200,6 @@ module.exports = (getAdapter, adapterType) => {
 				{
 					type: "create",
 					data: row,
-					oldData: null,
 					opts: {}
 				},
 				{ parentCtx: expect.any(Context) }
@@ -1241,11 +1244,6 @@ module.exports = (getAdapter, adapterType) => {
 				{
 					type: "update",
 					data: row,
-					oldData: {
-						_id: row.id,
-						title: "First post",
-						content: "First content"
-					},
 					opts: {}
 				},
 				{ parentCtx: expect.any(Context) }
