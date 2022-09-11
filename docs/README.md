@@ -16,6 +16,7 @@ The options of the Mixin.
 | `cache.eventType` | `String` | `"broadcast"` | Type of the broadcasted event. It can be `"broadcast"`, or `"emit"`. If `null`, the sending of the event is disabled. |
 | `cache.cacheCleanOnDeps` | `Boolean\|Array<String>` | `true` | Subscribe to the cache clean event of the service dependencies and clear the local cache entries. If it's an `Array<String>`, it should be the exact event names. |
 | `cache.additionalKeys` | `Array<String>` | `null` | Additional cache keys. |
+| `cache.cacheCleaner` | `Function` | `null` | Custom cache cleaner function. |
 | `rest` | `Boolean` | `true` | Set the API Gateway auto-aliasing REST properties in the service & actions. |
 | `entityChangedEventType` | `String` | `"broadcast"` | Type of the entity changed event. Values: `null`, `"broadcast"`, `"emit"`. The value `null` disables the sending of events. |
 | `entityChangedOldEntity` | `Boolean` | `false` | Add previous entity data to the entity changed event payload in case of update or replace. |
