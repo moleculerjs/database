@@ -17,7 +17,8 @@
     "bench:watch": "nodemon benchmark/index.js",
     "deps": "npm-check -u && npm audit fix",
     "ci-update-deps": "ncu -u --target minor",
-    "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+    "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "release": "npm publish --access public && git push --tags"
   },
   "keywords": [
     "moleculer",
