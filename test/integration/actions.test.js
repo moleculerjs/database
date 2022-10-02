@@ -1404,7 +1404,12 @@ module.exports = (getAdapter, adapterType) => {
 	});
 
 	describe("Test caching with additional events", () => {
-		const broker = new ServiceBroker({ logger: false, cacher: "Memory" });
+		const broker = new ServiceBroker({
+			logger: false,
+			cacher: "Memory",
+			metrics: { enabled: true },
+			tracing: { enabled: true }
+		});
 		const svc = broker.createService({
 			name: "posts",
 			mixins: [
