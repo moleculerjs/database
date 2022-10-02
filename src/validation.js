@@ -424,76 +424,45 @@ module.exports = function (mixinOpts) {
 						return setValue(field, value);
 					}
 
+					const customArgs = [
+						{
+							ctx,
+							value,
+							params,
+							field,
+							id: opts.id,
+							operation: type,
+							entity: oldEntity,
+							root: opts.root || params
+						}
+					];
+
 					// Handlers
 					if (!opts.skipOnHooks) {
 						if (type == "create" && field.onCreate) {
 							if (_.isFunction(field.onCreate)) {
-								value = await this._callCustomFunction(field.onCreate, [
-									{
-										ctx,
-										value,
-										params,
-										field,
-										id: opts.id,
-										operation: type,
-										entity: oldEntity,
-										root: opts.root || params
-									}
-								]);
+								value = await this._callCustomFunction(field.onCreate, customArgs);
 							} else {
 								value = field.onCreate;
 							}
 							return setValue(field, value);
 						} else if (type == "update" && field.onUpdate) {
 							if (_.isFunction(field.onUpdate)) {
-								value = await this._callCustomFunction(field.onUpdate, [
-									{
-										ctx,
-										value,
-										params,
-										field,
-										id: opts.id,
-										operation: type,
-										entity: oldEntity,
-										root: opts.root || params
-									}
-								]);
+								value = await this._callCustomFunction(field.onUpdate, customArgs);
 							} else {
 								value = field.onUpdate;
 							}
 							return setValue(field, value);
 						} else if (type == "replace" && field.onReplace) {
 							if (_.isFunction(field.onReplace)) {
-								value = await this._callCustomFunction(field.onReplace, [
-									{
-										ctx,
-										value,
-										params,
-										field,
-										id: opts.id,
-										operation: type,
-										entity: oldEntity,
-										root: opts.root || params
-									}
-								]);
+								value = await this._callCustomFunction(field.onReplace, customArgs);
 							} else {
 								value = field.onReplace;
 							}
 							return setValue(field, value);
 						} else if (type == "remove" && field.onRemove) {
 							if (_.isFunction(field.onRemove)) {
-								value = await this._callCustomFunction(field.onRemove, [
-									{
-										ctx,
-										value,
-										params,
-										field,
-										id: opts.id,
-										operation: type,
-										entity: oldEntity,
-										root: opts.root || params
-									}
-								]);
+								value = await this._callCustomFunction(field.onRemove, customArgs);
 							} else {
 								value = field.onRemove;
 							}
@@ -506,18 +475,10 @@ module.exports = function (mixinOpts) {
 						if (value === undefined) {
 							if (field.default !== undefined) {
 								if (_.isFunction(field.default)) {
-									value = await this._callCustomFunction(field.default, [
-										{
-											ctx,
-											value,
-											params,
-											field,
-											id: opts.id,
-											operation: type,
-											entity: oldEntity,
-											root: opts.root || params
-										}
-									]);
+									value = await this._callCustomFunction(
+										field.default,
+										customArgs
+									);
 								} else {
 									value = field.default;
 								}

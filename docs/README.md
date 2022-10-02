@@ -148,6 +148,16 @@ For ID fields set the `primaryKey` to true. The service knows the name of the ID
 }
 ```
 
+#### User-defined primary key
+If you would like to set the primary key values instead of database generate them, set the `generated: "user"` property into the primary key field definition.
+
+**Example**
+```js
+{
+    id: { type: "string", primaryKey: true, generated: "user", columnName: "_id" }
+}
+```
+
 
 ### `secure`: \<boolean\> _(Default: `false`)_
 With the `secure` property you can encrypt the value of the ID field. This can be useful to prevent users from finding out the IDs of other documents when the database uses incremental ID values.

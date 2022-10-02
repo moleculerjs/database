@@ -67,7 +67,7 @@ broker.createService({
 
 	settings: {
 		fields: {
-			id: { type: "string", primaryKey: true, columnName: "_id" },
+			id: { type: "string", primaryKey: true, columnName: "_id", generated: "user" },
 			title: {
 				type: "string",
 				max: 255,
@@ -106,6 +106,7 @@ broker
 	.then(async () => {
 		// Create a new post
 		let post = await broker.call("posts.create", {
+			id: "63397c8302751c0c0abd3609",
 			title: "My first post",
 			content: "Content of my first post..."
 		});

@@ -238,6 +238,9 @@ class MongoDBAdapter extends BaseAdapter {
 	 *
 	 */
 	async insert(entity) {
+		if (entity._id) {
+			entity._id = this.stringToObjectID(entity._id);
+		}
 		const res = await this.collection.insertOne(entity);
 		if (!res.acknowledged) throw new Error("MongoDB insertOne failed.");
 		return entity;
@@ -253,6 +256,11 @@ class MongoDBAdapter extends BaseAdapter {
 	 *
 	 */
 	async insertMany(entities, opts = {}) {
+		for (const entity of entities) {
+			if (entity._id) {
+				entity._id = this.stringToObjectID(entity._id);
+			}
+		}
 		const res = await this.collection.insertMany(entities);
 		if (!res.acknowledged) throw new Error("MongoDB insertMany failed.");
 		return opts.returnEntities ? entities : Object.values(res.insertedIds);
