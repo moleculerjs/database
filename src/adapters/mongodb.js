@@ -83,15 +83,25 @@ class MongoDBAdapter extends BaseAdapter {
 			this.client.on("open", () => this.logger.info(`MongoDB client has connected.`));
 			this.client.on("close", () => this.logger.warn("MongoDB client has disconnected."));
 			this.client.on("error", err => this.logger.error("MongoDB error.", err));
-
-			// Connect the client to the server
-			await this.client.connect();
+			try {
+				// Connect the client to the server
+				await this.client.connect();
+			} catch (err) {
+				// We remove the client from the global store if the connection failed because of reconnecting
+				this.removeAdapterFromClientGlobalStore(this.storeKey);
+				throw err;
+			}
 		} else {
 			this.logger.debug("Using an existing MongoDB client", this.storeKey);
 			if (!this.client.topology || !this.client.topology.isConnected()) {
 				this.logger.debug("Waiting for the connected state of MongoDB client...");
+				// This silent timer blocks the process to avoid exiting while wait for connecting
+				const emptyTimer = setInterval(() => {}, 1000);
 				await new this.Promise(resolve => {
-					this.client.once("open", resolve);
+					this.client.once("open", () => {
+						clearInterval(emptyTimer);
+						resolve();
+					});
 				});
 			}
 		}

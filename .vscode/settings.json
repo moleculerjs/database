@@ -1,23 +1,4 @@
 {
-    "grammarly.overrides": [
-        {
-            "files": [
-                "**/docs/README.md"
-            ],
-            "config": {
-                "audience": "general",
-                "dialect": "american",
-                "domain": "technical",
-                "emotions": [
-                    "neutral",
-                    "optimistic",
-                    "friendly"
-                ],
-                "goals": [
-                    "inform"
-                ]
-            }
-        }
-    ],
-    "jest.autoEnable": false
+
+    "jest.autoRun": "off"
 }

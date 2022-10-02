@@ -51,7 +51,7 @@ broker.createService({
 	mixins: [
 		DbService({
 			adapter: {
-				type: "Knex",
+				/*type: "Knex",
 				options: {
 					knex: {
 						client: "sqlite3",
@@ -59,7 +59,8 @@ broker.createService({
 							filename: ":memory:"
 						}
 					}
-				}
+				}*/
+				type: "MongoDB"
 			}
 		})
 	],
@@ -93,7 +94,7 @@ broker.createService({
 
 	async started() {
 		const adapter = await this.getAdapter();
-		await adapter.createTable();
+		if (adapter.createTable) await adapter.createTable();
 
 		await this.clearEntities();
 	}
