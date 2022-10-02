@@ -8,7 +8,7 @@
 # @moleculer/database 
 Advanced Database Access Service for Moleculer microservices framework. Use it to persist your data in a database.
 
-**This project is in work-in-progress. Don't use it in production.**
+**This project is in work-in-progress. Be careful using it in production.**
 
 >this module follows the *one database per service* pattern. To learn more about this design pattern and its implications check this [article](https://microservices.io/patterns/data/database-per-service.html). For *multiple entities/tables per service* approach check [FAQ](faq.html#DB-Adapters-moleculer-db).
 
@@ -29,12 +29,10 @@ Advanced Database Access Service for Moleculer microservices framework. Use it t
 - Multi-tenancy
 
 ## Install
-<!-- ```
+```
 npm i @moleculer/database nedb
-``` -->
 ```
-npm i moleculerjs/database nedb
-```
+> Installing `nedb` is optional. It can be good for prototyping.
 
 ## Usage
 
