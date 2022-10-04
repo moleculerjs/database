@@ -395,7 +395,7 @@ module.exports = function (mixinOpts) {
 			};
 
 			const authorizedFields = await this._authorizeFields(fields, ctx, params, {
-				permission: opts.permissive,
+				permissive: opts.permissive,
 				isWrite: true
 			});
 
