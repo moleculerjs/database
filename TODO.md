@@ -24,6 +24,7 @@
 - [ ] option to disable validators `opts.validation: false`
 - [x] add `scope` param for `removeEntities` and `updateEntities` and pass to the `findEntities` call inside the method.
 - [x] skipping softDelete in methods `opts.softDelete: false` to make real delete in maintenance processes
+- [ ] Add `events: false` to options to disable entity changed events. (e.g. when `softDelete: false` we don't want to send event about changes)
 
 
 ## Just if I bored to death
