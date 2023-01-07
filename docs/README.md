@@ -1591,14 +1591,18 @@ In this example, we'll create some scopes and show how you can use them when cal
 const activePosts = await broker.call("posts.find");
 ```
 
-**List all public posts**
+**List the active & public posts**
 ```js
 const activePublicPosts = await broker.call("posts.find", { scope: "public" });
 ```
 
-**List the active & public posts**
+**List all public posts (disabling `onlyActive` scope)**
+
+> To disable a default scope, use the `-` (minus) prefix for scope names. You can control the authority of scopes and default scopes disabling with the [`checkScopeAuthority`](#checkscopeauthority) method.
+
+
 ```js
-const activePublicPosts = await broker.call("posts.find", { scope: ["onlyActive", "public"] });
+const activePublicPosts = await broker.call("posts.find", { scope: ["-onlyActive", "public"] });
 ```
 
 **List all posts disabling the default scope(s)**
@@ -1609,8 +1613,9 @@ const activePosts = await broker.call("posts.find", { scope: false });
 You can do the same thing in REST calls:
 ```
 GET /posts?scope=public
-GET /posts?scope=onlyActive,public
+GET /posts?scope=-onlyActive,public
 ```
+
 
 # Indexes
 You can define the indexes in the service `settings.indexes` property. It has a common format and each adapter will process and create the indexes. Another way, if you call the `this.createIndex` method directly. [More info](#createindex)
