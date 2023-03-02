@@ -35,9 +35,9 @@ module.exports = function (mixinOpts) {
 			this.logger.debug(`Adapter not found for '${hash}'. Create a new adapter instance...`);
 			const adapter = Adapters.resolve(adapterOpts);
 			adapter.init(this);
-			await this.maintenanceAdapters();
 			await this._connect(adapter, hash, adapterOpts);
 			this.adapters.set(hash, { hash, adapter, touched: Date.now() });
+			await this.maintenanceAdapters();
 			this.logger.info(
 				`Adapter '${hash}' connected. Number of adapters:`,
 				this.adapters.size
