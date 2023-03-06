@@ -137,7 +137,7 @@ class MongoDBAdapter extends BaseAdapter {
 	 */
 	stringToObjectID(id) {
 		if (typeof id == "string" && ObjectId.isValid(id))
-			return new ObjectId.createFromHexString(id);
+			return ObjectId.createFromHexString(id);
 
 		return id;
 	}
