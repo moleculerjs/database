@@ -28,6 +28,10 @@ module.exports = function (mixinOpts) {
 			const [hash, adapterOpts] = await this.getAdapterByContext(ctx, mixinOpts.adapter);
 			const item = this.adapters.get(hash);
 			if (item) {
+				if(!item.adapter.connected){
+					this.logger.debug("Waiting for the connected state of adapter...");
+					await this._connect(item.adapter, hash, adapterOpts);
+				}
 				item.touched = Date.now();
 				return item.adapter;
 			}
@@ -35,9 +39,9 @@ module.exports = function (mixinOpts) {
 			this.logger.debug(`Adapter not found for '${hash}'. Create a new adapter instance...`);
 			const adapter = Adapters.resolve(adapterOpts);
 			adapter.init(this);
-			await this._connect(adapter, hash, adapterOpts);
 			this.adapters.set(hash, { hash, adapter, touched: Date.now() });
 			await this.maintenanceAdapters();
+			await this._connect(adapter, hash, adapterOpts);
 			this.logger.info(
 				`Adapter '${hash}' connected. Number of adapters:`,
 				this.adapters.size
@@ -87,6 +91,7 @@ module.exports = function (mixinOpts) {
 				const connecting = async () => {
 					try {
 						await adapter.connect();
+						adapter.connected = true;
 						if (this.$hooks["adapterConnected"])
 							await this.$hooks["adapterConnected"](adapter, hash, adapterOpts);
 
@@ -125,6 +130,7 @@ module.exports = function (mixinOpts) {
 
 			// Close the connection
 			if (_.isFunction(adapter.disconnect)) await adapter.disconnect();
+			adapter.connected = false;
 			this.logger.info(
 				`Adapter '${item ? item.hash : "unknown"}' diconnected. Number of adapters:`,
 				this.adapters.size
