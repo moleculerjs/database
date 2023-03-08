@@ -136,8 +136,7 @@ class MongoDBAdapter extends BaseAdapter {
 	 * @returns {ObjectId}
 	 */
 	stringToObjectID(id) {
-		if (typeof id == "string" && ObjectId.isValid(id))
-			return ObjectId.createFromHexString(id);
+		if (typeof id == "string" && ObjectId.isValid(id)) return ObjectId.createFromHexString(id);
 
 		return id;
 	}
@@ -335,7 +334,7 @@ class MongoDBAdapter extends BaseAdapter {
 	 *
 	 */
 	async removeById(id) {
-		const res = await this.collection.findOneAndDelete({ _id: this.stringToObjectID(id) });
+		await this.collection.findOneAndDelete({ _id: this.stringToObjectID(id) });
 		return id;
 	}
 

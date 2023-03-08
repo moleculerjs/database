@@ -29,19 +29,30 @@ module.exports = function (mixinOpts) {
 			const item = this.adapters.get(hash);
 			if (item) {
 				item.touched = Date.now();
+				if (!item.connectPromise) return item.adapter;
+				// This adapter is connecting now. Wait for it.
+				this.logger.debug(`Adapter '${hash}' is connecting, right now. Wait for it...`);
+				await item.connectPromise;
 				return item.adapter;
 			}
 
 			this.logger.debug(`Adapter not found for '${hash}'. Create a new adapter instance...`);
 			const adapter = Adapters.resolve(adapterOpts);
 			adapter.init(this);
-			this.adapters.set(hash, { hash, adapter, touched: Date.now() });
+			// We store the promise of connect, because we don't want to call the connect method twice.
+			const connectPromise = this._connect(adapter, hash, adapterOpts);
+			const storedAdapterItem = { hash, adapter, connectPromise, touched: Date.now() };
+			// Store the adapter
+			this.adapters.set(hash, storedAdapterItem);
 			await this.maintenanceAdapters();
-			await this._connect(adapter, hash, adapterOpts);
+			// Wait for real connect
+			await connectPromise;
 			this.logger.info(
 				`Adapter '${hash}' connected. Number of adapters:`,
 				this.adapters.size
 			);
+			// Clean the connect promise
+			delete storedAdapterItem.connectPromise;
 
 			return adapter;
 		},
@@ -126,7 +137,7 @@ module.exports = function (mixinOpts) {
 			// Close the connection
 			if (_.isFunction(adapter.disconnect)) await adapter.disconnect();
 			this.logger.info(
-				`Adapter '${item ? item.hash : "unknown"}' diconnected. Number of adapters:`,
+				`Adapter '${hash || "unknown"}' disconnected. Number of adapters:`,
 				this.adapters.size
 			);
 
