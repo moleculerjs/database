@@ -1059,6 +1059,7 @@ Update an existing entity. Only the specified fields will be updated.
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `<id>` | `any` | `null` | ID of the entity. The name of property comes from the primary key field. |
+| `scope` | `String\|Array<String>\|Boolean` | `null` | Scopes for the query. If `false`, the default scopes are disabled. |
 
 There are no special parameters. All fields are used after validation for the entity.
 
@@ -1101,6 +1102,7 @@ Replace an existing entity. The difference between replace and update that repla
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `<id>` | `any` | `null` | ID of entity. The name of property comes from the primary key field. |
+| `scope` | `String\|Array<String>\|Boolean` | `null` | Scopes for the query. If `false`, the default scopes are disabled. |
 
 There are no special parameters. All fields will be used after validation for the entity.
 
@@ -1146,6 +1148,8 @@ Delete an entity by ID.
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
 | `<id>` | `any` | `null` | ID of entity. The name of property comes from the primary key field. |
+| `scope` | `String\|Array<String>\|Boolean` | `null` | Scopes for the query. If `false`, the default scopes are disabled. |
+| `softDelete` | `Boolean` | `null` | Disable the enabled soft-delete feature. Only `false` value is acceptable. |
 
 ### REST endpoint
 ```js

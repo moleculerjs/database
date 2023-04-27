@@ -341,6 +341,8 @@ module.exports = function (mixinOpts) {
 	 *
 	 * @actions
 	 *
+	 * @param {String|Array<String>|Boolean?} scope - Scoping
+	 * 
 	 * @returns {Object} Updated entity.
 	 *
 	 * @throws {EntityNotFoundError} - 404 Entity not found
@@ -350,8 +352,13 @@ module.exports = function (mixinOpts) {
 			visibility: mixinOpts.actionVisibility,
 			rest: mixinOpts.rest ? "PATCH /:id" : null,
 			// params: {}, generate from `fields` in the `merged`
+			params:{
+				scope: PARAMS_SCOPE
+			},
 			async handler(ctx) {
-				return this.updateEntity(ctx);
+				return this.updateEntity(ctx, ctx.params, {
+					scope: ctx.params.scope,
+				});
 			}
 		};
 	}
@@ -361,6 +368,8 @@ module.exports = function (mixinOpts) {
 	 *
 	 * @actions
 	 *
+	 * @param {String|Array<String>|Boolean?} scope - Scoping
+	 * 
 	 * @returns {Object} Replaced entity.
 	 *
 	 * @throws {EntityNotFoundError} - 404 Entity not found
@@ -370,8 +379,13 @@ module.exports = function (mixinOpts) {
 			visibility: mixinOpts.actionVisibility,
 			rest: mixinOpts.rest ? "PUT /:id" : null,
 			// params: {}, generate from `fields` in the `merged`
+			params:{
+				scope: PARAMS_SCOPE
+			},
 			async handler(ctx) {
-				return this.replaceEntity(ctx);
+				return this.replaceEntity(ctx, ctx.params, {
+					scope: ctx.params.scope,
+				});
 			}
 		};
 	}
@@ -382,6 +396,9 @@ module.exports = function (mixinOpts) {
 	 * @actions
 	 *
 	 * @param {any} id - ID of entity.
+	 * @param {String|Array<String>|Boolean?} scope - Scoping
+	 * @param {Boolean} softDelete - Disabling Soft Delete
+	 * 
 	 * @returns {any} ID of removed entities.
 	 *
 	 * @throws {EntityNotFoundError} - 404 Entity not found
@@ -392,9 +409,14 @@ module.exports = function (mixinOpts) {
 			rest: mixinOpts.rest ? "DELETE /:id" : null,
 			params: {
 				// The "id" field get from `fields`
+				scope: PARAMS_SCOPE,
+				softDelete: { type: "boolean", optional: true },				
 			},
 			async handler(ctx) {
-				return this.removeEntity(ctx);
+				return this.removeEntity(ctx, ctx.params, {
+					scope: ctx.params.scope,
+					softDelete: ctx.params.softDelete,
+				});;
 			}
 		};
 	}
