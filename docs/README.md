@@ -359,7 +359,7 @@ module.exports = {
 ```
 
 ### `get`: \<Function\> _(Default: `null`)_
-The `get` function is called when transforming entities. With this function, you can modify an entity value before sending it back to the caller or calculate a value from other fields of the entity in virtual fields.
+The `get` function is called when transforming entities. With this function, you can modify an entity value before sending it back to the caller or calculate a value from other fields of the entity in virtual fields. If it is a String, it should be a service method name that will be called.
 _It can be asynchronous._
 
 ### Callback parameters
