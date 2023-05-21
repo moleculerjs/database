@@ -12,6 +12,7 @@ module.exports = (getAdapter, adapterType) => {
 	}
 
 	describe("Test transformations", () => {
+		const getLowerName = jest.fn(({ entity }) => (entity.name ? entity.name.toLowerCase() : entity.name));
 		const broker = new ServiceBroker({ logger: false });
 		const svc = broker.createService({
 			name: "users",
@@ -35,12 +36,30 @@ module.exports = (getAdapter, adapterType) => {
 						virtual: true,
 						get: ({ entity }) => (entity.name ? entity.name.toUpperCase() : entity.name)
 					},
+					lowerName: {
+						type: "string",
+						readonly: true,
+						virtual: true,
+						get: "getLowerName"
+					},
+					lengthName: {
+						type: "number",
+						readonly: true,
+						virtual: true,
+						get: "getNameLength"
+					},
 					password: { type: "string", hidden: true },
 					token: { type: "string", hidden: "byDefault" },
 					email: { type: "string", readPermission: "admin" },
 					phone: { type: "string", permission: "admin" }
 				}
 			},
+
+			methods: {
+				getNameLength ({ entity }){
+					return entity.name.length
+				}
+			},			
 
 			async started() {
 				const adapter = await this.getAdapter();
@@ -76,6 +95,7 @@ module.exports = (getAdapter, adapterType) => {
 				const res = await svc.createEntity(ctx, {
 					name: "John Doe",
 					upperName: "Nothing",
+					lowerName: "Nothing",
 					email: "john.doe@moleculer.services",
 					phone: "+1-555-1234",
 					password: "johnDoe1234",
@@ -87,6 +107,8 @@ module.exports = (getAdapter, adapterType) => {
 					myID: expectedID,
 					name: "John Doe",
 					upperName: "JOHN DOE",
+					lowerName: "john doe",
+					lengthName: 8,
 					email: "john.doe@moleculer.services",
 					phone: "+1-555-1234"
 				});
@@ -98,7 +120,9 @@ module.exports = (getAdapter, adapterType) => {
 				expect(res).toEqual({
 					myID: expectedID,
 					name: "John Doe",
-					upperName: "JOHN DOE"
+					upperName: "JOHN DOE",
+					lowerName: "john doe",
+					lengthName: 8,
 				});
 			});
 
