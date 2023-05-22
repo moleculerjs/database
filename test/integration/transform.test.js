@@ -96,6 +96,7 @@ module.exports = (getAdapter, adapterType) => {
 					name: "John Doe",
 					upperName: "Nothing",
 					lowerName: "Nothing",
+					lengthName: "Nothing",
 					email: "john.doe@moleculer.services",
 					phone: "+1-555-1234",
 					password: "johnDoe1234",
