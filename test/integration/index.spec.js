@@ -27,10 +27,10 @@ if (process.env.GITHUB_ACTIONS_CI) {
 					},
 					useNullAsDefault: true,
 					log: {
-						warn(message) {},
-						error(message) {},
-						deprecate(message) {},
-						debug(message) {}
+						warn() {},
+						error() {},
+						deprecate() {},
+						debug() {}
 					}
 				}
 			}
@@ -65,10 +65,10 @@ if (process.env.GITHUB_ACTIONS_CI) {
 						database: "db_int_test"
 					},
 					log: {
-						warn(message) {},
-						error(message) {},
-						deprecate(message) {},
-						debug(message) {}
+						warn() {},
+						error() {},
+						deprecate() {},
+						debug() {}
 					}
 				}
 			}
@@ -86,10 +86,10 @@ if (process.env.GITHUB_ACTIONS_CI) {
 						database: "db_int_test"
 					},
 					log: {
-						warn(message) {},
-						error(message) {},
-						deprecate(message) {},
-						debug(message) {}
+						warn() {},
+						error() {},
+						deprecate() {},
+						debug() {}
 					}
 				}
 			}
@@ -130,10 +130,10 @@ if (process.env.GITHUB_ACTIONS_CI) {
 					},
 					useNullAsDefault: true,
 					log: {
-						warn(message) {},
-						error(message) {},
-						deprecate(message) {},
-						debug(message) {}
+						warn() {},
+						error() {},
+						deprecate() {},
+						debug() {}
 					}
 				}
 			}
@@ -167,10 +167,10 @@ if (process.env.GITHUB_ACTIONS_CI) {
 						database: "db_int_test"
 					},
 					log: {
-						warn(message) {},
-						error(message) {},
-						deprecate(message) {},
-						debug(message) {}
+						warn() {},
+						error() {},
+						deprecate() {},
+						debug() {}
 					}
 				}
 			}
@@ -188,10 +188,10 @@ if (process.env.GITHUB_ACTIONS_CI) {
 						database: "db_int_test"
 					},
 					log: {
-						warn(message) {},
-						error(message) {},
-						deprecate(message) {},
-						debug(message) {}
+						warn() {},
+						error() {},
+						deprecate() {},
+						debug() {}
 					}
 				}
 			}
