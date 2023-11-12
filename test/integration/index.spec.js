@@ -225,7 +225,7 @@ describe("Integration tests", () => {
 		};
 
 		getAdapter.adapterName = adapter.name;
-		getAdapter.isNoSQL = ["NeDB", "MongoDB", "Mongoose"].includes(adapter.type);
+		getAdapter.isNoSQL = ["NeDB", "MongoDB"].includes(adapter.type);
 		getAdapter.isSQL = ["Knex"].includes(adapter.type);
 		getAdapter.IdColumnType = ["Knex"].includes(adapter.type) ? "integer" : "string";
 
