@@ -51,7 +51,7 @@ broker.createService({
 	mixins: [
 		DbService({
 			adapter: {
-				/*type: "Knex",
+				type: "Knex",
 				options: {
 					knex: {
 						client: "sqlite3",
@@ -59,15 +59,19 @@ broker.createService({
 							filename: ":memory:"
 						}
 					}
-				}*/
-				type: "MongoDB"
+				}
+				//type: "MongoDB"
+			},
+
+			createActions: {
+				remove: false
 			}
 		})
 	],
 
 	settings: {
 		fields: {
-			id: { type: "string", primaryKey: true, columnName: "_id", generated: "user" },
+			id: { type: "string", primaryKey: true, columnName: "_id" /*, generated: "user"*/ },
 			title: {
 				type: "string",
 				max: 255,
@@ -88,6 +92,21 @@ broker.createService({
 				readonly: true,
 				onUpdate: () => Date.now(),
 				columnType: "double"
+			}
+		}
+	},
+
+	actions: {
+		remove: {
+			rest: {
+				method: "DELETE",
+				path: "/:id"
+			},
+			params: {
+				id: { type: "string" }
+			},
+			async handler(ctx) {
+				console.log("Do something");
 			}
 		}
 	},

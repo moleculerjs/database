@@ -1,6 +1,6 @@
 /*
  * @moleculer/database
- * Copyright (c) 2022 MoleculerJS (https://github.com/moleculerjs/database)
+ * Copyright (c) 2023 MoleculerJS (https://github.com/moleculerjs/database)
  * MIT Licensed
  */
 
@@ -29,7 +29,13 @@ function getPrimaryKeyFromFields(fields) {
 
 function fixIDInRestPath(def, primaryKeyField) {
 	if (def && def.rest) {
-		def.rest = def.rest.replace(/:id/, `:${primaryKeyField.name}`);
+		if (_.isObject(def.rest)) {
+			def.rest.path = def.rest.path
+				? def.rest.path.replace(/:id/, `:${primaryKeyField.name}`)
+				: null;
+		} else if (_.isString(def.rest)) {
+			def.rest = def.rest.replace(/:id/, `:${primaryKeyField.name}`);
+		}
 	}
 }
 

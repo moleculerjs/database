@@ -1,7 +1,7 @@
 "use strict";
 
 const { ServiceBroker, Context } = require("moleculer");
-const { ValidationError } = require("moleculer").Errors;
+const { ValidationError, ServiceNotFoundError } = require("moleculer").Errors;
 const { EntityNotFoundError } = require("../../src/errors");
 const Fakerator = require("fakerator");
 const { Stream } = require("stream");
@@ -1456,6 +1456,123 @@ module.exports = (getAdapter, adapterType) => {
 
 			expect(broker.cacher.clean).toBeCalledTimes(1);
 			expect(broker.cacher.clean).toBeCalledWith("posts.**");
+		});
+	});
+
+	describe("Test action disabling", () => {
+		const broker = new ServiceBroker({
+			logger: false
+		});
+		const svc = broker.createService({
+			name: "posts",
+			mixins: [
+				DbService({
+					adapter: getAdapter(),
+					createActions: {
+						find: false,
+						count: false,
+						list: false,
+						get: false,
+						resolve: false,
+						create: false,
+						createMany: false,
+						update: false,
+						replace: false,
+						remove: false
+					}
+				})
+			],
+			settings: {
+				fields: {
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: "integer"
+					},
+					title: { type: "string", trim: true, required: true },
+					content: { type: "string", trim: true }
+				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
+			}
+		});
+
+		beforeAll(() => broker.start());
+		afterAll(() => broker.stop());
+
+		it("should throw service not found error", async () => {
+			await expect(broker.call("posts.find", {})).rejects.toThrow(ServiceNotFoundError);
+			await expect(broker.call("posts.count", {})).rejects.toThrow(ServiceNotFoundError);
+			await expect(broker.call("posts.list", {})).rejects.toThrow(ServiceNotFoundError);
+			await expect(broker.call("posts.get", {})).rejects.toThrow(ServiceNotFoundError);
+			await expect(broker.call("posts.resolve", {})).rejects.toThrow(ServiceNotFoundError);
+			await expect(broker.call("posts.create", {})).rejects.toThrow(ServiceNotFoundError);
+			await expect(broker.call("posts.createMany", {})).rejects.toThrow(ServiceNotFoundError);
+			await expect(broker.call("posts.update", {})).rejects.toThrow(ServiceNotFoundError);
+			await expect(broker.call("posts.replace", {})).rejects.toThrow(ServiceNotFoundError);
+			await expect(broker.call("posts.remove", {})).rejects.toThrow(ServiceNotFoundError);
+		});
+	});
+
+	describe("Test all action disabling", () => {
+		const broker = new ServiceBroker({
+			logger: false
+		});
+		const svc = broker.createService({
+			name: "posts",
+			mixins: [
+				DbService({
+					adapter: getAdapter(),
+					createActions: false
+				})
+			],
+			settings: {
+				fields: {
+					id: {
+						type: "string",
+						primaryKey: true,
+						columnName: "_id",
+						columnType: "integer"
+					},
+					title: { type: "string", trim: true, required: true },
+					content: { type: "string", trim: true }
+				}
+			},
+
+			async started() {
+				const adapter = await this.getAdapter();
+
+				if (adapterType == "Knex") {
+					await adapter.createTable();
+				}
+
+				await this.clearEntities();
+			}
+		});
+
+		beforeAll(() => broker.start());
+		afterAll(() => broker.stop());
+
+		it("should throw service not found error", async () => {
+			await expect(broker.call("posts.find", {})).rejects.toThrow(ServiceNotFoundError);
+			await expect(broker.call("posts.count", {})).rejects.toThrow(ServiceNotFoundError);
+			await expect(broker.call("posts.list", {})).rejects.toThrow(ServiceNotFoundError);
+			await expect(broker.call("posts.get", {})).rejects.toThrow(ServiceNotFoundError);
+			await expect(broker.call("posts.resolve", {})).rejects.toThrow(ServiceNotFoundError);
+			await expect(broker.call("posts.create", {})).rejects.toThrow(ServiceNotFoundError);
+			await expect(broker.call("posts.createMany", {})).rejects.toThrow(ServiceNotFoundError);
+			await expect(broker.call("posts.update", {})).rejects.toThrow(ServiceNotFoundError);
+			await expect(broker.call("posts.replace", {})).rejects.toThrow(ServiceNotFoundError);
+			await expect(broker.call("posts.remove", {})).rejects.toThrow(ServiceNotFoundError);
 		});
 	});
 };
