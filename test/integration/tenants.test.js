@@ -676,7 +676,8 @@ module.exports = (getAdapter, adapterType) => {
 
 	describe("Test record-level tenancy", () => {
 		const broker = new ServiceBroker({ logger: false });
-		const svc = broker.createService(baseServiceSchema, {
+		const svc = broker.createService({
+			mixins: [baseServiceSchema],
 			settings: {
 				fields: {
 					tenantId: {
@@ -719,7 +720,8 @@ module.exports = (getAdapter, adapterType) => {
 
 	describe("Test collection-level tenancy", () => {
 		const broker = new ServiceBroker({ logger: false });
-		const svc = broker.createService(baseServiceSchema, {
+		const svc = broker.createService({
+			mixins: [baseServiceSchema],
 			methods: {
 				getAdapterByContext(ctx, adapterDef) {
 					const tenantId = ctx && ctx.meta.tenantId;
@@ -759,7 +761,8 @@ module.exports = (getAdapter, adapterType) => {
 	if (adapterType == "Knex" && getAdapter.adapterName != "Knex-SQLite") {
 		describe("Test schema-level tenancy", () => {
 			const broker = new ServiceBroker({ logger: false });
-			const svc = broker.createService(baseServiceSchema, {
+			const svc = broker.createService({
+				mixins: [baseServiceSchema],
 				methods: {
 					getAdapterByContext(ctx, adapterDef) {
 						const tenantId = ctx.meta.tenantId;
@@ -809,7 +812,8 @@ module.exports = (getAdapter, adapterType) => {
 
 	describe("Test database-level tenancy", () => {
 		const broker = new ServiceBroker({ logger: false });
-		const svc = broker.createService(baseServiceSchema, {
+		const svc = broker.createService({
+			mixins: [baseServiceSchema],
 			methods: {
 				getAdapterByContext(ctx, adapterDef) {
 					const tenantId = ctx.meta.tenantId;
