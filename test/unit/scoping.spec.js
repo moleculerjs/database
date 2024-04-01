@@ -378,7 +378,7 @@ describe("Test scoping", () => {
 
 	describe("Test sanitizeParams method", () => {
 		const broker = new ServiceBroker({ logger: false, validation: false });
-		const svc = broker.createService(DbService, {
+		const svc = broker.createService({
 			name: "store",
 			mixins: [
 				DbService({
