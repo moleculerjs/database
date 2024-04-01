@@ -11,7 +11,7 @@ npm install mongodb@^4.1.4
 ## Usage
 
 ### Use the default localhost URI
-If you not define any options, the adapter uses the `"mongodb://localhost:27017"` connection string.
+If you not define any options, the adapter uses the `"mongodb://127.0.0.1:27017"` connection string.
 
 ```js
 // posts.service.js
@@ -52,7 +52,7 @@ module.exports = {
 ## Options
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
-| `uri` | `String` | `"mongodb://localhost:27017"` | MongoDB connection URI. |
+| `uri` | `String` | `"mongodb://127.0.0.1:27017"` | MongoDB connection URI. |
 | `mongoClientOptions` | `Object` | `null` | Available options: https://mongodb.github.io/node-mongodb-native/4.1/interfaces/MongoClientOptions.html |
 | `dbOptions` | `Object` | `null` | Available options: https://mongodb.github.io/node-mongodb-native/4.1/interfaces/DbOptions.html |
 

@@ -16,7 +16,7 @@ const broker = new ServiceBroker();
 
 const adapter = {
 	type: "MongoDB",
-	options: "mongodb://localhost:27017/example-pool"
+	options: "mongodb://127.0.0.1:27017/example-pool"
 };
 
 const fields = {

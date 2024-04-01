@@ -53,7 +53,7 @@ const svc = broker.createService({
 				{
 					type: "MongoDB",
 					options: {
-						uri: "mongodb://localhost:27017",
+						uri: "mongodb://127.0.0.1:27017",
 						dbName: `tenant-posts`,
 						collection: `posts-${tenantId}`
 					}

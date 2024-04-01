@@ -62,14 +62,14 @@ class MongoDBAdapter extends BaseAdapter {
 			);
 		}
 
-		this.checkClientLibVersion("mongodb", "^4.0.0");
+		this.checkClientLibVersion("mongodb", "^6.0.0");
 	}
 
 	/**
 	 * Connect adapter to database
 	 */
 	async connect() {
-		const uri = this.opts.uri || "mongodb://localhost:27017";
+		const uri = this.opts.uri || "mongodb://127.0.0.1:27017";
 
 		this.storeKey = `mongodb|${uri}`;
 		this.client = this.getClientFromGlobalStore(this.storeKey);
@@ -286,7 +286,7 @@ class MongoDBAdapter extends BaseAdapter {
 			raw ? changes : { $set: changes },
 			{ returnDocument: "after" }
 		);
-		return res.value;
+		return res;
 	}
 
 	/**
@@ -323,7 +323,7 @@ class MongoDBAdapter extends BaseAdapter {
 			entity,
 			{ returnDocument: "after" }
 		);
-		return res.value;
+		return res;
 	}
 
 	/**

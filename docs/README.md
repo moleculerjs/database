@@ -2298,7 +2298,7 @@ module.exports = {
                 {
                     type: "MongoDB",
                     options: {
-                        uri: "mongodb://localhost:27017/moleculer-demo",
+                        uri: "mongodb://127.0.0.1:27017/moleculer-demo",
                         collection: `posts-${tenantId}`
                     }
                 }
@@ -2341,7 +2341,7 @@ module.exports = {
                 {
                     type: "MongoDB",
                     options: {
-                        uri: `mongodb://localhost:27017/moleculer-demo--${tenantId}`,
+                        uri: `mongodb://127.0.0.1:27017/moleculer-demo--${tenantId}`,
                         collection: `posts`
                     }
                 }

@@ -36,7 +36,7 @@ broker.createService({
 				//type: "MongoDB",
 				type: "Knex",
 				options: {
-					//uri: "mongodb://localhost:27017",
+					//uri: "mongodb://127.0.0.1:27017",
 					//dbName: "tenants",
 					//collection: "posts",
 					tableName: "tenant_posts",
@@ -89,7 +89,7 @@ broker.createService({
 					//type: "MongoDB",
 					type: "Knex",
 					options: {
-						//uri: "mongodb://localhost:27017",
+						//uri: "mongodb://127.0.0.1:27017",
 						//dbName: `tenant-posts-${tenantId}`,
 						//collection: `posts`
 
