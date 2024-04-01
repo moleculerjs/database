@@ -28,6 +28,7 @@ jobs:
     strategy:
       matrix:
         node-version: [18.x, 20.x]
+        adapter: ["NeDB", "MongoDB", "Knex-SQLite", "Knex", "Knex-Postgresql", "Knex-MySQL", "Knex-MySQL2", "Knex-MSSQL"]
       fail-fast: false
     steps:
     - uses: actions/checkout@v3
@@ -40,11 +41,24 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Run unit tests
-      run: npm run test:unit
+    - name: Start containers for ${{ matrix.adapter }} adapter
+      run: docker-compose up mongo  -d
+      if: ${{ matrix.adapter == 'MongoDB' }}
+      working-directory: ./test
 
-    - name: Start containers
-      run: docker-compose up -d
+    - name: Start containers for ${{ matrix.adapter }} adapter
+      run: docker-compose up postgres  -d
+      if: ${{ matrix.adapter == 'Knex-Postgresql' }}
+      working-directory: ./test
+
+    - name: Start containers for ${{ matrix.adapter }} adapter
+      run: docker-compose up mysql  -d
+      if: ${{ matrix.adapter == 'Knex-MySQL' || matrix.adapter == 'Knex-MySQL2' }}
+      working-directory: ./test
+
+    - name: Start containers for ${{ matrix.adapter }} adapter
+      run: docker-compose up mssql mssql-create-db -d
+      if: ${{ matrix.adapter == 'Knex-MSSQL' }}
       working-directory: ./test
 
     - name: Sleeping 30 secs
@@ -60,8 +74,10 @@ jobs:
 
     - name: Run integration tests
       run: npm run test:integration
+      timeout-minutes: 10
       env:
         GITHUB_ACTIONS_CI: true
+        ADAPTER: ${{ matrix.adapter }}
 
     # - name: Run leak detection tests
     #   run: npm run test:leak
@@ -77,8 +93,8 @@ jobs:
       run: docker-compose down -v
       working-directory: ./test
 
-    - name: Upload code coverage
-      run: npm run coverall
-      if: success() && github.ref == 'refs/heads/master'
-      env:
-        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
+    # - name: Upload code coverage
+    #   run: npm run coverall
+    #   if: success() && github.ref == 'refs/heads/master'
+    #   env:
+    #     COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}

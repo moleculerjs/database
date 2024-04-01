@@ -115,10 +115,10 @@ if (process.env.GITHUB_ACTIONS_CI) {
 } else {
 	// Local development tests
 	Adapters = [
-		/*{
+		{
 			type: "NeDB"
-		} ,*/
-		{ type: "MongoDB", options: { dbName: "db_int_test" } } /*,
+		},
+		{ type: "MongoDB", options: { dbName: "db_int_test" } },
 		{
 			name: "Knex-SQLite",
 			type: "Knex",
@@ -137,7 +137,7 @@ if (process.env.GITHUB_ACTIONS_CI) {
 					}
 				}
 			}
-		}*/ /*,
+		},
 		{
 			name: "Knex-Postgresql",
 			type: "Knex",
@@ -212,12 +212,14 @@ if (process.env.GITHUB_ACTIONS_CI) {
 					}
 				}
 			}
-		}*/
+		}
 	];
 }
 
 describe("Integration tests", () => {
 	for (const adapter of Adapters) {
+		if (process.env.ADAPTER && adapter.name !== process.env.ADAPTER) continue;
+
 		const getAdapter = options => {
 			if (adapter.options) return _.defaultsDeep({}, { options }, adapter);
 
