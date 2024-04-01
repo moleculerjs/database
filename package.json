@@ -34,7 +34,6 @@
     "moleculer": "^0.14.12"
   },
   "devDependencies": {
-    "@icebob/node-memwatch": "^2.1.0",
     "@vscode/sqlite3": "^5.1.2",
     "axios": "^1.6.8",
     "benchmarkify": "^4.0.0",
