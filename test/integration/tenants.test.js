@@ -765,6 +765,9 @@ module.exports = (getAdapter, adapterType) => {
 				mixins: [baseServiceSchema],
 				methods: {
 					getAdapterByContext(ctx, adapterDef) {
+						// Somehow the password disappeared from the "adapterDef"
+						adapterDef = getAdapter();
+
 						const tenantId = ctx.meta.tenantId;
 						if (!tenantId) throw new Error("Missing tenantId!");
 
