@@ -760,7 +760,7 @@ module.exports = (getAdapter, adapterType) => {
 
 	if (adapterType == "Knex" && getAdapter.adapterName != "Knex-SQLite") {
 		describe("Test schema-level tenancy", () => {
-			const broker = new ServiceBroker({ logger: false });
+			const broker = new ServiceBroker({ logger: true });
 			const svc = broker.createService({
 				mixins: [baseServiceSchema],
 				methods: {

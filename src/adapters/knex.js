@@ -71,7 +71,7 @@ class KnexAdapter extends BaseAdapter {
 			);
 		}
 
-		this.checkClientLibVersion("knex", "^0.95.4 || ^1.0.1 || ^2.0.0");
+		this.checkClientLibVersion("knex", "^0.95.4 || ^1.0.1 || ^2.0.0 || ^3.0.0");
 	}
 
 	/**

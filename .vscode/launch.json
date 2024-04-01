@@ -31,7 +31,10 @@
 			"cwd": "${workspaceRoot}",
 			"runtimeArgs": [
                 "--nolazy"
-            ]
+            ],
+			"env": {
+				"ADAPTER": "Knex-Postgresql"
+			}
 		},
 		{
 			"type": "node",
