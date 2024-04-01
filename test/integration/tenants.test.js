@@ -760,14 +760,11 @@ module.exports = (getAdapter, adapterType) => {
 
 	if (adapterType == "Knex" && getAdapter.adapterName != "Knex-SQLite") {
 		describe("Test schema-level tenancy", () => {
-			const broker = new ServiceBroker({ logger: true });
+			const broker = new ServiceBroker({ logger: false });
 			const svc = broker.createService({
 				mixins: [baseServiceSchema],
 				methods: {
 					getAdapterByContext(ctx, adapterDef) {
-						// Somehow the password disappeared from the "adapterDef"
-						adapterDef = getAdapter();
-
 						const tenantId = ctx.meta.tenantId;
 						if (!tenantId) throw new Error("Missing tenantId!");
 

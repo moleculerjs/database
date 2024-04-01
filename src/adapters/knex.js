@@ -79,7 +79,8 @@ class KnexAdapter extends BaseAdapter {
 	 */
 	async connect() {
 		this.logger.debug(`Knex connecting...`);
-		this.client = new Knex(this.opts.knex);
+		// Should clone because Kney hides the password field
+		this.client = new Knex(_.cloneDeep(this.opts.knex));
 	}
 
 	/**
