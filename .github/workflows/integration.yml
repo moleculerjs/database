@@ -28,13 +28,13 @@ jobs:
     strategy:
       matrix:
         node-version: [18.x, 20.x]
-        adapter: ["NeDB", "MongoDB", "Knex-SQLite", "Knex", "Knex-Postgresql", "Knex-MySQL", "Knex-MySQL2", "Knex-MSSQL"]
+        adapter: ["NeDB", "MongoDB", "Knex-SQLite", "Knex-Postgresql", "Knex-MySQL", "Knex-MySQL2", "Knex-MSSQL"]
       fail-fast: false
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
 
