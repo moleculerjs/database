@@ -245,13 +245,15 @@ class NeDBAdapter extends BaseAdapter {
 		}
 
 		return new this.Promise((resolve, reject) => {
-			this.db.update(query, raw ? changes : { $set: changes }, { multi: true }, (
-				err,
-				numAffected /*, affectedDocuments*/
-			) => {
-				if (err) return reject(err);
-				resolve(numAffected);
-			});
+			this.db.update(
+				query,
+				raw ? changes : { $set: changes },
+				{ multi: true },
+				(err, numAffected /*, affectedDocuments*/) => {
+					if (err) return reject(err);
+					resolve(numAffected);
+				}
+			);
 		});
 	}
 
