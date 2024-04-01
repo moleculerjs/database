@@ -42,27 +42,24 @@ jobs:
       run: npm ci
 
     - name: Start containers for ${{ matrix.adapter }} adapter
-      run: docker-compose up mongo  -d
+      run: docker-compose up -d mongo && sleep 30
       if: ${{ matrix.adapter == 'MongoDB' }}
       working-directory: ./test
 
     - name: Start containers for ${{ matrix.adapter }} adapter
-      run: docker-compose up postgres  -d
+      run: docker-compose up -d postgres && sleep 30
       if: ${{ matrix.adapter == 'Knex-Postgresql' }}
       working-directory: ./test
 
     - name: Start containers for ${{ matrix.adapter }} adapter
-      run: docker-compose up mysql  -d
+      run: docker-compose up -d mysql && sleep 30
       if: ${{ matrix.adapter == 'Knex-MySQL' || matrix.adapter == 'Knex-MySQL2' }}
       working-directory: ./test
 
     - name: Start containers for ${{ matrix.adapter }} adapter
-      run: docker-compose up mssql mssql-create-db -d
+      run: docker-compose up -d mssql mssql-create-db && sleep 60
       if: ${{ matrix.adapter == 'Knex-MSSQL' }}
       working-directory: ./test
-
-    - name: Sleeping 30 secs
-      run: sleep 30
 
     - name: Check containers
       run: docker-compose ps
