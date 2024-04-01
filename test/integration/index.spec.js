@@ -216,9 +216,10 @@ if (process.env.GITHUB_ACTIONS_CI) {
 	];
 }
 
-describe("Integration tests", () => {
+describe(`Integration tests (${process.env.ADAPTER})`, () => {
 	for (const adapter of Adapters) {
-		if (process.env.ADAPTER && adapter.name !== process.env.ADAPTER) continue;
+		const name = adapter.name || adapter.type;
+		if (process.env.ADAPTER && name !== process.env.ADAPTER) continue;
 
 		const getAdapter = options => {
 			if (adapter.options) return _.defaultsDeep({}, { options }, adapter);
@@ -231,7 +232,7 @@ describe("Integration tests", () => {
 		getAdapter.isSQL = ["Knex"].includes(adapter.type);
 		getAdapter.IdColumnType = ["Knex"].includes(adapter.type) ? "integer" : "string";
 
-		describe(`Adapter: ${adapter.name || adapter.type}`, () => {
+		describe(`Adapter: ${name}`, () => {
 			describe("Test adapter", () => AdapterTests(getAdapter, adapter.type));
 			describe("Test methods", () => MethodTests(getAdapter, adapter.type));
 			describe("Test scopes", () => ScopeTests(getAdapter, adapter.type));
