@@ -50,20 +50,20 @@
     "jest-cli": "^29.7.0",
     "kleur": "^4.1.5",
     "knex": "^3.1.0",
-    "moleculer": "^0.14.32",
+    "moleculer": "^0.14.33",
     "moleculer-repl": "^0.7.4",
     "moleculer-web": "^0.10.7",
     "mongodb": "^6.5.0",
     "mysql": "^2.18.1",
-    "mysql2": "^3.9.3",
+    "mysql2": "^3.9.7",
     "nedb": "^1.8.0",
     "nodemon": "^3.1.0",
-    "npm-check-updates": "^16.14.18",
-    "pg": "^8.11.4",
+    "npm-check-updates": "^16.14.20",
+    "pg": "^8.11.5",
     "prettier": "^3.2.5",
-    "qs": "^6.12.0",
-    "sequelize": "^6.37.2",
-    "tedious": "^18.1.0"
+    "qs": "^6.12.1",
+    "sequelize": "^6.37.3",
+    "tedious": "^18.2.0"
   },
   "jest": {
     "testEnvironment": "node",
@@ -81,7 +81,7 @@
     "node": ">= 18.x.x"
   },
   "dependencies": {
-    "fastest-validator": "^1.17.0",
+    "fastest-validator": "^1.18.0",
     "lodash": "^4.17.21",
     "semver": "^7.6.0",
     "sqlite3": "^5.1.7"
