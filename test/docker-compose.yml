@@ -37,7 +37,7 @@ services:
       - MYSQL_DATABASE=db_int_test
     healthcheck:
       test: /usr/bin/mysql -hlocalhost -uroot -pmoleculer -e "SELECT 1"
-    command: --default-authentication-plugin=mysql_native_password
+    command: --authentication-policy=caching_sha2_password
     volumes:
       - ./scripts/mysql-create-databases.sql:/docker-entrypoint-initdb.d/mysql-create-databases.sql
 
