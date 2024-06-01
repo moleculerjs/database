@@ -35,14 +35,14 @@
   },
   "devDependencies": {
     "@vscode/sqlite3": "^5.1.2",
-    "axios": "^1.6.8",
+    "axios": "^1.7.2",
     "benchmarkify": "^4.0.0",
     "coveralls": "^3.1.1",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^5.1.3",
-    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-promise": "^6.2.0",
     "eslint-plugin-security": "^2.1.1",
     "fakerator": "^0.3.6",
     "globby": "^13.2.2",
@@ -53,11 +53,11 @@
     "moleculer": "^0.14.33",
     "moleculer-repl": "^0.7.4",
     "moleculer-web": "^0.10.7",
-    "mongodb": "^6.5.0",
+    "mongodb": "^6.7.0",
     "mysql": "^2.18.1",
-    "mysql2": "^3.9.7",
+    "mysql2": "^3.10.0",
     "nedb": "^1.8.0",
-    "nodemon": "^3.1.0",
+    "nodemon": "^3.1.2",
     "npm-check-updates": "^16.14.20",
     "pg": "^8.11.5",
     "prettier": "^3.2.5",
@@ -83,7 +83,7 @@
   "dependencies": {
     "fastest-validator": "^1.18.0",
     "lodash": "^4.17.21",
-    "semver": "^7.6.0",
+    "semver": "^7.6.2",
     "sqlite3": "^5.1.7"
   }
 }
