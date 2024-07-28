@@ -1,3 +1,10 @@
+<a name="v0.2.1"></a>
+
+# [0.2.1](https://github.com/moleculerjs/database/compare/v0.2.0...v0.2.1) (2024-07-28)
+
+- update dependencies
+- add moleculer 0.15 peer dependency
+
 <a name="v0.2.0"></a>
 
 # [0.2.0](https://github.com/moleculerjs/database/compare/v0.1.1...v0.2.0) (2024-04-01)
