@@ -380,7 +380,7 @@ class KnexAdapter extends BaseAdapter {
 					} else if (value.$eq) {
 						q = q.where(key, "=", value.$eq);
 					} else if (value.$ne) {
-						q = q.where(key, "=", value.$ne);
+						q = q.where(key, "!=", value.$ne);
 					} else if (value.$exists === true) {
 						q = q.whereNotNull(key);
 					} else if (value.$exists === false) {
