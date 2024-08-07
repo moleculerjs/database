@@ -42,31 +42,31 @@ jobs:
       run: npm ci
 
     - name: Start containers for ${{ matrix.adapter }} adapter
-      run: docker-compose up -d mongo && sleep 30
+      run: docker compose up -d mongo && sleep 30
       if: ${{ matrix.adapter == 'MongoDB' }}
       working-directory: ./test
 
     - name: Start containers for ${{ matrix.adapter }} adapter
-      run: docker-compose up -d postgres && sleep 30
+      run: docker compose up -d postgres && sleep 30
       if: ${{ matrix.adapter == 'Knex-Postgresql' }}
       working-directory: ./test
 
     - name: Start containers for ${{ matrix.adapter }} adapter
-      run: docker-compose up -d mysql && sleep 30
+      run: docker compose up -d mysql && sleep 30
       if: ${{ matrix.adapter == 'Knex-MySQL' || matrix.adapter == 'Knex-MySQL2' }}
       working-directory: ./test
 
     - name: Start containers for ${{ matrix.adapter }} adapter
-      run: docker-compose up -d mssql mssql-create-db && sleep 60
+      run: docker compose up -d mssql mssql-create-db && sleep 60
       if: ${{ matrix.adapter == 'Knex-MSSQL' }}
       working-directory: ./test
 
     - name: Check containers
-      run: docker-compose ps
+      run: docker compose ps
       working-directory: ./test
 
     - name: Check logs
-      run: docker-compose logs
+      run: docker compose logs
       working-directory: ./test
 
     - name: Run integration tests
@@ -82,12 +82,12 @@ jobs:
     #     GITHUB_ACTIONS_CI: true
 
     - name: Show container logs (in case of failure)
-      run: docker-compose logs
+      run: docker compose logs
       if: failure()
       working-directory: ./test
 
     - name: Stop containers
-      run: docker-compose down -v
+      run: docker compose down -v
       working-directory: ./test
 
     # - name: Upload code coverage
