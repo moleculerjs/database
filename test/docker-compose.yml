@@ -58,7 +58,7 @@ services:
       test:
         [
           'CMD',
-          '/opt/mssql-tools/bin/sqlcmd',
+          '/opt/mssql-tools18/bin/sqlcmd',
           '-S',
           'localhost',
           '-U',
@@ -84,4 +84,4 @@ services:
       - bash
       - -c
       # https://docs.microsoft.com/en-us/sql/relational-databases/logs/control-transaction-durability?view=sql-server-ver15#bkmk_DbControl
-      - 'until /opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P Moleculer@Pass1234 -d master -Q "CREATE DATABASE bench_test; CREATE DATABASE db_int_test; CREATE DATABASE db_int_posts_1000; CREATE DATABASE db_int_posts_1001; CREATE DATABASE db_int_posts_1002; CREATE DATABASE db_int_posts_1003;"; do sleep 5; done'
+      - 'until /opt/mssql-tools18/bin/sqlcmd -S mssql -U sa -P Moleculer@Pass1234 -d master -Q "CREATE DATABASE bench_test; CREATE DATABASE db_int_test; CREATE DATABASE db_int_posts_1000; CREATE DATABASE db_int_posts_1001; CREATE DATABASE db_int_posts_1002; CREATE DATABASE db_int_posts_1003;"; do sleep 5; done'
