@@ -6,7 +6,7 @@
 
 "use strict";
 
-const {	isisActionEnabled } = require("./schema");
+const {	isActionEnabled } = require("./schema");
 
 const PARAMS_FIELDS = [
 	{ type: "string", optional: true },
