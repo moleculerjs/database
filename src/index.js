@@ -1,7 +1,7 @@
 /*
 /*
  * @moleculer/database
- * Copyright (c) 2022 MoleculerJS (https://github.com/moleculerjs/database)
+ * Copyright (c) 2024 MoleculerJS (https://github.com/moleculerjs/database)
  * MIT Licensed
  */
 
@@ -18,7 +18,8 @@ const {
 	generateValidatorSchemaFromFields,
 	getPrimaryKeyFromFields,
 	fixIDInRestPath,
-	fixIDInCacheKeys
+	fixIDInCacheKeys,
+	isActionEnabled
 } = require("./schema");
 const pkg = require("../package.json");
 
@@ -190,7 +191,7 @@ module.exports = function DatabaseMixin(mixinOpts) {
 				if (mixinOpts.generateActionParams) {
 					// Generate action params
 					if (Object.keys(fields).length > 0) {
-						if (schema.actions.create) {
+						if (isActionEnabled(mixinOpts, "create") && schema.actions.create) {
 							schema.actions.create.params = generateValidatorSchemaFromFields(
 								fields,
 								{
@@ -201,7 +202,7 @@ module.exports = function DatabaseMixin(mixinOpts) {
 							);
 						}
 
-						if (schema.actions.createMany) {
+						if (isActionEnabled(mixinOpts, "createMany") && schema.actions.createMany) {
 							schema.actions.createMany.params = {
 								// TODO!
 								$$root: true,
@@ -220,7 +221,7 @@ module.exports = function DatabaseMixin(mixinOpts) {
 							};
 						}
 
-						if (schema.actions.update) {
+						if (isActionEnabled(mixinOpts, "update") && schema.actions.update) {
 							schema.actions.update.params = generateValidatorSchemaFromFields(
 								fields,
 								{
@@ -231,7 +232,7 @@ module.exports = function DatabaseMixin(mixinOpts) {
 							);
 						}
 
-						if (schema.actions.replace) {
+						if (isActionEnabled(mixinOpts, "replace") && schema.actions.replace) {
 							schema.actions.replace.params = generateValidatorSchemaFromFields(
 								fields,
 								{
@@ -246,19 +247,19 @@ module.exports = function DatabaseMixin(mixinOpts) {
 
 				if (primaryKeyField) {
 					// Set `id` field name & type in `get`, `resolve` and `remove` actions
-					if (schema.actions.get && schema.actions.get.params) {
+					if (isActionEnabled(mixinOpts, "get") && schema.actions.get && schema.actions.get.params) {
 						schema.actions.get.params[primaryKeyField.name] = {
 							type: primaryKeyField.type,
 							convert: true
 						};
 					}
-					if (schema.actions.resolve && schema.actions.resolve.params) {
+					if (isActionEnabled(mixinOpts, "resolve") && schema.actions.resolve && schema.actions.resolve.params) {
 						schema.actions.resolve.params[primaryKeyField.name] = [
 							{ type: "array", items: { type: primaryKeyField.type, convert: true } },
 							{ type: primaryKeyField.type, convert: true }
 						];
 					}
-					if (schema.actions.remove && schema.actions.remove.params) {
+					if (isActionEnabled(mixinOpts, "remove") && schema.actions.remove && schema.actions.remove.params) {
 						schema.actions.remove.params[primaryKeyField.name] = {
 							type: primaryKeyField.type,
 							convert: true
@@ -266,14 +267,26 @@ module.exports = function DatabaseMixin(mixinOpts) {
 					}
 
 					// Fix the ":id" variable name in the actions
-					fixIDInRestPath(schema.actions.get, primaryKeyField);
-					fixIDInRestPath(schema.actions.update, primaryKeyField);
-					fixIDInRestPath(schema.actions.replace, primaryKeyField);
-					fixIDInRestPath(schema.actions.remove, primaryKeyField);
+					if (isActionEnabled(mixinOpts, "create")) {
+						fixIDInRestPath(schema.actions.get, primaryKeyField);
+					}
+					if (isActionEnabled(mixinOpts, "update")) {
+						fixIDInRestPath(schema.actions.update, primaryKeyField);
+					}
+					if (isActionEnabled(mixinOpts, "replace")) {
+							fixIDInRestPath(schema.actions.replace, primaryKeyField);
+					}
+					if (isActionEnabled(mixinOpts, "remove")) {
+						fixIDInRestPath(schema.actions.remove, primaryKeyField);
+					}
 
 					// Fix the "id" key name in the cache keys
-					fixIDInCacheKeys(schema.actions.get, primaryKeyField);
-					fixIDInCacheKeys(schema.actions.resolve, primaryKeyField);
+					if (isActionEnabled(mixinOpts, "get")) {
+						fixIDInCacheKeys(schema.actions.get, primaryKeyField);
+					}
+					if (isActionEnabled(mixinOpts, "resolve")) {
+						fixIDInCacheKeys(schema.actions.resolve, primaryKeyField);
+					}
 				}
 			}
 

@@ -1,10 +1,12 @@
 /*
  * @moleculer/database
- * Copyright (c) 2022 MoleculerJS (https://github.com/moleculerjs/database)
+ * Copyright (c) 2024 MoleculerJS (https://github.com/moleculerjs/database)
  * MIT Licensed
  */
 
 "use strict";
+
+const {	isisActionEnabled } = require("./schema");
 
 const PARAMS_FIELDS = [
 	{ type: "string", optional: true },
@@ -52,13 +54,6 @@ module.exports = function (mixinOpts) {
 		return null;
 	};
 
-	const actionEnabled = name => {
-		if (typeof mixinOpts.createActions == "object") {
-			return mixinOpts.createActions[name] !== false;
-		}
-		return mixinOpts.createActions !== false;
-	};
-
 	/**
 	 * Find entities by query.
 	 *
@@ -77,7 +72,7 @@ module.exports = function (mixinOpts) {
 	 *
 	 * @returns {Array<Object>} List of found entities.
 	 */
-	if (actionEnabled("find")) {
+	if (isActionEnabled(mixinOpts, "find")) {
 		res.find = {
 			visibility: mixinOpts.actionVisibility,
 			rest: mixinOpts.rest ? "GET /all" : null,
@@ -131,7 +126,7 @@ module.exports = function (mixinOpts) {
 	 *
 	 * @returns {Number} Count of found entities.
 	 */
-	if (actionEnabled("count")) {
+	if (isActionEnabled(mixinOpts, "count")) {
 		res.count = {
 			visibility: mixinOpts.actionVisibility,
 			rest: mixinOpts.rest ? "GET /count" : null,
@@ -166,7 +161,7 @@ module.exports = function (mixinOpts) {
 	 *
 	 * @returns {Object} List of found entities and total count.
 	 */
-	if (actionEnabled("list")) {
+	if (isActionEnabled(mixinOpts, "list")) {
 		res.list = {
 			visibility: mixinOpts.actionVisibility,
 			rest: mixinOpts.rest ? "GET /" : null,
@@ -237,7 +232,7 @@ module.exports = function (mixinOpts) {
 	 *
 	 * @throws {EntityNotFoundError} - 404 Entity not found
 	 */
-	if (actionEnabled("get")) {
+	if (isActionEnabled(mixinOpts, "get")) {
 		res.get = {
 			visibility: mixinOpts.actionVisibility,
 			rest: mixinOpts.rest ? "GET /:id" : null,
@@ -270,7 +265,7 @@ module.exports = function (mixinOpts) {
 	 *
 	 * @throws {EntityNotFoundError} - 404 Entity not found
 	 */
-	if (actionEnabled("resolve")) {
+	if (isActionEnabled(mixinOpts, "resolve")) {
 		res.resolve = {
 			visibility: mixinOpts.actionVisibility,
 			cache: generateCacheOptions([
@@ -307,7 +302,7 @@ module.exports = function (mixinOpts) {
 	 *
 	 * @returns {Object} Saved entity.
 	 */
-	if (actionEnabled("create")) {
+	if (isActionEnabled(mixinOpts, "create")) {
 		res.create = {
 			visibility: mixinOpts.actionVisibility,
 			rest: mixinOpts.rest ? "POST /" : null,
@@ -325,7 +320,7 @@ module.exports = function (mixinOpts) {
 	 *
 	 * @returns {Array<Object>} Saved entities.
 	 */
-	if (actionEnabled("createMany")) {
+	if (isActionEnabled(mixinOpts, "createMany")) {
 		res.createMany = {
 			visibility: mixinOpts.actionVisibility,
 			rest: null,
@@ -345,7 +340,7 @@ module.exports = function (mixinOpts) {
 	 *
 	 * @throws {EntityNotFoundError} - 404 Entity not found
 	 */
-	if (actionEnabled("update")) {
+	if (isActionEnabled(mixinOpts, "update")) {
 		res.update = {
 			visibility: mixinOpts.actionVisibility,
 			rest: mixinOpts.rest ? "PATCH /:id" : null,
@@ -365,7 +360,7 @@ module.exports = function (mixinOpts) {
 	 *
 	 * @throws {EntityNotFoundError} - 404 Entity not found
 	 */
-	if (actionEnabled("replace")) {
+	if (isActionEnabled(mixinOpts, "replace")) {
 		res.replace = {
 			visibility: mixinOpts.actionVisibility,
 			rest: mixinOpts.rest ? "PUT /:id" : null,
@@ -386,7 +381,7 @@ module.exports = function (mixinOpts) {
 	 *
 	 * @throws {EntityNotFoundError} - 404 Entity not found
 	 */
-	if (actionEnabled("remove")) {
+	if (isActionEnabled(mixinOpts, "remove")) {
 		res.remove = {
 			visibility: mixinOpts.actionVisibility,
 			rest: mixinOpts.rest ? "DELETE /:id" : null,

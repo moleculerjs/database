@@ -1,6 +1,6 @@
 /*
  * @moleculer/database
- * Copyright (c) 2023 MoleculerJS (https://github.com/moleculerjs/database)
+ * Copyright (c) 2024 MoleculerJS (https://github.com/moleculerjs/database)
  * MIT Licensed
  */
 
@@ -44,6 +44,13 @@ function fixIDInCacheKeys(def, primaryKeyField) {
 		def.cache.keys = def.cache.keys.map(key => (key == "id" ? primaryKeyField.name : key));
 	}
 }
+
+function actionEnabled(mixinOpts, actionName) {
+	if (typeof mixinOpts.createActions == "object") {
+		return mixinOpts.createActions[actionName] !== false;
+	}
+	return mixinOpts.createActions !== false;
+};
 
 function generateValidatorSchemaFromFields(fields, opts) {
 	const res = {};
@@ -141,5 +148,6 @@ module.exports = {
 	fixIDInRestPath,
 	fixIDInCacheKeys,
 	generateValidatorSchemaFromFields,
-	generateFieldValidatorSchema
+	generateFieldValidatorSchema,
+	actionEnabled
 };
