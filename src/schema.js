@@ -45,7 +45,7 @@ function fixIDInCacheKeys(def, primaryKeyField) {
 	}
 }
 
-function actionEnabled(mixinOpts, actionName) {
+function isActionEnabled(mixinOpts, actionName) {
 	if (typeof mixinOpts.createActions == "object") {
 		return mixinOpts.createActions[actionName] !== false;
 	}
@@ -149,5 +149,5 @@ module.exports = {
 	fixIDInCacheKeys,
 	generateValidatorSchemaFromFields,
 	generateFieldValidatorSchema,
-	actionEnabled
+	isActionEnabled
 };
