@@ -35,13 +35,13 @@
   },
   "devDependencies": {
     "@vscode/sqlite3": "^5.1.2",
-    "axios": "^1.7.2",
+    "axios": "^1.7.9",
     "benchmarkify": "^4.0.0",
     "coveralls": "^3.1.1",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-prettier": "^5.2.3",
     "eslint-plugin-promise": "^6.6.0",
     "eslint-plugin-security": "^2.1.1",
     "fakerator": "^0.3.6",
@@ -50,20 +50,20 @@
     "jest-cli": "^29.7.0",
     "kleur": "^4.1.5",
     "knex": "^3.1.0",
-    "moleculer": "^0.14.34",
+    "moleculer": "^0.14.35",
     "moleculer-repl": "^0.7.4",
     "moleculer-web": "^0.10.7",
-    "mongodb": "^6.8.0",
+    "mongodb": "^6.13.0",
     "mysql": "^2.18.1",
-    "mysql2": "^3.11.0",
+    "mysql2": "^3.12.0",
     "nedb": "^1.8.0",
-    "nodemon": "^3.1.4",
+    "nodemon": "^3.1.9",
     "npm-check-updates": "^16.14.20",
-    "pg": "^8.12.0",
-    "prettier": "^3.3.3",
-    "qs": "^6.12.3",
-    "sequelize": "^6.37.3",
-    "tedious": "^18.4.0"
+    "pg": "^8.13.1",
+    "prettier": "^3.4.2",
+    "qs": "^6.14.0",
+    "sequelize": "^6.37.5",
+    "tedious": "^18.6.2"
   },
   "jest": {
     "testEnvironment": "node",
@@ -83,7 +83,7 @@
   "dependencies": {
     "fastest-validator": "^1.19.0",
     "lodash": "^4.17.21",
-    "semver": "^7.6.3",
+    "semver": "^7.7.0",
     "sqlite3": "^5.1.7"
   }
 }
