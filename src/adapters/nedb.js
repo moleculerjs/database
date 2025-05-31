@@ -1,6 +1,6 @@
 /*
  * @moleculer/database
- * Copyright (c) 2022 MoleculerJS (https://github.com/moleculerjs/database)
+ * Copyright (c) 2025 MoleculerJS (https://github.com/moleculerjs/database)
  * MIT Licensed
  */
 
@@ -43,17 +43,17 @@ class NeDBAdapter extends BaseAdapter {
 		super.init(service);
 
 		try {
-			Datastore = require("nedb");
+			Datastore = require("@seald-io/nedb");
 		} catch (err) {
 			/* istanbul ignore next */
 			this.broker.fatal(
-				"The 'nedb' package is missing! Please install it with 'npm install nedb --save' command.",
+				"The '@seald-io/nedb' package is missing! Please install it with 'npm install @seald-io/nedb --save' command.",
 				err,
 				true
 			);
 		}
 
-		this.checkClientLibVersion("nedb", "^1.8.0");
+		this.checkClientLibVersion("@seald-io/nedb", "^4.0.0");
 	}
 
 	/**

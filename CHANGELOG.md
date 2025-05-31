@@ -1,3 +1,11 @@
+<a name="v0.3.0"></a>
+
+# [0.3.0](https://github.com/moleculerjs/database/compare/v0.2.1...v0.3.0) (2025-05-31)
+
+- update dependencies.
+- Minimum node version is 20.
+- switch from `nedb` to `@seald-io/nedb` to support Node 24+.
+- 
 <a name="v0.2.1"></a>
 
 # [0.2.1](https://github.com/moleculerjs/database/compare/v0.2.0...v0.2.1) (2024-07-28)

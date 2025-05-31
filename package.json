@@ -31,9 +31,10 @@
   "author": "MoleculerJS",
   "license": "MIT",
   "peerDependencies": {
-    "moleculer": "^0.14.12 || ^0.15.0"
+    "moleculer": "^0.14.12 || ^0.15.0-0"
   },
   "devDependencies": {
+    "@seald-io/nedb": "^4.1.1",
     "@vscode/sqlite3": "^5.1.2",
     "axios": "^1.9.0",
     "benchmarkify": "^4.0.0",
@@ -56,7 +57,6 @@
     "mongodb": "^6.16.0",
     "mysql": "^2.18.1",
     "mysql2": "^3.14.1",
-    "nedb": "^1.8.0",
     "nodemon": "^3.1.10",
     "npm-check-updates": "^16.14.20",
     "pg": "^8.15.6",
@@ -78,7 +78,7 @@
     ]
   },
   "engines": {
-    "node": ">= 18.x.x"
+    "node": ">= 20.x.x"
   },
   "dependencies": {
     "fastest-validator": "^1.19.1",
