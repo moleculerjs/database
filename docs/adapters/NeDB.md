@@ -1,5 +1,5 @@
 # NeDB adapter
-The NeDB adapter is the default adapter. It uses the [NeDB](https://github.com/louischatriot/nedb) library which is a lightweight embedded persistent or in-memory database. The [API](https://github.com/louischatriot/nedb#api) is a subset of MongoDB's API.
+The NeDB adapter is the default adapter. It uses the [@seald-io/nedb](https://github.com/seald/nedb) library which is a lightweight embedded persistent or in-memory database. The [API](https://github.com/seald/nedb/blob/master/API.md) is a subset of MongoDB's API.
 
 > Use this adapter for prototyping and testing.
 
@@ -7,7 +7,7 @@ The NeDB adapter is the default adapter. It uses the [NeDB](https://github.com/l
 This module contains the source code of the adapter. You just need to install the dependent library.
 
 ```bash
-npm install nedb
+npm install @seald-io/nedb
 ```
 
 ## Usage
@@ -85,11 +85,11 @@ module.exports = {
 ## Options
 | Property | Type | Default | Description |
 | -------- | ---- | ------- | ----------- |
-| `neDB` | `Object|DataStore` | `null` |  [NeDB constructor options](https://github.com/louischatriot/nedb#creatingloading-a-database). If it's a `DataStore` instance, it uses it instead of creating a new one.  |
+| `neDB` | `Object|DataStore` | `null` |  [NeDB constructor options](https://github.com/seald/nedb?tab=readme-ov-file#creatingloading-a-database). If it's a `DataStore` instance, it uses it instead of creating a new one.  |
 
 
 ## Raw update
-If you want to update entity and using raw changes, use the [`updateEntity`](../README.md#updateentity) method with `{ raw: true }` options. In this case, you can use [NeDB modifiers](https://github.com/louischatriot/nedb#updating-documents) in the `params` parameter.
+If you want to update entity and using raw changes, use the [`updateEntity`](../README.md#updateentity) method with `{ raw: true }` options. In this case, you can use [NeDB modifiers](https://github.com/seald/nedb?tab=readme-ov-file#updating-documents) in the `params` parameter.
 
 ### Example
 ```js

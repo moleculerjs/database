@@ -8,8 +8,6 @@
 # @moleculer/database 
 Advanced Database Access Service for Moleculer microservices framework. Use it to persist your data in a database.
 
-**This project is in work-in-progress. Be careful using it in production.**
-
 >this module follows the *one database per service* pattern. To learn more about this design pattern and its implications check this [article](https://microservices.io/patterns/data/database-per-service.html). For *multiple entities/tables per service* approach check [FAQ](https://moleculer.services/docs/0.14/faq.html#How-can-I-manage-multiple-entities-tables-per-service).
 
 ## Features
@@ -30,9 +28,9 @@ Advanced Database Access Service for Moleculer microservices framework. Use it t
 
 ## Install
 ```
-npm i @moleculer/database nedb
+npm i @moleculer/database @seald-io/nedb
 ```
-> Installing `nedb` is optional. It can be good for prototyping.
+> Installing `@seald-io/nedb` is optional. It can be good for prototyping.
 
 ## Usage
 
@@ -118,6 +116,6 @@ There is some benchmark with all adapters. [You can find the results here.](benc
 The project is available under the [MIT license](https://tldrlegal.com/license/mit-license).
 
 ## Contact
-Copyright (c) 2022 MoleculerJS
+Copyright (c) 2025 MoleculerJS
 
 [![@MoleculerJS](https://img.shields.io/badge/github-moleculerjs-green.svg)](https://github.com/moleculerjs) [![@MoleculerJS](https://img.shields.io/badge/twitter-MoleculerJS-blue.svg)](https://twitter.com/MoleculerJS)
