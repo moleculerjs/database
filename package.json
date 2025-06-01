@@ -42,7 +42,7 @@
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^5.2.6",
+    "eslint-plugin-prettier": "^5.4.1",
     "eslint-plugin-promise": "^6.6.0",
     "eslint-plugin-security": "^2.1.1",
     "fakerator": "^0.3.6",
@@ -59,7 +59,7 @@
     "mysql2": "^3.14.1",
     "nodemon": "^3.1.10",
     "npm-check-updates": "^16.14.20",
-    "pg": "^8.15.6",
+    "pg": "^8.16.0",
     "prettier": "^3.5.3",
     "qs": "^6.14.0",
     "sequelize": "^6.37.7",
@@ -83,7 +83,7 @@
   "dependencies": {
     "fastest-validator": "^1.19.1",
     "lodash": "^4.17.21",
-    "semver": "^7.7.1",
+    "semver": "^7.7.2",
     "sqlite3": "^5.1.7"
   }
 }
