@@ -17,7 +17,6 @@
     "bench:watch": "nodemon benchmark/index.js",
     "deps": "npm-check -u && npm audit fix",
     "ci-update-deps": "ncu -u --target minor",
-    "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "release": "npm publish --access public && git push --tags"
   },
   "keywords": [
@@ -38,7 +37,6 @@
     "@vscode/sqlite3": "^5.1.2",
     "axios": "^1.9.0",
     "benchmarkify": "^4.0.0",
-    "coveralls": "^3.1.1",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-node": "^11.1.0",
