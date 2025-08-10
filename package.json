@@ -3,6 +3,7 @@
   "version": "0.3.0",
   "description": "Advanced Database Access Service for Moleculer microservices framework",
   "main": "index.js",
+  "typings": "index.d.ts",
   "scripts": {
     "dev": "nodemon examples/index.js",
     "ci:unit": "jest --testMatch \"**/unit/**/*.spec.js\" --watch",
