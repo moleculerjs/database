@@ -31,30 +31,6 @@ declare module "@moleculer/database" {
 		};
 	}
 
-	// Augment Moleculer types for database usage
-	declare module "moleculer" {
-		interface Context<P = GenericObject, M = GenericObject> {
-			meta: M & {
-				tenantId?: string;
-				user?: {
-					id?: string;
-					[key: string]: any;
-				};
-				[key: string]: any;
-			};
-		}
-
-		interface ServiceBroker {
-			call<T = any>(actionName: string): Promise<T>;
-			call<T = any>(actionName: string, params: any): Promise<T>;
-			call<T = any>(
-				actionName: string,
-				params: any,
-				opts: CallingOptions | Context
-			): Promise<T>;
-		}
-	}
-
 	// Re-export the main entity not found error
 	export class EntityNotFoundError extends MoleculerErrors.MoleculerClientError {
 		constructor(id: any);
@@ -101,7 +77,7 @@ declare module "@moleculer/database" {
 		/** Params for populating action */
 		params?: Record<string, any>;
 		/** Handler function for populating */
-		handler?: (ids: any[], docs: any[], rule: PopulateDefinition, ctx: Context) => Promise<any>;
+		handler?: (ids: any[], docs: any[], rule: PopulateDefinition, ctx: Context<any, any>) => Promise<any>;
 		/** Key field name in the target service */
 		keyField?: string;
 		/** Populated field name in entity */
@@ -136,26 +112,26 @@ declare module "@moleculer/database" {
 		/** Population configuration */
 		populate?:
 			| PopulateDefinition
-			| ((ctx: Context, values: any[], docs: any[]) => Promise<any>);
+			| ((ctx: Context<any, any>, values: any[], docs: any[]) => Promise<any>);
 		/** Transformation function when getting value */
-		get?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context) => any;
+		get?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context<any, any>) => any;
 		/** Transformation function when setting value */
-		set?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context) => any;
+		set?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context<any, any>) => any;
 		/** Custom validation function */
 		validate?: (
 			value: any,
 			entity: any,
 			field: BaseFieldDefinition,
-			ctx: Context
+			ctx: Context<any, any>
 		) => Promise<boolean | string>;
 		/** Lifecycle hook: called when entity is created */
-		onCreate?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context) => any;
+		onCreate?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context<any, any>) => any;
 		/** Lifecycle hook: called when entity is updated */
-		onUpdate?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context) => any;
+		onUpdate?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context<any, any>) => any;
 		/** Lifecycle hook: called when entity is replaced */
-		onReplace?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context) => any;
+		onReplace?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context<any, any>) => any;
 		/** Lifecycle hook: called when entity is removed (enables soft delete) */
-		onRemove?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context) => any;
+		onRemove?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context<any, any>) => any;
 	}
 
 	export interface StringFieldDefinition extends BaseFieldDefinition {
@@ -293,7 +269,7 @@ declare module "@moleculer/database" {
 		/** Query to apply for this scope */
 		query?: Record<string, any>;
 		/** Handler function for dynamic scoping */
-		handler?: (query: Record<string, any>, params: any, ctx: Context) => Record<string, any>;
+		handler?: (query: Record<string, any>, params: any, ctx: Context<any, any>) => Record<string, any>;
 	}
 
 	export interface Scopes {
@@ -433,7 +409,7 @@ declare module "@moleculer/database" {
 		entityToJSON(entity: any): any;
 
 		/** Before save transformation */
-		beforeSave(entity: any, ctx: Context): any;
+		beforeSave(entity: any, ctx: Context<any, any>): any;
 
 		/** After retrieve transformation */
 		afterRetrieve(entity: any): any;
@@ -609,47 +585,47 @@ declare module "@moleculer/database" {
 	// Database service methods
 	export interface DatabaseMethods {
 		// Adapter methods
-		getAdapter(ctx?: Context): Promise<BaseAdapter>;
-		getAdapterByContext(ctx?: Context, adapterDef?: any): [string, any];
+		getAdapter(ctx?: Context<any, any>): Promise<BaseAdapter>;
+		getAdapterByContext(ctx?: Context<any, any>, adapterDef?: any): [string, any];
 		maintenanceAdapters(): Promise<void>;
 
 		// Entity methods
-		findEntities<T = any>(ctx: Context, params?: FindParams): Promise<T[]>;
+		findEntities<T = any>(ctx: Context<any, any>, params?: FindParams): Promise<T[]>;
 		countEntities(
-			ctx: Context,
+			ctx: Context<any, any>,
 			params?: Omit<FindParams, "limit" | "offset" | "fields" | "sort">
 		): Promise<number>;
-		findEntity<T = any>(ctx: Context, params?: GetParams): Promise<T | null>;
+		findEntity<T = any>(ctx: Context<any, any>, params?: GetParams): Promise<T | null>;
 		resolveEntities<T = any>(
-			ctx: Context,
+			ctx: Context<any, any>,
 			params?: ResolveParams,
 			opts?: { throwIfNotExist?: boolean; reorderResult?: boolean }
 		): Promise<T | T[] | Record<string, T>>;
-		createEntity<T = any>(ctx: Context, params?: any): Promise<T>;
+		createEntity<T = any>(ctx: Context<any, any>, params?: any): Promise<T>;
 		createEntities<T = any>(
-			ctx: Context,
+			ctx: Context<any, any>,
 			entities: any[],
 			opts?: { returnEntities?: boolean }
 		): Promise<T[] | number>;
-		updateEntity<T = any>(ctx: Context, params?: any): Promise<T>;
+		updateEntity<T = any>(ctx: Context<any, any>, params?: any): Promise<T>;
 		updateEntities(
-			ctx: Context,
+			ctx: Context<any, any>,
 			query: Record<string, any>,
 			update: any,
 			opts?: any
 		): Promise<number>;
-		replaceEntity<T = any>(ctx: Context, params?: any): Promise<T>;
-		removeEntity(ctx: Context, params?: any): Promise<any>;
-		removeEntities(ctx: Context, query: Record<string, any>, opts?: any): Promise<number>;
-		clearEntities(ctx?: Context): Promise<number>;
-		streamEntities(ctx: Context, params?: FindParams): any;
+		replaceEntity<T = any>(ctx: Context<any, any>, params?: any): Promise<T>;
+		removeEntity(ctx: Context<any, any>, params?: any): Promise<any>;
+		removeEntities(ctx: Context<any, any>, query: Record<string, any>, opts?: any): Promise<number>;
+		clearEntities(ctx?: Context<any, any>): Promise<number>;
+		streamEntities(ctx: Context<any, any>, params?: FindParams): any;
 
 		// Validation methods
 		validateEntity(
 			entity: any,
 			opts?: { type?: "create" | "update" | "replace" }
 		): Promise<any>;
-		authorizeFields(fields: any[], ctx: Context, params: any, opts?: any): Promise<any[]>;
+		authorizeFields(fields: any[], ctx: Context<any, any>, params: any, opts?: any): Promise<any[]>;
 		sanitizeParams(params: any, opts?: any): any;
 
 		// Transformation methods
@@ -657,12 +633,12 @@ declare module "@moleculer/database" {
 			adapter: BaseAdapter | null,
 			docs: any | any[],
 			params?: any,
-			ctx?: Context
+			ctx?: Context<any, any>
 		): Promise<T | T[]>;
 		encodeEntity(entity: any): any;
 		decodeEntity(entity: any): any;
 		populateEntities<T = any>(
-			ctx: Context,
+			ctx: Context<any, any>,
 			docs: T[],
 			populateFields: string[],
 			params?: any
@@ -675,13 +651,13 @@ declare module "@moleculer/database" {
 		entityChanged(
 			type: "created" | "updated" | "replaced" | "removed",
 			entity: any,
-			ctx: Context,
+			ctx: Context<any, any>,
 			opts?: { oldEntity?: any }
 		): void;
 
 		// Monitoring
-		startSpan(ctx: Context, name: string, tags?: Record<string, any>): any;
-		finishSpan(ctx: Context, span: any, tags?: Record<string, any>): void;
+		startSpan(ctx: Context<any, any>, name: string, tags?: Record<string, any>): any;
+		finishSpan(ctx: Context<any, any>, span: any, tags?: Record<string, any>): void;
 	}
 
 	// Database service actions
@@ -699,14 +675,14 @@ declare module "@moleculer/database" {
 	}
 
 	// Database action handler with proper this context
-	export interface DatabaseActionHandler<TParams = any> {
-		(this: DatabaseService, ctx: Context<TParams>): Promise<any> | any;
+	export interface DatabaseActionHandler<TParams = any, TMeta = any> {
+		(this: DatabaseService, ctx: Context<TParams, TMeta>): Promise<any> | any;
 	}
 
 	// Database action definition
-	export interface DatabaseActionDef<TParams = any> {
+	export interface DatabaseActionDef<TParams = any, TMeta = any> {
 		params?: ActionParams;
-		handler?: DatabaseActionHandler<TParams>;
+		handler?: DatabaseActionHandler<TParams, TMeta>;
 	}
 
 		// Custom hooks interface

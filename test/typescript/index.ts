@@ -8,7 +8,7 @@
  * compilation when there are type mismatches.
  */
 
-import Moleculer, { ServiceBroker, Context, ServiceSchema } from "moleculer";
+import { ServiceBroker, Context, Service as MoleculerService, ServiceSchema } from "moleculer";
 import {
     Service as DbService,
     Fields,
@@ -496,86 +496,86 @@ function demonstrateServiceUsage() {
     // These calls would be made in a real application
     return {
         // Test CRUD operations
-        async createPost(ctx: Context) {
-            const post = await broker.call<Post>("posts.create", {
+        async createPost() {
+            const post = await broker.call<Post, Partial<Post>>("posts.create", {
                 title: "My First Post",
                 content: "This is the content of my first post",
                 author: "user123",
                 tags: ["moleculer", "database"]
-            }, ctx);
+            });
             return post;
         },
 
-        async updatePost(ctx: Context, id: string) {
-            const updatedPost = await broker.call<Post>("posts.update", {
+        async updatePost(id: string) {
+            const updatedPost = await broker.call<Post, Partial<Post>>("posts.update", {
                 id,
                 title: "Updated Post Title",
                 votes: 5
-            }, ctx);
+            });
             return updatedPost;
         },
 
-        async findPosts(ctx: Context) {
-            const posts = await broker.call<Post[]>("posts.find", {
+        async findPosts() {
+            const posts = await broker.call<Post[], FindParams>("posts.find", {
                 limit: 10,
                 sort: "-createdAt",
                 populate: ["author"],
                 scope: ["published"]
-            }, ctx);
+            });
             return posts;
         },
 
-        async listPosts(ctx: Context) {
-            const result = await broker.call<ListResult<Post>>("posts.list", {
+        async listPosts() {
+            const result = await broker.call<ListResult<Post>, ListParams>("posts.list", {
                 page: 1,
                 pageSize: 20,
                 fields: ["id", "title", "votes", "status"],
                 scope: ["published"]
-            }, ctx);
+            });
             return result;
         },
 
-        async getPost(ctx: Context, id: string) {
-            const post = await broker.call<Post>("posts.get", {
+        async getPost(id: string) {
+            const post = await broker.call<Post, GetParams>("posts.get", {
                 id,
                 populate: ["author"]
-            }, ctx);
+            });
             return post;
         },
 
-        async resolvePosts(ctx: Context, ids: string[]) {
-            const posts = await broker.call<Record<string, Post>>("posts.resolve", {
+        async resolvePosts(ids: string[]) {
+            const posts = await broker.call<Post, ResolveParams>("posts.resolve", {
                 id: ids,
                 mapping: true,
                 fields: ["id", "title", "votes"]
-            }, ctx);
+            });
             return posts;
         },
 
-        async countPosts(ctx: Context) {
-            const count = await broker.call<number>("posts.count", {
+        async countPosts() {
+            const count = await broker.call<number, FindParams>("posts.count", {
                 scope: ["published"],
                 query: { votes: { $gte: 1 } }
-            }, ctx);
+            });
             return count;
         },
 
-        async removePost(ctx: Context, id: string) {
-            const result = await broker.call("posts.remove", { id }, ctx);
+        async removePost(id: string) {
+            const result = await broker.call("posts.remove", { id });
             return result;
         },
 
         // Test custom actions
-        async findByAuthor(ctx: Context, authorId: string) {
-            const posts = await broker.call<Post[]>("posts.findByAuthor", {
+        async findByAuthor(authorId: string) {
+            const posts = await broker.call<Post[], { authorId: string; limit: number }>("posts.findByAuthor", {
                 authorId,
                 limit: 5
-            }, ctx);
+            });
             return posts;
         },
 
-        async incrementVotes(ctx: Context, id: string) {
-            const post = await broker.call<Post>("posts.incrementVotes", { id }, ctx);
+        async incrementVotes(id: string) {
+            const post = await broker.call<Post, { id: string }>("posts.incrementVotes", { id });
             return post;
         }
     };
@@ -585,7 +585,7 @@ function demonstrateServiceUsage() {
 // Direct Service Method Testing
 // =============================================================================
 
-function demonstrateDirectServiceMethods(service: Service) {
+function demonstrateDirectServiceMethods(service: MoleculerService & DatabaseMethods) {
     return {
         // Test entity methods with proper typing
         async testEntityMethods(ctx: Context) {
@@ -727,7 +727,7 @@ function demonstrateErrorHandling() {
     // Test error in async context
     async function testAsyncError(ctx: Context): Promise<Post | null> {
         try {
-            const service = ctx.service as DatabaseService;
+            const service = ctx.service as MoleculerService & DatabaseMethods;
             const post = await service.findEntity<Post>(ctx, { id: "nonExistentId" });
             return post;
         } catch (error) {
@@ -973,7 +973,7 @@ function testTypeInference() {
 
     // This should properly type the context and return values
     const testAction = async (ctx: Context<{ id: string }>) => {
-        const service = ctx.service as DatabaseService;
+        const service = ctx.service as MoleculerService & DatabaseMethods;
 
         // Should infer Post type
         const post = await service.findEntity<Post>(ctx, { id: ctx.params.id });
@@ -1022,7 +1022,7 @@ const advancedServiceSchema: ServiceSchema<DatabaseServiceSettings, DatabaseMeth
         scopes: {
             published: { query: { status: "published" } },
             byUser: {
-                handler: (query: Record<string, any>, params: any, ctx: Context) => {
+                handler: (query: Record<string, any>, params: any, ctx: Context<any, { user: { id: string } }>) => {
                     if (ctx.meta?.user?.id) {
                         query.createdBy = ctx.meta.user.id;
                     }
@@ -1077,21 +1077,21 @@ const advancedServiceSchema: ServiceSchema<DatabaseServiceSettings, DatabaseMeth
     },
 
     events: {
-        "posts.created"(payload: { entity: Post; ctx: Context }) {
-            this.logger.info("Post created:", payload.entity.id);
+        "posts.created"(ctx: Context<{ entity: Post }>) {
+            this.logger.info("Post created:", ctx.params.entity.id);
         },
 
-        "posts.updated"(payload: { entity: Post; oldEntity: Post; ctx: Context }) {
-            this.logger.info("Post updated:", payload.entity.id);
+        "posts.updated"(ctx: Context<{ entity: Post; oldEntity: Post }>) {
+            this.logger.info("Post updated:", ctx.params.entity.id);
             // Check if status changed from draft to published
-            if (payload.oldEntity.status !== payload.entity.status && payload.entity.status) {
-                this.broker.emit("post.published", { post: payload.entity });
+            if (ctx.params.oldEntity.status !== ctx.params.entity.status && ctx.params.entity.status) {
+                this.broker.emit("post.published", { post: ctx.params.entity });
             }
         }
     },
 
     methods: {
-        async generateSlug(title: string): Promise<string> {
+        async generateSlug(ctx: Context, title: string): Promise<string> {
             const baseSlug = title
                 .toLowerCase()
                 .replace(/[^a-z0-9\s-]/g, "")
@@ -1102,7 +1102,7 @@ const advancedServiceSchema: ServiceSchema<DatabaseServiceSettings, DatabaseMeth
             let counter = 1;
 
             // Ensure uniqueness
-            while (await this.findEntity(this.broker.ContextFactory.create({}), { slug })) {
+            while (await this.findEntity(ctx, { slug })) {
                 slug = `${baseSlug}-${counter}`;
                 counter++;
             }

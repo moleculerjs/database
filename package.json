@@ -18,7 +18,7 @@
     "bench:watch": "nodemon benchmark/index.js",
     "deps": "npm-check -u && npm audit fix",
     "ci-update-deps": "ncu -u --target minor",
-    "type-check": "tsc --project tsconfig.json",
+    "typecheck": "tsc --project tsconfig.json",
     "test:ts": "tsc --project test/typescript/tsconfig.json",
     "release": "npm publish --access public && git push --tags"
   },
