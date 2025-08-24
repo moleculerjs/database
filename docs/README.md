@@ -1340,7 +1340,7 @@ Update an existing entity. Only the specified fields will be updated.
 | `opts.raw` | `Boolean` | `false` | If `true`, the `params` is passed directly to the database client. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
 | `opts.permissive` | `Boolean` | `false` | If `true`, readonly and immutable fields can be set and update and field permission is not checked. |
-| `opts.scope` | `String|Array<String>|Boolean` | `null` |Scopes for the query. If false, the default scopes are disabled. |
+| `opts.scope` | `String\|Array<String>\|Boolean` | `null` |Scopes for the query. If false, the default scopes are disabled. |
 
 It returns the updated entity.
 
@@ -1356,7 +1356,7 @@ Update multiple entities by a query. Only the specified fields will be updated.
 | `params` | `Object` | `null` | Parameters for method. |
 | `params.query` | `Object` | `null` | The query for finding entities. |
 | `params.changes` | `Object` | `null` | It contains the changed field values. |
-| `params.scope` | `String|Array<String>|Boolean` | `null` |Scopes for the query. If false, the default scopes are disabled. |
+| `params.scope` | `String\|Array<String>\|Boolean` | `null` |Scopes for the query. If false, the default scopes are disabled. |
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.raw` | `Boolean` | `false` | If `true`, the `params` is passed directly to the database client. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
@@ -1377,7 +1377,7 @@ Replace an existing entity.
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
 | `opts.permissive` | `Boolean` | `false` | If `true`, readonly and immutable fields can be set and update and field permission is not checked. |
-| `opts.scope` | `String|Array<String>|Boolean` | `null` |Scopes for the query. If false, the default scopes are disabled. |
+| `opts.scope` | `String\|Array<String>\|Boolean` | `null` |Scopes for the query. If false, the default scopes are disabled. |
 
 It returns the replaced entity.
 
@@ -1393,7 +1393,7 @@ Delete an entity by ID.
 | `params` | `Object` | `null` | It contains the entity ID. |
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
-| `opts.scope` | `String|Array<String>|Boolean` | `null` |Scopes for the query. If false, the default scopes are disabled. |
+| `opts.scope` | `String\|Array<String>\|Boolean` | `null` |Scopes for the query. If false, the default scopes are disabled. |
 | `opts.softDelete` | `Boolean` | `null` | Disable the enabled soft-delete feature. Only `false` value is acceptable. |
 
 The method returns only the ID of the deleted entity.
@@ -1409,7 +1409,7 @@ Delete multiple entities by a query.
 | `ctx` | `Context` | `null` | Moleculer `Context` instance. It can be `null`. |
 | `params` | `Object` | `null` | Parameters for method. |
 | `params.query` | `Object` | `null` | The query for finding entities. |
-| `params.scope` | `String|Array<String>|Boolean` | `null` |Scopes for the query. If false, the default scopes are disabled. |
+| `params.scope` | `String\|Array<String>\|Boolean` | `null` |Scopes for the query. If false, the default scopes are disabled. |
 | `opts` | `Object` | `{}` | Other options for internal methods. |
 | `opts.transform` | `Boolean` | `true` | If `false`, the result won't be transformed. |
 | `opts.softDelete` | `Boolean` | `null` | Disable the enabled soft-delete feature. Only `false` value is acceptable. |

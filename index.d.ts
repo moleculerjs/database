@@ -509,6 +509,8 @@ declare module "@moleculer/database" {
 		indexes?: IndexDefinition[];
 	}
 
+	type ScopeParam = boolean | string | string[];
+
 	// Query parameters for database operations
 	export interface FindParams {
 		/** Maximum number of entities to return */
@@ -526,7 +528,7 @@ declare module "@moleculer/database" {
 		/** Collation options */
 		collation?: Record<string, any>;
 		/** Scope to apply */
-		scope?: boolean | string | string[];
+		scope?: ScopeParam;
 		/** Fields to populate */
 		populate?: string | string[];
 		/** Custom query */
@@ -546,7 +548,7 @@ declare module "@moleculer/database" {
 		/** Fields to include in results */
 		fields?: string | string[];
 		/** Scope to apply */
-		scope?: boolean | string | string[];
+		scope?: ScopeParam;
 		/** Fields to populate */
 		populate?: string | string[];
 	}
@@ -557,7 +559,7 @@ declare module "@moleculer/database" {
 		/** Fields to include in results */
 		fields?: string | string[];
 		/** Scope to apply */
-		scope?: boolean | string | string[];
+		scope?: ScopeParam;
 		/** Fields to populate */
 		populate?: string | string[];
 		/** Convert result array to object with ID as key */
@@ -581,6 +583,93 @@ declare module "@moleculer/database" {
 		totalPages: number;
 	}
 
+	export interface FindOptions {
+		/** Enable transformation of results */
+		transform?: boolean;
+	}
+
+	export interface ResolveEntityOptions {
+		/** Enable transformation of results */
+		transform?: boolean;
+		/** Throw error if entity not found */
+		throwIfNotExist?: boolean;
+		/** Reorder results to match input order */
+		reorderResult?: boolean;
+	}
+
+	export interface CreateEntityOptions {
+		/** Enable transformation of results */
+		transform?: boolean;
+		/** Enable permissive updates */
+		permissive?: boolean;
+	}
+
+	export interface CreateEntitiesOptions extends CreateEntityOptions {
+		/** Return created entities */
+		returnEntities?: boolean;
+	}
+
+	export interface UpdateEntityOptions {
+		/** Return raw database response */
+		raw?: boolean;
+		/** Enable permissive updates */
+		permissive?: boolean;
+		/** Skip "onCreate", "onUpdate" and "onDelete" hooks */
+		skipOnHooks?: boolean;
+		/** Enable transformation of results */
+		transform?: boolean;
+		/** Scope to apply */
+		scope?: ScopeParam;
+	}
+
+	export interface UpdateEntitiesParams<T = any> {
+		/** Query to match entities */
+		query: Record<string, any>;
+		/** Fields to update */
+		changes: Partial<T>;
+		/** Scope to apply */
+		scope?: ScopeParam;
+	}
+
+	export interface RemoveEntityOptions {
+		/** Enable transformation of results */
+		transform?: boolean;
+		/** Scope to apply */
+		scope?: ScopeParam;
+		/** Enable soft delete */
+		softDelete?: boolean;
+	}
+
+	export interface RemoveEntitiesOptions {
+		/** Enable transformation of results */
+		transform?: boolean;
+		/** Enable soft delete */
+		softDelete?: boolean;
+	}
+
+	export interface RemoveEntitiesParams {
+		/** Query to match entities */
+		query: Record<string, any>;
+		/** Scope to apply */
+		scope?: ScopeParam;
+	}
+
+	export interface ValidateParamsOptions {
+		/** Type of validation */
+		type?: "create" | "update" | "replace";
+		/** Enable permissive updates */
+		permissive?: boolean;
+		/** Skip "onCreate", "onUpdate" and "onDelete" hooks */
+		skipOnHooks?: boolean;
+	}
+
+	export interface EntityChangedOptions {
+		/** It was a batch operation */
+		batch: boolean;
+		/** It's soft deleted */
+		softDelete: boolean;
+	}
+
 	// Database service methods
 	export interface DatabaseMethods {
 		// Adapter methods
@@ -589,70 +678,68 @@ declare module "@moleculer/database" {
 		maintenanceAdapters(): Promise<void>;
 
 		// Entity methods
-		findEntities<T = any>(ctx: Context<any, any>, params?: FindParams): Promise<T[]>;
+		findEntities<T = any>(ctx: Context<any, any>, params?: FindParams, opts?: FindOptions): Promise<T[]>;
 		countEntities(
 			ctx: Context<any, any>,
 			params?: Omit<FindParams, "limit" | "offset" | "fields" | "sort">
 		): Promise<number>;
-		findEntity<T = any>(ctx: Context<any, any>, params?: GetParams): Promise<T | null>;
+		findEntity<T = any>(ctx: Context<any, any>, params?: GetParams, opts?: FindOptions): Promise<T | null>;
 		resolveEntities<T = any>(
 			ctx: Context<any, any>,
 			params?: ResolveParams,
-			opts?: { throwIfNotExist?: boolean; reorderResult?: boolean }
+			opts?: ResolveEntityOptions
 		): Promise<T | T[] | Record<string, T>>;
-		createEntity<T = any>(ctx: Context<any, any>, params?: any): Promise<T>;
+		createEntity<T = any>(ctx: Context<any, any>, params?: any, opts?: CreateEntityOptions): Promise<T>;
 		createEntities<T = any>(
 			ctx: Context<any, any>,
-			entities: any[],
-			opts?: { returnEntities?: boolean }
+			entities: Partial<T>[],
+			opts?: CreateEntitiesOptions
 		): Promise<T[] | number>;
-		updateEntity<T = any>(ctx: Context<any, any>, params?: any): Promise<T>;
-		updateEntities(
+		updateEntity<T = any>(ctx: Context<any, any>, params?: Partial<T>, opts?: UpdateEntityOptions): Promise<T>;
+		updateEntities<T = any>(
 			ctx: Context<any, any>,
-			query: Record<string, any>,
-			update: any,
-			opts?: any
-		): Promise<number>;
-		replaceEntity<T = any>(ctx: Context<any, any>, params?: any): Promise<T>;
-		removeEntity(ctx: Context<any, any>, params?: any): Promise<any>;
-		removeEntities(ctx: Context<any, any>, query: Record<string, any>, opts?: any): Promise<number>;
+			params: UpdateEntitiesParams<T>,
+			opts?: UpdateEntityOptions
+		): Promise<T[]>;
+		replaceEntity<T = any>(ctx: Context<any, any>, params?: Partial<T>, opts?: UpdateEntityOptions): Promise<T>;
+		removeEntity(ctx: Context<any, any>, params?: { [idField: string]: any }, opts?: RemoveEntityOptions): Promise<any>;
+		removeEntities(ctx: Context<any, any>, params?: RemoveEntitiesParams, opts?: RemoveEntitiesOptions): Promise<number>;
 		clearEntities(ctx?: Context<any, any>): Promise<number>;
-		streamEntities(ctx: Context<any, any>, params?: FindParams): any;
+		streamEntities(ctx: Context<any, any>, params?: FindParams, opts?: FindOptions): any;
 
 		// Validation methods
-		validateEntity(
-			entity: any,
-			opts?: { type?: "create" | "update" | "replace" }
-		): Promise<any>;
+		validateParams<T = any>(
+			ctx: Context<any, any>,
+			params?: Partial<T>,
+			opts?: ValidateParamsOptions
+		): Promise<T>;
 		authorizeFields(fields: any[], ctx: Context<any, any>, params: any, opts?: any): Promise<any[]>;
 		sanitizeParams(params: any, opts?: any): any;
 
 		// Transformation methods
 		transformResult<T = any>(
 			adapter: BaseAdapter | null,
-			docs: any | any[],
-			params?: any,
+			docs: T | T[],
+			params?: Record<string, any>,
 			ctx?: Context<any, any>
 		): Promise<T | T[]>;
-		encodeEntity(entity: any): any;
-		decodeEntity(entity: any): any;
-		populateEntities<T = any>(
-			ctx: Context<any, any>,
-			docs: T[],
-			populateFields: string[],
-			params?: any
-		): Promise<T[]>;
-
-		// Cache methods
-		cleanCache(eventName?: string, groups?: string | string[]): Promise<void>;
 
 		// Event methods
-		entityChanged(
-			type: "created" | "updated" | "replaced" | "removed",
-			entity: any,
+		entityChanged<T = any>(
+			type: "create" | "update" | "replace" | "remove" | "clear",
+			data: T | T[],
+			oldData: T,
 			ctx: Context<any, any>,
-			opts?: { oldEntity?: any }
+			opts?: EntityChangedOptions
 		): void;
+
+		// Encode & Decode ID
+		encodeID<TOld, TNew>(id: TOld): TNew;
+		decodeID<TOld, TNew>(id: TOld): TNew;
+
+		// Field authorization
+		checkFieldAuthority<T = any>(ctx?: Context<any, any> | null, permission: any, params: T, field: Record<string, any>): Promise<boolean>;
+		checkScopeAuthority(ctx?: Context<any, any> | null, name: string, operation: "add" | "remove", scope: Record<string, any>): Promise<boolean>;
 
 		// Monitoring
 		startSpan(ctx: Context<any, any>, name: string, tags?: Record<string, any>): any;
