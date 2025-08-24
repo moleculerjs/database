@@ -639,6 +639,10 @@ function demonstrateDirectServiceMethods(service: MoleculerService & DatabaseMet
 			});
 			const updatedTitle: string = updatedPost.title;
 
+			const rawUpdatedPost = await service.updateEntity<Post>(ctx, {
+				$push: { comments: { text: "My comment" } }
+			}, { raw: true });
+
 			// Replace entity
 			const replacedPost = await service.replaceEntity<Post>(ctx, {
 				id: "someId",

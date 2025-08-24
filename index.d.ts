@@ -631,6 +631,10 @@ declare module "@moleculer/database" {
 		scope?: ScopeParam;
 	}
 
+	export interface UpdateEntityRawOptions<T = any> extends UpdateEntityOptions {
+		raw: true;
+	}
+
 	export interface RemoveEntityOptions {
 		/** Enable transformation of results */
 		transform?: boolean;
@@ -686,24 +690,25 @@ declare module "@moleculer/database" {
 		findEntity<T = any>(ctx: Context<any, any>, params?: GetParams, opts?: FindOptions): Promise<T | null>;
 		resolveEntities<T = any>(
 			ctx: Context<any, any>,
-			params?: ResolveParams,
+			params: ResolveParams,
 			opts?: ResolveEntityOptions
 		): Promise<T | T[] | Record<string, T>>;
-		createEntity<T = any>(ctx: Context<any, any>, params?: any, opts?: CreateEntityOptions): Promise<T>;
+		createEntity<T = any>(ctx: Context<any, any>, params: Partial<T>, opts?: CreateEntityOptions): Promise<T>;
 		createEntities<T = any>(
 			ctx: Context<any, any>,
 			entities: Partial<T>[],
 			opts?: CreateEntitiesOptions
 		): Promise<T[] | number>;
-		updateEntity<T = any>(ctx: Context<any, any>, params?: Partial<T>, opts?: UpdateEntityOptions): Promise<T>;
+		updateEntity<T = any>(ctx: Context<any, any>, params: Partial<T>, opts?: UpdateEntityOptions): Promise<T>;
+		updateEntity<T = any>(ctx: Context<any, any>, params: any, opts: UpdateEntityRawOptions): Promise<T>;
 		updateEntities<T = any>(
 			ctx: Context<any, any>,
 			params: UpdateEntitiesParams<T>,
 			opts?: UpdateEntityOptions
 		): Promise<T[]>;
-		replaceEntity<T = any>(ctx: Context<any, any>, params?: Partial<T>, opts?: UpdateEntityOptions): Promise<T>;
-		removeEntity(ctx: Context<any, any>, params?: { [idField: string]: any }, opts?: RemoveEntityOptions): Promise<any>;
-		removeEntities(ctx: Context<any, any>, params?: RemoveEntitiesParams, opts?: RemoveEntitiesOptions): Promise<number>;
+		replaceEntity<T = any>(ctx: Context<any, any>, params: Partial<T>, opts?: UpdateEntityOptions): Promise<T>;
+		removeEntity(ctx: Context<any, any>, params: { [idField: string]: any }, opts?: RemoveEntityOptions): Promise<any>;
+		removeEntities(ctx: Context<any, any>, params: RemoveEntitiesParams, opts?: RemoveEntitiesOptions): Promise<number>;
 		clearEntities(ctx?: Context<any, any>): Promise<number>;
 		streamEntities(ctx: Context<any, any>, params?: FindParams, opts?: FindOptions): any;
 
