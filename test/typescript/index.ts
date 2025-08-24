@@ -417,8 +417,8 @@ const postServiceSchema: ServiceSchema<
 		},
 
 		// Test method that uses validation
-		async validatePostData(data: Partial<Post>): Promise<Post> {
-			const validated = await this.validateEntity(data, { type: "create" });
+		async validatePostData(ctx: Context, data: Post): Promise<Post> {
+			const validated = await this.validateParams(ctx, data, { type: "create" });
 			return validated;
 		},
 
@@ -439,7 +439,7 @@ const postServiceSchema: ServiceSchema<
 			post: Post,
 			ctx: Context
 		): void {
-			this.entityChanged(type, post, ctx);
+			this.entityChanged<Post>("create", post, post, ctx);
 		}
 	},
 	async started() {
@@ -663,7 +663,8 @@ function demonstrateDirectServiceMethods(service: MoleculerService & DatabaseMet
 
 		// Test validation methods
 		async testValidation(ctx: Context) {
-			const validatedEntity = await service.validateEntity(
+			const validatedEntity = await service.validateParams(
+				ctx,
 				{
 					title: "Test Post",
 					content: "Test content"
@@ -704,16 +705,10 @@ function demonstrateDirectServiceMethods(service: MoleculerService & DatabaseMet
 				ctx
 			);
 
-			const encodedEntity = service.encodeEntity(mockPost);
-			const decodedEntity = service.decodeEntity(encodedEntity);
+			const encodedId = service.encodeID<string, string>(mockPost.id);
+			const decodedId = service.decodeID<string, string>(encodedId);
 
-			const populatedPosts = await service.populateEntities<Post>(
-				ctx,
-				[mockPost],
-				["author"]
-			);
-
-			return { transformedResult, encodedEntity, decodedEntity, populatedPosts };
+			return { transformedResult, encodedId, decodedId };
 		},
 
 		// Test adapter methods
