@@ -103,7 +103,7 @@ module.exports = function DatabaseMixin(mixinOpts) {
 			/** @type {Object?} Field filtering list. It must be an `Object`. If the value is `null` it won't filter the fields of entities. */
 			fields: null,
 
-			/** @type {Object?} Predefined scopes */
+			/** @type {Scopes?} Predefined scopes */
 			scopes: {},
 
 			/** @type {Array<String>?} Default scopes which applies to `find` & `list` actions */

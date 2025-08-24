@@ -265,22 +265,21 @@ declare module "@moleculer/database" {
 		[fieldName: string]: FieldDefinition;
 	}
 
-	export interface ScopeDefinition {
-		/** Query to apply for this scope */
-		query?: Record<string, any>;
-		/** Handler function for dynamic scoping */
-		handler?: (query: Record<string, any>, params: any, ctx: Context<any, any>) => Record<string, any>;
-	}
-
 	export interface Scopes {
-		[scopeName: string]: ScopeDefinition;
+		[scopeName: string]: Record<string, any>
+			| ((query: Record<string, any>, ctx: Context<any, any>, params: any) => Record<string, any>);
 	}
 
 	export interface IndexDefinition {
 		/** Fields to index */
-		fields: Record<string, 1 | -1> | string | string[];
+		fields: Record<string, string> | string | string[];
+		/** Index name */
+		name?: string;
 		/** Index options */
-		options?: Record<string, any>;
+		unique?: boolean;
+		sparse?: boolean;
+		type?: string;
+		expireAfterSeconds?: number;
 	}
 
 	// Adapter interfaces
