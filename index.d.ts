@@ -674,6 +674,19 @@ declare module "@moleculer/database" {
 		softDelete: boolean;
 	}
 
+	export interface ListResult<T = any> {
+		/** Result rows */
+		rows: T[];
+		/** Total count */
+		total: number;
+		/** Current page */
+		page: number;
+		/** Page size */
+		pageSize: number;
+		/** Total pages */
+		totalPages: number;
+	}
+
 	// Database service methods
 	export interface DatabaseMethods {
 		// Adapter methods
