@@ -77,7 +77,12 @@ declare module "@moleculer/database" {
 		/** Params for populating action */
 		params?: Record<string, any>;
 		/** Handler function for populating */
-		handler?: (ids: any[], docs: any[], rule: PopulateDefinition, ctx: Context<any, any>) => Promise<any>;
+		handler?: (
+			ids: any[],
+			docs: any[],
+			rule: PopulateDefinition,
+			ctx: Context<any, any>
+		) => Promise<any>;
 		/** Key field name in the target service */
 		keyField?: string;
 		/** Populated field name in entity */
@@ -118,20 +123,42 @@ declare module "@moleculer/database" {
 		/** Transformation function when setting value */
 		set?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context<any, any>) => any;
 		/** Custom validation function */
-		validate?: string | ((
+		validate?:
+			| string
+			| ((
+					value: any,
+					entity: any,
+					field: BaseFieldDefinition,
+					ctx: Context<any, any>
+			  ) => Promise<boolean | string>);
+		/** Lifecycle hook: called when entity is created */
+		onCreate?: (
 			value: any,
 			entity: any,
 			field: BaseFieldDefinition,
 			ctx: Context<any, any>
-		) => Promise<boolean | string>);
-		/** Lifecycle hook: called when entity is created */
-		onCreate?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context<any, any>) => any;
+		) => any;
 		/** Lifecycle hook: called when entity is updated */
-		onUpdate?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context<any, any>) => any;
+		onUpdate?: (
+			value: any,
+			entity: any,
+			field: BaseFieldDefinition,
+			ctx: Context<any, any>
+		) => any;
 		/** Lifecycle hook: called when entity is replaced */
-		onReplace?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context<any, any>) => any;
+		onReplace?: (
+			value: any,
+			entity: any,
+			field: BaseFieldDefinition,
+			ctx: Context<any, any>
+		) => any;
 		/** Lifecycle hook: called when entity is removed (enables soft delete) */
-		onRemove?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context<any, any>) => any;
+		onRemove?: (
+			value: any,
+			entity: any,
+			field: BaseFieldDefinition,
+			ctx: Context<any, any>
+		) => any;
 	}
 
 	export interface StringFieldDefinition extends BaseFieldDefinition {
@@ -266,8 +293,13 @@ declare module "@moleculer/database" {
 	}
 
 	export interface Scopes {
-		[scopeName: string]: Record<string, any>
-			| ((query: Record<string, any>, ctx: Context<any, any>, params: any) => Record<string, any>);
+		[scopeName: string]:
+			| Record<string, any>
+			| ((
+					query: Record<string, any>,
+					ctx: Context<any, any>,
+					params: any
+			  ) => Record<string, any>);
 	}
 
 	export interface IndexDefinition {
@@ -510,6 +542,8 @@ declare module "@moleculer/database" {
 	}
 
 	type ScopeParam = boolean | string | string[];
+	type PopulateParam = string | string[];
+	type FieldsParam = string | string[];
 
 	// Query parameters for database operations
 	export interface FindParams {
@@ -518,7 +552,7 @@ declare module "@moleculer/database" {
 		/** Number of entities to skip */
 		offset?: number | undefined;
 		/** Fields to include in results */
-		fields?: string | string[];
+		fields?: FieldsParam;
 		/** Sort order */
 		sort?: string | string[] | Record<string, any>;
 		/** Search text */
@@ -530,7 +564,7 @@ declare module "@moleculer/database" {
 		/** Scope to apply */
 		scope?: ScopeParam;
 		/** Fields to populate */
-		populate?: string | string[];
+		populate?: PopulateParam;
 		/** Custom query */
 		query?: Record<string, any> | string;
 	}
@@ -542,26 +576,28 @@ declare module "@moleculer/database" {
 		pageSize?: number;
 	}
 
-	export interface GetParams {
-		/** Entity ID */
-		[idField: string]: any;
-		/** Fields to include in results */
-		fields?: string | string[];
-		/** Scope to apply */
-		scope?: ScopeParam;
-		/** Fields to populate */
-		populate?: string | string[];
-	}
-
-	export interface ResolveParams {
+	export type GetParams<TIdField extends string = "id", TIdType = string> = {
 		/** Entity ID(s) */
-		[idField: string]: any | any[];
+		[K in TIdField]: TIdType;
+	} & {
 		/** Fields to include in results */
-		fields?: string | string[];
+		fields?: FieldsParam;
 		/** Scope to apply */
 		scope?: ScopeParam;
 		/** Fields to populate */
-		populate?: string | string[];
+		populate?: PopulateParam;
+	};
+
+	export type ResolveParams<TIdField extends string = "id", TIdType = string> = {
+		/** Entity ID(s) */
+		[K in TIdField]: TIdType | TIdType[];
+	} & {
+		/** Fields to include in results */
+		fields?: FieldsParam;
+		/** Scope to apply */
+		scope?: ScopeParam;
+		/** Fields to populate */
+		populate?: PopulateParam;
 		/** Convert result array to object with ID as key */
 		mapping?: boolean;
 		/** Throw error if entity not found */
@@ -695,33 +731,61 @@ declare module "@moleculer/database" {
 		maintenanceAdapters(): Promise<void>;
 
 		// Entity methods
-		findEntities<T = any>(ctx: Context<any, any>, params?: FindParams, opts?: FindOptions): Promise<T[]>;
+		findEntities<T = any>(
+			ctx: Context<any, any>,
+			params?: FindParams,
+			opts?: FindOptions
+		): Promise<T[]>;
 		countEntities(
 			ctx: Context<any, any>,
 			params?: Omit<FindParams, "limit" | "offset" | "fields" | "sort">
 		): Promise<number>;
-		findEntity<T = any>(ctx: Context<any, any>, params?: GetParams, opts?: FindOptions): Promise<T | null>;
-		resolveEntities<T = any>(
+		findEntity<T = any>(
 			ctx: Context<any, any>,
-			params: ResolveParams,
+			params?: Omit<FindParams, "limit" | "offset">,
+			opts?: FindOptions
+		): Promise<T | null>;
+		resolveEntities<T = any, TIdField = "id", TIdType = string>(
+			ctx: Context<any, any>,
+			params: ResolveParams<TIdField, TIdType>,
 			opts?: ResolveEntityOptions
 		): Promise<T | T[] | Record<string, T>>;
-		createEntity<T = any>(ctx: Context<any, any>, params: Partial<T>, opts?: CreateEntityOptions): Promise<T>;
+		createEntity<T = any>(
+			ctx: Context<any, any>,
+			params: Partial<T>,
+			opts?: CreateEntityOptions
+		): Promise<T>;
 		createEntities<T = any>(
 			ctx: Context<any, any>,
 			entities: Partial<T>[],
 			opts?: CreateEntitiesOptions
 		): Promise<T[] | number>;
-		updateEntity<T = any>(ctx: Context<any, any>, params: Partial<T>, opts?: UpdateEntityOptions): Promise<T>;
-		updateEntity<T = any>(ctx: Context<any, any>, params: any, opts: UpdateEntityRawOptions): Promise<T>;
+		updateEntity<T = any>(
+			ctx: Context<any, any>,
+			params: Partial<T>,
+			opts?: UpdateEntityOptions
+		): Promise<T>;
+		updateEntity<T = any>(
+			ctx: Context<any, any>,
+			params: any,
+			opts: UpdateEntityRawOptions
+		): Promise<T>;
 		updateEntities<T = any>(
 			ctx: Context<any, any>,
 			params: UpdateEntitiesParams<T>,
 			opts?: UpdateEntityOptions
 		): Promise<T[]>;
-		replaceEntity<T = any>(ctx: Context<any, any>, params: Partial<T>, opts?: UpdateEntityOptions): Promise<T>;
-		removeEntity(ctx: Context<any, any>, params: { [idField: string]: any }, opts?: RemoveEntityOptions): Promise<any>;
-		removeEntities(ctx: Context<any, any>, params: RemoveEntitiesParams, opts?: RemoveEntitiesOptions): Promise<number>;
+		replaceEntity<T = any>(
+			ctx: Context<any, any>,
+			params: Partial<T>,
+			opts?: UpdateEntityOptions
+		): Promise<T>;
+		removeEntity(ctx: Context<any, any>, params: any, opts?: RemoveEntityOptions): Promise<any>;
+		removeEntities(
+			ctx: Context<any, any>,
+			params: RemoveEntitiesParams,
+			opts?: RemoveEntitiesOptions
+		): Promise<number>;
 		clearEntities(ctx?: Context<any, any>): Promise<number>;
 		streamEntities(ctx: Context<any, any>, params?: FindParams, opts?: FindOptions): any;
 
@@ -731,7 +795,12 @@ declare module "@moleculer/database" {
 			params?: Partial<T>,
 			opts?: ValidateParamsOptions
 		): Promise<T>;
-		authorizeFields(fields: any[], ctx: Context<any, any>, params: any, opts?: any): Promise<any[]>;
+		authorizeFields(
+			fields: any[],
+			ctx: Context<any, any>,
+			params: any,
+			opts?: any
+		): Promise<any[]>;
 		sanitizeParams(params: any, opts?: any): any;
 
 		// Transformation methods
@@ -756,8 +825,18 @@ declare module "@moleculer/database" {
 		decodeID<TOld, TNew>(id: TOld): TNew;
 
 		// Field authorization
-		checkFieldAuthority<T = any>(ctx?: Context<any, any> | null, permission: any, params: T, field: Record<string, any>): Promise<boolean>;
-		checkScopeAuthority(ctx?: Context<any, any> | null, name: string, operation: "add" | "remove", scope: Record<string, any>): Promise<boolean>;
+		checkFieldAuthority<T = any>(
+			ctx?: Context<any, any> | null,
+			permission: any,
+			params: T,
+			field: Record<string, any>
+		): Promise<boolean>;
+		checkScopeAuthority(
+			ctx?: Context<any, any> | null,
+			name: string,
+			operation: "add" | "remove",
+			scope: Record<string, any>
+		): Promise<boolean>;
 
 		// Monitoring
 		startSpan(ctx: Context<any, any>, name: string, tags?: Record<string, any>): any;
@@ -775,7 +854,7 @@ declare module "@moleculer/database" {
 		createMany?: ActionHandler<any[]>;
 		update?: ActionHandler<any>;
 		replace?: ActionHandler<any>;
-		remove?: ActionHandler<{ [idField: string]: any }>;
+		remove?: ActionHandler<any>;
 	}
 
 	// Database action handler with proper this context
@@ -789,13 +868,13 @@ declare module "@moleculer/database" {
 		handler?: DatabaseActionHandler<TParams, TMeta>;
 	}
 
-		// Custom hooks interface
+	// Custom hooks interface
 	export interface DatabaseHooks extends ServiceHooks {
 		customs?: Record<string, Function | Function[] | string | string[]>;
 	}
 
 	export interface DatabaseLocalVariables {
-				// Adapter management
+		// Adapter management
 		adapters: Map<string, any>;
 
 		// Field definitions

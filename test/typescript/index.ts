@@ -394,7 +394,7 @@ const postServiceSchema: ServiceSchema<
 				id: "string"
 			},
 			async handler(ctx: Context<{ id: string }>) {
-				const post = await this.findEntity<Post>(ctx, { id: ctx.params.id });
+				const post = await this.findEntity<Post>(ctx, { query: { a: 5 } });
 				if (!post) {
 					throw new EntityNotFoundError(ctx.params.id);
 				}
@@ -483,10 +483,23 @@ const getParams: GetParams = {
 	scope: false,
 	populate: ["author"]
 };
+const getParams2: GetParams<"key", number> = {
+	key: 123,
+	fields: ["id", "title", "content", "author"],
+	scope: false,
+	populate: ["author"]
+};
 
 // Test resolve parameters
 const resolveParams: ResolveParams = {
 	id: ["507f1f77bcf86cd799439011", "507f1f77bcf86cd799439012"],
+	fields: ["id", "title", "votes"],
+	mapping: true,
+	throwIfNotExist: false,
+	reorderResult: true
+};
+const resolveParams2: ResolveParams<"key", number> = {
+	key: [123, 456],
 	fields: ["id", "title", "votes"],
 	mapping: true,
 	throwIfNotExist: false,
@@ -606,7 +619,7 @@ function demonstrateDirectServiceMethods(service: MoleculerService & DatabaseMet
 			const firstPost: Post | undefined = posts[0];
 
 			// Find single entity
-			const post = await service.findEntity<Post>(ctx, getParams);
+			const post = await service.findEntity<Post>(ctx, { query: { a: 5 } });
 			const title: string | undefined = post?.title;
 
 			// Count entities
@@ -746,7 +759,7 @@ function demonstrateErrorHandling() {
 	async function testAsyncError(ctx: Context): Promise<Post | null> {
 		try {
 			const service = ctx.service as MoleculerService & DatabaseMethods;
-			const post = await service.findEntity<Post>(ctx, { id: "nonExistentId" });
+			const post = await service.findEntity<Post>(ctx, { query: { a: 5 } });
 			return post;
 		} catch (error) {
 			if (error instanceof EntityNotFoundError) {
@@ -998,7 +1011,7 @@ function testTypeInference() {
 		const service = ctx.service as MoleculerService & DatabaseMethods;
 
 		// Should infer Post type
-		const post = await service.findEntity<Post>(ctx, { id: ctx.params.id });
+		const post = await service.findEntity<Post>(ctx, { query: { a: 5 } });
 
 		// Should infer Post[] type
 		const posts = await service.findEntities<Post>(ctx, { limit: 10 });
@@ -1075,6 +1088,9 @@ const advancedServiceSchema: ServiceSchema<
 			async handler(ctx: Context<{ slug: string }>) {
 				const post = await this.findEntity<Post>(ctx, {
 					query: { slug: ctx.params.slug },
+					scope: "published",
+					search: "<search-term>",
+					searchFields: ["title", "content"],
 					populate: ["author", "categories"]
 				});
 				return post;
@@ -1135,7 +1151,7 @@ const advancedServiceSchema: ServiceSchema<
 			let counter = 1;
 
 			// Ensure uniqueness
-			while (await this.findEntity(ctx, { slug })) {
+			while (await this.findEntity(ctx, { query: { slug } })) {
 				slug = `${baseSlug}-${counter}`;
 				counter++;
 			}
@@ -1145,7 +1161,6 @@ const advancedServiceSchema: ServiceSchema<
 
 		async getRelatedPosts(ctx: Context, postId: string, limit: number = 5): Promise<Post[]> {
 			const post = await this.findEntity<Post>(ctx, {
-				id: postId,
 				populate: ["categories"]
 			});
 
