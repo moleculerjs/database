@@ -118,12 +118,12 @@ declare module "@moleculer/database" {
 		/** Transformation function when setting value */
 		set?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context<any, any>) => any;
 		/** Custom validation function */
-		validate?: (
+		validate?: string | ((
 			value: any,
 			entity: any,
 			field: BaseFieldDefinition,
 			ctx: Context<any, any>
-		) => Promise<boolean | string>;
+		) => Promise<boolean | string>);
 		/** Lifecycle hook: called when entity is created */
 		onCreate?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context<any, any>) => any;
 		/** Lifecycle hook: called when entity is updated */
