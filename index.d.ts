@@ -69,6 +69,18 @@ declare module "@moleculer/database" {
 
 	export type EntityChangedEventType = "broadcast" | "emit" | null;
 
+	// Hook function type for field lifecycle hooks
+	export type HookCustomFunctionArgument<TValue = any, TEntity = any> = {
+		ctx: Context<any, any>;
+		value: TValue;
+		params: any;
+		field: BaseFieldDefinition;
+		id?: any;
+		operation: "create" | "update" | "replace" | "remove";
+		entity?: TEntity;
+		root?: any;
+	};
+
 	export interface PopulateDefinition {
 		/** Service name for populating */
 		service?: string;
@@ -121,7 +133,7 @@ declare module "@moleculer/database" {
 		/** Transformation function when getting value */
 		get?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context<any, any>) => any;
 		/** Transformation function when setting value */
-		set?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context<any, any>) => any;
+		set?: (args: HookCustomFunctionArgument) => any;
 		/** Custom validation function */
 		validate?:
 			| string
@@ -132,33 +144,13 @@ declare module "@moleculer/database" {
 					ctx: Context<any, any>
 			  ) => Promise<boolean | string>);
 		/** Lifecycle hook: called when entity is created */
-		onCreate?: (
-			value: any,
-			entity: any,
-			field: BaseFieldDefinition,
-			ctx: Context<any, any>
-		) => any;
+		onCreate?: (args: HookCustomFunctionArgument) => any | any;
 		/** Lifecycle hook: called when entity is updated */
-		onUpdate?: (
-			value: any,
-			entity: any,
-			field: BaseFieldDefinition,
-			ctx: Context<any, any>
-		) => any;
+		onUpdate?: (args: HookCustomFunctionArgument) => any | any;
 		/** Lifecycle hook: called when entity is replaced */
-		onReplace?: (
-			value: any,
-			entity: any,
-			field: BaseFieldDefinition,
-			ctx: Context<any, any>
-		) => any;
+		onReplace?: (args: HookCustomFunctionArgument) => any | any;
 		/** Lifecycle hook: called when entity is removed (enables soft delete) */
-		onRemove?: (
-			value: any,
-			entity: any,
-			field: BaseFieldDefinition,
-			ctx: Context<any, any>
-		) => any;
+		onRemove?: (args: HookCustomFunctionArgument) => any | any;
 	}
 
 	export interface StringFieldDefinition extends BaseFieldDefinition {

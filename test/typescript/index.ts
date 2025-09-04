@@ -43,7 +43,8 @@ import {
 	generateFieldValidatorSchema,
 	DatabaseServiceSettings,
 	DatabaseMethods,
-	DatabaseLocalVariables
+	DatabaseLocalVariables,
+	HookCustomFunctionArgument
 } from "@moleculer/database";
 
 // =============================================================================
@@ -155,12 +156,12 @@ const customField: CustomFieldDefinition = {
 // Test field definitions with lifecycle hooks
 const fieldWithHooks: FieldDefinition = {
 	type: "string",
-	onCreate: (value: any, entity: any, field: FieldDefinition, ctx: Context) => value || "default",
-	onUpdate: (value: any, entity: any, field: FieldDefinition, ctx: Context) => value,
-	onReplace: (value: any, entity: any, field: FieldDefinition, ctx: Context) => value,
-	onRemove: (value: any, entity: any, field: FieldDefinition, ctx: Context) => null,
+	onCreate: ({ value }) => value || "default",
+	onUpdate: ({ value }) => value,
+	onReplace: ({ value }) => value,
+	onRemove: () => null,
 	get: (value: any, entity: any, field: FieldDefinition, ctx: Context) => value,
-	set: (value: any, entity: any, field: FieldDefinition, ctx: Context) => value,
+	set: ({ value }) => value,
 	validate: async (value: any, entity: any, field: FieldDefinition, ctx: Context) => {
 		return typeof value === "string" && value.length > 0;
 	}
@@ -850,7 +851,7 @@ const multiTenantServiceSchema: ServiceSchema<
 			tenantId: {
 				type: "string",
 				required: true,
-				set: (value: any, entity: any, field: FieldDefinition, ctx: Context) => {
+				set: ({ value, ctx }) => {
 					return (ctx.meta as any)?.tenantId || value;
 				}
 			}
@@ -896,7 +897,7 @@ const complexFields: Fields = {
 		trim: true,
 		lowercase: true,
 		alphanum: false,
-		set: (value: any) => value?.toString().toLowerCase().replace(/\s+/g, "-")
+		set: ({ value }) => value?.toString().toLowerCase().replace(/\s+/g, "-")
 	},
 
 	// Number field with validation
@@ -975,18 +976,18 @@ const complexFields: Fields = {
 	auditInfo: {
 		type: "object",
 		readonly: true,
-		onCreate: (value: any, entity: any, field: FieldDefinition, ctx: Context) => ({
+		onCreate: ({ ctx }: HookCustomFunctionArgument) => ({
 			createdBy: (ctx.meta as any)?.user?.id,
 			createdAt: Date.now(),
 			version: 1
 		}),
-		onUpdate: (value: any, entity: any, field: FieldDefinition, ctx: Context) => ({
+		onUpdate: ({ value, ctx }: HookCustomFunctionArgument) => ({
 			...value,
 			updatedBy: (ctx.meta as any)?.user?.id,
 			updatedAt: Date.now(),
 			version: (value.version || 0) + 1
 		}),
-		onRemove: (value: any, entity: any, field: FieldDefinition, ctx: Context) => ({
+		onRemove: ({ value, ctx }: HookCustomFunctionArgument) => ({
 			...value,
 			deletedBy: (ctx.meta as any)?.user?.id,
 			deletedAt: Date.now()
