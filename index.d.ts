@@ -121,7 +121,7 @@ declare module "@moleculer/database" {
 		/** Field is immutable after creation */
 		immutable?: boolean;
 		/** Default value */
-		default?: any | (() => any);
+		default?: any | (() => Promise<any> | any);
 		/** Permission required for this field */
 		permission?: string | string[];
 		/** Read permission required for this field */
@@ -133,24 +133,17 @@ declare module "@moleculer/database" {
 		/** Transformation function when getting value */
 		get?: (value: any, entity: any, field: BaseFieldDefinition, ctx: Context<any, any>) => any;
 		/** Transformation function when setting value */
-		set?: (args: HookCustomFunctionArgument) => any;
+		set?: ((args: HookCustomFunctionArgument) => Promise<any> | any) | string;
 		/** Custom validation function */
-		validate?:
-			| string
-			| ((
-					value: any,
-					entity: any,
-					field: BaseFieldDefinition,
-					ctx: Context<any, any>
-			  ) => Promise<boolean | string>);
+		validate?: ((args: HookCustomFunctionArgument) => boolean | string | Promise<boolean | string>) | string;
 		/** Lifecycle hook: called when entity is created */
-		onCreate?: (args: HookCustomFunctionArgument) => any | any;
+		onCreate?: ((args: HookCustomFunctionArgument) => Promise<any> | any) | string | any;
 		/** Lifecycle hook: called when entity is updated */
-		onUpdate?: (args: HookCustomFunctionArgument) => any | any;
+		onUpdate?: ((args: HookCustomFunctionArgument) => Promise<any> | any) | string | any;
 		/** Lifecycle hook: called when entity is replaced */
-		onReplace?: (args: HookCustomFunctionArgument) => any | any;
+		onReplace?: ((args: HookCustomFunctionArgument) => Promise<any> | any) | string | any;
 		/** Lifecycle hook: called when entity is removed (enables soft delete) */
-		onRemove?: (args: HookCustomFunctionArgument) => any | any;
+		onRemove?: ((args: HookCustomFunctionArgument) => Promise<any> | any) | string | any;
 	}
 
 	export interface StringFieldDefinition extends BaseFieldDefinition {

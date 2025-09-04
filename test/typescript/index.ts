@@ -110,7 +110,7 @@ const basicNumberField: NumberFieldDefinition = {
 	max: 10000,
 	integer: true,
 	positive: true,
-	default: 0,
+	default: async () => Math.floor(Math.random() * 100),
 	columnType: "integer"
 };
 
@@ -153,16 +153,60 @@ const customField: CustomFieldDefinition = {
 	}
 };
 
+// Test field with string validation
+const stringValidatedField: StringFieldDefinition = {
+	type: "string",
+	required: true,
+	validate: "email-validator",
+	set: "normalize-email",
+	onCreate: "generate-verification-token"
+};
+
+// Test field with async string validation
+const asyncStringField: StringFieldDefinition = {
+	type: "string",
+	required: true,
+	validate: async ({ value, ctx }: { value: any; ctx: any }) => {
+		// Simulate async validation (e.g., checking uniqueness)
+		await new Promise(resolve => setTimeout(resolve, 10));
+		return typeof value === "string" && value.length >= 3;
+	},
+	set: async ({ value, ctx }: { value: any; ctx: any }) => {
+		// Async transformation
+		await new Promise(resolve => setTimeout(resolve, 5));
+		return value?.toString().toLowerCase().trim();
+	}
+};
+
+// Test field with mixed validation types
+const mixedValidationField: FieldDefinition = {
+	type: "string",
+	validate: async ({ value }: HookCustomFunctionArgument) => {
+		await new Promise(resolve => setTimeout(resolve, 1));
+		return typeof value === "string" && value.length <= 255 && /^[a-zA-Z0-9]+$/.test(value);
+	}
+};
+
 // Test field definitions with lifecycle hooks
 const fieldWithHooks: FieldDefinition = {
 	type: "string",
-	onCreate: ({ value }) => value || "default",
-	onUpdate: ({ value }) => value,
-	onReplace: ({ value }) => value,
-	onRemove: () => null,
+	onCreate: async ({ value }: HookCustomFunctionArgument) => value || "default",
+	onUpdate: async ({ value }: HookCustomFunctionArgument) => {
+		// Simulate async processing
+		await new Promise(resolve => setTimeout(resolve, 1));
+		return value;
+	},
+	onReplace: ({ value }: HookCustomFunctionArgument) => value,
+	onRemove: "soft-delete-handler",
 	get: (value: any, entity: any, field: FieldDefinition, ctx: Context) => value,
-	set: ({ value }) => value,
-	validate: async (value: any, entity: any, field: FieldDefinition, ctx: Context) => {
+	set: async ({ value }: HookCustomFunctionArgument) => {
+		// Async transformation
+		await new Promise(resolve => setTimeout(resolve, 1));
+		return value?.toString().trim();
+	},
+	validate: async ({ value }: HookCustomFunctionArgument) => {
+		// Simulate async validation (e.g., checking against external service)
+		await new Promise(resolve => setTimeout(resolve, 1));
 		return typeof value === "string" && value.length > 0;
 	}
 };
@@ -232,13 +276,17 @@ const postFields: Fields = {
 	createdAt: {
 		type: "number",
 		readonly: true,
-		onCreate: () => Date.now(),
+		onCreate: async () => {
+			// Simulate async timestamp generation
+			await new Promise(resolve => setTimeout(resolve, 1));
+			return Date.now();
+		},
 		columnType: "bigint"
 	},
 	updatedAt: {
 		type: "number",
 		readonly: true,
-		onUpdate: () => Date.now(),
+		onUpdate: "timestamp-handler",
 		columnType: "bigint"
 	}
 };
@@ -897,7 +945,8 @@ const complexFields: Fields = {
 		trim: true,
 		lowercase: true,
 		alphanum: false,
-		set: ({ value }) => value?.toString().toLowerCase().replace(/\s+/g, "-")
+		set: "slug-transformer",
+		validate: "slug-validator"
 	},
 
 	// Number field with validation
@@ -907,7 +956,9 @@ const complexFields: Fields = {
 		min: 0.01,
 		positive: true,
 		convert: true,
-		validate: async (value: number) => {
+		validate: async ({ value }) => {
+			// Simulate async price validation against external service
+			await new Promise(resolve => setTimeout(resolve, 1));
 			return value > 0 && value < 10000;
 		}
 	},
@@ -1199,6 +1250,9 @@ export {
 	basicArrayField,
 	complexObjectField,
 	customField,
+	stringValidatedField,
+	asyncStringField,
+	mixedValidationField,
 	postFields,
 	complexFields,
 
