@@ -126,6 +126,8 @@ declare module "@moleculer/database" {
 		permission?: string | string[];
 		/** Read permission required for this field */
 		readPermission?: string | string[];
+		/** Virtual field (not stored in DB) */
+		virtual?: boolean;
 		/** Population configuration */
 		populate?:
 			| PopulateDefinition

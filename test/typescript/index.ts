@@ -272,6 +272,11 @@ const postFields: Fields = {
 		max: 20,
 		default: []
 	},
+	virtual: {
+		type: "string",
+		virtual: true,
+		get: (value: any, entity: any) => "virtual"
+	},
 	metadata: complexObjectField,
 	createdAt: {
 		type: "number",
