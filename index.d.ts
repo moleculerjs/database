@@ -8,18 +8,16 @@ declare module "@moleculer/database" {
 		ActionParams,
 		ActionHandler,
 		ServiceSettingSchema,
-		ServiceEvents,
 		ServiceHooks,
 		Errors as MoleculerErrors,
 		CallingOptions,
 		ServiceBroker,
-		GenericObject,
-		Loggers,
+		Logger,
 		Service
 	} from "moleculer";
 
 	// Extended Context with meta properties for common use cases
-	export interface DatabaseContext<TParams = GenericObject, TMeta = GenericObject>
+	export interface DatabaseContext<TParams = Record<string, any>, TMeta = Record<string, any>>
 		extends Context<TParams, TMeta> {
 		meta: TMeta & {
 			tenantId?: string;
@@ -351,7 +349,7 @@ declare module "@moleculer/database" {
 	export abstract class BaseAdapter {
 		protected opts: BaseAdapterOptions;
 		protected service: Service;
-		protected logger: Loggers;
+		protected logger: Logger;
 		protected broker: ServiceBroker;
 		protected Promise: PromiseConstructor;
 
