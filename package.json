@@ -1,6 +1,6 @@
 {
   "name": "@moleculer/database",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Advanced Database Access Service for Moleculer microservices framework",
   "main": "index.js",
   "typings": "index.d.ts",
@@ -13,7 +13,7 @@
     "test:integration": "jest --testMatch \"**/integration/**/*.spec.js\" --runInBand --coverage",
     "test:leak": "jest --testMatch \"**/leak-detection/**/*.spec.js\" --runInBand",
     "test": "jest --testMatch \"**/*.spec.js\" --runInBand --coverage",
-    "lint": "eslint --ext=.js src examples test",
+    "lint": "eslint src examples test",
     "bench": "node benchmark/index.js",
     "bench:watch": "nodemon benchmark/index.js",
     "deps": "npm-check -u && npm audit fix",
@@ -33,7 +33,7 @@
   "author": "MoleculerJS",
   "license": "MIT",
   "peerDependencies": {
-    "moleculer": "^0.14.12 || ^0.15.0-0"
+    "moleculer": "^0.15.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -80,7 +80,7 @@
     ]
   },
   "engines": {
-    "node": ">= 20.x.x"
+    "node": ">= 22.x.x"
   },
   "dependencies": {
     "fastest-validator": "^1.19.1",

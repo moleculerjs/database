@@ -1,3 +1,23 @@
+<a name="v0.4.0"></a>
+
+# [0.4.0](https://github.com/moleculerjs/database/compare/v0.3.0...v0.4.0) (2026-03-27)
+
+**Breaking changes**
+- minimum Node.js version bumped to 22.
+- minimum Moleculer version bumped to 0.15.
+- upgrade ESLint to 9 with flat config (`.eslintrc.js` → `eslint.config.js`).
+- upgrade TypeScript to 6.
+- remove `eslint-plugin-promise` (not compatible with ESLint 9+).
+- replace deprecated `eslint-plugin-node` with `eslint-plugin-n`.
+
+**TypeScript**
+- fix types for Moleculer 0.15 compatibility (remove `ServiceEvents`, `GenericObject` imports).
+- fix `logger` type from `Loggers` namespace to `Logger` interface.
+- add TypeScript type definitions (`index.d.ts`).
+
+**Other changes**
+- update all dependencies to latest versions.
+
 <a name="v0.3.0"></a>
 
 # [0.3.0](https://github.com/moleculerjs/database/compare/v0.2.1...v0.3.0) (2025-05-31)
