@@ -4,7 +4,7 @@
 
 **Breaking changes**
 - minimum Node.js version bumped to 22.
-- minimum Moleculer version bumped to 0.15.
+- add Moleculer 0.15 support (peer dependency: `^0.14.12 || ^0.15.0`).
 - upgrade ESLint to 9 with flat config (`.eslintrc.js` → `eslint.config.js`).
 - upgrade TypeScript to 6.
 - remove `eslint-plugin-promise` (not compatible with ESLint 9+).
