@@ -1,7 +1,6 @@
 const js = require("@eslint/js");
 const globals = require("globals");
 const pluginN = require("eslint-plugin-n");
-const pluginPromise = require("eslint-plugin-promise");
 const pluginSecurity = require("eslint-plugin-security");
 const prettier = require("eslint-config-prettier");
 
@@ -12,7 +11,6 @@ module.exports = [
 	{
 		plugins: {
 			n: pluginN,
-			promise: pluginPromise,
 			security: pluginSecurity
 		},
 		languageOptions: {
