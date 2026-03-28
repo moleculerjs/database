@@ -16,9 +16,13 @@
 - add TypeScript type definitions (`index.d.ts`).
 
 **Other changes**
-- upgrade `mongodb` driver from 6.x to 7.x.
+- upgrade `mongodb` driver from 6.x to 7.x (accept both `^6.0.0` and `^7.0.0`).
 - upgrade `sqlite3` from 5.x to 6.x.
-- update all dependencies to latest versions.
+- upgrade `tedious` from 18.x to 19.x.
+- upgrade `globals` from 16.x to 17.x.
+- upgrade `npm-check-updates` from 16.x to 19.x.
+- update all other dependencies to latest minor/patch versions.
+- CI: use `npm install` instead of `npm ci` to work around Node 24 fsevents lockfile bug ([npm/cli#8805](https://github.com/npm/cli/issues/8805)).
 
 <a name="v0.3.0"></a>
 
