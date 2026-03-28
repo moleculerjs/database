@@ -62,7 +62,7 @@ class MongoDBAdapter extends BaseAdapter {
 			);
 		}
 
-		this.checkClientLibVersion("mongodb", "^6.0.0");
+		this.checkClientLibVersion("mongodb", "^6.0.0 || ^7.0.0");
 	}
 
 	/**

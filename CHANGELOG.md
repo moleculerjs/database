@@ -16,6 +16,7 @@
 - add TypeScript type definitions (`index.d.ts`).
 
 **Other changes**
+- upgrade `mongodb` driver from 6.x to 7.x.
 - upgrade `sqlite3` from 5.x to 6.x.
 - update all dependencies to latest versions.
 

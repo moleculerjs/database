@@ -55,7 +55,7 @@
     "moleculer": "github:moleculerjs/moleculer#next",
     "moleculer-repl": "^0.7.4",
     "moleculer-web": "github:moleculerjs/moleculer-web#next",
-    "mongodb": "^6.21.0",
+    "mongodb": "^7.1.1",
     "mysql": "^2.18.1",
     "mysql2": "^3.20.0",
     "nodemon": "^3.1.14",
