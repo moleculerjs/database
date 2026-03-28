@@ -10,6 +10,10 @@ Advanced Database Access Service for Moleculer microservices framework. Use it t
 
 >this module follows the *one database per service* pattern. To learn more about this design pattern and its implications check this [article](https://microservices.io/patterns/data/database-per-service.html). For *multiple entities/tables per service* approach check [FAQ](https://moleculer.services/docs/0.14/faq.html#How-can-I-manage-multiple-entities-tables-per-service).
 
+## Requirements
+- **Node.js >= 22**
+- **Moleculer >= 0.14.12** (recommended: 0.15.0+)
+
 ## Features
 - multiple pluggable adapters (NeDB, MongoDB, Knex)
 - common CRUD actions for RESTful API with caching
@@ -104,8 +108,6 @@ const res = await broker.call("posts.remove", { id: post.id });
 console.log("Deleted:", res);
 ```
 
-[**Try it in your browser on repl.it**](https://replit.com/@icebob/moleculer-database-common)
-
 ## Documentation
 You can find [here the documentation](docs/README.md).
 
@@ -116,6 +118,6 @@ There is some benchmark with all adapters. [You can find the results here.](benc
 The project is available under the [MIT license](https://tldrlegal.com/license/mit-license).
 
 ## Contact
-Copyright (c) 2025 MoleculerJS
+Copyright (c) 2026 MoleculerJS
 
 [![@MoleculerJS](https://img.shields.io/badge/github-moleculerjs-green.svg)](https://github.com/moleculerjs) [![@MoleculerJS](https://img.shields.io/badge/twitter-MoleculerJS-blue.svg)](https://twitter.com/MoleculerJS)
