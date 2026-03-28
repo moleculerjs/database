@@ -16,6 +16,7 @@
 - add TypeScript type definitions (`index.d.ts`).
 
 **Other changes**
+- upgrade `sqlite3` from 5.x to 6.x.
 - update all dependencies to latest versions.
 
 <a name="v0.3.0"></a>
