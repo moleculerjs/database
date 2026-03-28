@@ -107,3 +107,6 @@ dist
 *.db-journal
 *.sqlite3
 *.sqlite3-journal
+
+# Claude Code local settings
+.claude/settings.local.json

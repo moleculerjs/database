@@ -406,24 +406,6 @@ module.exports = function (mixinOpts) {
 					// Virtual field
 					if (field.virtual) return;
 
-					// Custom formatter (can be async)
-					// Syntax: `set: (value, entity, field, ctx) => value.toUpperCase()`
-					if (field.set) {
-						value = await this._callCustomFunction(field.set, [
-							{
-								ctx,
-								value,
-								params,
-								field,
-								id: opts.id,
-								operation: type,
-								entity: oldEntity,
-								root: opts.root || params
-							}
-						]);
-						return setValue(field, value);
-					}
-
 					const customArgs = [
 						{
 							ctx,
@@ -436,6 +418,13 @@ module.exports = function (mixinOpts) {
 							root: opts.root || params
 						}
 					];
+
+					// Custom formatter (can be async)
+					// Syntax: `set: (value, entity, field, ctx) => value.toUpperCase()`
+					if (field.set) {
+						value = await this._callCustomFunction(field.set, customArgs);
+						return setValue(field, value);
+					}
 
 					// Handlers
 					if (!opts.skipOnHooks) {

@@ -1,3 +1,29 @@
+<a name="v0.4.0"></a>
+
+# [0.4.0](https://github.com/moleculerjs/database/compare/v0.3.0...v0.4.0) (2026-03-27)
+
+**Breaking changes**
+- minimum Node.js version bumped to 22.
+- add Moleculer 0.15 support (peer dependency: `^0.14.12 || ^0.15.0`).
+- upgrade ESLint to 10 with flat config (`.eslintrc.js` → `eslint.config.js`).
+- upgrade TypeScript to 6.
+- remove `eslint-plugin-promise` (not compatible with ESLint 10).
+- replace deprecated `eslint-plugin-node` with `eslint-plugin-n`.
+
+**TypeScript**
+- fix types for Moleculer 0.15 compatibility (remove `ServiceEvents`, `GenericObject` imports).
+- fix `logger` type from `Loggers` namespace to `Logger` interface.
+- add TypeScript type definitions (`index.d.ts`).
+
+**Other changes**
+- upgrade `mongodb` driver from 6.x to 7.x (accept both `^6.0.0` and `^7.0.0`).
+- upgrade `sqlite3` from 5.x to 6.x.
+- upgrade `tedious` from 18.x to 19.x.
+- upgrade `globals` from 16.x to 17.x.
+- upgrade `npm-check-updates` from 16.x to 19.x.
+- update all other dependencies to latest minor/patch versions.
+- CI: use `npm install` instead of `npm ci` to work around Node 24 fsevents lockfile bug ([npm/cli#8805](https://github.com/npm/cli/issues/8805)).
+
 <a name="v0.3.0"></a>
 
 # [0.3.0](https://github.com/moleculerjs/database/compare/v0.2.1...v0.3.0) (2025-05-31)
