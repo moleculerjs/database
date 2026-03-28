@@ -1,6 +1,6 @@
 <a name="v0.4.0"></a>
 
-# [0.4.0](https://github.com/moleculerjs/database/compare/v0.3.0...v0.4.0) (2026-03-27)
+# [0.4.0](https://github.com/moleculerjs/database/compare/v0.3.0...v0.4.0) (2026-03-28)
 
 **Breaking changes**
 - minimum Node.js version bumped to 22.
