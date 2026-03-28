@@ -37,12 +37,8 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Update npm (fix fsevents lockfile bug in npm <11.10.1)
-      run: npm install -g npm@latest
-      if: ${{ matrix.node-version == '24.x' }}
-
     - name: Install dependencies
-      run: npm ci
+      run: npm install
 
     - name: Run unit tests
       run: npm run test:unit
