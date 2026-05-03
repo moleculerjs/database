@@ -13,7 +13,8 @@ const Adapters = {
 	Base: require("./base"),
 	Knex: require("./knex"),
 	MongoDB: require("./mongodb"),
-	NeDB: require("./nedb")
+	NeDB: require("./nedb"),
+	SurrealDB: require("./surrealdb")
 };
 
 function getByName(name) {
