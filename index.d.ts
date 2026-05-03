@@ -302,6 +302,21 @@ declare module "@moleculer/database" {
 	// Adapter interfaces
 	export interface BaseAdapterOptions {}
 
+	export interface SurrealDBAdapterOptions extends BaseAdapterOptions {
+		/** SurrealDB endpoint (e.g., ws://localhost:8000/rpc) */
+		url?: string;
+		/** SurrealDB namespace */
+		namespace?: string;
+		/** SurrealDB database */
+		database?: string;
+		/** SurrealDB username */
+		username?: string;
+		/** SurrealDB password */
+		password?: string;
+		/** Table/collection name */
+		table?: string;
+	}
+
 	export interface MongoDBAdapterOptions extends BaseAdapterOptions {
 		/** MongoDB connection URI */
 		uri?: string;
@@ -332,18 +347,25 @@ declare module "@moleculer/database" {
 	export type AdapterDefinition =
 		| string
 		| {
-				type?: "NeDB";
-				options?: NeDBAdapterOptions | string;
-		  }
+			type?: "NeDB";
+			options?: NeDBAdapterOptions | string;
+		}
 		| {
-				type?: "MongoDB";
-				options?: MongoDBAdapterOptions;
-		  }
+			type?: "MongoDB";
+			options?: MongoDBAdapterOptions;
+		}
 		| {
-				type?: "Knex";
-				options?: KnexAdapterOptions;
-		  }
+			type?: "Knex";
+			options?: KnexAdapterOptions;
+		}
+		| {
+			type?: "SurrealDB";
+			options?: SurrealDBAdapterOptions;
+		}
 		| BaseAdapter;
+export declare class SurrealDBAdapter extends BaseAdapter {
+	constructor(opts?: SurrealDBAdapterOptions);
+}
 
 	// Database adapter base class
 	export abstract class BaseAdapter {
@@ -452,6 +474,7 @@ declare module "@moleculer/database" {
 		export const MongoDB: typeof MongoDBAdapter;
 		export const Knex: typeof KnexAdapter;
 		export const NeDB: typeof NeDBAdapter;
+		export const SurrealDB: typeof SurrealDBAdapter;
 
 		export function resolve(opt: AdapterDefinition): BaseAdapter;
 		export function register(name: string, adapter: typeof BaseAdapter): void;
