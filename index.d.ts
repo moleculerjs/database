@@ -4,6 +4,11 @@ declare module '@moleculer/database/src/adapters/base' {
     export default BaseAdapter;
 }
 
+declare module '@moleculer/database/index' {
+    import { Adapters } from "@moleculer/database";
+    export {Adapters};
+}
+
 declare module "@moleculer/database" {
 	import {
 		Context,
