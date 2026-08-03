@@ -1,3 +1,9 @@
+
+declare module '@moleculer/database/src/adapters/base' {
+    import { BaseAdapter } from "@moleculer/database";
+    export default BaseAdapter;
+}
+
 declare module "@moleculer/database" {
 	import {
 		Context,
