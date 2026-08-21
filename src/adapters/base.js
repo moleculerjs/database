@@ -50,7 +50,18 @@ class BaseAdapter {
 	 * @returns {Boolean}
 	 */
 	checkClientLibVersion(library, requiredVersions) {
-		const pkg = require(`${library}/package.json`);
+		let pkg;
+		try {
+			pkg = require(`${library}/package.json`);
+		} catch {
+			// In bundled environments (esbuild, webpack, Cloudflare Workers, ...)
+			// dynamic require is not available, so the version cannot be resolved.
+			// The check is advisory only, skip it instead of crashing.
+			this.logger.warn(
+				`Unable to resolve the installed version of the '${library}' library. Version check skipped.`
+			);
+			return true;
+		}
 		const installedVersion = pkg.version;
 
 		if (semver.satisfies(installedVersion, requiredVersions)) {
