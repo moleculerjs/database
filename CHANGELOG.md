@@ -1,3 +1,11 @@
+<a name="v0.4.1"></a>
+
+# [0.4.1](https://github.com/moleculerjs/database/compare/v0.4.0...v0.4.1) (2026-08-29)
+
+- fix: tolerate unresolvable client library version in bundled environments (esbuild, webpack, Cloudflare Workers) [#100](https://github.com/moleculerjs/database/pull/100)
+- CI: add NPM publish workflow with OIDC trusted publishing (removed `NPM_TOKEN`).
+- CI: remove monthly auto dependency-update workflow.
+
 <a name="v0.4.0"></a>
 
 # [0.4.0](https://github.com/moleculerjs/database/compare/v0.3.0...v0.4.0) (2026-03-28)
