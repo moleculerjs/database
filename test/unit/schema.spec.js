@@ -1,6 +1,6 @@
 "use strict";
 
-const { generateValidatorSchemaFromFields } = require("../..");
+const { generateValidatorSchemaFromFields, defineFields } = require("../..");
 
 describe("Test validator schema generation", () => {
 	const fields = {
@@ -335,6 +335,23 @@ describe("Test validator schema generation", () => {
 			},
 			bio: { type: "any", optional: true },
 			status: { type: "string", default: "A", optional: true, convert: true }
+		});
+	});
+});
+
+describe("Test defineFields", () => {
+	it("should return the same fields object", () => {
+		const fields = {
+			id: { type: "string", primaryKey: true, columnName: "_id" },
+			name: { type: "string", required: true },
+			age: "number"
+		};
+
+		expect(defineFields(fields)).toBe(fields);
+		expect(fields).toEqual({
+			id: { type: "string", primaryKey: true, columnName: "_id" },
+			name: { type: "string", required: true },
+			age: "number"
 		});
 	});
 });

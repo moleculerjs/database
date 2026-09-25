@@ -143,7 +143,20 @@ function generateFieldValidatorSchema(field, opts) {
 	return schema;
 }
 
+/**
+ * Identity helper for field definitions. It returns the received object untouched.
+ * It exists only for TypeScript: the `index.d.ts` declares it with a `const` generic
+ * so `InferEntity`/`InferCreate`/`InferUpdate` can derive entity types from it.
+ *
+ * @param {Object} fields
+ * @returns {Object}
+ */
+function defineFields(fields) {
+	return fields;
+}
+
 module.exports = {
+	defineFields,
 	getPrimaryKeyFromFields,
 	fixIDInRestPath,
 	fixIDInCacheKeys,

@@ -13,5 +13,6 @@ module.exports = {
 	Adapters: require("./src/adapters"),
 	Errors: require("./src/errors"),
 	generateValidatorSchemaFromFields: Schema.generateValidatorSchemaFromFields,
-	generateFieldValidatorSchema: Schema.generateFieldValidatorSchema
+	generateFieldValidatorSchema: Schema.generateFieldValidatorSchema,
+	defineFields: Schema.defineFields
 };
