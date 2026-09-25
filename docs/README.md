@@ -566,6 +566,93 @@ You can use all additional properties for validation & sanitization from the Fas
 
 [Check Fastest Validator documentation.](https://github.com/icebob/fastest-validator#readme)
 
+# TypeScript: inferring entity types
+
+The entity types can be derived from the `fields` definition, without code generation or a build step. Wrap the definition in `defineFields` (it returns the same object at runtime) and use the `Infer*` helper types.
+
+```ts
+import { Context } from "moleculer";
+import { Service as DbService, DatabaseMethods, defineFields, InferEntity, InferCreate, InferUpdate, EntityQuery } from "@moleculer/database";
+
+const fields = defineFields({
+    id: { type: "string", primaryKey: true, columnName: "_id" },
+    name: { type: "string", required: true },
+    age: { type: "number" },
+    status: { type: "enum", values: ["active", "banned"], default: "active" },
+    tags: { type: "array", items: "string" },
+    address: { type: "object", properties: { city: { type: "string", required: true }, zip: { type: "number" } } },
+    password: { type: "string", hidden: true },
+    createdAt: { type: "number", readonly: true, onCreate: () => Date.now() }
+});
+
+type User = InferEntity<typeof fields>;       // entity returned by the service
+type UserCreate = InferCreate<typeof fields>; // input of `create`
+type UserUpdate = InferUpdate<typeof fields>; // input of `update`
+
+// User:       { id: string; name: string; status: "active" | "banned"; createdAt: number;
+//               age?: number; tags?: string[]; address?: { city: string; zip?: number } }
+// UserCreate: { name: string; age?: number; status?: "active" | "banned"; tags?: string[];
+//               address?: { city: string; zip?: number }; password?: string }
+// UserUpdate: { id: string; name?: string; ...; address?: { city?: string; zip?: number } }
+
+export default {
+    name: "users",
+    mixins: [DbService({ adapter: "MongoDB" })],
+    settings: { fields },
+    actions: {
+        register(this: DatabaseMethods, ctx: Context<UserCreate>) {
+            return this.createEntity<User>(ctx, ctx.params);
+        }
+    }
+};
+```
+
+`defineFields` uses a `const` type parameter, so no `as const` is needed. Editor completions and error reporting of the field options work the same as with a `Fields` annotation.
+
+## Type mapping
+
+| Field `type` | Type |
+| ------------ | ---- |
+| `string`, `email`, `url`, `uuid`, `mac` | `string` (a literal union if the `enum` option is set) |
+| `number` | `number` |
+| `boolean` | `boolean` |
+| `date` | `Date` in the entity. The input accepts `Date \| string \| number` because the validator converts it (unless `convert: false`). |
+| `enum` | union of the `values` |
+| `array` | element type from `items` (object or shorthand string), `unknown[]` without `items` |
+| `object` | recursive over `properties`, `Record<string, unknown>` without `properties` |
+| `record` | `Record<string, unknown>` |
+| `any`, `custom`, anything else | `unknown` |
+
+`nullable: true` adds `| null`. The field names are the keys (not the `columnName`). Fields set to `false` are skipped, `true` means `unknown`.
+
+## Keys and optionality
+
+| | `InferEntity` | `InferCreate` | `InferUpdate` |
+| - | ------------- | ------------- | ------------- |
+| Required key | `primaryKey`, `required: true`, has a `default` or `onCreate` | `required: true` without `default` or `set` | the primary key only |
+| Excluded | `hidden: true` | `readonly`, `virtual`, has `onCreate`, the primary key (unless `generated: "user"`) | `readonly`, `virtual`, `immutable`, has `onUpdate` |
+| Always optional | `hidden: "byDefault"`, `virtual`, fields with `permission`/`readPermission` | | everything except the primary key |
+
+`optional: false` is the same as `required: true` (like at runtime). The same rules apply to nested object properties and array items, so `InferUpdate` is deep-partial (MongoDB & NeDB adapters patch nested fields with dot notation, the Knex adapter stores the whole received object).
+
+## Typed queries
+
+`EntityQuery<User>` types the `query` param: each field accepts its value, `null`, or the operators supported by every adapter (`$ne`, `$gt`, `$gte`, `$lt`, `$lte`, `$in`, `$nin`, `$exists`). For array fields an element value is accepted too.
+
+```ts
+const query: EntityQuery<User> = { status: "active", age: { $gte: 18 } };
+const adults = await this.findEntities<User>(ctx, { query });
+```
+
+## Limitations
+- The mixin can't type `this` in your service, so annotate it (`this: DatabaseMethods`) and pass the entity type explicitly: `this.createEntity<User>(ctx, params)`, `this.findEntities<User>(ctx, ...)`. The update methods take a shallow `Partial<T>`, so for entities with nested objects use `this.updateEntity<User>(ctx, changes as Partial<User>)`.
+- `broker.call` / `ctx.call` params and results are not typed. Annotate them yourself, e.g. `const user: User = await ctx.call("users.get", { id })`.
+- Shorthand strings support the type (including `"string[]"`) and simple flags (`"string|required"`, `"number|readonly"`, `"number|default:5"`). Option values are not parsed, e.g. `"enum|values:a,b"` becomes `unknown`.
+- Populated fields are `unknown` in `InferEntity` (they hold the raw ID or the populated entity depending on the `populate` param). The input types keep the declared type (the ID).
+- Virtual fields use their declared `type`. The return types of `get` or `set` and the `secure` ID encoding are not inferred.
+- The inference needs literal types: use `defineFields` (or `as const`). A definition annotated as `Fields` gives a loose index-signature type.
+- Hook callbacks with parameters (`onCreate: ({ ctx }) => ...`) need an explicit `HookCustomFunctionArgument` annotation in strict mode, the same as with a `Fields` annotation.
+
 # Actions
 
 The service generates common CRUD actions if the `createActions` mixin option is not `false`.

@@ -29,6 +29,7 @@ Advanced Database Access Service for Moleculer microservices framework. Use it t
 - scopes support
 - entity lifecycle events
 - Multi-tenancy
+- TypeScript entity types inferred from the field definitions
 
 ## Install
 ```
@@ -107,6 +108,23 @@ console.log("Updated:", post);
 const res = await broker.call("posts.remove", { id: post.id });
 console.log("Deleted:", res);
 ```
+
+**TypeScript: infer the entity types from the fields**
+```ts
+import { defineFields, InferEntity, InferCreate, InferUpdate } from "@moleculer/database";
+
+const fields = defineFields({
+    id: { type: "string", primaryKey: true, columnName: "_id" },
+    title: { type: "string", required: true },
+    status: { type: "enum", values: ["draft", "published"], default: "draft" },
+    createdAt: { type: "number", readonly: true, onCreate: () => Date.now() }
+});
+
+type Post = InferEntity<typeof fields>;       // { id: string; title: string; status: "draft" | "published"; createdAt: number }
+type PostCreate = InferCreate<typeof fields>; // { title: string; status?: "draft" | "published" }
+type PostUpdate = InferUpdate<typeof fields>; // { id: string; title?: string; status?: "draft" | "published" }
+```
+No code generation or build step is needed. [Read more about the type mapping and the limitations](docs/README.md#typescript-inferring-entity-types).
 
 ## Documentation
 You can find [here the documentation](docs/README.md).
