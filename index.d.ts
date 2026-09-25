@@ -112,6 +112,12 @@ declare module "@moleculer/database" {
 		columnType?: string;
 		/** Primary key field */
 		primaryKey?: boolean;
+		/** Primary key generation. Set to `"user"` if the value is set by the caller instead of the database */
+		generated?: "user" | (string & {});
+		/** Encode/decode the value with the `encodeID`/`decodeID` service methods (ID fields) */
+		secure?: boolean;
+		/** Allow `null` value for required fields */
+		nullable?: boolean;
 		/** Field is hidden from results */
 		hidden?: boolean | "byDefault";
 		/** Field is read-only */
@@ -128,6 +134,7 @@ declare module "@moleculer/database" {
 		virtual?: boolean;
 		/** Population configuration */
 		populate?:
+			| string
 			| PopulateDefinition
 			| ((ctx: Context<any, any>, values: any[], docs: any[]) => Promise<any>);
 		/** Transformation function when getting value */
@@ -161,7 +168,7 @@ declare module "@moleculer/database" {
 		/** Whether field is required to be empty */
 		empty?: boolean;
 		/** Enumeration of allowed values */
-		enum?: string[];
+		enum?: readonly string[];
 		/** Lowercase transformation */
 		lowercase?: boolean;
 		/** Uppercase transformation */
@@ -181,7 +188,7 @@ declare module "@moleculer/database" {
 		/** Ends with string */
 		endsWith?: string;
 		/** Contains string */
-		contains?: string | string[];
+		contains?: string | readonly string[];
 		/** Convert value */
 		convert?: boolean;
 	}
@@ -218,6 +225,12 @@ declare module "@moleculer/database" {
 		convert?: boolean;
 	}
 
+	export interface EnumFieldDefinition extends BaseFieldDefinition {
+		type: "enum";
+		/** Allowed values */
+		values: readonly any[];
+	}
+
 	export interface ArrayFieldDefinition extends BaseFieldDefinition {
 		type: "array";
 		/** Minimum length */
@@ -231,7 +244,7 @@ declare module "@moleculer/database" {
 		/** Items validation schema */
 		items?: FieldDefinition | string;
 		/** Enumeration of allowed values */
-		enum?: any[];
+		enum?: readonly any[];
 		/** Convert value */
 		convert?: boolean;
 	}
@@ -266,6 +279,7 @@ declare module "@moleculer/database" {
 		| NumberFieldDefinition
 		| BooleanFieldDefinition
 		| DateFieldDefinition
+		| EnumFieldDefinition
 		| ArrayFieldDefinition
 		| ObjectFieldDefinition
 		| CustomFieldDefinition
@@ -901,6 +915,286 @@ declare module "@moleculer/database" {
 		}
 	): Record<string, any> | null;
 
+	// ---------------------------------------------------------------------------
+	// Entity type inference from field definitions
+	// ---------------------------------------------------------------------------
+
+	/**
+	 * Identity helper for field definitions. At runtime it returns the received
+	 * object. In TypeScript the `const` type parameter keeps the literal types
+	 * (enum values, nested properties, flags) so the entity types can be inferred:
+	 *
+	 * ```ts
+	 * const fields = defineFields({ name: { type: "string", required: true } });
+	 * type User = InferEntity<typeof fields>;
+	 * ```
+	 */
+	export function defineFields<const TFields extends Fields>(
+		fields: TFields & InferStrictFields<TFields>
+	): TFields;
+
+	/** Entity shape returned by the service (find, get, create, ...). */
+	export type InferEntity<TFields> = InferFieldsObject<TFields, "entity">;
+	/** Accepted input of `create` / `createEntity`. */
+	export type InferCreate<TFields> = InferFieldsObject<TFields, "create">;
+	/** Accepted input of `update` / `updateEntity` (the primary key is required). */
+	export type InferUpdate<TFields> = InferFieldsObject<TFields, "update">;
+
+	/**
+	 * Query operators supported by all built-in adapters (NeDB, MongoDB, Knex).
+	 * Note: the Knex adapter applies only one operator per field.
+	 */
+	export interface QueryOperators<T> {
+		$ne?: T;
+		$gt?: T;
+		$gte?: T;
+		$lt?: T;
+		$lte?: T;
+		$in?: readonly T[];
+		$nin?: readonly T[];
+		$exists?: boolean;
+	}
+
+	/** Typed `query` object for an entity type, e.g. `EntityQuery<InferEntity<typeof fields>>`. */
+	export type EntityQuery<TEntity> = {
+		[K in keyof TEntity]?: EntityQueryValue<Exclude<TEntity[K], undefined>>;
+	};
+
+	type EntityQueryValue<V> =
+		| V
+		| QueryOperators<V>
+		| (V extends readonly (infer E)[] ? E | QueryOperators<E> : never)
+		| null;
+
+	type InferMode = "entity" | "create" | "update";
+
+	// `defineFields` infers `TFields` from the argument, so the usual excess-property and
+	// discriminated-union checks of a `Fields` annotation do not run. This re-applies them:
+	// every option must exist on the definition matching the field `type` and have its type.
+	type InferSpecificFieldDefinition =
+		| StringFieldDefinition
+		| NumberFieldDefinition
+		| BooleanFieldDefinition
+		| DateFieldDefinition
+		| EnumFieldDefinition
+		| ArrayFieldDefinition
+		| ObjectFieldDefinition
+		| CustomFieldDefinition;
+
+	type InferDefinitionFor<F> = F extends { type: infer T }
+		? [Extract<InferSpecificFieldDefinition, { type: T }>] extends [never]
+			? BaseFieldDefinition
+			: Extract<InferSpecificFieldDefinition, { type: T }>
+		: BaseFieldDefinition;
+
+	// Non-object definitions map to `unknown`, so when the check is instantiated with the
+	// `FieldDefinition` union (editor completions) it collapses and adds no suggestions.
+	type InferStrictField<F> = F extends object
+		? {
+				[P in keyof F]: P extends "properties"
+					? InferStrictFields<F[P]>
+					: P extends "items"
+						? InferStrictField<F[P]>
+						: P extends keyof InferDefinitionFor<F>
+							? InferDefinitionFor<F>[P]
+							: never;
+			}
+		: unknown;
+
+	type InferStrictFields<T> = { [K in keyof T]: InferStrictField<T[K]> };
+
+	type InferSimplify<T> = { [K in keyof T]: T[K] } & {};
+
+	type InferAnyTrue<T extends readonly boolean[]> = true extends T[number] ? true : false;
+
+	/** `true` if the `K` property of `F` is literally `true`. */
+	type InferIsTrue<F, K extends PropertyKey> = F extends Record<K, true> ? true : false;
+
+	/** `true` if the `K` property of `F` is set to a truthy value. */
+	type InferHasValue<F, K extends PropertyKey> =
+		F extends Record<K, infer V>
+			? [V] extends [undefined | null | false | 0 | ""]
+				? false
+				: true
+			: false;
+
+	type InferHasDefault<F> =
+		F extends Record<"default", infer D> ? ([D] extends [undefined] ? false : true) : false;
+
+	/** Mirrors the runtime: `required: true`, or `optional: false` when `required` is not set. */
+	type InferIsRequired<F> =
+		F extends Record<"required", true>
+			? true
+			: F extends Record<"required", any>
+				? false
+				: InferIsFalse<F, "optional">;
+
+	type InferIsFalse<F, K extends PropertyKey> = F extends Record<K, false> ? true : false;
+
+	type InferIsPrimaryKey<F> = InferIsTrue<F, "primaryKey">;
+
+	/** Primary key whose value is generated by the database (no `generated: "user"`). */
+	type InferIsGeneratedPK<F> =
+		InferIsPrimaryKey<F> extends true
+			? F extends Record<"generated", "user">
+				? false
+				: true
+			: false;
+
+	// Shorthand string definitions, e.g. "string|required|min:3" or "string[]"
+	type InferTrim<S extends string> = S extends ` ${infer R}`
+		? InferTrim<R>
+		: S extends `${infer R} `
+			? InferTrim<R>
+			: S;
+
+	type InferShorthandType<T extends string> = T extends `${infer Item}[]`
+		? { type: "array"; items: Item }
+		: { type: T };
+
+	type InferShorthandSegment<S extends string> = S extends `${infer K}:${infer V}`
+		? {
+				[P in InferTrim<K>]: InferTrim<V> extends "true"
+					? true
+					: InferTrim<V> extends "false"
+						? false
+						: unknown;
+			}
+		: InferTrim<S> extends `no-${infer K}`
+			? { [P in K]: false }
+			: { [P in InferTrim<S>]: true };
+
+	type InferShorthandSegments<S extends string> = S extends `${infer Head}|${infer Rest}`
+		? InferShorthandSegment<Head> & InferShorthandSegments<Rest>
+		: InferShorthandSegment<S>;
+
+	type InferParseShorthand<S extends string> = S extends `${infer Type}|${infer Rest}`
+		? InferShorthandType<InferTrim<Type>> & InferShorthandSegments<Rest>
+		: InferShorthandType<InferTrim<S>>;
+
+	/** Normalize shorthand forms: `"string|required"` -> object, `true` -> `{ type: "any" }`. */
+	type InferNormalize<F> = F extends string
+		? InferParseShorthand<F>
+		: F extends true
+			? { type: "any" }
+			: F;
+
+	/** Is the (normalized) field left out of the shape in the given mode? */
+	type InferIsExcluded<F, M extends InferMode> = F extends false
+		? true
+		: M extends "entity"
+			? InferIsTrue<F, "hidden">
+			: M extends "create"
+				? InferAnyTrue<
+						[
+							InferIsTrue<F, "readonly">,
+							InferIsTrue<F, "virtual">,
+							InferHasValue<F, "onCreate">,
+							InferIsGeneratedPK<F>
+						]
+					>
+				: InferIsPrimaryKey<F> extends true
+					? false
+					: InferAnyTrue<
+							[
+								InferIsTrue<F, "readonly">,
+								InferIsTrue<F, "virtual">,
+								InferIsTrue<F, "immutable">,
+								InferHasValue<F, "onUpdate">
+							]
+						>;
+
+	/** Is the (normalized) field a required key in the given mode? */
+	type InferIsRequiredKey<F, M extends InferMode> = M extends "entity"
+		? InferAnyTrue<
+				[
+					InferIsTrue<F, "virtual">,
+					F extends Record<"hidden", "byDefault"> ? true : false,
+					InferHasValue<F, "permission">,
+					InferHasValue<F, "readPermission">
+				]
+			> extends true
+			? false
+			: InferAnyTrue<
+					[
+						InferIsPrimaryKey<F>,
+						InferIsRequired<F>,
+						InferHasDefault<F>,
+						InferHasValue<F, "onCreate">
+					]
+				>
+		: M extends "create"
+			? InferIsRequired<F> extends true
+				? InferAnyTrue<[InferHasDefault<F>, InferHasValue<F, "set">]> extends true
+					? false
+					: true
+				: false
+			: InferIsPrimaryKey<F>;
+
+	type InferElementOf<A> = A extends readonly (infer E)[] ? E : unknown;
+
+	type InferBaseValue<F, M extends InferMode> = F extends { type: infer T }
+		? T extends "string" | "email" | "url" | "uuid" | "mac"
+			? F extends Record<"enum", infer E>
+				? InferElementOf<E>
+				: string
+			: T extends "number"
+				? number
+				: T extends "boolean"
+					? boolean
+					: T extends "date"
+						? M extends "entity"
+							? Date
+							: F extends Record<"convert", false>
+								? Date
+								: Date | string | number
+						: T extends "enum"
+							? F extends Record<"values", infer V>
+								? InferElementOf<V>
+								: unknown
+							: T extends "array"
+								? F extends Record<"items", infer I>
+									? InferFieldValue<InferNormalize<I>, M>[]
+									: unknown[]
+								: T extends "object"
+									? F extends Record<"properties", infer P>
+										? InferFieldsObject<P, M>
+										: Record<string, unknown>
+									: T extends "record"
+										? Record<string, unknown>
+										: unknown
+		: unknown;
+
+	type InferFieldValue<F, M extends InferMode> = M extends "entity"
+		? InferHasValue<F, "populate"> extends true
+			? unknown
+			: InferNullable<F, InferBaseValue<F, M>>
+		: InferNullable<F, InferBaseValue<F, M>>;
+
+	type InferNullable<F, V> = InferIsTrue<F, "nullable"> extends true ? V | null : V;
+
+	type InferKey<K, F, M extends InferMode, R extends boolean> = K extends string
+		? InferIsExcluded<InferNormalize<F>, M> extends true
+			? never
+			: InferIsRequiredKey<InferNormalize<F>, M> extends R
+				? K
+				: never
+		: never;
+
+	type InferFieldsObject<TFields, M extends InferMode> = InferSimplify<
+		{
+			-readonly [K in keyof TFields as InferKey<K, TFields[K], M, true>]-?: InferFieldValue<
+				InferNormalize<TFields[K]>,
+				M
+			>;
+		} & {
+			-readonly [K in keyof TFields as InferKey<K, TFields[K], M, false>]?: InferFieldValue<
+				InferNormalize<TFields[K]>,
+				M
+			>;
+		}
+	>;
+
 	// Default export is the Service factory function
 	declare const DatabaseModule: {
 		Service: ServiceSchema;
@@ -910,6 +1204,7 @@ declare module "@moleculer/database" {
 		};
 		generateValidatorSchemaFromFields: typeof generateValidatorSchemaFromFields;
 		generateFieldValidatorSchema: typeof generateFieldValidatorSchema;
+		defineFields: typeof defineFields;
 	};
 
 	export default DatabaseModule;
