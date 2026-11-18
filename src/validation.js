@@ -11,10 +11,6 @@ const { ServiceSchemaError, ValidationError } = require("moleculer").Errors;
 const _ = require("lodash");
 const { generateValidatorSchemaFromFields } = require("./schema");
 
-const Validator = require("fastest-validator");
-const validator = new Validator({
-	useNewCustomCheckerFunction: true
-});
 
 module.exports = function (mixinOpts) {
 	return {
@@ -24,6 +20,8 @@ module.exports = function (mixinOpts) {
 		 * @private
 		 */
 		_processFields() {
+			// using broker validator 
+			const validator = this.broker.validator ;
 			this.$fields = null;
 			this.$primaryField = null;
 			this.$softDelete = false;
@@ -40,19 +38,19 @@ module.exports = function (mixinOpts) {
 						generateValidatorSchemaFromFields(this.settings.fields, {
 							type: "create",
 							enableParamsConversion: mixinOpts.enableParamsConversion
-						})
+						},validator)
 					),
 					update: validator.compile(
 						generateValidatorSchemaFromFields(this.settings.fields, {
 							type: "update",
 							enableParamsConversion: mixinOpts.enableParamsConversion
-						})
+						},validator)
 					),
 					replace: validator.compile(
 						generateValidatorSchemaFromFields(this.settings.fields, {
 							type: "replace",
 							enableParamsConversion: mixinOpts.enableParamsConversion
-						})
+						},validator)
 					)
 				};
 			}
