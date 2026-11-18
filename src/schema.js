@@ -62,14 +62,14 @@ function generateValidatorSchemaFromFields(fields, opts, validator) {
 		if (field === false) return;
 		if (typeof field == "string") field = validator.parseShortHand(field);
 
-		const schema = generateFieldValidatorSchema(field, opts);
+		const schema = generateFieldValidatorSchema(field, opts,validator);
 		if (schema != null) res[name] = schema;
 	});
 
 	return res;
 }
 
-function generateFieldValidatorSchema(field, opts) {
+function generateFieldValidatorSchema(field, opts, validator) {
 	const schema = _.omit(field, [
 		"name",
 		"required",
@@ -128,12 +128,12 @@ function generateFieldValidatorSchema(field, opts) {
 		schema.properties = generateValidatorSchemaFromFields(field.properties, {
 			...opts,
 			level: opts.level + 1
-		});
+		},validator);
 	}
 
 	// Array
 	if (field.type == "array" && field.items) {
-		schema.items = generateFieldValidatorSchema(field.items, opts);
+		schema.items = generateFieldValidatorSchema(field.items, opts,validator);
 	}
 
 	return schema;
