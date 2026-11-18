@@ -8,10 +8,6 @@
 
 const _ = require("lodash");
 
-const Validator = require("fastest-validator");
-const validator = new Validator({
-	useNewCustomCheckerFunction: true
-});
 
 function getPrimaryKeyFromFields(fields) {
 	let field = null;
@@ -52,7 +48,7 @@ function isActionEnabled(mixinOpts, actionName) {
 	return mixinOpts.createActions !== false;
 };
 
-function generateValidatorSchemaFromFields(fields, opts) {
+function generateValidatorSchemaFromFields(fields, opts, validator) {
 	const res = {};
 
 	if (fields == null || Object.keys(fields).length == 0) return res;
