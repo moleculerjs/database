@@ -61,6 +61,7 @@ module.exports = function (mixinOpts) {
 		},
 
 		_processFieldObject(fields) {
+			const validator = this.broker.validator ;
 			return _.compact(
 				_.map(fields, (def, name) => {
 					// Disabled field
